@@ -117,7 +117,9 @@ export default function DashboardShell() {
     <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0f1a] shadow-[0_50px_120px_-60px_rgba(0,0,0,1)]">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] bg-[#0d1321] px-6 py-4">
         <div className="flex items-center gap-3">
-          <img src="/images/logo.png" alt="AD" className="h-10 w-10 rounded-lg bg-white/90 p-0.5 object-contain" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0c1220] overflow-hidden">
+            <img src="/images/logo.png" alt="AD" className="h-7 w-7 object-contain mix-blend-screen" />
+          </div>
           <div>
             <div className="text-lg font-semibold text-slate-50">
               Operating Overview

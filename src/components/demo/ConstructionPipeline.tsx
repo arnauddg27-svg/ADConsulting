@@ -76,7 +76,9 @@ export default function ConstructionPipeline() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] bg-[#0d1321] px-6 py-4">
         <div className="flex items-center gap-3">
-          <img src="/images/logo.png" alt="AD" className="h-10 w-10 rounded-lg bg-white/90 p-0.5 object-contain" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0c1220] overflow-hidden">
+            <img src="/images/logo.png" alt="AD" className="h-7 w-7 object-contain mix-blend-screen" />
+          </div>
           <div>
             <div className="text-lg font-semibold text-slate-50">
               Construction Pipeline

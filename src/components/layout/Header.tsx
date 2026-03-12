@@ -37,7 +37,9 @@ export default function Header() {
             )}
           >
             <Link href="/" className="flex items-center gap-3">
-              <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-11 w-11 rounded-xl bg-white/90 p-0.5 object-contain" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0c1220] overflow-hidden">
+                <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-9 w-9 object-contain mix-blend-screen" />
+              </div>
               <div className="hidden min-w-0 sm:block">
                 <span className="block font-heading text-[1.05rem] tracking-[0.18em] text-slate-50">
                   {SITE_CONFIG.name.toUpperCase()}

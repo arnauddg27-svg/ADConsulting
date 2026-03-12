@@ -17,7 +17,9 @@ export default function Footer() {
           <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.9fr]">
             <div>
               <div className="flex items-center gap-3">
-                <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-12 w-12 rounded-xl bg-white/90 p-0.5 object-contain" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0c1220] overflow-hidden">
+                  <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-9 w-9 object-contain mix-blend-screen" />
+                </div>
                 <div>
                   <div className="font-heading text-[1.2rem] tracking-[0.18em] text-slate-50">
                     {SITE_CONFIG.name.toUpperCase()}
