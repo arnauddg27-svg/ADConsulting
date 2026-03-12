@@ -1,6 +1,10 @@
+"use client";
+
 import { ArrowRight, BarChart3, DollarSign, CalendarClock, FolderOpen } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { NumberTicker } from "@/components/magicui/number-ticker";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 const previewModules = [
   {
@@ -26,21 +30,28 @@ const previewModules = [
 ];
 
 const sampleKPIs = [
-  { label: "Active Projects", value: "24" },
-  { label: "On-Time Rate", value: "87%" },
-  { label: "Budget Used", value: "$4.2M" },
-  { label: "Change Orders", value: "12" },
+  { label: "Active Projects", value: 24, prefix: "", suffix: "" },
+  { label: "On-Time Rate", value: 87, prefix: "", suffix: "%" },
+  { label: "Budget Used", value: 4.2, prefix: "$", suffix: "M", decimals: 1 },
+  { label: "Change Orders", value: 12, prefix: "", suffix: "" },
 ];
 
 export default function DashboardPreview() {
   return (
     <section className="section-space">
       <Container>
-        <div className="panel overflow-hidden">
+        <div className="reveal panel relative overflow-hidden">
+          <BorderBeam
+            size={120}
+            duration={8}
+            colorFrom="#34d399"
+            colorTo="#10b981"
+            borderWidth={1}
+          />
           <div className="grid lg:grid-cols-[0.45fr_0.55fr]">
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
               <span className="eyebrow">Illustrative Example</span>
-              <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[0.04em] text-slate-50 md:text-5xl">
+              <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
                 A clear operating view of projects, costs, and schedules.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
@@ -86,8 +97,15 @@ export default function DashboardPreview() {
                     <div className="text-[0.64rem] uppercase tracking-[0.18em] text-slate-500">
                       {kpi.label}
                     </div>
-                    <div className="mt-2 font-heading text-2xl tracking-[0.04em] text-slate-50">
-                      {kpi.value}
+                    <div className="mt-2 font-heading text-2xl text-slate-50">
+                      {kpi.prefix}
+                      <NumberTicker
+                        value={kpi.value}
+                        decimalPlaces={kpi.decimals ?? 0}
+                        delay={0.3}
+                        className="text-slate-50"
+                      />
+                      {kpi.suffix}
                     </div>
                   </div>
                 ))}
@@ -111,7 +129,7 @@ export default function DashboardPreview() {
                       </div>
                       <div className="mt-1.5 h-2 rounded-full bg-white/[0.06]">
                         <div
-                          className="h-2 rounded-full bg-accent-400"
+                          className="h-2 rounded-full bg-gradient-to-r from-accent-600 to-accent-400"
                           style={{ width: `${project.pct}%` }}
                         />
                       </div>

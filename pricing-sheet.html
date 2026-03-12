@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A.D. Homes & Consulting — Services & Pricing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --accent: #34d399;
+      --accent-dark: #059669;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--slate-800);
+      line-height: 1.6;
+      background: white;
+    }
+
+    @media print {
+      body { font-size: 11pt; }
+      .page-break { page-break-before: always; }
+      .no-print { display: none; }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--slate-900);
+      color: white;
+      padding: 48px 0 40px;
+    }
+
+    header .logo {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--slate-50);
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 15px;
+      color: var(--slate-400);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    header .contact-row {
+      display: flex;
+      gap: 28px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--slate-300);
+    }
+
+    header .contact-row span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Section ── */
+    .section {
+      padding: 40px 0;
+    }
+
+    .section + .section {
+      border-top: 1px solid var(--slate-200);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      margin-bottom: 8px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 6px;
+    }
+
+    .section .subtitle {
+      font-size: 14px;
+      color: var(--slate-500);
+      margin-bottom: 24px;
+      max-width: 600px;
+    }
+
+    /* ── Service Card ── */
+    .service-card {
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 20px;
+      background: var(--slate-50);
+    }
+
+    .service-card .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .service-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    .service-card .price-badge {
+      background: var(--slate-900);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .service-card .description {
+      font-size: 14px;
+      color: var(--slate-600);
+      margin-bottom: 18px;
+      line-height: 1.7;
+    }
+
+    .service-card .deliverables-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--slate-400);
+      margin-bottom: 10px;
+    }
+
+    .deliverables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+    }
+
+    .deliverable {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--slate-700);
+      line-height: 1.6;
+    }
+
+    .deliverable::before {
+      content: "✓";
+      color: var(--accent-dark);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .service-card .timeline {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--slate-200);
+      display: flex;
+      gap: 28px;
+      font-size: 12px;
+      color: var(--slate-500);
+    }
+
+    .service-card .timeline strong {
+      color: var(--slate-700);
+      font-weight: 600;
+    }
+
+    /* ── Retainer Table ── */
+    .retainer-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .retainer-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--slate-400);
+      padding: 10px 16px;
+      border-bottom: 2px solid var(--slate-200);
+    }
+
+    .retainer-table td {
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--slate-700);
+      border-bottom: 1px solid var(--slate-100);
+    }
+
+    .retainer-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .retainer-table .plan-name {
+      font-weight: 600;
+      color: var(--slate-900);
+    }
+
+    .retainer-table .plan-price {
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    .retainer-table .plan-best {
+      background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+    }
+
+    .retainer-table .best-badge {
+      display: inline-block;
+      background: var(--accent-dark);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+
+    /* ── Notes ── */
+    .notes {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-top: 12px;
+    }
+
+    .notes h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate-800);
+      margin-bottom: 10px;
+    }
+
+    .notes ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .notes li {
+      font-size: 13px;
+      color: var(--slate-600);
+      line-height: 1.7;
+      padding-left: 18px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .notes li::before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: var(--slate-400);
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--slate-900);
+      color: var(--slate-400);
+      padding: 32px 0;
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    footer strong {
+      color: var(--slate-200);
+    }
+
+    footer .cta {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 28px;
+      background: var(--accent-dark);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="container">
+      <div class="logo">A.D. Homes & Consulting</div>
+      <h1>Services & Pricing Guide</h1>
+      <p>Operations consulting for Central Florida home builders. Each engagement is scoped to the way your business actually runs.</p>
+      <div class="contact-row">
+        <span>Arnaud Durand</span>
+        <span>(407) 840-1368</span>
+        <span>arnauddg27@gmail.com</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Project-Based Services ── -->
+  <div class="container">
+    <div class="section">
+      <div class="section-label">Project-Based Engagements</div>
+      <h2>Core Services</h2>
+      <p class="subtitle">Flat-fee projects with defined scope and deliverables. Every engagement starts with a free discovery call.</p>
+
+      <!-- Service 1: Dashboards -->
+      <div class="service-card">
+        <div class="card-header">
+          <h3>Dashboards, KPIs & Reporting</h3>
+          <span class="price-badge">$8,000 – $15,000</span>
+        </div>
+        <p class="description">Power BI dashboards and KPI systems that turn scattered operating data into a weekly management view. Track cost by plan, margin trends, vendor variance, cycle times, and community profitability — automated, consistent, and decision-ready.</p>
+        <div class="deliverables-label">Deliverables</div>
+        <div class="deliverables-grid">
+          <div class="deliverable">Custom Power BI dashboard design & deployment</div>
+          <div class="deliverable">Lot-to-close KPI framework</div>
+          <div class="deliverable">Job cost trend and margin reporting</div>
+          <div class="deliverable">Critical-path and cycle-time tracking</div>
+          <div class="deliverable">Vendor performance & variance reporting</div>
+          <div class="deliverable">Automated weekly and monthly reporting</div>
+        </div>
+        <div class="timeline">
+          <span><strong>Timeline:</strong> 4 – 8 weeks</span>
+          <span><strong>Includes:</strong> 2 rounds of revision</span>
+        </div>
+      </div>
+
+      <!-- Service 2: Financial Modeling -->
+      <div class="service-card">
+        <div class="card-header">
+          <h3>Financial Modeling & Underwriting</h3>
+          <span class="price-badge">$5,000 – $12,000</span>
+        </div>
+        <p class="description">Land proformas, lot grading, and mid-construction underwriting that help you pressure-test deals before capital is committed and re-verify margin as conditions change. Scenario modeling for pricing, absorption, inflation, and cash-flow risk.</p>
+        <div class="deliverables-label">Deliverables</div>
+        <div class="deliverables-grid">
+          <div class="deliverable">Pre-acquisition land proformas with lot grading</div>
+          <div class="deliverable">Mid-construction underwriting & margin re-checks</div>
+          <div class="deliverable">Scenario modeling (inflation, repricing, absorption)</div>
+          <div class="deliverable">Plan mix and pricing analysis</div>
+          <div class="deliverable">Draw schedule and cash flow modeling</div>
+          <div class="deliverable">Sensitivity analysis and risk review</div>
+        </div>
+        <div class="timeline">
+          <span><strong>Timeline:</strong> 2 – 5 weeks</span>
+          <span><strong>Includes:</strong> Live walkthrough with leadership</span>
+        </div>
+      </div>
+
+      <!-- Service 3: ERP & Process -->
+      <div class="service-card">
+        <div class="card-header">
+          <h3>ERP Optimization & Process Improvement</h3>
+          <span class="price-badge">$10,000 – $20,000</span>
+        </div>
+        <p class="description">Most builders use only a fraction of what their ERP can do. We audit the setup, clean up cost codes, streamline PO workflows, standardize schedules, and align the team around repeatable processes so the system supports the operation.</p>
+        <div class="deliverables-label">Deliverables</div>
+        <div class="deliverables-grid">
+          <div class="deliverable">ERP audit, cost code cleanup & configuration</div>
+          <div class="deliverable">PO-based purchasing workflows</div>
+          <div class="deliverable">Standard construction schedule templates</div>
+          <div class="deliverable">Permitting tracking & follow-up workflows</div>
+          <div class="deliverable">Data integrity cleanup</div>
+          <div class="deliverable">Team training and adoption support</div>
+        </div>
+        <div class="timeline">
+          <span><strong>Timeline:</strong> 6 – 12 weeks</span>
+          <span><strong>Includes:</strong> On-site training sessions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Monthly Retainers ── -->
+    <div class="section page-break">
+      <div class="section-label">Ongoing Support</div>
+      <h2>Monthly Retainer Plans</h2>
+      <p class="subtitle">For builders who want ongoing reporting updates, model refreshes, and a direct line to operational support.</p>
+
+      <table class="retainer-table">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Hours / Month</th>
+            <th>Includes</th>
+            <th>Monthly</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="plan-name">Essentials</td>
+            <td>8 hrs</td>
+            <td>Dashboard maintenance, monthly KPI review, minor report updates</td>
+            <td class="plan-price">$2,000</td>
+          </tr>
+          <tr class="plan-best">
+            <td class="plan-name">Growth <span class="best-badge">Most Popular</span></td>
+            <td>16 hrs</td>
+            <td>Everything in Essentials + model updates, new reports, quarterly ERP review</td>
+            <td class="plan-price">$3,500</td>
+          </tr>
+          <tr>
+            <td class="plan-name">Embedded</td>
+            <td>30 hrs</td>
+            <td>Full-scope support — dashboards, modeling, ERP, process. Acts as your fractional ops analyst</td>
+            <td class="plan-price">$6,000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Advisory Rate ── -->
+    <div class="section">
+      <div class="section-label">Ad-Hoc</div>
+      <h2>Hourly Advisory</h2>
+      <p class="subtitle">For one-off questions, quick reviews, or scoping conversations beyond the free initial consultation.</p>
+
+      <div class="service-card" style="margin-bottom: 0;">
+        <div class="card-header">
+          <h3>Advisory & Consulting Hours</h3>
+          <span class="price-badge">$200 / hour</span>
+        </div>
+        <p class="description">Billed in 30-minute increments. Ideal for ad-hoc data reviews, deal gut-checks, ERP troubleshooting, or second opinions on operational decisions. No minimum commitment.</p>
+      </div>
+    </div>
+
+    <!-- ── Notes ── -->
+    <div class="section">
+      <div class="notes">
+        <h4>How Engagements Work</h4>
+        <ul>
+          <li>Every engagement starts with a <strong>free 30-minute discovery call</strong> — no obligation.</li>
+          <li>Project pricing is flat-fee and scoped up front. No surprise invoices.</li>
+          <li>Retainers are month-to-month. Cancel anytime with 30 days notice.</li>
+          <li>Travel within Central Florida is included. Outside the region billed at cost.</li>
+          <li>All deliverables are yours to keep — dashboards, models, templates, documentation.</li>
+          <li>Multi-service bundles receive a <strong>10% discount</strong> on combined project fees.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <strong>A.D. Homes & Consulting</strong> · Orlando & Central Florida<br />
+      (407) 840-1368 · arnauddg27@gmail.com
+      <br />
+      <a href="mailto:arnauddg27@gmail.com" class="cta no-print">Schedule a Free Consultation</a>
+    </div>
+  </footer>
+
+</body>
+</html>

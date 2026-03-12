@@ -5,8 +5,8 @@ export const SITE_CONFIG = {
   businessName: "A.D. Homes & Consulting",
   tagline: "Operations Consulting for Builders.",
   description:
-    "Operations consulting for Central Florida builders and development firms. Dashboards, KPI reporting, financial modeling, and ERP/process improvement.",
-  location: "Central Florida",
+    "Construction operations consulting for Orlando and Central Florida home builders. Dashboards, KPI reporting, financial modeling, and ERP/process improvement.",
+  location: "Orlando & Central Florida",
   phone: "(407) 840-1368",
   email: "arnauddg27@gmail.com",
 };

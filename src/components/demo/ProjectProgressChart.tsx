@@ -25,7 +25,12 @@ const chartData = projects.map((project) => ({
   status: project.status,
 }));
 
-export default function ProjectProgressChart() {
+interface ProjectProgressChartProps {
+  statusFilter?: string | null;
+  onBarClick?: (status: string) => void;
+}
+
+export default function ProjectProgressChart({ statusFilter, onBarClick }: ProjectProgressChartProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -44,6 +49,13 @@ export default function ProjectProgressChart() {
               data={chartData}
               layout="vertical"
               margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
+              style={{ cursor: onBarClick ? "pointer" : undefined }}
+              onClick={(state: Record<string, unknown>) => {
+                const payload = state?.activePayload as Array<{ payload: { status: string } }> | undefined;
+                if (onBarClick && payload?.[0]) {
+                  onBarClick(payload[0].payload.status);
+                }
+              }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
               <XAxis
@@ -77,7 +89,12 @@ export default function ProjectProgressChart() {
               />
               <Bar dataKey="complete" radius={[0, 6, 6, 0]} barSize={18}>
                 {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={statusColors[entry.status]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={statusColors[entry.status]}
+                    opacity={statusFilter && statusFilter !== entry.status ? 0.15 : 1}
+                    style={{ transition: "opacity 0.3s ease" }}
+                  />
                 ))}
               </Bar>
             </BarChart>

@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, PhoneCall } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
@@ -24,7 +26,7 @@ export default function CTABanner({
       <Container>
         <div
           className={clsx(
-            "panel overflow-hidden px-6 py-8 md:px-8 md:py-10",
+            "reveal panel relative overflow-hidden px-6 py-8 md:px-8 md:py-10",
             variant === "accent"
               ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.15),rgba(255,255,255,0.04)_55%,rgba(255,255,255,0.02))]"
               : "bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03)_55%,rgba(16,185,129,0.08))]"
@@ -33,7 +35,7 @@ export default function CTABanner({
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <span className="eyebrow">Next Step</span>
-              <h2 className="mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[0.04em] text-slate-50 md:text-5xl">
+              <h2 className="mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
                 {headline}
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 md:text-lg">

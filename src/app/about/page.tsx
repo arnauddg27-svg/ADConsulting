@@ -9,9 +9,9 @@ import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About | A.D. Homes & Consulting",
+  title: "About Arnaud Durand | Construction Operations Consultant — Orlando, FL",
   description:
-    "Hands-on operations consulting for Central Florida builders and development firms. Dashboards, KPI reporting, financial modeling, and process improvement.",
+    "Arnaud Durand is a construction operations consultant serving Orlando and Central Florida home builders. MBA-trained with 6+ years of builder-side experience in dashboards, financial modeling, and ERP systems.",
 };
 
 const services = [
@@ -27,7 +27,7 @@ export default function AboutPage() {
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">About</span>
-            <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[0.04em] text-slate-50 sm:text-6xl">
+            <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
               About A.D. Homes & Consulting
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
@@ -41,9 +41,9 @@ export default function AboutPage() {
 
       <section className="section-space pt-0">
         <Container>
-          <div className="mx-auto grid max-w-4xl gap-10 lg:grid-cols-[240px_1fr] lg:gap-14">
+          <div className="reveal mx-auto grid max-w-4xl gap-10 lg:grid-cols-[240px_1fr] lg:gap-14">
             <div className="flex flex-col items-center lg:items-start">
-              <div className="relative h-64 w-52 overflow-hidden rounded-2xl border border-white/[0.08]">
+              <div className="relative h-64 w-52 overflow-hidden rounded-2xl border border-white/[0.1] shadow-[0_20px_60px_-20px_rgba(16,185,129,0.2)]">
                 <Image
                   src="/images/arnaud-durand.png"
                   alt="Arnaud Durand"
@@ -53,7 +53,7 @@ export default function AboutPage() {
                 />
               </div>
               <div className="mt-4 text-center lg:text-left">
-                <div className="font-heading text-lg tracking-[0.04em] text-slate-50">
+                <div className="font-heading text-lg tracking-[-0.01em] text-slate-50">
                   Arnaud Durand
                 </div>
                 <div className="text-sm text-slate-400">Founder and Principal</div>
@@ -63,11 +63,11 @@ export default function AboutPage() {
             <div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {services.map((item) => (
-                  <div key={item.stat} className="panel-soft p-5 text-center">
+                  <div key={item.stat} className="glow-card p-5 text-center">
                     <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
                       {item.icon}
                     </div>
-                    <div className="mt-3 font-heading text-lg tracking-[0.04em] text-slate-50">
+                    <div className="mt-3 font-heading text-lg tracking-[-0.01em] text-slate-50">
                       {item.stat}
                     </div>
                     <div className="mt-1 text-xs text-slate-400">{item.label}</div>

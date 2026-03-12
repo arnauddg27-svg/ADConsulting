@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 
 const variants = {
   primary:
-    "border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400",
+    "border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)]",
   secondary:
     "border-white/[0.1] bg-white/[0.06] text-slate-50 hover:-translate-y-0.5 hover:border-white/[0.2] hover:bg-white/[0.09]",
   outline:

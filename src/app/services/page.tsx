@@ -11,9 +11,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import { SERVICES, PROCESS_STEPS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Services | Homebuilder Operations Consulting",
+  title: "Builder Operations Consulting Services | Dashboards, Financial Modeling & ERP — Orlando",
   description:
-    "Dashboards, KPI systems, financial modeling, ERP optimization, and process improvement for Central Florida builders and development firms.",
+    "Construction operations consulting services for Orlando and Central Florida home builders: dashboard reporting, KPI systems, financial modeling, ERP optimization, and process improvement.",
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -29,8 +29,8 @@ export default function ServicesPage() {
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">Services</span>
-            <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[0.04em] text-slate-50 sm:text-6xl">
-              Services
+            <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
+              Operations consulting for home builders
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
               Each service is designed to remove a different source of drag:
@@ -46,7 +46,7 @@ export default function ServicesPage() {
           {SERVICES.map((service, index) => (
             <div
               key={service.id}
-              className="panel overflow-hidden p-6 md:p-8 lg:p-10"
+              className="reveal panel overflow-hidden p-6 md:p-8 lg:p-10"
             >
               <div className="grid items-center gap-8 lg:grid-cols-[0.5fr_0.5fr] lg:gap-12">
                 <div>
@@ -59,7 +59,7 @@ export default function ServicesPage() {
                     </span>
                   </div>
 
-                  <h2 className="mt-6 font-heading text-3xl leading-[0.95] tracking-[0.04em] text-slate-50 md:text-4xl">
+                  <h2 className="mt-6 font-heading text-3xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-4xl">
                     {service.title}
                   </h2>
                   <p className="mt-4 text-base leading-7 text-slate-300">
@@ -100,18 +100,18 @@ export default function ServicesPage() {
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">Process</span>
-            <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[0.04em] text-slate-50 sm:text-5xl">
+            <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
               How engagements typically unfold.
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="reveal-stagger mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {PROCESS_STEPS.map((step) => (
-              <div key={step.step} className="panel-soft p-6">
+              <div key={step.step} className="reveal glow-card p-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-accent-400/30 bg-accent-500/10 font-heading text-lg text-accent-200">
                   {step.step}
                 </div>
-                <h3 className="mt-5 font-heading text-2xl tracking-[0.04em] text-slate-50">
+                <h3 className="mt-5 font-heading text-2xl tracking-[-0.01em] text-slate-50">
                   {step.title}
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-slate-300">

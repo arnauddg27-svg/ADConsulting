@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { clsx } from "clsx";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { costBreakdown } from "@/lib/mock-data";
 
 const total = costBreakdown.reduce((sum, item) => sum + item.value, 0);
 
-export default function CostBreakdownChart() {
+interface CostBreakdownChartProps {
+  activeCategory?: string | null;
+  onCategoryClick?: (category: string) => void;
+}
+
+export default function CostBreakdownChart({ activeCategory, onCategoryClick }: CostBreakdownChartProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -30,11 +36,22 @@ export default function CostBreakdownChart() {
                   cx="50%"
                   cy="50%"
                   innerRadius={52}
-                  outerRadius={86}
+                  outerRadius={({ category }: { category: string }) =>
+                    activeCategory === category ? 92 : 86
+                  }
                   paddingAngle={2}
+                  style={{ cursor: "pointer" }}
+                  onClick={(_, index) => {
+                    if (onCategoryClick) onCategoryClick(costBreakdown[index].category);
+                  }}
                 >
                   {costBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      opacity={activeCategory && activeCategory !== entry.category ? 0.2 : 1}
+                      style={{ transition: "opacity 0.3s ease" }}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
@@ -57,7 +74,17 @@ export default function CostBreakdownChart() {
         </div>
         <div className="space-y-2.5">
           {costBreakdown.map((category) => (
-            <div key={category.category} className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] px-4 py-3">
+            <button
+              key={category.category}
+              onClick={() => onCategoryClick?.(category.category)}
+              className={clsx(
+                "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all",
+                activeCategory === category.category
+                  ? "border-accent-400/30 bg-accent-500/10"
+                  : "border-white/[0.05] bg-white/[0.02] hover:border-white/[0.1]",
+                activeCategory && activeCategory !== category.category && "opacity-40"
+              )}
+            >
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />
               <div>
                 <div className="text-sm font-medium text-slate-100">{category.category}</div>
@@ -65,7 +92,7 @@ export default function CostBreakdownChart() {
                   ${(category.value / 1000000).toFixed(2)}M ({((category.value / total) * 100).toFixed(0)}%)
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

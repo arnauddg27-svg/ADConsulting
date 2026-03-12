@@ -17,7 +17,6 @@ export default function Home() {
         headline="Start with the bottleneck that is hurting the business."
         description="We’ll look at whether the real issue sits in reporting, margin analysis, ERP setup, or day-to-day process execution and identify the right place to start."
         primaryCTA={{ label: "Start the Conversation", href: "/contact/" }}
-        secondaryCTA={{ label: "Review Services", href: "/services/" }}
       />
     </>
   );

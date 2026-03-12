@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
 
 interface KPICardProps {
   label: string;
@@ -8,6 +8,8 @@ interface KPICardProps {
   trend?: "up" | "down" | "neutral";
   subtitle?: string;
   progress?: number;
+  clickable?: boolean;
+  onClick?: () => void;
 }
 
 export default function KPICard({
@@ -17,11 +19,27 @@ export default function KPICard({
   trend = "neutral",
   subtitle,
   progress,
+  clickable,
+  onClick,
 }: KPICardProps) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
-      <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
-        {label}
+    <div
+      className={clsx(
+        "rounded-xl border border-white/[0.06] bg-white/[0.025] p-5 transition-all",
+        clickable && "cursor-pointer hover:border-accent-400/30 hover:bg-white/[0.04] group"
+      )}
+      onClick={onClick}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={clickable ? (e) => { if (e.key === "Enter" || e.key === " ") onClick?.(); } : undefined}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          {label}
+        </div>
+        {clickable && (
+          <ChevronRight size={14} className="text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-accent-400" />
+        )}
       </div>
       <div className="mt-3 text-3xl font-semibold tracking-tight text-slate-50">
         {value}

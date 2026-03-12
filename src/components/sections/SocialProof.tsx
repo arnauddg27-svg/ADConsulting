@@ -33,9 +33,9 @@ export default function SocialProof() {
   return (
     <section className="section-space pt-0">
       <Container>
-        <div className="text-center">
+        <div className="reveal text-center">
           <span className="eyebrow">Common Problems</span>
-          <h2 className="mx-auto mt-5 max-w-2xl font-heading text-4xl leading-[0.95] tracking-[0.04em] text-slate-50 sm:text-[3.2rem]">
+          <h2 className="mx-auto mt-5 max-w-2xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-[3.2rem]">
             Where builder operations usually start slipping.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
@@ -45,9 +45,9 @@ export default function SocialProof() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {painPoints.map((item) => (
-            <div key={item.problem} className="panel-soft p-5">
+            <div key={item.problem} className="reveal glow-card p-5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-500">
                 {item.icon}
               </div>

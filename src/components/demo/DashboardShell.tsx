@@ -51,6 +51,20 @@ const scheduleNotes = [
 
 export default function DashboardShell() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
+
+  const switchTab = (tab: string, preserveFilter = false) => {
+    setActiveTab(tab);
+    if (!preserveFilter) {
+      setStatusFilter(null);
+      setHighlightedCategory(null);
+    }
+  };
+
+  const filteredProjects = statusFilter
+    ? projects.filter((p) => p.status === statusFilter)
+    : projects;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0f1a] shadow-[0_50px_120px_-60px_rgba(0,0,0,1)]">
@@ -83,7 +97,7 @@ export default function DashboardShell() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => switchTab(tab.id)}
                 className={clsx(
                   "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.12em] transition-all",
                   activeTab === tab.id
@@ -103,7 +117,7 @@ export default function DashboardShell() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => switchTab(tab.id)}
                 className={clsx(
                   "mr-2 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-all",
                   activeTab === tab.id
@@ -119,6 +133,21 @@ export default function DashboardShell() {
         </div>
 
         <div className="flex-1 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_22%),#0a0f1a] p-4 md:p-6">
+          {(statusFilter || highlightedCategory) && (
+            <div className="mb-4 flex items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-500/10 px-3 py-1.5 text-xs font-semibold text-accent-300">
+                Showing: &ldquo;{(statusFilter || highlightedCategory)?.replace("-", " ")}&rdquo;
+                <button
+                  onClick={() => { setStatusFilter(null); setHighlightedCategory(null); }}
+                  className="ml-1 rounded-full p-0.5 transition-colors hover:bg-white/10"
+                  aria-label="Clear filter"
+                >
+                  ✕
+                </button>
+              </span>
+            </div>
+          )}
+
           {activeTab === "overview" && (
             <div className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -127,18 +156,24 @@ export default function DashboardShell() {
                   value="24"
                   change="+3 vs last month"
                   trend="up"
+                  clickable
+                  onClick={() => switchTab("projects")}
                 />
                 <KPICard
                   label="On-Time Rate"
                   value="87%"
                   change="+5% vs Q3"
                   trend="up"
+                  clickable
+                  onClick={() => { setStatusFilter("on-track"); switchTab("projects", true); }}
                 />
                 <KPICard
                   label="Budget Utilization"
                   value="$4.2M"
                   subtitle="of $5.1M budget"
                   progress={82}
+                  clickable
+                  onClick={() => switchTab("budget")}
                 />
                 <KPICard
                   label="Open Change Orders"
@@ -148,7 +183,7 @@ export default function DashboardShell() {
                 />
               </div>
               <div className="grid gap-5 xl:grid-cols-2">
-                <ProjectProgressChart />
+                <ProjectProgressChart statusFilter={statusFilter} onBarClick={(status) => setStatusFilter(statusFilter === status ? null : status)} />
                 <BudgetVarianceChart />
               </div>
             </div>
@@ -156,7 +191,7 @@ export default function DashboardShell() {
 
           {activeTab === "projects" && (
             <div className="space-y-5">
-              <ProjectProgressChart />
+              <ProjectProgressChart statusFilter={statusFilter} onBarClick={(status) => setStatusFilter(statusFilter === status ? null : status)} />
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
                 <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Project Status Snapshot
@@ -173,7 +208,7 @@ export default function DashboardShell() {
                       </tr>
                     </thead>
                     <tbody>
-                      {projects.map((project) => (
+                      {filteredProjects.map((project) => (
                         <tr key={project.id} className="border-b border-white/[0.04] last:border-b-0">
                           <td className="py-4 font-medium text-slate-100">{project.name}</td>
                           <td className="py-4 text-slate-300">{project.phase}</td>
@@ -194,14 +229,15 @@ export default function DashboardShell() {
                             </div>
                           </td>
                           <td className="py-4">
-                            <span
+                            <button
+                              onClick={() => setStatusFilter(statusFilter === project.status ? null : project.status)}
                               className={clsx(
-                                "inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em]",
+                                "inline-flex cursor-pointer rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] transition-all hover:ring-1 hover:ring-white/20",
                                 projectStatusBadge[project.status]
                               )}
                             >
                               {project.status.replace("-", " ")}
-                            </span>
+                            </button>
                           </td>
                           <td className="py-4 text-right text-slate-300">{project.daysRemaining}</td>
                         </tr>
@@ -216,7 +252,7 @@ export default function DashboardShell() {
           {activeTab === "budget" && (
             <div className="space-y-5">
               <div className="grid gap-5 xl:grid-cols-2">
-                <CostBreakdownChart />
+                <CostBreakdownChart activeCategory={highlightedCategory} onCategoryClick={(cat) => setHighlightedCategory(highlightedCategory === cat ? null : cat)} />
                 <BudgetVarianceChart />
               </div>
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
@@ -262,38 +298,38 @@ export default function DashboardShell() {
                   Projected Job Profitability
                 </h3>
                 <div className="mt-5 overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[640px] text-xs">
                     <thead>
-                      <tr className="border-b border-white/[0.06] text-left text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                        <th className="pb-3">Project</th>
-                        <th className="pb-3 text-right">Contract</th>
-                        <th className="pb-3 text-right">Est. Cost</th>
-                        <th className="pb-3 text-right">Actual to Date</th>
-                        <th className="pb-3 text-right">Proj. Final</th>
-                        <th className="pb-3 text-right pr-4">Margin</th>
-                        <th className="pb-3 pl-3">Status</th>
+                      <tr className="border-b border-white/[0.06] text-left text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="pb-3 pr-2">Project</th>
+                        <th className="pb-3 px-2 text-right whitespace-nowrap">Contract</th>
+                        <th className="pb-3 px-2 text-right whitespace-nowrap">Est. Cost</th>
+                        <th className="pb-3 px-2 text-right whitespace-nowrap">Actual</th>
+                        <th className="pb-3 px-2 text-right whitespace-nowrap">Proj. Final</th>
+                        <th className="pb-3 px-2 text-right whitespace-nowrap">Margin</th>
+                        <th className="pb-3 pl-2">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {jobProfitability.map((job) => (
                         <tr key={job.id} className="border-b border-white/[0.04] last:border-b-0">
-                          <td className="py-3.5 font-medium text-slate-100">{job.project}</td>
-                          <td className="py-3.5 text-right text-slate-300">${job.contractValue.toLocaleString()}</td>
-                          <td className="py-3.5 text-right text-slate-300">${job.estimatedCost.toLocaleString()}</td>
-                          <td className="py-3.5 text-right text-slate-300">${job.actualCostToDate.toLocaleString()}</td>
-                          <td className="py-3.5 text-right text-slate-300">${job.projectedFinalCost.toLocaleString()}</td>
+                          <td className="py-3 pr-2 font-medium text-slate-100">{job.project}</td>
+                          <td className="py-3 px-2 text-right whitespace-nowrap text-slate-300">${job.contractValue.toLocaleString()}</td>
+                          <td className="py-3 px-2 text-right whitespace-nowrap text-slate-300">${job.estimatedCost.toLocaleString()}</td>
+                          <td className="py-3 px-2 text-right whitespace-nowrap text-slate-300">${job.actualCostToDate.toLocaleString()}</td>
+                          <td className="py-3 px-2 text-right whitespace-nowrap text-slate-300">${job.projectedFinalCost.toLocaleString()}</td>
                           <td className={clsx(
-                            "py-3.5 pr-4 text-right font-semibold",
+                            "py-3 px-2 text-right whitespace-nowrap font-semibold",
                             job.status === "healthy" && "text-emerald-400",
                             job.status === "watch" && "text-accent-300",
                             job.status === "eroding" && "text-red-400"
                           )}>
                             {job.estimatedMargin}%
                           </td>
-                          <td className="py-3.5 pl-3">
+                          <td className="py-3 pl-2">
                             <span
                               className={clsx(
-                                "inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em]",
+                                "inline-flex rounded-full border px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-[0.1em]",
                                 profitStatusBadge[job.status]
                               )}
                             >

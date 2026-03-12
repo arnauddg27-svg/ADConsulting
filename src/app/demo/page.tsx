@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import DashboardShell from "@/components/demo/DashboardShell";
+import ConstructionPipeline from "@/components/demo/ConstructionPipeline";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "Interactive Sample View | Homebuilder Operations Consulting",
+  title: "Builder Dashboard Sample | Construction Reporting & KPI Demo — Orlando",
   description:
-    "Explore a sample operating review for projects, costs, and schedules built for Central Florida home builders.",
+    "Explore a sample construction operations dashboard with project tracking, cost reporting, budget analysis, and schedule visibility built for Central Florida home builders.",
 };
 
 const demoHighlights = [
@@ -46,6 +47,12 @@ export default function DemoPage() {
       <section className="section-space pt-0">
         <Container className="max-w-[90rem]">
           <DashboardShell />
+        </Container>
+      </section>
+
+      <section className="section-space pt-0">
+        <Container className="max-w-[90rem]">
+          <ConstructionPipeline />
         </Container>
       </section>
 
