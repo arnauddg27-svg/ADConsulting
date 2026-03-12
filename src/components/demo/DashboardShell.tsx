@@ -117,9 +117,7 @@ export default function DashboardShell() {
     <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0f1a] shadow-[0_50px_120px_-60px_rgba(0,0,0,1)]">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] bg-[#0d1321] px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-400/30 bg-accent-500/15 text-sm font-semibold text-accent-300">
-            AD
-          </div>
+          <img src="/images/logo.png" alt="AD" className="h-10 w-10 rounded-lg bg-white/90 p-0.5 object-contain" />
           <div>
             <div className="text-lg font-semibold text-slate-50">
               Operating Overview

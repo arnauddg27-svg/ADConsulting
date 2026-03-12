@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { clsx } from "clsx";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { costBreakdown } from "@/lib/mock-data";
+import { costBreakdown, projects } from "@/lib/mock-data";
 import type { DashboardFilters } from "@/types";
 
-const total = costBreakdown.reduce((sum, item) => sum + item.value, 0);
+const portfolioSpent = projects.reduce((sum, p) => sum + p.spent, 0);
+const portfolioTotal = costBreakdown.reduce((sum, item) => sum + item.value, 0);
+
+const getCommunity = (name: string) => name.split(" - ")[0];
 
 interface CostBreakdownChartProps {
   filters: DashboardFilters;
@@ -20,10 +23,43 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
     setMounted(true);
   }, []);
 
+  const hasProjectFilter = !!(filters.project || filters.community || filters.phase || filters.status);
+
+  const { scaledData, scaledTotal } = useMemo(() => {
+    if (!hasProjectFilter) {
+      return { scaledData: costBreakdown, scaledTotal: portfolioTotal };
+    }
+    const filteredProjects = projects.filter((p) => {
+      if (filters.project && p.name !== filters.project) return false;
+      if (filters.community && getCommunity(p.name) !== filters.community) return false;
+      if (filters.phase && p.phase !== filters.phase) return false;
+      if (filters.status && p.status !== filters.status) return false;
+      return true;
+    });
+    const filteredSpent = filteredProjects.reduce((sum, p) => sum + p.spent, 0);
+    const ratio = portfolioSpent > 0 ? filteredSpent / portfolioSpent : 0;
+    const scaled = costBreakdown.map((cat) => ({
+      ...cat,
+      value: Math.round(cat.value * ratio),
+    }));
+    return { scaledData: scaled, scaledTotal: scaled.reduce((s, c) => s + c.value, 0) };
+  }, [filters, hasProjectFilter]);
+
+  const formatValue = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value}`;
+  };
+
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
       <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
         Cost Breakdown
+        {hasProjectFilter && (
+          <span className="ml-2 normal-case tracking-normal text-slate-500">
+            · {formatValue(scaledTotal)} est.
+          </span>
+        )}
       </h3>
       <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-center">
         <div className="h-52 w-full max-w-[14rem] shrink-0">
@@ -31,7 +67,7 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
-                  data={costBreakdown}
+                  data={scaledData}
                   dataKey="value"
                   nameKey="category"
                   cx="50%"
@@ -43,10 +79,10 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
                   paddingAngle={2}
                   style={{ cursor: "pointer" }}
                   onClick={(_, index) => {
-                    onFilterToggle("costCategory", costBreakdown[index].category);
+                    onFilterToggle("costCategory", scaledData[index].category);
                   }}
                 >
-                  {costBreakdown.map((entry, index) => (
+                  {scaledData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
@@ -56,7 +92,7 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => [`$${(Number(value) / 1000000).toFixed(2)}M`]}
+                  formatter={(value) => [formatValue(Number(value))]}
                   contentStyle={{
                     borderRadius: "12px",
                     border: "1px solid rgba(255,255,255,0.08)",
@@ -74,7 +110,7 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
           )}
         </div>
         <div className="space-y-2.5">
-          {costBreakdown.map((category) => (
+          {scaledData.map((category) => (
             <button
               key={category.category}
               onClick={() => onFilterToggle("costCategory", category.category)}
@@ -90,7 +126,7 @@ export default function CostBreakdownChart({ filters, onFilterToggle }: CostBrea
               <div>
                 <div className="text-sm font-medium text-slate-100">{category.category}</div>
                 <div className="text-xs text-slate-400">
-                  ${(category.value / 1000000).toFixed(2)}M ({((category.value / total) * 100).toFixed(0)}%)
+                  {formatValue(category.value)} ({scaledTotal > 0 ? ((category.value / scaledTotal) * 100).toFixed(0) : 0}%)
                 </div>
               </div>
             </button>

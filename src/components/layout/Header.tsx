@@ -37,9 +37,7 @@ export default function Header() {
             )}
           >
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent-400/40 bg-accent-500/15 text-sm font-heading tracking-[0.18em] text-accent-200">
-                AD
-              </div>
+              <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-11 w-11 rounded-xl bg-white/90 p-0.5 object-contain" />
               <div className="hidden min-w-0 sm:block">
                 <span className="block font-heading text-[1.05rem] tracking-[0.18em] text-slate-50">
                   {SITE_CONFIG.name.toUpperCase()}

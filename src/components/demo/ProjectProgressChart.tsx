@@ -52,30 +52,34 @@ export default function ProjectProgressChart({ filters, onFilterToggle }: Projec
 
   const hasActiveFilter = filters.community || filters.status || filters.phase || filters.project;
 
-  const ClickableYAxisTick = ({ x, y, payload }: { x: number; y: number; payload: { value: string } }) => (
-    <text
-      x={x}
-      y={y}
-      textAnchor="end"
-      fill="#94a3b8"
-      fontSize={11}
-      style={{ cursor: "pointer" }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onFilterToggle("community", payload.value);
-      }}
-      className="hover:fill-accent-300 transition-colors"
-    >
-      {payload.value}
-    </text>
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderYAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    return (
+      <text
+        x={x}
+        y={y}
+        dy={4}
+        textAnchor="end"
+        fill="#94a3b8"
+        fontSize={11}
+        style={{ cursor: "pointer" }}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          onFilterToggle("community", payload.value);
+        }}
+      >
+        {payload.value}
+      </text>
+    );
+  };
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
       <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
         Project Progress by Community
       </h3>
-      <div className="mt-5 h-64">
+      <div className="mt-5 h-80">
         {mounted ? (
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart
@@ -103,9 +107,10 @@ export default function ProjectProgressChart({ filters, onFilterToggle }: Projec
               <YAxis
                 type="category"
                 dataKey="name"
-                width={120}
+                width={140}
                 fontSize={11}
-                tick={<ClickableYAxisTick x={0} y={0} payload={{ value: "" }} />}
+                tick={renderYAxisTick}
+                interval={0}
                 axisLine={false}
                 tickLine={false}
               />
