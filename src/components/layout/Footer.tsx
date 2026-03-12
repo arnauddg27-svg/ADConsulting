@@ -17,8 +17,8 @@ export default function Footer() {
           <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.9fr]">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0c1220] overflow-hidden">
-                  <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-9 w-9 object-contain mix-blend-screen" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-accent-500/20 to-emerald-500/10 text-lg font-bold tracking-wider text-accent-300">
+                  AD
                 </div>
                 <div>
                   <div className="font-heading text-[1.2rem] tracking-[0.18em] text-slate-50">

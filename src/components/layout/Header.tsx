@@ -37,8 +37,8 @@ export default function Header() {
             )}
           >
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0c1220] overflow-hidden">
-                <img src="/images/logo.png" alt="A.D. Homes & Consulting" className="h-9 w-9 object-contain mix-blend-screen" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-accent-500/20 to-emerald-500/10 text-lg font-bold tracking-wider text-accent-300">
+                AD
               </div>
               <div className="hidden min-w-0 sm:block">
                 <span className="block font-heading text-[1.05rem] tracking-[0.18em] text-slate-50">

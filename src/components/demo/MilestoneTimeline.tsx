@@ -52,27 +52,29 @@ export default function MilestoneTimeline({ filters, onFilterToggle }: Milestone
     ? filters.project
     : filters?.community
       ? filters.community
-      : "Lakewood Reserve - Lot 42";
+      : filters?.status
+        ? `${filters.status.replace("-", " ")} projects`
+        : "All Projects";
 
   /* Derive milestone statuses from filtered project's current phase */
   const derivedMilestones = useMemo((): Milestone[] => {
-    // Find the filtered project(s)
-    let matchedProject = null;
-    if (filters?.project) {
-      matchedProject = projects.find((p) => p.name === filters.project);
-    } else if (filters?.community) {
-      // Pick the most advanced project in the community
-      const communityProjects = projects.filter(
-        (p) => getCommunity(p.name) === filters.community
-      );
-      if (communityProjects.length > 0) {
-        matchedProject = communityProjects.reduce((best, p) =>
-          p.percentComplete > best.percentComplete ? p : best
-        );
-      }
-    }
+    // Find matching project(s) using all relevant filters
+    const matchingProjects = projects.filter((p) => {
+      if (filters?.project && p.name !== filters.project) return false;
+      if (filters?.community && getCommunity(p.name) !== filters.community) return false;
+      if (filters?.phase && p.phase !== filters.phase) return false;
+      if (filters?.status && p.status !== filters.status) return false;
+      return true;
+    });
 
-    if (!matchedProject) return milestones;
+    // If no filters or no match, fall back to defaults
+    const hasFilter = !!(filters?.project || filters?.community || filters?.phase || filters?.status);
+    if (!hasFilter || matchingProjects.length === 0) return milestones;
+
+    // Pick the most advanced matched project
+    const matchedProject = matchingProjects.reduce((best, p) =>
+      p.percentComplete > best.percentComplete ? p : best
+    );
 
     const currentMilestoneName = phaseToMilestone[matchedProject.phase] || matchedProject.phase;
     const currentIndex = milestoneOrder.indexOf(currentMilestoneName);
@@ -83,7 +85,7 @@ export default function MilestoneTimeline({ filters, onFilterToggle }: Milestone
       ...m,
       status: i < currentIndex ? "complete" : i === currentIndex ? "in-progress" : "upcoming",
     }));
-  }, [filters?.project, filters?.community]);
+  }, [filters?.project, filters?.community, filters?.phase, filters?.status]);
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
