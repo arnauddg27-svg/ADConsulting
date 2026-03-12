@@ -66,3 +66,12 @@ export interface JobProfitability {
   estimatedMargin: number;
   status: "healthy" | "watch" | "eroding";
 }
+
+export interface DashboardFilters {
+  project: string | null;
+  community: string | null;
+  phase: string | null;
+  status: string | null;
+  costCategory: string | null;
+  profitStatus: string | null;
+}

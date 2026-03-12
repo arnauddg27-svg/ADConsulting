@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { costBreakdown } from "@/lib/mock-data";
+import type { DashboardFilters } from "@/types";
 
 const total = costBreakdown.reduce((sum, item) => sum + item.value, 0);
 
 interface CostBreakdownChartProps {
-  activeCategory?: string | null;
-  onCategoryClick?: (category: string) => void;
+  filters: DashboardFilters;
+  onFilterToggle: (key: keyof DashboardFilters, value: string) => void;
 }
 
-export default function CostBreakdownChart({ activeCategory, onCategoryClick }: CostBreakdownChartProps) {
+export default function CostBreakdownChart({ filters, onFilterToggle }: CostBreakdownChartProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -37,19 +38,19 @@ export default function CostBreakdownChart({ activeCategory, onCategoryClick }: 
                   cy="50%"
                   innerRadius={52}
                   outerRadius={({ category }: { category: string }) =>
-                    activeCategory === category ? 92 : 86
+                    filters.costCategory === category ? 92 : 86
                   }
                   paddingAngle={2}
                   style={{ cursor: "pointer" }}
                   onClick={(_, index) => {
-                    if (onCategoryClick) onCategoryClick(costBreakdown[index].category);
+                    onFilterToggle("costCategory", costBreakdown[index].category);
                   }}
                 >
                   {costBreakdown.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={entry.color}
-                      opacity={activeCategory && activeCategory !== entry.category ? 0.2 : 1}
+                      opacity={filters.costCategory && filters.costCategory !== entry.category ? 0.2 : 1}
                       style={{ transition: "opacity 0.3s ease" }}
                     />
                   ))}
@@ -76,13 +77,13 @@ export default function CostBreakdownChart({ activeCategory, onCategoryClick }: 
           {costBreakdown.map((category) => (
             <button
               key={category.category}
-              onClick={() => onCategoryClick?.(category.category)}
+              onClick={() => onFilterToggle("costCategory", category.category)}
               className={clsx(
                 "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all",
-                activeCategory === category.category
+                filters.costCategory === category.category
                   ? "border-accent-400/30 bg-accent-500/10"
                   : "border-white/[0.05] bg-white/[0.02] hover:border-white/[0.1]",
-                activeCategory && activeCategory !== category.category && "opacity-40"
+                filters.costCategory && filters.costCategory !== category.category && "opacity-40"
               )}
             >
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />

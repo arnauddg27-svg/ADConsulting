@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { scheduleHeatmapData } from "@/lib/mock-data";
+import type { DashboardFilters } from "@/types";
 
 const weeks = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9", "W10", "W11", "W12"];
 
@@ -12,7 +13,14 @@ function getCellColor(intensity: number) {
   return "bg-accent-400";
 }
 
-export default function ScheduleHeatmap() {
+interface ScheduleHeatmapProps {
+  filters?: DashboardFilters;
+  onFilterToggle?: (key: keyof DashboardFilters, value: string) => void;
+}
+
+export default function ScheduleHeatmap({ filters, onFilterToggle }: ScheduleHeatmapProps) {
+  const hasCommunityFilter = !!filters?.community;
+
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
       <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -34,16 +42,33 @@ export default function ScheduleHeatmap() {
             </tr>
           </thead>
           <tbody>
-            {scheduleHeatmapData.map((row) => (
-              <tr key={row.project}>
-                <td className="py-2 text-sm text-slate-200">{row.project}</td>
-                {row.weeks.map((intensity, index) => (
-                  <td key={index} className="p-1">
-                    <div className={clsx("mx-auto h-6 w-full rounded", getCellColor(intensity))} />
+            {scheduleHeatmapData.map((row) => {
+              const isFiltered = hasCommunityFilter && filters.community !== row.project;
+
+              return (
+                <tr
+                  key={row.project}
+                  className={clsx(
+                    "transition-opacity duration-300",
+                    isFiltered && "opacity-20"
+                  )}
+                >
+                  <td className="py-2">
+                    <button
+                      onClick={() => onFilterToggle?.("community", row.project)}
+                      className="text-sm text-slate-200 cursor-pointer hover:text-accent-300 transition-colors text-left"
+                    >
+                      {row.project}
+                    </button>
                   </td>
-                ))}
-              </tr>
-            ))}
+                  {row.weeks.map((intensity, index) => (
+                    <td key={index} className="p-1">
+                      <div className={clsx("mx-auto h-6 w-full rounded", getCellColor(intensity))} />
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

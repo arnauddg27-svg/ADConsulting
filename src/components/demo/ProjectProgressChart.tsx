@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import { projects } from "@/lib/mock-data";
+import type { DashboardFilters } from "@/types";
 
 const statusColors: Record<string, string> = {
   "on-track": "#10b981",
@@ -19,23 +20,55 @@ const statusColors: Record<string, string> = {
   behind: "#ef4444",
 };
 
+const getCommunity = (name: string) => name.split(" - ")[0];
+
 const chartData = projects.map((project) => ({
-  name: project.name.split(" - ")[0],
+  name: getCommunity(project.name),
+  fullName: project.name,
   complete: project.percentComplete,
   status: project.status,
+  phase: project.phase,
 }));
 
 interface ProjectProgressChartProps {
-  statusFilter?: string | null;
-  onBarClick?: (status: string) => void;
+  filters: DashboardFilters;
+  onFilterToggle: (key: keyof DashboardFilters, value: string) => void;
 }
 
-export default function ProjectProgressChart({ statusFilter, onBarClick }: ProjectProgressChartProps) {
+export default function ProjectProgressChart({ filters, onFilterToggle }: ProjectProgressChartProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const projectMatchesFilters = (entry: (typeof chartData)[number]) => {
+    if (filters.community && getCommunity(entry.fullName) !== filters.community) return false;
+    if (filters.status && entry.status !== filters.status) return false;
+    if (filters.phase && entry.phase !== filters.phase) return false;
+    if (filters.project && entry.fullName !== filters.project) return false;
+    return true;
+  };
+
+  const hasActiveFilter = filters.community || filters.status || filters.phase || filters.project;
+
+  const ClickableYAxisTick = ({ x, y, payload }: { x: number; y: number; payload: { value: string } }) => (
+    <text
+      x={x}
+      y={y}
+      textAnchor="end"
+      fill="#94a3b8"
+      fontSize={11}
+      style={{ cursor: "pointer" }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onFilterToggle("community", payload.value);
+      }}
+      className="hover:fill-accent-300 transition-colors"
+    >
+      {payload.value}
+    </text>
+  );
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
@@ -49,11 +82,11 @@ export default function ProjectProgressChart({ statusFilter, onBarClick }: Proje
               data={chartData}
               layout="vertical"
               margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
-              style={{ cursor: onBarClick ? "pointer" : undefined }}
+              style={{ cursor: "pointer" }}
               onClick={(state: Record<string, unknown>) => {
                 const payload = state?.activePayload as Array<{ payload: { status: string } }> | undefined;
-                if (onBarClick && payload?.[0]) {
-                  onBarClick(payload[0].payload.status);
+                if (payload?.[0]) {
+                  onFilterToggle("status", payload[0].payload.status);
                 }
               }}
             >
@@ -72,7 +105,7 @@ export default function ProjectProgressChart({ statusFilter, onBarClick }: Proje
                 dataKey="name"
                 width={120}
                 fontSize={11}
-                tick={{ fill: "#94a3b8" }}
+                tick={<ClickableYAxisTick x={0} y={0} payload={{ value: "" }} />}
                 axisLine={false}
                 tickLine={false}
               />
@@ -92,7 +125,7 @@ export default function ProjectProgressChart({ statusFilter, onBarClick }: Proje
                   <Cell
                     key={`cell-${index}`}
                     fill={statusColors[entry.status]}
-                    opacity={statusFilter && statusFilter !== entry.status ? 0.15 : 1}
+                    opacity={hasActiveFilter && !projectMatchesFilters(entry) ? 0.15 : 1}
                     style={{ transition: "opacity 0.3s ease" }}
                   />
                 ))}

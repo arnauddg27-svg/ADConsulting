@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 import { Check, Circle, Clock } from "lucide-react";
 import { milestones } from "@/lib/mock-data";
+import type { DashboardFilters } from "@/types";
 
 const statusConfig = {
   complete: {
@@ -23,11 +24,22 @@ const statusConfig = {
   },
 };
 
-export default function MilestoneTimeline() {
+interface MilestoneTimelineProps {
+  filters?: DashboardFilters;
+  onFilterToggle?: (key: keyof DashboardFilters, value: string) => void;
+}
+
+export default function MilestoneTimeline({ filters, onFilterToggle }: MilestoneTimelineProps) {
+  const titleLabel = filters?.project
+    ? filters.project
+    : filters?.community
+      ? filters.community
+      : "Lakewood Reserve Lot 42";
+
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
       <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-        Milestone Timeline · Lakewood Reserve Lot 42
+        Milestone Timeline · {titleLabel}
       </h3>
 
       <div className="mt-6 overflow-x-auto">
@@ -35,14 +47,25 @@ export default function MilestoneTimeline() {
           {milestones.map((milestone, index) => {
             const config = statusConfig[milestone.status];
             const isLast = index === milestones.length - 1;
+            const isPhaseMatch = filters?.phase === milestone.name;
+            const hasPhaseFilter = !!filters?.phase;
 
             return (
-              <div key={milestone.name} className="flex flex-1 flex-col items-center">
+              <div
+                key={milestone.name}
+                className={clsx(
+                  "flex flex-1 flex-col items-center transition-opacity duration-300",
+                  hasPhaseFilter && !isPhaseMatch && "opacity-30"
+                )}
+              >
                 <div className="flex w-full items-center">
                   <div className={clsx("h-0.5 flex-1", index === 0 ? "bg-transparent" : config.line)} />
                   <div
                     className={clsx(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.06]",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border",
+                      isPhaseMatch
+                        ? "border-accent-300 ring-2 ring-accent-400/40"
+                        : "border-white/[0.06]",
                       config.bg,
                       config.text
                     )}
@@ -58,9 +81,12 @@ export default function MilestoneTimeline() {
                 </div>
 
                 <div className="mt-3 text-center">
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-200">
+                  <button
+                    onClick={() => onFilterToggle?.("phase", milestone.name)}
+                    className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-200 cursor-pointer hover:text-accent-300 transition-colors"
+                  >
                     {milestone.name}
-                  </div>
+                  </button>
                   <div className="mt-1 text-[0.68rem] text-slate-500">{milestone.date}</div>
                 </div>
               </div>
