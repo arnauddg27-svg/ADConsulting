@@ -16,7 +16,7 @@ import BudgetVarianceChart from "./BudgetVarianceChart";
 import CostBreakdownChart from "./CostBreakdownChart";
 import MilestoneTimeline from "./MilestoneTimeline";
 import ScheduleHeatmap from "./ScheduleHeatmap";
-import { projects, drawSchedule, jobProfitability } from "@/lib/mock-data";
+import { projects, jobProfitability } from "@/lib/mock-data";
 
 const tabs = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard size={18} /> },
@@ -31,11 +31,7 @@ const projectStatusBadge = {
   behind: "border-red-500/20 bg-red-500/15 text-red-400",
 };
 
-const drawStatusBadge: Record<string, string> = {
-  Paid: "border-emerald-500/20 bg-emerald-500/15 text-emerald-400",
-  Pending: "border-accent-400/20 bg-accent-500/15 text-accent-300",
-  Upcoming: "border-white/[0.08] bg-white/[0.04] text-slate-300",
-};
+
 
 const profitStatusBadge: Record<string, string> = {
   healthy: "border-emerald-500/20 bg-emerald-500/15 text-emerald-400",
@@ -255,43 +251,6 @@ export default function DashboardShell() {
                 <CostBreakdownChart activeCategory={highlightedCategory} onCategoryClick={(cat) => setHighlightedCategory(highlightedCategory === cat ? null : cat)} />
                 <BudgetVarianceChart />
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
-                <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Draw Schedule Snapshot
-                </h3>
-                <div className="mt-5 overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white/[0.06] text-left text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                        <th className="pb-3">Draw</th>
-                        <th className="pb-3">Amount</th>
-                        <th className="pb-3">Status</th>
-                        <th className="pb-3 text-right">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {drawSchedule.map((draw) => (
-                        <tr key={draw.draw} className="border-b border-white/[0.04] last:border-b-0">
-                          <td className="py-4 font-medium text-slate-100">{draw.draw}</td>
-                          <td className="py-4 text-slate-300">${draw.amount.toLocaleString()}</td>
-                          <td className="py-4">
-                            <span
-                              className={clsx(
-                                "inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em]",
-                                drawStatusBadge[draw.status]
-                              )}
-                            >
-                              {draw.status}
-                            </span>
-                          </td>
-                          <td className="py-4 text-right text-slate-300">{draw.date}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
               {/* Job Profitability Estimate */}
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-5">
                 <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">

@@ -50,7 +50,7 @@ export const SERVICES: Service[] = [
       "Mid-construction underwriting and margin re-checks",
       "Scenario modeling for inflation, repricing, and absorption",
       "Plan mix and pricing analysis",
-      "Draw schedule and cash flow modeling",
+      "Cash flow modeling",
       "Sensitivity analysis and risk review",
     ],
   },

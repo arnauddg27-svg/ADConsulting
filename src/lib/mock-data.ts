@@ -125,13 +125,6 @@ export const scheduleHeatmapData = [
   { project: "Apopka Crossing", weeks: [0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 4, 3] },
 ];
 
-export const drawSchedule = [
-  { draw: "Draw 1 - Foundation", amount: 285000, status: "Paid", date: "Jan 15" },
-  { draw: "Draw 2 - Framing", amount: 420000, status: "Paid", date: "Feb 28" },
-  { draw: "Draw 3 - Rough-In", amount: 380000, status: "Pending", date: "Apr 10" },
-  { draw: "Draw 4 - Drywall", amount: 195000, status: "Upcoming", date: "May 15" },
-  { draw: "Draw 5 - Final", amount: 320000, status: "Upcoming", date: "Jul 01" },
-];
 
 export const jobProfitability: JobProfitability[] = [
   {
