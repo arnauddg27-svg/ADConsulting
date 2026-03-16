@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     "builder operating system",
     "construction data ecosystem Orlando",
     "Central Florida homebuilder consultant",
-    "builder ERP data extraction",
+    "builder data extraction",
     "homebuilder job profitability",
     "construction pipeline tracking",
     "vendor scorecard home builders",

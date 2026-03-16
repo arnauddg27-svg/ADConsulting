@@ -33,7 +33,7 @@ const pricingTiers = [
     segment: "Small Builders",
     volume: "25 – 100 homes / year",
     painPoint:
-      "Manual Excel exports, disjointed ERP modules, no single source of truth for margin or cycle time.",
+      "Manual Excel exports, disjointed systems, no single source of truth for margin or cycle time.",
     range: "$30,000 – $70,000",
     note: "Standardized operating system with core applications and automated data ingestion.",
   },
@@ -58,9 +58,10 @@ export default function ServicesPage() {
               Custom operating systems for home builders
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              We extract data from your ERP, centralize it into a single source
-              of truth, and build functional applications that your construction,
-              purchasing, and finance teams actually use every day.
+              We pull together scattered data from across your operation,
+              centralize it into a single source of truth, and build functional
+              applications that your construction, purchasing, and finance teams
+              actually use every day.
             </p>
           </div>
         </Container>

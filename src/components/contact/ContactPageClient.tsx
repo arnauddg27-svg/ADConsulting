@@ -15,11 +15,11 @@ const faqs = [
   },
   {
     q: "How long does implementation take?",
-    a: "Most implementations run 8 to 16 weeks depending on the complexity of your ERP, the number of departments involved, and data quality. After launch, a $3K/month retainer keeps the system maintained and evolving.",
+    a: "Most implementations run 8 to 16 weeks depending on the complexity of your operation, the number of departments involved, and data quality. After launch, a $3K/month retainer keeps the system maintained and evolving.",
   },
   {
-    q: "Do you replace our current ERP?",
-    a: "No. We extract data from your existing systems \u2014 Buildertrend, Hyphen, Sage, or whatever you run \u2014 and build a layer on top. Your teams keep using their tools. We make the data actually work.",
+    q: "Do you replace our current systems?",
+    a: "No. We extract data from the tools you already use and build a layer on top. Your teams keep working in their systems. We make the data actually work.",
   },
   {
     q: "What happens on the first call?",
@@ -209,7 +209,7 @@ export default function ContactPageClient() {
                       required
                       rows={6}
                       className="field resize-none"
-                      placeholder="What's your core ERP system? Where is your team spending the most time manually exporting data? What would you want to see in a single operating view?"
+                      placeholder="Where is your team spending the most time manually exporting data? What systems are you using today? What would you want to see in a single operating view?"
                     />
                   </div>
 

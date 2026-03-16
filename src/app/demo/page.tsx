@@ -58,7 +58,7 @@ export default function DemoPage() {
 
       <CTABanner
         headline="Want this kind of operating system for your business?"
-        description="We build custom data ecosystems tailored to your ERP, your workflows, and the decisions your team makes every day."
+        description="We build custom data ecosystems tailored to your operation, your workflows, and the decisions your team makes every day."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

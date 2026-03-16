@@ -24,14 +24,14 @@ export default function Hero() {
           </span>
 
           <h1 className="mx-auto mt-8 max-w-5xl font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl lg:text-[4.4rem]">
-            Your ERP holds the data.{" "}
+            Your data is already there.{" "}
             <span className="text-gradient">We make it work.</span>
           </h1>
 
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
-            We extract data from your builder systems, centralize it into a
-            single source of truth, and build custom applications where your
-            construction, purchasing, and finance teams actually execute.
+            We pull together scattered data from across your operation,
+            centralize it into a single source of truth, and build custom
+            applications where your teams actually execute.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -48,7 +48,7 @@ export default function Hero() {
         {/* Service pillars */}
         <div className="reveal mx-auto mt-20 grid max-w-4xl gap-px overflow-hidden rounded-[1.75rem] border border-white/[0.1] bg-white/[0.06] sm:grid-cols-3">
           {[
-            { value: "Automated Ingestion", label: "Data flows from your ERP automatically" },
+            { value: "Automated Ingestion", label: "Data flows from your systems automatically" },
             { value: "Centralized Data", label: "One source of truth for every metric" },
             { value: "Custom Applications", label: "Tools your team actually uses daily" },
           ].map((stat) => (

@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
   businessName: "A.D. Homes & Consulting",
   tagline: "Custom Operating Systems for Builders.",
   description:
-    "We build custom data ecosystems for residential home builders in Central Florida — automated ingestion, centralized data, and functional applications that replace spreadsheets and disconnected ERPs.",
+    "We build custom data ecosystems for residential home builders in Central Florida — automated ingestion, centralized data, and functional applications that replace spreadsheets and disconnected systems.",
   location: "Orlando & Central Florida",
   phone: "(407) 840-1368",
   email: "arnauddg27@gmail.com",
@@ -111,7 +111,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Admin Tools",
     headline: "Fix statuses, notes, and mappings directly — without calling IT",
     description:
-      "Give your team the ability to correct data issues, update statuses, and fix mappings in real time through simple, controlled interfaces. No more emailing IT or waiting for someone to update the ERP manually.",
+      "Give your team the ability to correct data issues, update statuses, and fix mappings in real time through simple, controlled interfaces. No more emailing IT or waiting for someone to update the system manually.",
     icon: "Wrench",
     deliverables: [
       "Status and phase correction screens",

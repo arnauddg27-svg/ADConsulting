@@ -24,8 +24,8 @@ const painPoints = [
   },
   {
     icon: <AlertTriangle size={22} />,
-    problem: "ERP is expensive but underused — a glorified filing cabinet",
-    solution: "We extract the value trapped in your system and make it operational",
+    problem: "Systems are expensive but underused — glorified filing cabinets",
+    solution: "We unlock the value trapped in your tools and make it operational",
   },
 ];
 
@@ -40,10 +40,10 @@ export default function SocialProof() {
             <span className="text-gradient">You have a data structure problem.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
-            Systems like Buildertrend, Hyphen, and Sage are great for storing
-            data — but they&apos;re rigid and terrible for actual day-to-day
-            workflows. Most consultants slap a dashboard on top of messy data.
-            We fix the structure underneath.
+            Your builder systems store the data — but getting it out and
+            making it useful is where everything breaks down. Most consultants
+            slap a dashboard on top of messy data. We fix the structure
+            underneath.
           </p>
         </div>
 

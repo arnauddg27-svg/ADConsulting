@@ -79,14 +79,14 @@ export default function AboutPage() {
                 <p>
                   I spent 6+ years inside a Central Florida production builder
                   managing operations across 1,200+ lots and 1,000+ home
-                  deliveries — purchasing, scheduling, ERP migrations, vendor
-                  management, and the analytics that tie it all together.
+                  deliveries — purchasing, scheduling, system implementations,
+                  vendor management, and the analytics that tie it all together.
                 </p>
                 <p>
-                  The problem I kept seeing: builders invest in ERP systems like
-                  Buildertrend, Hyphen, or Sage, but the data stays trapped.
-                  Teams export to spreadsheets. Departments work from different
-                  numbers. Leadership makes decisions on stale reports.
+                  The problem I kept seeing: builders invest in software and
+                  systems, but the data stays trapped. Teams export to
+                  spreadsheets. Departments work from different numbers.
+                  Leadership makes decisions on stale reports.
                 </p>
                 <p>
                   A.D. Homes &amp; Consulting fixes that. I extract data from your

@@ -10,7 +10,7 @@ const reasons = [
   {
     icon: <Building2 size={22} />,
     title: "1,000+ homes of builder-side experience",
-    body: "Purchasing, scheduling, ERP migrations, vendor management — across 1,200+ lots at a Central Florida production builder. Not theory. Lived operations.",
+    body: "Purchasing, scheduling, system implementations, vendor management — across 1,200+ lots at a Central Florida production builder. Not theory. Lived operations.",
   },
   {
     icon: <Wrench size={22} />,

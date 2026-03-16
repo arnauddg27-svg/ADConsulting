@@ -61,7 +61,7 @@ export default function DashboardPreview() {
               </p>
               <p className="mt-2 text-xs italic text-slate-500">
                 Illustrative only. Every implementation is shaped around the
-                builder&apos;s actual ERP, workflows, and operating questions.
+                builder&apos;s actual data, workflows, and operating questions.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
