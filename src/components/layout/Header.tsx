@@ -45,7 +45,7 @@ export default function Header() {
                   {SITE_CONFIG.name.toUpperCase()}
                 </span>
                 <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-slate-400">
-                  Operations Consulting for Builders
+                  Custom Operating Systems for Builders
                 </span>
               </div>
             </Link>
@@ -74,7 +74,7 @@ export default function Header() {
                 })}
               </nav>
               <Button href="/contact/" size="sm">
-                Schedule a Consultation
+                Book a Discovery Call
               </Button>
             </div>
 
@@ -125,7 +125,7 @@ export default function Header() {
                 })}
               </nav>
               <Button href="/contact/" className="mt-6 w-full justify-center">
-                Schedule a Consultation
+                Book a Discovery Call
               </Button>
             </div>
           </Container>

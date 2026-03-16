@@ -20,20 +20,20 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "A.D. Homes & Consulting | Construction Operations Consulting — Orlando & Central Florida",
+  title: "A.D. Homes & Consulting | Custom Operating Systems for Builders — Orlando & Central Florida",
   description:
-    "Construction operations consulting for Orlando and Central Florida home builders. Dashboards, KPI reporting, financial modeling, ERP optimization, and process improvement for builders doing 50–200+ homes per year.",
+    "Custom data ecosystems for Central Florida home builders. Automated ingestion, centralized data, and functional applications — job profitability, lot pipeline, vendor scorecards, and more.",
   keywords: [
-    "construction operations consulting Orlando",
+    "builder operating system",
+    "construction data ecosystem Orlando",
     "Central Florida homebuilder consultant",
-    "builder ERP consulting Florida",
-    "homebuilder dashboard reporting",
-    "construction KPI systems",
-    "financial modeling home builders",
-    "home builder operations consulting",
+    "builder ERP data extraction",
+    "homebuilder job profitability",
+    "construction pipeline tracking",
+    "vendor scorecard home builders",
+    "builder data warehouse",
     "construction management consulting Orlando",
-    "builder reporting Power BI",
-    "real estate development consulting Florida",
+    "home builder operations technology Florida",
   ],
 };
 

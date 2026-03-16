@@ -9,23 +9,23 @@ import Container from "@/components/ui/Container";
 const painPoints = [
   {
     icon: <FileSpreadsheet size={22} />,
-    problem: "The process breaks down in daily use",
-    solution: "Clearer workflows and better follow-through",
-  },
-  {
-    icon: <Clock size={22} />,
-    problem: "Margin issues show up too late",
-    solution: "Earlier visibility and tighter cost control",
-  },
-  {
-    icon: <AlertTriangle size={22} />,
-    problem: "Teams are not working from the same playbook",
-    solution: "Better coordination across purchasing, schedules, and approvals",
+    problem: "Spreadsheets everywhere, none of them match",
+    solution: "One centralized source of truth for every metric — automatically updated",
   },
   {
     icon: <TrendingDown size={22} />,
-    problem: "Leadership does not get a clear weekly read",
-    solution: "Cleaner decisions on jobs, cash, and execution",
+    problem: "Margin erosion shows up at closing, not during construction",
+    solution: "Real-time cost tracking and variance flags while you can still act",
+  },
+  {
+    icon: <Clock size={22} />,
+    problem: "Field and office are looking at two different sets of numbers",
+    solution: "Shared operating views that keep every team on the same page",
+  },
+  {
+    icon: <AlertTriangle size={22} />,
+    problem: "ERP is expensive but underused — a glorified filing cabinet",
+    solution: "We extract the value trapped in your system and make it operational",
   },
 ];
 
@@ -34,14 +34,16 @@ export default function SocialProof() {
     <section className="section-space pt-0">
       <Container>
         <div className="reveal text-center">
-          <span className="eyebrow">Common Problems</span>
-          <h2 className="mx-auto mt-5 max-w-2xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-[3.2rem]">
-            Where builder operations usually start slipping.
+          <span className="eyebrow">The Problem</span>
+          <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-[3.2rem]">
+            You don&apos;t have a software problem.{" "}
+            <span className="text-gradient">You have a data structure problem.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
-            Most problems start in the same places: weak process control,
-            inconsistent numbers, and teams working without a clean operating
-            rhythm.
+            Systems like Buildertrend, Hyphen, and Sage are great for storing
+            data — but they&apos;re rigid and terrible for actual day-to-day
+            workflows. Most consultants slap a dashboard on top of messy data.
+            We fix the structure underneath.
           </p>
         </div>
 

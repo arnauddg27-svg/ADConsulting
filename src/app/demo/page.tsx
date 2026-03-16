@@ -57,10 +57,10 @@ export default function DemoPage() {
       </section>
 
       <CTABanner
-        headline="Want this kind of visibility in your business?"
-        description="Each engagement is built around the way your business reviews jobs, costs, schedules, and operating issues."
+        headline="Want this kind of operating system for your business?"
+        description="We build custom data ecosystems tailored to your ERP, your workflows, and the decisions your team makes every day."
         primaryCTA={{
-          label: "Schedule a Free Consultation",
+          label: "Book a Discovery Call",
           href: "/contact/",
         }}
         secondaryCTA={{

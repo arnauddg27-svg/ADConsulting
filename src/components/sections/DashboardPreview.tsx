@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BarChart3, DollarSign, CalendarClock, FolderOpen } from "lucide-react";
+import { ArrowRight, DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { NumberTicker } from "@/components/magicui/number-ticker";
@@ -8,32 +8,32 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 
 const previewModules = [
   {
-    icon: <FolderOpen size={20} />,
-    title: "Project review",
-    detail: "Community status, phase visibility, and production pacing",
-  },
-  {
     icon: <DollarSign size={20} />,
-    title: "Budget control",
-    detail: "Spend movement, draw tracking, and exceptions",
+    title: "Job Profitability",
+    detail: "Budget vs. actuals, cost code variances, and margin flags",
   },
   {
-    icon: <BarChart3 size={20} />,
-    title: "Cost movement",
-    detail: "Category mix, variance trends, and pressure points",
+    icon: <Layers size={20} />,
+    title: "Lot Pipeline",
+    detail: "Starts, completions, phase tracking, and bottleneck visibility",
   },
   {
-    icon: <CalendarClock size={20} />,
-    title: "Schedule risk",
-    detail: "Milestones, critical dates, and job pacing",
+    icon: <AlertTriangle size={20} />,
+    title: "Exception Center",
+    detail: "Delayed jobs, missing data, and stale update alerts",
+  },
+  {
+    icon: <TrendingUp size={20} />,
+    title: "Sales & Backlog",
+    detail: "Sales pace, backlog health, and community performance",
   },
 ];
 
 const sampleKPIs = [
-  { label: "Active Projects", value: 24, prefix: "", suffix: "" },
+  { label: "Active Jobs", value: 24, prefix: "", suffix: "" },
   { label: "On-Time Rate", value: 87, prefix: "", suffix: "%" },
   { label: "Budget Used", value: 4.2, prefix: "$", suffix: "M", decimals: 1 },
-  { label: "Change Orders", value: 12, prefix: "", suffix: "" },
+  { label: "Open Exceptions", value: 12, prefix: "", suffix: "" },
 ];
 
 export default function DashboardPreview() {
@@ -52,17 +52,16 @@ export default function DashboardPreview() {
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
               <span className="eyebrow">Illustrative Example</span>
               <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-                A clear operating view of projects, costs, and schedules.
+                This is what your operating system looks like.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
-                This example brings production pace, cost movement, schedule
-                pressure, and open issues into one place so leadership can
-                review the business faster and act earlier.
+                Job profitability, pipeline status, exception flags, and schedule
+                pressure — unified in one system that your entire team can work
+                from. No more exporting data to do your actual job.
               </p>
               <p className="mt-2 text-xs italic text-slate-500">
-                Illustrative only. Every engagement is shaped around the
-                communities, workflows, and operating questions that matter
-                most to the business.
+                Illustrative only. Every implementation is shaped around the
+                builder&apos;s actual ERP, workflows, and operating questions.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2">

@@ -14,9 +14,9 @@ export default function Home() {
       <WhyChooseUs />
       <DashboardPreview />
       <CTABanner
-        headline="Start with the bottleneck that is hurting the business."
-        description="We’ll look at whether the real issue sits in reporting, margin analysis, ERP setup, or day-to-day process execution and identify the right place to start."
-        primaryCTA={{ label: "Start the Conversation", href: "/contact/" }}
+        headline="Your data is already there. Let’s make it work."
+        description="Book a 30-minute discovery call. We’ll dig into your current systems and tell you exactly what a custom operating system would look like for your operation."
+        primaryCTA={{ label: "Book a Discovery Call", href: "/contact/" }}
       />
     </>
   );

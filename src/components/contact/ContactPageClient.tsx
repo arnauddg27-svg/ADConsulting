@@ -11,19 +11,19 @@ import { SITE_CONFIG } from "@/lib/constants";
 const faqs = [
   {
     q: "What size builder do you work with?",
-    a: "Mostly small to midsize builders, especially teams closing fewer than 200 homes a year that need stronger operating infrastructure without enterprise-consulting overhead.",
+    a: "Builders producing 25 to 300 homes per year. Small builders ($30K\u2013$70K implementations) get a standardized operating system. Mid-size builders ($70K\u2013$150K) get a full multi-department data ecosystem.",
   },
   {
-    q: "How long does a typical engagement take?",
-    a: "Most engagements run 4 to 8 weeks. ERP and process work often takes 2 to 3 months, and larger cleanup or implementation work can run longer depending on data quality, system condition, and how many teams are involved.",
+    q: "How long does implementation take?",
+    a: "Most implementations run 8 to 16 weeks depending on the complexity of your ERP, the number of departments involved, and data quality. After launch, a $3K/month retainer keeps the system maintained and evolving.",
   },
   {
-    q: "Do you replace our current systems?",
-    a: "Only when the current stack is clearly the issue. Most engagements start by improving how the existing tools are configured, cleaned up, and used.",
+    q: "Do you replace our current ERP?",
+    a: "No. We extract data from your existing systems \u2014 Buildertrend, Hyphen, Sage, or whatever you run \u2014 and build a layer on top. Your teams keep using their tools. We make the data actually work.",
   },
   {
-    q: "What happens in the free consultation?",
-    a: "We spend 30 minutes on the operation itself: where reporting slows down, where decisions lose clarity, and which system or process layer is creating the drag.",
+    q: "What happens on the first call?",
+    a: "A 30-minute discovery call where we dig into your pain points, current systems, and where the biggest operational drag lives. If it\u2019s a quick fix, we\u2019ll tell you how to do it for free. If it needs a full build, you\u2019ll get a precise roadmap.",
   },
 ];
 
@@ -83,12 +83,12 @@ export default function ContactPageClient() {
             <div>
               <span className="eyebrow">Start the Conversation</span>
               <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.05em] text-slate-50 sm:text-6xl">
-                Tell me where the operation is getting stuck.
+                Tell me where the data is breaking down.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                If reporting is late, margin is unclear, the ERP is underused,
-                or the team is fighting broken workflows, let’s talk through
-                it.
+                If your VP of Construction and your CFO would pull up two
+                different margin numbers, if your team is exporting data just
+                to do their actual jobs — let&apos;s talk through it.
               </p>
             </div>
           </div>
@@ -191,11 +191,11 @@ export default function ContactPageClient() {
                       <option value="" disabled>
                         Select range
                       </option>
-                      <option value="1-25">1 – 25 homes</option>
-                      <option value="25-50">25 – 50 homes</option>
-                      <option value="50-100">50 – 100 homes</option>
+                      <option value="under-25">Under 25 homes</option>
+                      <option value="25-100">25 – 100 homes</option>
                       <option value="100-200">100 – 200 homes</option>
-                      <option value="200+">200+ homes</option>
+                      <option value="200-300">200 – 300 homes</option>
+                      <option value="300+">300+ homes</option>
                     </select>
                   </div>
 
@@ -209,7 +209,7 @@ export default function ContactPageClient() {
                       required
                       rows={6}
                       className="field resize-none"
-                      placeholder="Tell me what needs to work better, what the team needs to see more clearly, and what outcome you want from the engagement."
+                      placeholder="What's your core ERP system? Where is your team spending the most time manually exporting data? What would you want to see in a single operating view?"
                     />
                   </div>
 
@@ -263,12 +263,12 @@ export default function ContactPageClient() {
                 className="bg-[linear-gradient(135deg,rgba(209,133,63,0.18),rgba(255,255,255,0.05)_60%,rgba(255,255,255,0.03))]"
               >
                 <h3 className="font-heading text-3xl tracking-[0.04em] text-slate-50">
-                  Free 30-minute consultation
+                  Free 30-minute discovery call
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-slate-200 md:text-base">
-                  The first call is meant to create clarity. We’ll sort through
-                  the reporting, system, or process issue and identify the most
-                  useful place to start.
+                  We&apos;ll dig into your current systems, where data is
+                  breaking down, and whether a full operating system build
+                  makes sense — or if there&apos;s a simpler fix.
                 </p>
               </Card>
             </div>
@@ -280,8 +280,8 @@ export default function ContactPageClient() {
         <Container>
           <SectionHeading
             label="FAQ"
-            title="Questions builders usually ask before the first call."
-            subtitle="If you are not sure whether the issue sits in process, reporting, or systems, that is normal. The first conversation is meant to separate those layers."
+            title="Questions builders usually ask before the discovery call."
+            subtitle="If you're not sure whether you need a full data ecosystem or just a cleanup, that's exactly what the first call is for."
           />
 
           <div className="grid gap-5 md:grid-cols-2">

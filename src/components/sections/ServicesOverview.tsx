@@ -1,17 +1,23 @@
 import Link from "next/link";
 import {
-  BarChart3,
-  Calculator,
-  Settings,
+  DollarSign,
+  Layers,
+  Users,
+  AlertTriangle,
+  TrendingUp,
+  Wrench,
   ArrowRight,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import { SERVICES } from "@/lib/constants";
 
 const iconMap: Record<string, React.ReactNode> = {
-  BarChart3: <BarChart3 size={24} />,
-  Calculator: <Calculator size={24} />,
-  Settings: <Settings size={24} />,
+  DollarSign: <DollarSign size={24} />,
+  Layers: <Layers size={24} />,
+  Users: <Users size={24} />,
+  AlertTriangle: <AlertTriangle size={24} />,
+  TrendingUp: <TrendingUp size={24} />,
+  Wrench: <Wrench size={24} />,
 };
 
 export default function ServicesOverview() {
@@ -19,19 +25,19 @@ export default function ServicesOverview() {
     <section className="section-space pt-8 md:pt-12">
       <Container>
         <div className="reveal mb-12 text-center md:mb-16">
-          <span className="eyebrow">Services</span>
+          <span className="eyebrow">What We Build</span>
           <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
-            Core areas where we help builders{" "}
-            <span className="text-gradient">improve performance.</span>
+            A complete operating system{" "}
+            <span className="text-gradient">for your building company.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
-            These are common starting points. Most engagements cut across
-            reporting, finance, systems, and day-to-day operations rather than
-            living neatly in just one bucket.
+            We don&apos;t just build dashboards. We extract your data, clean it
+            in a centralized warehouse, and build functional applications where
+            your team actually works.
           </p>
         </div>
 
-        <div className="reveal-stagger mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="reveal-stagger mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service) => (
             <Link
               key={service.id}

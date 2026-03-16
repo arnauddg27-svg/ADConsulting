@@ -4,9 +4,10 @@ import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
 
 const practiceAreas = [
-  "Financial planning",
-  "Internal systems",
-  "Process improvement",
+  "Job Profitability",
+  "Lot Pipeline",
+  "Vendor Scorecard",
+  "Data Ecosystems",
 ];
 
 export default function Footer() {
@@ -25,14 +26,14 @@ export default function Footer() {
                     {SITE_CONFIG.name.toUpperCase()}
                   </div>
                   <div className="text-[0.7rem] uppercase tracking-[0.24em] text-slate-400">
-                    Operations Consulting for Builders
+                    Custom Operating Systems for Builders
                   </div>
                 </div>
               </div>
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 md:text-base">
-                Helping Central Florida builders and development firms improve
-                planning, systems, and execution.
+                Custom data ecosystems for Central Florida home builders.
+                We extract, centralize, and build the tools your team needs.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">

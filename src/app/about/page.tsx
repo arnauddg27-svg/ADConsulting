@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import {
-  BarChart3,
-  Calculator,
-  Settings,
+  DollarSign,
+  Layers,
+  AlertTriangle,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About Arnaud Durand | Construction Operations Consultant — Orlando, FL",
+  title: "About Arnaud Durand | Builder Data Systems Architect — Orlando, FL",
   description:
-    "Arnaud Durand is a construction operations consultant serving Orlando and Central Florida home builders. MBA-trained with 6+ years of builder-side experience in dashboards, financial modeling, and ERP systems.",
+    "Arnaud Durand builds custom data ecosystems for Central Florida home builders. MBA-trained with 6+ years of builder-side experience across 1,200+ lots and 1,000+ homes.",
 };
 
 const services = [
-  { icon: <BarChart3 size={20} />, stat: "Dashboards & KPIs", label: "Power BI reporting and performance tracking" },
-  { icon: <Calculator size={20} />, stat: "Financial Modeling", label: "Proformas, underwriting, and scenario analysis" },
-  { icon: <Settings size={20} />, stat: "ERP & Process", label: "System cleanup and operations improvement" },
+  { icon: <DollarSign size={20} />, stat: "Job Profitability", label: "Budget tracking, cost variances, margin protection" },
+  { icon: <Layers size={20} />, stat: "Lot Pipeline", label: "Starts, completions, bottleneck visibility" },
+  { icon: <AlertTriangle size={20} />, stat: "Exception Center", label: "Delayed jobs, missing data, stale update alerts" },
 ];
 
 export default function AboutPage() {
@@ -28,12 +28,12 @@ export default function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">About</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              About A.D. Homes & Consulting
+              About A.D. Homes &amp; Consulting
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              An independent practice where every engagement is handled
-              directly by Arnaud Durand for builders and development firms
-              across Central Florida.
+              A specialized firm that builds custom data ecosystems for
+              residential home builders — handled directly by Arnaud Durand
+              from discovery to deployment.
             </p>
           </div>
         </Container>
@@ -77,22 +77,29 @@ export default function AboutPage() {
 
               <div className="mt-10 space-y-4 text-base leading-7 text-slate-300">
                 <p>
-                  I work directly with builders and development firms that have
-                  outgrown spreadsheet-based reporting but do not need layers
-                  of consultants. When you hire A.D. Homes & Consulting, you
-                  work with me directly from start to finish.
+                  I spent 6+ years inside a Central Florida production builder
+                  managing operations across 1,200+ lots and 1,000+ home
+                  deliveries — purchasing, scheduling, ERP migrations, vendor
+                  management, and the analytics that tie it all together.
                 </p>
                 <p>
-                  My background is builder-side: purchasing, analytics,
-                  underwriting, ERP workflow cleanup, and operating support
-                  inside an active Central Florida development group. The
-                  recommendations come from real operating use, not theory.
+                  The problem I kept seeing: builders invest in ERP systems like
+                  Buildertrend, Hyphen, or Sage, but the data stays trapped.
+                  Teams export to spreadsheets. Departments work from different
+                  numbers. Leadership makes decisions on stale reports.
                 </p>
                 <p>
-                  I handle the work myself. Reporting gets tightened, models
-                  get built, systems get cleaned up, and client teams get
-                  trained. No handoffs, no junior staffing, and no padded
-                  project structure.
+                  A.D. Homes &amp; Consulting fixes that. I extract data from your
+                  builder systems, centralize it into a single source of truth,
+                  and build custom applications where your teams actually execute.
+                  Job profitability, lot pipeline, vendor scorecards, exception
+                  tracking — all connected, all automated.
+                </p>
+                <p>
+                  I hold an <b>MBA from the Crummer Graduate School at Rollins
+                  College</b> (Finance &amp; Operations/Technology, 3.86 GPA) and
+                  am bilingual in French and English. When you hire A.D. Homes,
+                  you work with me directly — no handoffs, no junior staffing.
                 </p>
               </div>
             </div>
@@ -101,10 +108,10 @@ export default function AboutPage() {
       </section>
 
       <CTABanner
-        headline="Let’s find the actual bottleneck first."
-        description="The first conversation is about identifying the real constraint, whether it sits in reporting, underwriting, or a process issue that looks like a data issue."
+        headline="Let's look under the hood."
+        description="The first call is a 30-minute discovery session. We'll dig into your current systems, your pain points, and where the biggest operational drag lives. If it's a quick fix, I'll tell you for free."
         primaryCTA={{
-          label: "Get in Touch",
+          label: "Book a Discovery Call",
           href: "/contact/",
         }}
       />
