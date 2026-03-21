@@ -10,20 +10,20 @@ import { SITE_CONFIG } from "@/lib/constants";
 
 const faqs = [
   {
-    q: "What size builder do you work with?",
-    a: "Builders producing 25 to 300 homes per year. Small builders ($30K\u2013$70K implementations) get a standardized operating system. Mid-size builders ($70K\u2013$150K) get a full multi-department data ecosystem.",
+    q: "What size builder do you usually work with?",
+    a: "The core fit is residential builders doing roughly 20-500+ homes per year across North America. The strongest fit is usually the point where ERP data, spreadsheets, and reporting no longer stay aligned without heavy manual work.",
   },
   {
-    q: "How long does implementation take?",
-    a: "Most implementations run 8 to 16 weeks depending on the complexity of your operation, the number of departments involved, and data quality. After launch, a $3K/month retainer keeps the system maintained and evolving.",
+    q: "How long do projects usually take?",
+    a: "Typical timelines follow the package structure in the playbook: 4-6 weeks for lighter analytics work, 8-12 weeks for single-ERP dashboard builds, 12-18 weeks for Builder Ops engagements, and 20-25 weeks for enterprise-level multi-source systems.",
   },
   {
     q: "Do you replace our current systems?",
-    a: "No. We extract data from the tools you already use and build a layer on top. Your teams keep working in their systems. We make the data actually work.",
+    a: "No. The model is to extract from the systems you already use, whether that is Buildertrend, Hyphen, Sage, JME, Google Sheets, CSV exports, or a mix. The platform sits on top of the operation so the data becomes usable without forcing a full rip-and-replace.",
   },
   {
     q: "What happens on the first call?",
-    a: "A 30-minute discovery call where we dig into your pain points, current systems, and where the biggest operational drag lives. If it\u2019s a quick fix, we\u2019ll tell you how to do it for free. If it needs a full build, you\u2019ll get a precise roadmap.",
+    a: "The discovery call is meant to uncover where the operation is bleeding time or margin: fragmented data, manual exports, stale reports, or mismatched numbers between teams. If the issue is simple, I will say that. If it needs a deeper systems mapping session, that becomes the next step.",
   },
 ];
 
@@ -83,12 +83,12 @@ export default function ContactPageClient() {
             <div>
               <span className="eyebrow">Start the Conversation</span>
               <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.05em] text-slate-50 sm:text-6xl">
-                Tell me where the data is breaking down.
+                Tell me where the systems stop matching reality.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                If your VP of Construction and your CFO would pull up two
-                different margin numbers, if your team is exporting data just
-                to do their actual jobs — let&apos;s talk through it.
+                If finance is rebuilding reports by hand, if the field and the
+                office are looking at different numbers, or if your ERP data is
+                trapped in exports, let&apos;s walk through it.
               </p>
             </div>
           </div>
@@ -106,8 +106,9 @@ export default function ContactPageClient() {
                     Message received.
                   </h2>
                   <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-200">
-                    Thanks. I’ll reply within 24 hours with the best next step
-                    and what I’d want to review first.
+                    Thanks. I&apos;ll reply with the best next step, whether that is
+                    a quick fix, a systems mapping call, or a fuller platform
+                    conversation.
                   </p>
                   <Button
                     variant="secondary"
@@ -191,11 +192,11 @@ export default function ContactPageClient() {
                       <option value="" disabled>
                         Select range
                       </option>
-                      <option value="under-25">Under 25 homes</option>
-                      <option value="25-100">25 – 100 homes</option>
-                      <option value="100-200">100 – 200 homes</option>
-                      <option value="200-300">200 – 300 homes</option>
-                      <option value="300+">300+ homes</option>
+                      <option value="under-20">Under 20 homes</option>
+                      <option value="20-100">20 - 100 homes</option>
+                      <option value="100-300">100 - 300 homes</option>
+                      <option value="300-500">300 - 500 homes</option>
+                      <option value="500+">500+ homes</option>
                     </select>
                   </div>
 
@@ -209,7 +210,7 @@ export default function ContactPageClient() {
                       required
                       rows={6}
                       className="field resize-none"
-                      placeholder="Where is your team spending the most time manually exporting data? What systems are you using today? What would you want to see in a single operating view?"
+                      placeholder="Tell me your core systems of record, where the team is exporting data manually, and which numbers stop matching between departments."
                     />
                   </div>
 
@@ -266,9 +267,10 @@ export default function ContactPageClient() {
                   Free 30-minute discovery call
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-slate-200 md:text-base">
-                  We&apos;ll dig into your current systems, where data is
-                  breaking down, and whether a full operating system build
-                  makes sense — or if there&apos;s a simpler fix.
+                  The goal of the first call is to understand where the current
+                  reporting stack is breaking down, not to force a canned pitch.
+                  If there is an easier fix than a full platform build, that will
+                  be part of the conversation.
                 </p>
               </Card>
             </div>
@@ -281,7 +283,7 @@ export default function ContactPageClient() {
           <SectionHeading
             label="FAQ"
             title="Questions builders usually ask before the discovery call."
-            subtitle="If you're not sure whether you need a full data ecosystem or just a cleanup, that's exactly what the first call is for."
+            subtitle="If you are not sure whether the problem is extraction, reporting, data quality, or process alignment, that is exactly what the first conversation is meant to clarify."
           />
 
           <div className="grid gap-5 md:grid-cols-2">

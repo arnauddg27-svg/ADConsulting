@@ -9,23 +9,23 @@ import Container from "@/components/ui/Container";
 const reasons = [
   {
     icon: <Building2 size={22} />,
-    title: "1,000+ homes of builder-side experience",
-    body: "Purchasing, scheduling, system implementations, vendor management — across 1,200+ lots at a Central Florida production builder. Not theory. Lived operations.",
+    title: "Builder reality plus technical depth",
+    body: "Most data consultants do not understand builder operations, and most construction consultants cannot design warehouses or applications. A.D. Homes is built around both skill sets.",
   },
   {
     icon: <Wrench size={22} />,
-    title: "We build systems, not slide decks",
-    body: "You get a working operating system — automated data flows, functional applications, and tools your team uses daily. Not a PowerPoint with recommendations.",
+    title: "Full lifecycle coverage",
+    body: "The platform is designed around land acquisition, permitting, loans, construction, sales, property management, and audits instead of treating each department as a separate reporting problem.",
   },
   {
     icon: <GraduationCap size={22} />,
-    title: "Finance + technology depth",
-    body: "MBA-trained in finance and operations/technology. We bridge the gap between financial analysis and system implementation that most consultants can't.",
+    title: "Client-owned stack",
+    body: "Clients keep their code, warehouse, and hosting. KPI logic lives in the data model, not inside a vendor-locked dashboard layer.",
   },
   {
     icon: <MapPin size={22} />,
-    title: "Built for 25–300 home/year builders",
-    body: "Big consultancies don't serve your segment. We're built specifically for builders who have outgrown spreadsheets but don't need enterprise overhead.",
+    title: "Built for 20-500+ homes per year",
+    body: "The offering is sized for builders who have outgrown spreadsheets and disconnected modules, but do not want the cost and overhead of a large enterprise consulting team.",
   },
 ];
 
@@ -37,13 +37,13 @@ export default function WhyChooseUs() {
           <div>
             <span className="eyebrow">Why Us</span>
             <h2 className="mt-5 max-w-lg font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-              Not another consultant.{" "}
-              <span className="text-gradient">A builder who builds systems.</span>
+              Built for builders who need <span className="text-gradient">better data infrastructure, not more noise.</span>
             </h2>
             <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
-              We don&apos;t audit your operation and hand you a report. We
-              extract your data, centralize it, and build the tools your
-              team needs to execute — then stay on to keep it running.
+              A.D. Homes combines operational context, data engineering, cloud
+              architecture, and application delivery in one engagement. The goal
+              is straightforward: give residential builders access to the kind of
+              operating intelligence national players spend far more to build.
             </p>
           </div>
 

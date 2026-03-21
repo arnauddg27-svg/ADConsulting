@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ContactPageClient from "@/components/contact/ContactPageClient";
 
 export const metadata: Metadata = {
-  title: "Contact A.D. Homes & Consulting | Free Builder Operations Consultation — Orlando",
+  title: "Contact A.D. Homes & Consulting | Discovery Call for Residential Homebuilders",
   description:
-    "Schedule a free 30-minute consultation about construction dashboards, KPI reporting, financial modeling, and operations improvement for Orlando and Central Florida home builders.",
+    "Schedule a discovery call about builder ERP extraction, centralized reporting, lifecycle dashboards, pro forma tools, and operational intelligence for residential homebuilders across North America.",
 };
 
 export default function ContactPage() {

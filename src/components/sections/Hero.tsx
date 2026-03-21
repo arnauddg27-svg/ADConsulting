@@ -6,7 +6,6 @@ import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
 export default function Hero() {
   return (
     <section className="page-hero pb-10 md:pb-12">
-      {/* Atmospheric glow behind hero */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -19,19 +18,20 @@ export default function Hero() {
         <div className="animate-rise-in text-center">
           <span className="eyebrow">
             <AnimatedShinyText shimmerWidth={80}>
-              Orlando &amp; Central Florida · 25–300 Homes/Year Builders
+              North America · Residential Homebuilders · 20-500+ Homes/Year
             </AnimatedShinyText>
           </span>
 
           <h1 className="mx-auto mt-8 max-w-5xl font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl lg:text-[4.4rem]">
-            Your data is already there.{" "}
-            <span className="text-gradient">We make it work.</span>
+            Not a read-only dashboard. <span className="text-gradient">A platform your team can run the business on.</span>
           </h1>
 
-          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
-            We pull together scattered data from across your operation,
-            centralize it into a single source of truth, and build custom
-            applications where your teams actually execute.
+          <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
+            A.D. Homes &amp; Consulting builds custom operational intelligence
+            platforms for residential homebuilders. We extract data from builder
+            ERPs, spreadsheets, and finance systems, centralize it in a cloud
+            warehouse, and deliver interactive applications from land acquisition
+            through audits.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -45,12 +45,20 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Service pillars */}
         <div className="reveal mx-auto mt-20 grid max-w-4xl gap-px overflow-hidden rounded-[1.75rem] border border-white/[0.1] bg-white/[0.06] sm:grid-cols-3">
           {[
-            { value: "Automated Ingestion", label: "Data flows from your systems automatically" },
-            { value: "Centralized Data", label: "One source of truth for every metric" },
-            { value: "Custom Applications", label: "Tools your team actually uses daily" },
+            {
+              value: "Automated Extraction",
+              label: "ERP, Sheets, CSV, and XLSX data synced into one flow",
+            },
+            {
+              value: "Central Warehouse",
+              label: "Raw and mart datasets with KPI logic defined once",
+            },
+            {
+              value: "Interactive Apps",
+              label: "Lifecycle views for executives, finance, and operations",
+            },
           ].map((stat) => (
             <div
               key={stat.label}

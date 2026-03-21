@@ -3,10 +3,10 @@ import type { Service, NavLink, Stat, Testimonial } from "@/types";
 export const SITE_CONFIG = {
   name: "A.D. Homes & Consulting",
   businessName: "A.D. Homes & Consulting",
-  tagline: "Custom Operating Systems for Builders.",
+  tagline: "Custom Data Ecosystems & Analytics Platforms for Residential Homebuilders.",
   description:
-    "We build custom data ecosystems for residential home builders in Central Florida — automated ingestion, centralized data, and functional applications that replace spreadsheets and disconnected systems.",
-  location: "Orlando & Central Florida",
+    "A.D. Homes & Consulting builds custom operational intelligence platforms for residential homebuilders across North America. We extract data from builder ERPs, spreadsheets, and finance systems, centralize it in a warehouse, and deliver interactive applications from land acquisition through audits.",
+  location: "North America (U.S. & Canada)",
   phone: "(407) 840-1368",
   email: "arnauddg27@gmail.com",
 };
@@ -21,105 +21,105 @@ export const NAV_LINKS: NavLink[] = [
 
 export const SERVICES: Service[] = [
   {
-    id: "profitability",
-    title: "Job Profitability Console",
-    shortTitle: "Job Profitability",
-    headline: "Budget vs. actuals, cost code variances, and margin flags — in real time",
+    id: "ingestion",
+    title: "Automated Ingestion Engine",
+    shortTitle: "Data Extraction",
+    headline: "Pull data out of Buildertrend, Hyphen, Sage, JME, Sheets, and exports automatically",
     description:
-      "Stop waiting for closings to find out where margin went. Track budget vs. actuals, cost code variances, and margin pressure across every job and community so leadership can act before problems compound.",
-    icon: "DollarSign",
-    deliverables: [
-      "Budget vs. actual tracking by job and community",
-      "Cost code variance and exception flags",
-      "Margin trend analysis with early-warning alerts",
-      "Community profitability comparisons",
-      "Projected final cost and margin at completion",
-      "Automated weekly cost movement reports",
-    ],
-  },
-  {
-    id: "pipeline",
-    title: "Lot Pipeline Board",
-    shortTitle: "Lot Pipeline",
-    headline: "Full visibility into starts, completions, and bottlenecks across every community",
-    description:
-      "See exactly where every lot stands — from permit to closing — with bottleneck flags that show where jobs are stalling. Production pacing, phase duration tracking, and superintendent workload views keep the field and the office on the same page.",
-    icon: "Layers",
-    deliverables: [
-      "Visual lot-by-lot pipeline across all communities",
-      "Start-to-close cycle time tracking",
-      "Phase duration and bottleneck detection",
-      "Superintendent workload and capacity views",
-      "Production pacing vs. absorption targets",
-      "Stale-job and aging alerts",
-    ],
-  },
-  {
-    id: "vendor",
-    title: "Vendor Scorecard",
-    shortTitle: "Vendor Scorecard",
-    headline: "Trade performance, defects, and pricing analysis — not just gut feel",
-    description:
-      "Replace gut-feel vendor decisions with data. Track trade performance across cost, quality, and timeline metrics. Identify which subs are costing you money, which are reliable, and where renegotiation or replacement makes sense.",
-    icon: "Users",
-    deliverables: [
-      "Vendor performance scoring (cost, quality, timeline)",
-      "Defect and callback tracking by trade",
-      "Cost comparison across vendors and communities",
-      "Schedule compliance and delay attribution",
-      "Rebid and renegotiation trigger alerts",
-      "Historical trend analysis by trade category",
-    ],
-  },
-  {
-    id: "exceptions",
-    title: "Exception Center",
-    shortTitle: "Exception Center",
-    headline: "Flags delayed jobs, missing data, and stale updates before they become problems",
-    description:
-      "Surface the issues that slip through the cracks. Automatically flag jobs with stale updates, missing milestones, data gaps, and schedule drift so your team can fix problems the same week they appear — not months later at closing.",
-    icon: "AlertTriangle",
-    deliverables: [
-      "Delayed job and missed milestone alerts",
-      "Missing data and incomplete record flags",
-      "Stale update detection (no activity in X days)",
-      "Schedule drift and slippage tracking",
-      "Exception dashboards by superintendent and community",
-      "Automated escalation notifications",
-    ],
-  },
-  {
-    id: "sales",
-    title: "Sales & Backlog Console",
-    shortTitle: "Sales & Backlog",
-    headline: "Sales pace, backlog health, and community performance in one view",
-    description:
-      "Track sales pace against absorption targets, monitor backlog health, and compare community performance side by side. Give leadership the confidence to adjust pricing, release lots, or shift marketing spend based on real numbers.",
-    icon: "TrendingUp",
-    deliverables: [
-      "Sales pace tracking vs. absorption targets",
-      "Backlog aging and conversion analysis",
-      "Community performance comparison",
-      "Pricing sensitivity and adjustment signals",
-      "Contract-to-close timeline tracking",
-      "Monthly and quarterly trend reports",
-    ],
-  },
-  {
-    id: "admin",
-    title: "Admin & Data Correction Tools",
-    shortTitle: "Admin Tools",
-    headline: "Fix statuses, notes, and mappings directly — without calling IT",
-    description:
-      "Give your team the ability to correct data issues, update statuses, and fix mappings in real time through simple, controlled interfaces. No more emailing IT or waiting for someone to update the system manually.",
+      "Every platform starts with extraction. We map the builder's actual systems of record, set up the right connectors or import scripts, and automate the movement of ERP, spreadsheet, and operational data into a structure the business can trust.",
     icon: "Wrench",
     deliverables: [
-      "Status and phase correction screens",
-      "Lot and job data cleanup interfaces",
-      "Vendor and cost code mapping tools",
-      "Notes and annotation management",
-      "Audit trail for all corrections",
-      "Role-based access controls",
+      "ERP extraction strategy by source system",
+      "Automated syncs for CSV, XLSX, Sheets, or API data",
+      "Raw staging tables with source-level validation",
+      "Data mapping and cleanup documentation",
+      "Refresh schedules and monitoring rules",
+      "Handoff notes for ongoing support",
+    ],
+  },
+  {
+    id: "warehouse",
+    title: "Central Data Warehouse",
+    shortTitle: "Warehouse",
+    headline: "One cloud data foundation for KPI logic, filters, reporting, and auditability",
+    description:
+      "We centralize the builder's data in BigQuery, Snowflake, or Microsoft Fabric with separate raw and mart layers. KPI logic lives in the warehouse so the numbers stay consistent across finance, construction, sales, and leadership.",
+    icon: "Layers",
+    deliverables: [
+      "Raw and mart datasets organized for speed and auditability",
+      "Pre-computed KPI and filter tables",
+      "Warehouse SQL or dbt-style modeling",
+      "Daily refresh scripts and validation checks",
+      "Cost-conscious infrastructure design",
+      "Client-owned architecture and documentation",
+    ],
+  },
+  {
+    id: "builder-ops",
+    title: "Builder Ops Console",
+    shortTitle: "Builder Ops",
+    headline: "Interactive applications organized around the builder lifecycle, not generic BI tabs",
+    description:
+      "The application layer is built around how the business actually runs. Instead of a read-only dashboard, the team gets a platform with drill-downs, pipeline tables, filters, and operating views that support daily decisions.",
+    icon: "TrendingUp",
+    deliverables: [
+      "Interactive Next.js dashboards and operating views",
+      "Drill-downs by city, community, job, or superintendent",
+      "Spreadsheet-grade pipeline tables",
+      "Executive and department-level visibility",
+      "Responsive layouts for desktop review and field use",
+      "Production-ready deployment and walkthroughs",
+    ],
+  },
+  {
+    id: "lifecycle",
+    title: "Lifecycle Dashboards",
+    shortTitle: "Lifecycle Views",
+    headline: "Land, permitting, loans, construction, sales, and portfolio views in one connected system",
+    description:
+      "Off-the-shelf tools usually show only one slice of the operation. We organize the platform around the full builder lifecycle so leadership can move from acquisition through closing and beyond without changing systems or definitions.",
+    icon: "Users",
+    deliverables: [
+      "Land acquisition and subdivision pipeline views",
+      "Permitting status, cycle times, and stuck-permit alerts",
+      "Loan exposure, draws, and expiration tracking",
+      "Construction stage, cycle time, and stall analysis",
+      "Sales backlog, revenue, and per-job P&L views",
+      "Property management and portfolio reporting where needed",
+    ],
+  },
+  {
+    id: "pro-forma",
+    title: "Per-Job Pro Forma & Audit Tools",
+    shortTitle: "Pro Forma",
+    headline: "Configurable job-level financial views that catch margin erosion before closing",
+    description:
+      "Builders need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
+    icon: "DollarSign",
+    deliverables: [
+      "Per-job pro forma P&L views",
+      "Budget vs. actual and variance analysis",
+      "Configurable cost defaults and assumptions",
+      "At-risk job and exception flagging",
+      "Audit-ready calculations and reference tables",
+      "Inline-edit admin settings where appropriate",
+    ],
+  },
+  {
+    id: "data-quality",
+    title: "Data Quality Monitor & Admin Controls",
+    shortTitle: "Admin Tools",
+    headline: "Freshness checks, exception alerts, and controlled admin tools to keep the platform reliable",
+    description:
+      "A builder platform only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
+    icon: "AlertTriangle",
+    deliverables: [
+      "Data freshness indicators and sync health checks",
+      "Column coverage and completeness monitoring",
+      "Exception center alerts by role or workflow",
+      "Admin settings for pro forma and reference defaults",
+      "Role-aware operational controls",
+      "Documentation for ownership and ongoing maintenance",
     ],
   },
 ];
@@ -133,24 +133,24 @@ export const PROCESS_STEPS = [
     step: 1,
     title: "Discovery Call",
     description:
-      "30-minute conversation to understand your pain points, current systems, and where the biggest operational drag lives.",
+      "A 30-minute conversation focused on where spreadsheets, stale reporting, or ERP gaps are costing time and margin.",
   },
   {
     step: 2,
     title: "Systems Mapping",
     description:
-      "A technical deep-dive into your actual workflows, data quality, and system setup to identify exactly what needs to change.",
+      "A technical review of source systems, data quality, KPI requirements, and the right extraction path for the builder's environment.",
   },
   {
     step: 3,
-    title: "Implementation",
+    title: "Platform Build",
     description:
-      "We build and deploy your custom operating system — automated data flows, centralized reporting, and functional tools your team actually uses.",
+      "Warehouse, mart logic, and application views are delivered in working iterations so the platform improves with real feedback.",
   },
   {
     step: 4,
-    title: "Ongoing Support",
+    title: "Handoff & Support",
     description:
-      "Post-launch retainer to maintain pipelines, refine applications, and evolve the system as your operation grows.",
+      "Training, documentation, production rollout, and optional monthly support to keep the system useful as operations evolve.",
   },
 ];

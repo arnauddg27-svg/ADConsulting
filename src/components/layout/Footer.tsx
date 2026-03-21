@@ -4,10 +4,10 @@ import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
 
 const practiceAreas = [
-  "Job Profitability",
-  "Lot Pipeline",
-  "Vendor Scorecard",
-  "Data Ecosystems",
+  "Data Extraction",
+  "Warehouse & KPIs",
+  "Lifecycle Dashboards",
+  "Pro Forma & Audits",
 ];
 
 export default function Footer() {
@@ -26,14 +26,15 @@ export default function Footer() {
                     {SITE_CONFIG.name.toUpperCase()}
                   </div>
                   <div className="text-[0.7rem] uppercase tracking-[0.24em] text-slate-400">
-                    Custom Operating Systems for Builders
+                    Custom Data Ecosystems for Residential Homebuilders
                   </div>
                 </div>
               </div>
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 md:text-base">
-                Custom data ecosystems for Central Florida home builders.
-                We extract, centralize, and build the tools your team needs.
+                Custom operational intelligence platforms for residential
+                homebuilders. Data extraction, centralized warehousing, and
+                interactive applications built around the builder lifecycle.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">

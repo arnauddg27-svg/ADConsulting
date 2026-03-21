@@ -27,13 +27,13 @@ export default function ServicesOverview() {
         <div className="reveal mb-12 text-center md:mb-16">
           <span className="eyebrow">What We Build</span>
           <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
-            A complete operating system{" "}
-            <span className="text-gradient">for your building company.</span>
+            The stack behind <span className="text-gradient">better builder decisions.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
-            We don&apos;t just build dashboards. We extract your data, clean it
-            in a centralized warehouse, and build functional applications where
-            your team actually works.
+            Every engagement combines extraction, warehousing, KPI modeling,
+            and an application layer organized around the builder lifecycle.
+            The result is not just a prettier report. It is a working operating
+            system the team can use every week.
           </p>
         </div>
 

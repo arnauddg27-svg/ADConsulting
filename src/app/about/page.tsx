@@ -3,21 +3,33 @@ import Image from "next/image";
 import {
   DollarSign,
   Layers,
-  AlertTriangle,
+  Wrench,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About Arnaud Durand | Builder Data Systems Architect — Orlando, FL",
+  title: "About Arnaud Durand | Founder & Data Architect for Residential Homebuilders",
   description:
-    "Arnaud Durand builds custom data ecosystems for Central Florida home builders. MBA-trained with 6+ years of builder-side experience across 1,200+ lots and 1,000+ homes.",
+    "Learn how A.D. Homes & Consulting helps residential homebuilders across North America replace fragmented reporting with custom operational intelligence platforms.",
 };
 
 const services = [
-  { icon: <DollarSign size={20} />, stat: "Job Profitability", label: "Budget tracking, cost variances, margin protection" },
-  { icon: <Layers size={20} />, stat: "Lot Pipeline", label: "Starts, completions, bottleneck visibility" },
-  { icon: <AlertTriangle size={20} />, stat: "Exception Center", label: "Delayed jobs, missing data, stale update alerts" },
+  {
+    icon: <Wrench size={20} />,
+    stat: "Data Extraction",
+    label: "ERP, spreadsheet, and file-based source mapping",
+  },
+  {
+    icon: <Layers size={20} />,
+    stat: "Warehouse & KPI Logic",
+    label: "Raw plus mart datasets with consistent reporting logic",
+  },
+  {
+    icon: <DollarSign size={20} />,
+    stat: "Operational Intelligence",
+    label: "Interactive lifecycle views, pro forma, and audit tools",
+  },
 ];
 
 export default function AboutPage() {
@@ -31,9 +43,8 @@ export default function AboutPage() {
               About A.D. Homes &amp; Consulting
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              A specialized firm that builds custom data ecosystems for
-              residential home builders — handled directly by Arnaud Durand
-              from discovery to deployment.
+              A specialized data consulting firm for residential homebuilders,
+              led directly by Arnaud Durand.
             </p>
           </div>
         </Container>
@@ -56,7 +67,7 @@ export default function AboutPage() {
                 <div className="font-heading text-lg tracking-[-0.01em] text-slate-50">
                   Arnaud Durand
                 </div>
-                <div className="text-sm text-slate-400">Founder and Principal</div>
+                <div className="text-sm text-slate-400">Founder and Data Architect</div>
               </div>
             </div>
 
@@ -77,29 +88,30 @@ export default function AboutPage() {
 
               <div className="mt-10 space-y-4 text-base leading-7 text-slate-300">
                 <p>
-                  I spent 6+ years inside a Central Florida production builder
-                  managing operations across 1,200+ lots and 1,000+ home
-                  deliveries — purchasing, scheduling, system implementations,
-                  vendor management, and the analytics that tie it all together.
+                  A.D. Homes &amp; Consulting was built around a clear market gap:
+                  most data consultants do not understand the operating reality of
+                  a residential builder, and most construction consultants cannot
+                  design warehouses, KPI models, and custom applications.
                 </p>
                 <p>
-                  The problem I kept seeing: builders invest in software and
-                  systems, but the data stays trapped. Teams export to
-                  spreadsheets. Departments work from different numbers.
-                  Leadership makes decisions on stale reports.
+                  The firm helps builders doing roughly 20-500+ homes per year
+                  replace fragmented reporting with a connected operating platform.
+                  Data is extracted from builder ERPs, spreadsheets, finance tools,
+                  and operational trackers, centralized in a cloud warehouse, and
+                  delivered through interactive applications organized around the
+                  builder lifecycle.
                 </p>
                 <p>
-                  A.D. Homes &amp; Consulting fixes that. I extract data from your
-                  builder systems, centralize it into a single source of truth,
-                  and build custom applications where your teams actually execute.
-                  Job profitability, lot pipeline, vendor scorecards, exception
-                  tracking — all connected, all automated.
+                  That lifecycle can span land acquisition, permitting, loans,
+                  construction, sales, property management, and audits. The goal is
+                  to give builders access to the same kind of operational intelligence
+                  national players invest heavily to build, without the cost, delay,
+                  or vendor lock-in that usually comes with it.
                 </p>
                 <p>
-                  I hold an <b>MBA from the Crummer Graduate School at Rollins
-                  College</b> (Finance &amp; Operations/Technology, 3.86 GPA) and
-                  am bilingual in French and English. When you hire A.D. Homes,
-                  you work with me directly — no handoffs, no junior staffing.
+                  Every engagement is handled directly by Arnaud Durand as founder
+                  and data architect. Clients keep their code, warehouse, and
+                  hosting. If the relationship ends, the platform stays with them.
                 </p>
               </div>
             </div>
@@ -108,8 +120,8 @@ export default function AboutPage() {
       </section>
 
       <CTABanner
-        headline="Let's look under the hood."
-        description="The first call is a 30-minute discovery session. We'll dig into your current systems, your pain points, and where the biggest operational drag lives. If it's a quick fix, I'll tell you for free."
+        headline="Start with the systems underneath the reporting."
+        description="The first conversation is meant to surface where data, workflows, and decisions stop lining up. If it is a quick fix, you will hear that. If it needs a full platform build, you will get a clear next step."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

@@ -45,7 +45,7 @@ export default function Header() {
                   {SITE_CONFIG.name.toUpperCase()}
                 </span>
                 <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-slate-400">
-                  Custom Operating Systems for Builders
+                  Custom Data Ecosystems for Residential Homebuilders
                 </span>
               </div>
             </Link>
@@ -95,11 +95,11 @@ export default function Header() {
             <div className="panel overflow-hidden p-6">
               <div className="mb-6 border-b border-white/[0.08] pb-5">
                 <div className="font-heading text-2xl tracking-[0.12em] text-slate-50">
-                  Builder Consulting
+                  Builder Data Consulting
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Finance, systems, and operations support for Central Florida
-                  builders.
+                  Custom operational intelligence platforms for residential
+                  homebuilders across North America.
                 </p>
               </div>
               <nav className="flex flex-col gap-2">

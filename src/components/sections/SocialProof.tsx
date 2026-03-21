@@ -9,23 +9,23 @@ import Container from "@/components/ui/Container";
 const painPoints = [
   {
     icon: <FileSpreadsheet size={22} />,
-    problem: "Spreadsheets everywhere, none of them match",
-    solution: "One centralized source of truth for every metric — automatically updated",
+    problem: "Fragmented data across ERP, spreadsheets, CRM, and loan trackers",
+    solution: "One warehouse pulling every source into a single operating view",
   },
   {
     icon: <TrendingDown size={22} />,
-    problem: "Margin erosion shows up at closing, not during construction",
-    solution: "Real-time cost tracking and variance flags while you can still act",
+    problem: "Margin reports arrive after the damage is already done",
+    solution: "Daily KPI logic and exception flags while you can still act",
   },
   {
     icon: <Clock size={22} />,
-    problem: "Field and office are looking at two different sets of numbers",
-    solution: "Shared operating views that keep every team on the same page",
+    problem: "Finance loses 10-20 hours a week rebuilding exports and pivots",
+    solution: "Automated ingestion and pre-computed metrics instead of manual report assembly",
   },
   {
     icon: <AlertTriangle size={22} />,
-    problem: "Systems are expensive but underused — glorified filing cabinets",
-    solution: "We unlock the value trapped in your tools and make it operational",
+    problem: "Off-the-shelf dashboards miss the full lifecycle and trap your data",
+    solution: "A client-owned platform spanning land, construction, sales, and audits",
   },
 ];
 
@@ -36,14 +36,13 @@ export default function SocialProof() {
         <div className="reveal text-center">
           <span className="eyebrow">The Problem</span>
           <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-[3.2rem]">
-            You don&apos;t have a software problem.{" "}
-            <span className="text-gradient">You have a data structure problem.</span>
+            You don&apos;t have a software problem. <span className="text-gradient">You have a data structure problem.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
-            Your builder systems store the data — but getting it out and
-            making it useful is where everything breaks down. Most consultants
-            slap a dashboard on top of messy data. We fix the structure
-            underneath.
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
+            Most residential builders already have the data. The breakdown
+            happens between systems, exports, and reporting lag. A.D. Homes fixes
+            the structure underneath so construction, finance, and leadership
+            can work from the same truth.
           </p>
         </div>
 

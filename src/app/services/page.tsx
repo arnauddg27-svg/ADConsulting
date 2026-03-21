@@ -14,9 +14,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import { SERVICES, PROCESS_STEPS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Custom Builder Operating Systems | Job Profitability, Pipeline, Vendor Scorecard — Orlando",
+  title: "Services | Data Platforms for Residential Homebuilders",
   description:
-    "We build custom data ecosystems for residential home builders: job profitability consoles, lot pipeline boards, vendor scorecards, exception centers, and sales dashboards.",
+    "Explore A.D. Homes & Consulting services for residential homebuilders: data extraction, warehouse design, lifecycle dashboards, pro forma tools, and ongoing platform support.",
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -30,20 +30,36 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const pricingTiers = [
   {
-    segment: "Small Builders",
-    volume: "25 – 100 homes / year",
+    segment: "Insights Lite",
+    volume: "Best fit: 20-100 homes / year",
     painPoint:
-      "Manual Excel exports, disjointed systems, no single source of truth for margin or cycle time.",
-    range: "$30,000 – $70,000",
-    note: "Standardized operating system with core applications and automated data ingestion.",
+      "Builders still living in spreadsheets who need structured KPI visibility without a full platform build.",
+    range: "$20,000",
+    note: "Google Sheets or Excel analytics platform with 15-25 KPIs, data mapping documentation, and walkthrough support. Typical timeline: 4-6 weeks.",
   },
   {
-    segment: "Mid-Size Builders",
-    volume: "100 – 300 homes / year",
+    segment: "Insights Pro",
+    volume: "Best fit: single-ERP builders needing a real application layer",
     painPoint:
-      "Processes breaking at scale, executive visibility gaps, multiple departments working from different numbers.",
-    range: "$70,000 – $150,000",
-    note: "Full data ecosystem with multi-department workflows, custom applications, and executive reporting.",
+      "Teams need more than exports and pivots, but the environment is still relatively centralized.",
+    range: "$70,000",
+    note: "Next.js dashboard, warehouse setup, automated ingestion pipeline, pre-computed KPI marts, and team training. Typical timeline: 8-12 weeks.",
+  },
+  {
+    segment: "Builder Ops",
+    volume: "Best fit: 100-300 home / year operators",
+    painPoint:
+      "Processes are breaking at scale, multiple departments need visibility, and community complexity is rising.",
+    range: "$80,000",
+    note: "One to three dashboards, multi-source warehouse, spreadsheet-grade pipeline tables, configurable pro forma engine, and broader team enablement. Typical timeline: 12-18 weeks.",
+  },
+  {
+    segment: "Enterprise",
+    volume: "Best fit: 300-500+ homes / year or multi-entity teams",
+    painPoint:
+      "Multi-source consolidation, audit pressure, and more formal operating protocols require a deeper system build.",
+    range: "$120,000",
+    note: "Full custom data ecosystem with 12+ dashboards, 80+ KPIs, enterprise integrations, SOPs, documentation, and onsite-style training. Typical timeline: 20-25 weeks.",
   },
 ];
 
@@ -55,19 +71,17 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">What We Build</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              Custom operating systems for home builders
+              Custom data platforms for residential homebuilders
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              We pull together scattered data from across your operation,
-              centralize it into a single source of truth, and build functional
-              applications that your construction, purchasing, and finance teams
-              actually use every day.
+              We build the stack behind better builder decisions: extraction,
+              warehousing, KPI logic, and interactive applications organized
+              around the operational lifecycle.
             </p>
           </div>
         </Container>
       </section>
 
-      {/* ── Core Deliverables ── */}
       <section className="section-space pt-0 pb-8 md:pb-10">
         <Container className="space-y-6">
           {SERVICES.map((service, index) => (
@@ -123,17 +137,17 @@ export default function ServicesPage() {
         </Container>
       </section>
 
-      {/* ── Pricing Tiers ── */}
       <section className="section-space pt-6 md:pt-8">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Investment</span>
+            <span className="eyebrow">Packages</span>
             <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
-              Priced by builder size, not by the hour.
+              Engagements sized to the builder's complexity.
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-300">
-              Implementation fees are based on the complexity of your operation.
-              Post-launch retainers keep your system maintained and evolving.
+              The documents provided outline four implementation packages, from a
+              lighter analytics layer to a full Builder Ops platform. Support
+              retainers are available after go-live.
             </p>
           </div>
 
@@ -159,26 +173,26 @@ export default function ServicesPage() {
 
           <div className="reveal mt-5 glow-card mx-auto max-w-md p-6 text-center">
             <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
-              Ongoing Retainer
+              Ongoing Support Retainers
             </div>
             <div className="mt-3 font-heading text-3xl tracking-[-0.02em] text-slate-50">
-              $3,000 / month
+              $2K-$5K / month
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Pipeline maintenance, application updates, and fractional data
-              engineering support post-launch.
+              Maintenance, KPI iterations, dashboard updates, data optimization,
+              and architecture evolution support after launch, with scope-based
+              tiers and no hourly tracking.
             </p>
           </div>
         </Container>
       </section>
 
-      {/* ── Process ── */}
       <section className="section-space">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">Process</span>
             <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
-              From discovery call to operating system.
+              From discovery call to production handoff.
             </h2>
           </div>
 
@@ -201,8 +215,8 @@ export default function ServicesPage() {
       </section>
 
       <CTABanner
-        headline="The first call is free. The insight isn't."
-        description="We'll look under the hood at your actual workflows and data quality. If it's an easy fix, we'll tell you how to do it for free. If it requires a full build, you'll get a precise roadmap and budget."
+        headline="The first call is about fit, not pressure."
+        description="If the right answer is a lighter analytics engagement, I will say that. If it needs warehouse and platform work, you will get a precise roadmap, package fit, and budget range."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",
