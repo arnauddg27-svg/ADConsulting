@@ -14,9 +14,10 @@ interface SHSpreadsheetTableProps {
   columns: SSColumn[];
   rows: Record<string, unknown>[];
   maxRows?: number;
+  onRowClick?: (row: Record<string, unknown>) => void;
 }
 
-export default function SHSpreadsheetTable({ columns, rows, maxRows = 20 }: SHSpreadsheetTableProps) {
+export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowClick }: SHSpreadsheetTableProps) {
   const frozenCols = columns.filter(c => c.frozen);
   const scrollCols = columns.filter(c => !c.frozen);
   const visibleRows = rows.slice(0, maxRows);
@@ -45,7 +46,12 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20 }: SHSp
             {frozenCols.map(c => <span key={c.key}>{c.label}</span>)}
           </div>
           {visibleRows.map((row, i) => (
-            <div key={i} className="sh-ss-row" style={{ gridTemplateColumns: gridFrozen }}>
+            <div
+              key={i}
+              className={`sh-ss-row ${onRowClick ? "interactive" : ""}`}
+              style={{ gridTemplateColumns: gridFrozen, cursor: onRowClick ? "pointer" : "default" }}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+            >
               {frozenCols.map(c => renderCell(c, row))}
             </div>
           ))}
@@ -58,7 +64,12 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20 }: SHSp
           {scrollCols.map(c => <span key={c.key} style={{ textAlign: c.align }}>{c.label}</span>)}
         </div>
         {visibleRows.map((row, i) => (
-          <div key={i} className="sh-ss-row" style={{ gridTemplateColumns: gridScroll }}>
+          <div
+            key={i}
+            className={`sh-ss-row ${onRowClick ? "interactive" : ""}`}
+            style={{ gridTemplateColumns: gridScroll, cursor: onRowClick ? "pointer" : "default" }}
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
+          >
             {scrollCols.map(c => renderCell(c, row))}
           </div>
         ))}

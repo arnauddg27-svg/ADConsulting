@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHJob } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getCostKPIs, getCostBreakdown, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -27,9 +28,10 @@ const MONTHLY_TREND = [
 
 interface Props {
   jobs: SHJob[];
+  onDrill: (detail: DrillDetail) => void;
 }
 
-export default function ConstructionCostTab({ jobs }: Props) {
+export default function ConstructionCostTab({ jobs, onDrill }: Props) {
   const kpis = getCostKPIs(jobs);
   const breakdown = getCostBreakdown();
 
@@ -111,6 +113,7 @@ export default function ConstructionCostTab({ jobs }: Props) {
               }},
             ]}
             rows={varianceRows as unknown as Record<string, unknown>[]}
+            onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: String(r.jobCode) })}
           />
         </SHPanel>
       </div>
