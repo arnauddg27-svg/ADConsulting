@@ -103,6 +103,39 @@ export interface SHPropertyUnit {
   daysPastDue: number;
 }
 
+export interface SHSubdivision {
+  id: number;
+  projectName: string;
+  community: string;
+  city: string;
+  entity: string;
+  totalLots: number;
+  lotsSold: number;
+  lotsUnderConstruction: number;
+  lotsCompleted: number;
+  lotsRemaining: number;
+  totalAcres: number;
+  landCost: number;
+  developmentCost: number;
+  totalInvestment: number;
+  projectedRevenue: number;
+  projectedProfit: number;
+  profitMarginPct: number;
+  status: "active" | "pre-development" | "sold-out" | "planning";
+  startDate: string;
+  estCompletionDate: string;
+  infraComplete: boolean;
+  zoningApproved: boolean;
+  platRecorded: boolean;
+  utilityStubs: boolean;
+  roadsComplete: boolean;
+  retentionPonds: boolean;
+  avgLotPrice: number;
+  avgHomePrice: number;
+  absorptionRate: number; // sales per month
+  monthsOfInventory: number;
+}
+
 export interface SHDashboardFilters {
   city: string | null;
   jobType: string | null;
@@ -120,6 +153,7 @@ export type SHSection =
 
 export type SHTab =
   | "land-dashboard"
+  | "land-subdivisions"
   | "permitting-dashboard"
   | "loans-dashboard"
   | "construction-dashboard"

@@ -8,7 +8,7 @@ import FilterBar from "./FilterBar";
 import SHDrawer from "./SHDrawer";
 import type { DrillDetail } from "./SHDrawer";
 import {
-  jobs, sales, loans, landDeals, permits, propertyUnits,
+  jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions,
   matchFilters,
 } from "@/lib/sunshine-homes-data";
 import type { SHTab, SHDashboardFilters } from "@/types/sunshine-homes";
@@ -21,6 +21,7 @@ import ConstructionCostTab from "./tabs/ConstructionCostTab";
 import SalesDashboardTab from "./tabs/SalesDashboardTab";
 import LoansDashboardTab from "./tabs/LoansDashboardTab";
 import LandDashboardTab from "./tabs/LandDashboardTab";
+import SubdivisionPipelineTab from "./tabs/SubdivisionPipelineTab";
 import PermittingDashboardTab from "./tabs/PermittingDashboardTab";
 import PropertyMgmtDashboardTab from "./tabs/PropertyMgmtDashboardTab";
 
@@ -43,6 +44,7 @@ export default function SunshineDashboard() {
   const filteredLand = useMemo(() => landDeals.filter(d => matchFilters(d, filters)), [filters]);
   const filteredPermits = useMemo(() => permits.filter(p => matchFilters(p, filters)), [filters]);
   const filteredUnits = useMemo(() => propertyUnits.filter(u => matchFilters(u, filters)), [filters]);
+  const filteredSubs = useMemo(() => subdivisions.filter(s => matchFilters(s, filters)), [filters]);
 
   const setCommunity = (community: string | null) =>
     setFilters(prev => ({ ...prev, community: prev.community === community ? null : community }));
@@ -66,6 +68,8 @@ export default function SunshineDashboard() {
         return <LoansDashboardTab loans={filteredLoans} onDrill={onDrill} />;
       case "land-dashboard":
         return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onDrill={onDrill} />;
+      case "land-subdivisions":
+        return <SubdivisionPipelineTab subdivisions={filteredSubs} onDrill={onDrill} />;
       case "permitting-dashboard":
         return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} />;
       case "pm-dashboard":
