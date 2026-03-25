@@ -87,7 +87,7 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
 
         {/* Center text */}
         <text x={center} y={center - 6} className="sh-donut-center" style={{ fontSize: hoveredSeg ? 14 : 18 }}>
-          {hoveredSeg ? hoveredSeg.value : total}
+          {(() => { const v = hoveredSeg ? hoveredSeg.value : total; return v >= 1_000_000 ? `${(v/1_000_000).toFixed(1)}M` : v >= 10_000 ? `${(v/1_000).toFixed(0)}K` : v; })()}
         </text>
         <text x={center} y={center + 10} textAnchor="middle" style={{ fontSize: 9, fill: "var(--sh-text-muted)", fontWeight: 500 }}>
           {hoveredSeg ? hoveredSeg.label : "total"}
@@ -113,7 +113,7 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
             />
             <span>{seg.label}</span>
             <span className="sh-donut-legend-value">
-              {seg.value}
+              {seg.value >= 1_000_000 ? `${(seg.value / 1_000_000).toFixed(1)}M` : seg.value >= 1_000 ? `${(seg.value / 1_000).toFixed(0)}K` : seg.value}
               <span style={{ fontSize: 9, color: "var(--sh-text-muted)", marginLeft: 3 }}>
                 {Math.round((seg.value / total) * 100)}%
               </span>

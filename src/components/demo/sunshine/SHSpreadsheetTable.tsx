@@ -18,8 +18,6 @@ interface SHSpreadsheetTableProps {
 }
 
 export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowClick }: SHSpreadsheetTableProps) {
-  const frozenCols = columns.filter(c => c.frozen);
-  const scrollCols = columns.filter(c => !c.frozen);
   const visibleRows = rows.slice(0, maxRows);
 
   if (rows.length === 0) {
@@ -32,58 +30,86 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
     );
   }
 
-  const gridFrozen = frozenCols.map(c => c.width).join(" ");
-  const gridScroll = scrollCols.map(c => c.width).join(" ");
-
-  const renderCell = (col: SSColumn, row: Record<string, unknown>) => {
-    const className = [
-      col.mono ? "mono" : "",
-      col.align === "right" ? "text-right" : "",
-    ].filter(Boolean).join(" ");
-    return (
-      <span key={col.key} className={className}>
-        {col.render ? col.render(row) : String(row[col.key] ?? "—")}
-      </span>
-    );
-  };
-
   return (
-    <div className="sh-ss-table">
-      {/* Frozen columns */}
-      {frozenCols.length > 0 && (
-        <div className="sh-ss-frozen">
-          <div className="sh-ss-header" style={{ gridTemplateColumns: gridFrozen }}>
-            {frozenCols.map(c => <span key={c.key}>{c.label}</span>)}
-          </div>
+    <div style={{
+      border: "1px solid var(--sh-border)",
+      borderRadius: 6,
+      overflow: "auto",
+      maxHeight: 400,
+    }}>
+      <table style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        fontSize: 11,
+        color: "var(--sh-text-primary)",
+        tableLayout: "fixed",
+        minWidth: columns.reduce((s, c) => s + (parseInt(c.width) || 100), 0),
+      }}>
+        <thead>
+          <tr style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            background: "var(--sh-bg-surface-raised)",
+            borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
+          }}>
+            {columns.map(c => (
+              <th key={c.key} style={{
+                padding: "6px 10px",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "var(--sh-text-muted)",
+                textAlign: c.align ?? "left",
+                whiteSpace: "nowrap",
+                width: c.width,
+                position: c.frozen ? "sticky" : undefined,
+                left: c.frozen ? 0 : undefined,
+                zIndex: c.frozen ? 5 : undefined,
+                background: "var(--sh-bg-surface-raised)",
+                borderRight: c.frozen ? "2px solid var(--sh-border)" : undefined,
+              }}>
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
           {visibleRows.map((row, i) => (
-            <div
+            <tr
               key={i}
-              className={`sh-ss-row ${onRowClick ? "interactive" : ""}`}
-              style={{ gridTemplateColumns: gridFrozen, cursor: onRowClick ? "pointer" : "default" }}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
+              style={{
+                cursor: onRowClick ? "pointer" : "default",
+                borderBottom: "1px solid var(--sh-border-dim)",
+                background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(20,184,166,0.04)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"; }}
             >
-              {frozenCols.map(c => renderCell(c, row))}
-            </div>
+              {columns.map(c => (
+                <td key={c.key} style={{
+                  padding: "5px 10px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  textAlign: c.align,
+                  fontFamily: c.mono ? '"SF Mono", "Fira Code", monospace' : undefined,
+                  fontSize: c.mono ? 10 : undefined,
+                  position: c.frozen ? "sticky" : undefined,
+                  left: c.frozen ? 0 : undefined,
+                  zIndex: c.frozen ? 3 : undefined,
+                  background: c.frozen ? "var(--sh-bg-surface)" : undefined,
+                  borderRight: c.frozen ? "2px solid var(--sh-border)" : undefined,
+                }}>
+                  {c.render ? c.render(row) : String(row[c.key] ?? "—")}
+                </td>
+              ))}
+            </tr>
           ))}
-        </div>
-      )}
-
-      {/* Scrollable columns */}
-      <div className="sh-ss-scroll">
-        <div className="sh-ss-header" style={{ gridTemplateColumns: gridScroll }}>
-          {scrollCols.map(c => <span key={c.key} style={{ textAlign: c.align }}>{c.label}</span>)}
-        </div>
-        {visibleRows.map((row, i) => (
-          <div
-            key={i}
-            className={`sh-ss-row ${onRowClick ? "interactive" : ""}`}
-            style={{ gridTemplateColumns: gridScroll, cursor: onRowClick ? "pointer" : "default" }}
-            onClick={onRowClick ? () => onRowClick(row) : undefined}
-          >
-            {scrollCols.map(c => renderCell(c, row))}
-          </div>
-        ))}
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 }

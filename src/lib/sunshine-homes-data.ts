@@ -174,7 +174,7 @@ function generateJobs(): SHJob[] {
       const completionPct = between(completionRanges[stageIdx][0], completionRanges[stageIdx][1]);
 
       const contractValue = between(380000, 620000);
-      const costRatio = 0.72 + rand() * 0.06;
+      const costRatio = 0.80 + rand() * 0.06;
       const estimatedCost = Math.round(contractValue * costRatio);
       const spentRatio = completionPct / 100;
       const actualCost = Math.round(estimatedCost * spentRatio * (0.95 + rand() * 0.1));
@@ -546,8 +546,8 @@ function generatePMUnits(): SHPropertyUnit[] {
       const tenant = isOccupied ? `${pick(tenantFamilies)} Family` : null;
       const leaseEnd = isOccupied ? dateToStr(2026 + (rand() > 0.5 ? 1 : 0), between(1, 12), between(1, 28)) : null;
       const isDelinquent = isOccupied && rand() > 0.78;
-      const delinquentAmount = isDelinquent ? monthlyRent * between(1, 3) : 0;
-      const daysPastDue = isDelinquent ? between(15, 95) : 0;
+      const delinquentAmount = isDelinquent ? monthlyRent : 0;
+      const daysPastDue = isDelinquent ? between(5, 28) : 0;
       const managementPct = Math.round((8 + rand() * 2) * 10) / 10;
       const deposit = monthlyRent > 0 ? monthlyRent : marketRent;
 
@@ -1089,11 +1089,11 @@ function generateAuditJobs(): SHAuditJob[] {
     const financing = rng.between(2000, 18000);
     const insurance = rng.between(800, 2500);
     const closingCost = rng.between(800, 4000);
-    const well = rng.between(0, 3200);
-    const septic = rng.between(0, 12000);
-    const waterFiltration = rng.between(0, 1500);
+    const well = rng.between(2800, 3500);
+    const septic = rng.between(14000, 20000);
+    const waterFiltration = rng.between(1395, 3500);
     const gopherTortoise = rng.between(0, 300);
-    const treeSurvey = rng.between(0, 250);
+    const treeSurvey = rng.between(200, 350);
     const builderFeePct = rng.between(5, 8) / 100;
 
     const totalDirect = lotLand + permitting + siteWork + vertical + options + dirtPad + dumpsters + well + septic + waterFiltration + gopherTortoise + treeSurvey;
@@ -1101,7 +1101,11 @@ function generateAuditJobs(): SHAuditJob[] {
     const totalCost = totalDirect + totalIndirect;
     const contingency = rng.between(1000, 5000);
     const builderFee = Math.round(salePrice * builderFeePct);
-    const proceeds = salePrice - closingCost;
+    const commissionPct = 0.05;
+    const commission = Math.round(salePrice * commissionPct);
+    const closingFee = 1500;
+    const loanPayoff = Math.round(totalCost * 0.75); // typical loan covers ~75% of cost
+    const proceeds = salePrice - loanPayoff - commission - closingFee;
     const netProfit = salePrice - totalCost - contingency - builderFee;
     const netMargin = salePrice > 0 ? Math.round((netProfit / salePrice) * 1000) / 10 : 0;
 

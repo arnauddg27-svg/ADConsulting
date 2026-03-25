@@ -216,13 +216,6 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           { field: "Closing Cost", value: fmt$(audit.closingCost) },
           { field: "Total Indirect", value: fmt$(audit.totalIndirectCost) },
           { field: "", value: "" },
-          { field: "══ UTILITIES & ENVIRONMENTAL ══", value: "" },
-          { field: "Individual Well", value: fmt$(audit.well) },
-          { field: "Septic System", value: fmt$(audit.septic) },
-          { field: "Water Filtration", value: fmt$(audit.waterFiltration) },
-          { field: "Gopher Tortoise Survey", value: fmt$(audit.gopherTortoise) },
-          { field: "Tree Survey", value: fmt$(audit.treeSurvey) },
-          { field: "", value: "" },
           { field: "══ TOTALS ══", value: "" },
           { field: "Total Cost", value: fmt$(audit.totalCost) },
           { field: "Builder Fee", value: `${fmt$(audit.builderFee)} (${audit.builderFeePct}%)` },
@@ -399,10 +392,11 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     /* ═══════════════ PERMITS ═══════════════ */
 
     case "permit-status": {
-      const statusPermits = permits.filter(p => {
-        const normalized = p.status.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-        return normalized === detail.value || p.status === normStatus(detail.value);
-      });
+      const v = detail.value.toLowerCase().replace(/\s+/g, "-");
+      /* "in-progress" means in-review + pending; "all" means everything */
+      const statusPermits = v === "all" ? permits
+        : v === "in-progress" ? permits.filter(p => p.status === "in-review" || p.status === "pending")
+        : permits.filter(p => p.status === v || p.status.replace(/-/g, " ") === detail.value.toLowerCase());
       title = `${detail.value} Permits`;
       subtitle = `${statusPermits.length} permits`;
       columns = permitCols;
