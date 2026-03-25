@@ -1,0 +1,79 @@
+"use client";
+
+import type { SHAuditJob } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
+import { fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import SHKpiCard from "../SHKpiCard";
+import SHPanel from "../SHPanel";
+import SHSpreadsheetTable from "../SHSpreadsheetTable";
+import SHPill from "../SHPill";
+
+interface Props {
+  audits: SHAuditJob[];
+  onDrill: (detail: DrillDetail) => void;
+}
+
+export default function AuditsPipelineTab({ audits, onDrill }: Props) {
+  const totalRevenue = audits.reduce((s, a) => s + a.salePrice, 0);
+  const totalCost = audits.reduce((s, a) => s + a.totalCost, 0);
+  const totalProfit = audits.reduce((s, a) => s + a.netProfit, 0);
+  const avgBuilderFee = audits.length ? audits.reduce((s, a) => s + a.builderFeePct, 0) / audits.length : 0;
+
+  return (
+    <>
+      <div className="sh-tab-header">
+        <div className="sh-tab-kicker">Audits</div>
+        <h2 className="sh-tab-title">Per-Job P&L Audits</h2>
+        <p className="sh-tab-desc">Detailed cost breakdown for every audited job. Pro forma P&L with Lot/Land, Permitting, Site Work, Vertical, Financing, and all line items. Click any row for full detail.</p>
+      </div>
+
+      <div className="sh-kpi-row">
+        <SHKpiCard label="Total Revenue" value={fmt$(totalRevenue)} />
+        <SHKpiCard label="Total Cost" value={fmt$(totalCost)} accent="#22d3ee" />
+        <SHKpiCard label="Total Profit" value={fmt$(totalProfit)} accent={totalProfit > 0 ? "#14b8a6" : "#f46a6a"} />
+        <SHKpiCard label="Avg Builder Fee" value={fmtPct(avgBuilderFee)} accent="#3b82f6" />
+      </div>
+
+      <div className="sh-panels-row single">
+        <SHPanel kicker="PL-02" title="Per-Job Pro Forma P&L">
+          <SHSpreadsheetTable
+            columns={[
+              { key: "jobCode", label: "Job", width: "80px", frozen: true, mono: true },
+              { key: "community", label: "Community", width: "120px", frozen: true },
+              { key: "plan", label: "Plan", width: "100px" },
+              { key: "city", label: "City", width: "90px" },
+              { key: "salePrice", label: "Sale Price", width: "85px", align: "right", render: r => fmt$(Number(r.salePrice)) },
+              { key: "lotLand", label: "Lot/Land", width: "70px", align: "right", render: r => fmt$(Number(r.lotLand)) },
+              { key: "permitting", label: "Permit", width: "70px", align: "right", render: r => fmt$(Number(r.permitting)) },
+              { key: "siteWork", label: "Site Work", width: "75px", align: "right", render: r => fmt$(Number(r.siteWork)) },
+              { key: "vertical", label: "Vertical", width: "75px", align: "right", render: r => fmt$(Number(r.vertical)) },
+              { key: "options", label: "Options", width: "65px", align: "right", render: r => fmt$(Number(r.options)) },
+              { key: "dirtPad", label: "Dirt/Pad", width: "70px", align: "right", render: r => fmt$(Number(r.dirtPad)) },
+              { key: "dumpsters", label: "Dumpster", width: "70px", align: "right", render: r => fmt$(Number(r.dumpsters)) },
+              { key: "financing", label: "Finance", width: "70px", align: "right", render: r => fmt$(Number(r.financing)) },
+              { key: "insurance", label: "Insure", width: "65px", align: "right", render: r => fmt$(Number(r.insurance)) },
+              { key: "closingCost", label: "Closing", width: "65px", align: "right", render: r => fmt$(Number(r.closingCost)) },
+              { key: "septic", label: "Septic", width: "65px", align: "right", render: r => fmt$(Number(r.septic)) },
+              { key: "well", label: "Well", width: "55px", align: "right", render: r => fmt$(Number(r.well)) },
+              { key: "totalCost", label: "Total Cost", width: "85px", align: "right", render: r => <span style={{ fontWeight: 700 }}>{fmt$(Number(r.totalCost))}</span> },
+              { key: "builderFee", label: "Builder Fee", width: "80px", align: "right", render: r => fmt$(Number(r.builderFee)) },
+              { key: "contingency", label: "Conting.", width: "70px", align: "right", render: r => fmt$(Number(r.contingency)) },
+              { key: "netProfit", label: "Net Profit", width: "85px", align: "right", render: r => {
+                const v = Number(r.netProfit);
+                return <span style={{ color: v >= 0 ? "var(--sh-accent)" : "var(--sh-danger)", fontWeight: 700 }}>{fmt$(v)}</span>;
+              }},
+              { key: "netMargin", label: "Margin", width: "65px", align: "right", render: r => {
+                const m = Number(r.netMargin);
+                const tone = m >= 15 ? "good" : m >= 5 ? "watch" : "alert";
+                return <SHPill tone={tone} label={fmtPct(m)} />;
+              }},
+            ]}
+            rows={audits as unknown as Record<string, unknown>[]}
+            maxRows={50}
+            onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: `${r.jobCode} — ${r.address}` })}
+          />
+        </SHPanel>
+      </div>
+    </>
+  );
+}

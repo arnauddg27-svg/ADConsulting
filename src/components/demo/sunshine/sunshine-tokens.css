@@ -97,6 +97,33 @@
   color: var(--sh-accent);
 }
 
+/* ── Time Toggle ── */
+.sh-time-toggle {
+  display: flex;
+  gap: 1px;
+  background: var(--sh-border);
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sh-time-btn {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: none;
+  background: var(--sh-bg-surface-raised);
+  color: var(--sh-text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.sh-time-btn:hover { color: var(--sh-text-secondary); background: var(--sh-bg-hover); }
+.sh-time-btn.active {
+  background: var(--sh-accent-dim);
+  color: var(--sh-accent);
+  font-weight: 700;
+}
+
 /* ── Filter Bar ── */
 .sh-filter-bar {
   grid-column: 1 / -1;
@@ -684,6 +711,233 @@
 .sh-ss-row .text-danger { color: var(--sh-danger); }
 .sh-ss-row .text-accent { color: var(--sh-accent); }
 .sh-ss-row .text-warning { color: var(--sh-warning); }
+
+/* ── Stacked Cycle Bar (SHStackedCycleBar) ── */
+.sh-stacked-cycle { display: flex; flex-direction: column; gap: 10px; }
+.sh-stacked-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.sh-stacked-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--sh-text-secondary);
+}
+.sh-stacked-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.sh-stacked-rows { display: flex; flex-direction: column; gap: 6px; }
+.sh-stacked-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 50px;
+  align-items: center;
+  gap: 8px;
+}
+.sh-stacked-city {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sh-stacked-city-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sh-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sh-stacked-city-jobs {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--sh-text-muted);
+}
+.sh-stacked-bar-track {
+  height: 28px;
+  background: var(--sh-bg-hover);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.sh-stacked-bar {
+  display: flex;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: width 0.4s ease;
+}
+.sh-stacked-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 3px;
+}
+.sh-stacked-total {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sh-text-primary);
+  text-align: right;
+}
+
+/* ── Sparkline Cards (SHSparklineCards) ── */
+.sh-sparkline-grid {
+  display: grid;
+  gap: 10px;
+}
+.sh-sparkline-card {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, var(--sh-bg-surface) 0%, var(--sh-bg-surface-raised) 100%);
+  border: 1px solid var(--sh-border);
+  border-radius: 8px;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.sh-sparkline-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sh-sparkline-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sh-text-primary);
+}
+.sh-sparkline-card-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+.sh-sparkline-card-values {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+.sh-sparkline-card-current {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.sh-sparkline-card-goal {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--sh-text-muted);
+}
+.sh-sparkline-card-pct {
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+}
+.sh-sparkline-card-chart {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Cross-Tab (SHCrossTab) ── */
+.sh-crosstab {
+  border: 1px solid var(--sh-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sh-crosstab-title {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sh-text-primary);
+  background: var(--sh-bg-surface);
+  border-bottom: 1px solid var(--sh-border);
+}
+.sh-crosstab-grid {
+  display: grid;
+  background: var(--sh-bg-surface);
+}
+.sh-crosstab-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sh-text-muted);
+  background: var(--sh-bg-surface-raised);
+  border-bottom: 2px solid rgba(20, 184, 166, 0.2);
+  text-align: center;
+  white-space: nowrap;
+}
+.sh-crosstab-corner { text-align: left; }
+.sh-crosstab-total-header {
+  font-weight: 700;
+  color: var(--sh-text-secondary);
+}
+.sh-crosstab-row-label {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sh-text-primary);
+  background: var(--sh-bg-surface);
+  border-bottom: 1px solid var(--sh-border-dim);
+  border-right: 2px solid var(--sh-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.sh-crosstab-cell {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--sh-text-primary);
+  text-align: center;
+  border-bottom: 1px solid var(--sh-border-dim);
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 10px;
+}
+.sh-crosstab-cell.interactive { cursor: pointer; }
+.sh-crosstab-row-total {
+  font-weight: 700;
+  color: var(--sh-text-primary);
+  background: rgba(20, 184, 166, 0.04);
+  border-left: 2px solid var(--sh-border);
+}
+.sh-crosstab-col-total {
+  font-weight: 700;
+  color: var(--sh-text-primary);
+  background: rgba(20, 184, 166, 0.04);
+  border-top: 2px solid rgba(20, 184, 166, 0.2);
+}
+.sh-crosstab-total-label {
+  font-weight: 700;
+  color: var(--sh-text-secondary);
+  border-top: 2px solid rgba(20, 184, 166, 0.2);
+}
+.sh-crosstab-grand-total {
+  font-weight: 800;
+  color: var(--sh-accent);
+  background: rgba(20, 184, 166, 0.08);
+  border-top: 2px solid rgba(20, 184, 166, 0.2);
+  border-left: 2px solid var(--sh-border);
+}
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {

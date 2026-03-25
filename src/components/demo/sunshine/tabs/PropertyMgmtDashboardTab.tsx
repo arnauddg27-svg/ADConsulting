@@ -17,9 +17,10 @@ const OCC_COLORS: Record<string, string> = {
 
 interface Props {
   units: SHPropertyUnit[];
+  onDrill: (detail: import("../SHDrawer").DrillDetail) => void;
 }
 
-export default function PropertyMgmtDashboardTab({ units }: Props) {
+export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
   const kpis = getPMKPIs(units);
 
   const byOccupancy = (() => {
@@ -58,7 +59,7 @@ export default function PropertyMgmtDashboardTab({ units }: Props) {
 
       <div className="sh-panels-row">
         <SHPanel kicker="Occupancy" title="Units by Status">
-          <SHDonutChart segments={byOccupancy} />
+          <SHDonutChart segments={byOccupancy} onSegmentClick={label => onDrill({ type: "occupancy", value: label.toLowerCase(), label })} />
         </SHPanel>
         <SHPanel kicker="Delinquency" title="Past-Due Tenants">
           {delinquent.length > 0 ? (
@@ -74,6 +75,7 @@ export default function PropertyMgmtDashboardTab({ units }: Props) {
                 }},
               ]}
               rows={delinquent as unknown as Record<string, unknown>[]}
+              onRowClick={r => onDrill({ type: "unit", value: String(r.address), label: String(r.address) })}
             />
           ) : (
             <div style={{ fontSize: 11, color: "var(--sh-text-muted)", padding: 12 }}>No delinquent tenants</div>

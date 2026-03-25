@@ -8,7 +8,7 @@ import FilterBar from "./FilterBar";
 import SHDrawer from "./SHDrawer";
 import type { DrillDetail } from "./SHDrawer";
 import {
-  jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions,
+  jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs,
   matchFilters,
 } from "@/lib/sunshine-homes-data";
 import type { SHTab, SHDashboardFilters } from "@/types/sunshine-homes";
@@ -25,11 +25,23 @@ import SubdivisionPipelineTab from "./tabs/SubdivisionPipelineTab";
 import PermittingDashboardTab from "./tabs/PermittingDashboardTab";
 import PropertyMgmtDashboardTab from "./tabs/PropertyMgmtDashboardTab";
 
+/* New pipeline tabs */
+import LandPipelineTab from "./tabs/LandPipelineTab";
+import PermittingPipelineTab from "./tabs/PermittingPipelineTab";
+import LoansPipelineTab from "./tabs/LoansPipelineTab";
+import SalesPipelineTab from "./tabs/SalesPipelineTab";
+import PMPipelineTab from "./tabs/PMPipelineTab";
+
+/* Audit tabs */
+import AuditsDashboardTab from "./tabs/AuditsDashboardTab";
+import AuditsPipelineTab from "./tabs/AuditsPipelineTab";
+
 const EMPTY_FILTERS: SHDashboardFilters = {
   city: null,
   jobType: null,
   entity: null,
   community: null,
+  timePeriod: "all",
 };
 
 export default function SunshineDashboard() {
@@ -45,6 +57,7 @@ export default function SunshineDashboard() {
   const filteredPermits = useMemo(() => permits.filter(p => matchFilters(p, filters)), [filters]);
   const filteredUnits = useMemo(() => propertyUnits.filter(u => matchFilters(u, filters)), [filters]);
   const filteredSubs = useMemo(() => subdivisions.filter(s => matchFilters(s, filters)), [filters]);
+  const filteredAudits = useMemo(() => auditJobs.filter(a => matchFilters(a, filters)), [filters]);
 
   const setCommunity = (community: string | null) =>
     setFilters(prev => ({ ...prev, community: prev.community === community ? null : community }));
@@ -54,26 +67,56 @@ export default function SunshineDashboard() {
 
   const tabContent = () => {
     switch (activeTab) {
+      /* Construction */
       case "construction-dashboard":
         return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onTabChange={setActiveTab} onDrill={onDrill} />;
       case "construction-pipeline":
         return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} />;
       case "construction-cycle":
-        return <ConstructionCycleTimeTab jobs={filteredJobs} />;
+        return <ConstructionCycleTimeTab jobs={filteredJobs} onDrill={onDrill} />;
       case "construction-cost":
         return <ConstructionCostTab jobs={filteredJobs} onDrill={onDrill} />;
+      case "construction-subdivisions":
+        return <SubdivisionPipelineTab subdivisions={filteredSubs} onDrill={onDrill} />;
+
+      /* Sales */
       case "sales-dashboard":
         return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onDrill={onDrill} />;
+      case "sales-pipeline":
+        return <SalesPipelineTab sales={filteredSales} onDrill={onDrill} />;
+
+      /* Loans */
       case "loans-dashboard":
         return <LoansDashboardTab loans={filteredLoans} onDrill={onDrill} />;
+      case "loans-pipeline":
+        return <LoansPipelineTab loans={filteredLoans} onDrill={onDrill} />;
+
+      /* Land */
       case "land-dashboard":
         return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onDrill={onDrill} />;
+      case "land-pipeline":
+        return <LandPipelineTab deals={filteredLand} onDrill={onDrill} />;
       case "land-subdivisions":
         return <SubdivisionPipelineTab subdivisions={filteredSubs} onDrill={onDrill} />;
+
+      /* Permitting */
       case "permitting-dashboard":
-        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} />;
+        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} onDrill={onDrill} />;
+      case "permitting-pipeline":
+        return <PermittingPipelineTab permits={filteredPermits} onDrill={onDrill} />;
+
+      /* Property Management */
       case "pm-dashboard":
-        return <PropertyMgmtDashboardTab units={filteredUnits} />;
+        return <PropertyMgmtDashboardTab units={filteredUnits} onDrill={onDrill} />;
+      case "pm-pipeline":
+        return <PMPipelineTab units={filteredUnits} onDrill={onDrill} />;
+
+      /* Audits */
+      case "audits-dashboard":
+        return <AuditsDashboardTab audits={filteredAudits} onDrill={onDrill} />;
+      case "audits-pipeline":
+        return <AuditsPipelineTab audits={filteredAudits} onDrill={onDrill} />;
+
       default:
         return null;
     }

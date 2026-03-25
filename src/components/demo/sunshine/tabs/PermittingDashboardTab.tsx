@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHPermit } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getPermitKPIs, fmtN } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -17,9 +18,10 @@ const STATUS_COLORS: Record<string, string> = {
 interface Props {
   permits: SHPermit[];
   onCommunityClick: (community: string) => void;
+  onDrill: (detail: DrillDetail) => void;
 }
 
-export default function PermittingDashboardTab({ permits, onCommunityClick }: Props) {
+export default function PermittingDashboardTab({ permits, onCommunityClick, onDrill }: Props) {
   const kpis = getPermitKPIs(permits);
 
   const byStatus = [
@@ -53,10 +55,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick }: Pr
 
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Permits by Status">
-          <SHDonutChart segments={byStatus} />
+          <SHDonutChart segments={byStatus} onSegmentClick={label => onDrill({ type: "permit-status", value: label, label })} />
         </SHPanel>
         <SHPanel kicker="Communities" title="Permits by Community">
-          <SHRankedBars items={byCommunity} onBarClick={onCommunityClick} />
+          <SHRankedBars items={byCommunity} onBarClick={label => onDrill({ type: "community", value: label, label })} showRank />
         </SHPanel>
       </div>
     </>
