@@ -3,9 +3,7 @@
 interface RankedItem {
   label: string;
   value: number;
-  /** Optional secondary value shown as lighter overlay */
   target?: number;
-  /** Optional status coloring */
   status?: "good" | "watch" | "alert";
 }
 
@@ -13,7 +11,6 @@ interface SHRankedBarsProps {
   items: RankedItem[];
   formatValue?: (v: number) => string;
   onBarClick?: (label: string) => void;
-  /** Show rank numbers */
   showRank?: boolean;
 }
 
@@ -29,42 +26,52 @@ export default function SHRankedBars({ items, formatValue, onBarClick, showRank 
   const max = Math.max(...items.map(i => i.target ?? i.value), 1);
 
   return (
-    <div className="sh-ranked-bars">
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {items.map((item, i) => {
         const pct = (item.value / max) * 100;
         const gradient = item.status ? STATUS_GRADIENTS[item.status] : DEFAULT_GRADIENT;
         return (
           <div
             key={item.label}
-            className="sh-ranked-bar"
+            style={{
+              display: "flex", alignItems: "center", gap: 8, cursor: onBarClick ? "pointer" : "default",
+            }}
             onClick={onBarClick ? () => onBarClick(item.label) : undefined}
           >
             {showRank && (
-              <span style={{ width: 16, fontSize: 10, fontWeight: 700, color: "var(--sh-text-muted)", textAlign: "right", marginRight: 4 }}>
+              <span style={{ width: 16, fontSize: 10, fontWeight: 700, color: "var(--sh-text-muted)", textAlign: "right", flexShrink: 0 }}>
                 {i + 1}
               </span>
             )}
-            <span className="sh-ranked-bar-label" title={item.label}>{item.label}</span>
-            <div className="sh-ranked-bar-track">
-              {/* Target ghost bar */}
+            <span style={{
+              width: 130, flexShrink: 0, fontSize: 11, fontWeight: 500, color: "var(--sh-text-secondary)",
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              transition: "color 0.12s",
+            }} title={item.label}>
+              {item.label}
+            </span>
+            <div style={{
+              flex: 1, height: 18, background: "var(--sh-bg-hover)", borderRadius: 3,
+              overflow: "hidden", position: "relative",
+            }}>
               {item.target && (
                 <div style={{
                   position: "absolute", top: 0, left: 0, height: "100%",
                   width: `${(item.target / max) * 100}%`,
-                  background: "rgba(255,255,255,0.04)",
-                  borderRadius: 3,
+                  background: "rgba(255,255,255,0.04)", borderRadius: 3,
                 }} />
               )}
-              <div
-                className="sh-ranked-bar-fill"
-                style={{
-                  width: `${pct}%`,
-                  background: gradient,
-                  boxShadow: `0 0 10px ${item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : "rgba(20, 184, 166, 0.3)"}`,
-                }}
-              />
+              <div style={{
+                width: `${pct}%`, height: "100%", borderRadius: 3,
+                background: gradient,
+                boxShadow: `0 0 10px ${item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : "rgba(20, 184, 166, 0.3)"}`,
+                transition: "width 0.4s ease",
+              }} />
             </div>
-            <span className="sh-ranked-bar-value">
+            <span style={{
+              width: 50, flexShrink: 0, fontSize: 11, fontWeight: 600,
+              color: "var(--sh-text-primary)", textAlign: "right",
+            }}>
               {formatValue ? formatValue(item.value) : item.value}
             </span>
           </div>

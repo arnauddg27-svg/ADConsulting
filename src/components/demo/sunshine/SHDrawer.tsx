@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit } from "@/types/sunshine-homes";
-import { jobs, sales, loans, landDeals, permits, propertyUnits, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHAuditJob } from "@/types/sunshine-homes";
+import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
@@ -192,9 +192,91 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "permit-status": {
+      const statusPermits = permits.filter(p => {
+        const statusLabel = p.status.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase());
+        return statusLabel === detail.value || p.status === detail.value.toLowerCase().replace(" ", "-");
+      });
+      title = `${detail.value} Permits`;
+      subtitle = `${statusPermits.length} permits`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "80px" },
+        { key: "community", label: "Community", width: "130px" },
+        { key: "city", label: "City", width: "90px" },
+        { key: "permitType", label: "Type", width: "80px" },
+        { key: "submittedDate", label: "Submitted", width: "90px" },
+        { key: "daysInReview", label: "Days", width: "50px", align: "right", render: r => {
+          const d = Number(r.daysInReview);
+          return <SHPill tone={d > 30 ? "alert" : d > 15 ? "watch" : "good"} label={`${d}d`} />;
+        }},
+      ];
+      rows = statusPermits as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "occupancy": {
+      const occUnits = propertyUnits.filter(u => u.occupancy === detail.value.toLowerCase().replace(" ", "-"));
+      title = `${detail.label} Units`;
+      subtitle = `${occUnits.length} units`;
+      columns = [
+        { key: "address", label: "Address", width: "1fr" },
+        { key: "community", label: "Community", width: "120px" },
+        { key: "tenant", label: "Tenant", width: "100px", render: r => String(r.tenant ?? "—") },
+        { key: "monthlyRent", label: "Rent", width: "70px", align: "right", render: r => fmt$(Number(r.monthlyRent)) },
+      ];
+      rows = occUnits as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cost-category":
+    case "margin-bucket": {
+      const auditRows = auditJobs.filter(a => {
+        if (detail.type === "margin-bucket") {
+          const m = a.netMargin;
+          if (detail.value === "< 0%") return m < 0;
+          if (detail.value === "0–10%") return m >= 0 && m < 10;
+          if (detail.value === "10–20%") return m >= 10 && m < 20;
+          if (detail.value === "20–30%") return m >= 20 && m < 30;
+          if (detail.value === "30%+") return m >= 30;
+        }
+        return true;
+      });
+      title = detail.label;
+      subtitle = `${auditRows.length} jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "80px" },
+        { key: "community", label: "Community", width: "120px" },
+        { key: "salePrice", label: "Sale", width: "75px", align: "right", render: r => fmt$(Number(r.salePrice)) },
+        { key: "totalCost", label: "Cost", width: "75px", align: "right", render: r => fmt$(Number(r.totalCost)) },
+        { key: "netMargin", label: "Margin", width: "60px", align: "right", render: r => {
+          const m = Number(r.netMargin);
+          return <SHPill tone={m >= 15 ? "good" : m >= 5 ? "watch" : "alert"} label={fmtPct(m)} />;
+        }},
+      ];
+      rows = auditRows as unknown as Record<string, unknown>[];
+      break;
+    }
+
     default:
       title = detail.label;
-      rows = [];
+      subtitle = "Drill-down data";
+      /* Try to show related jobs for unhandled types */
+      const relatedJobs = jobs.filter(j =>
+        j.community === detail.value || j.city === detail.value || j.stage === detail.value || j.plan === detail.value
+      );
+      if (relatedJobs.length > 0) {
+        subtitle = `${relatedJobs.length} related jobs`;
+        columns = [
+          { key: "jobCode", label: "Job", width: "80px" },
+          { key: "community", label: "Community", width: "130px" },
+          { key: "stage", label: "Stage", width: "100px" },
+          { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+          { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+        ];
+        rows = relatedJobs as unknown as Record<string, unknown>[];
+      } else {
+        rows = [];
+      }
   }
 
   return (
