@@ -42,6 +42,18 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
               { key: "community", label: "Community", width: "120px", frozen: true },
               { key: "plan", label: "Plan", width: "100px" },
               { key: "city", label: "City", width: "90px" },
+              { key: "county", label: "County", width: "90px", render: r => {
+                const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
+                return cityCounty[String(r.city)] ?? "\u2014";
+              }},
+              { key: "entity", label: "Entity", width: "150px" },
+              { key: "jobType", label: "Job Type", width: "90px" },
+              { key: "salesStatus", label: "Sales Status", width: "95px", render: r => {
+                const s = String(r.salesStatus);
+                const tone = s === "closed" ? "good" : s === "pending" ? "watch" : s === "active" ? "good" : "alert";
+                return <SHPill tone={tone} label={s} />;
+              }},
+              { key: "builderFeePct", label: "Builder %", width: "75px", align: "right", render: r => fmtPct(Number(r.builderFeePct)) },
               { key: "salePrice", label: "Sale Price", width: "85px", align: "right", render: r => fmt$(Number(r.salePrice)) },
               { key: "lotLand", label: "Lot/Land", width: "70px", align: "right", render: r => fmt$(Number(r.lotLand)) },
               { key: "permitting", label: "Permit", width: "70px", align: "right", render: r => fmt$(Number(r.permitting)) },

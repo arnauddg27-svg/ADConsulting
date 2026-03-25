@@ -80,6 +80,9 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
               { key: "jobCode", label: "Job", width: "80px", frozen: true, mono: true },
               { key: "community", label: "Community", width: "130px", frozen: true },
               { key: "lot", label: "Lot", width: "60px" },
+              { key: "county", label: "County", width: "90px" },
+              { key: "entity", label: "Entity", width: "150px" },
+              { key: "jobType", label: "Job Type", width: "90px", render: r => <SHPill tone={String(r.jobType) === "Closed" ? "good" : String(r.jobType) === "Construction" ? "watch" : undefined} label={String(r.jobType)} /> },
               { key: "plan", label: "Plan", width: "100px" },
               { key: "superintendent", label: "Super", width: "100px" },
               { key: "stage", label: "Stage", width: "100px", render: (r) => {
@@ -88,9 +91,25 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
                 return tone ? <SHPill tone={tone} label={stage} /> : <span style={{ color: STAGE_COLORS[stage] }}>{stage}</span>;
               }},
               { key: "completionPct", label: "Completion", width: "110px", render: (r) => <CompletionBar pct={Number(r.completionPct)} /> },
+              { key: "startDate", label: "Start", width: "85px" },
+              { key: "permitDate", label: "Permit", width: "85px", render: r => String(r.permitDate ?? "\u2014") },
+              { key: "foundationDate", label: "Foundation", width: "85px", render: r => String(r.foundationDate ?? "\u2014") },
+              { key: "framingDate", label: "Framing", width: "85px", render: r => String(r.framingDate ?? "\u2014") },
+              { key: "mepDate", label: "MEP", width: "85px", render: r => String(r.mepDate ?? "\u2014") },
+              { key: "drywallDate", label: "Drywall", width: "85px", render: r => String(r.drywallDate ?? "\u2014") },
+              { key: "finishesDate", label: "Finishes", width: "85px", render: r => String(r.finishesDate ?? "\u2014") },
+              { key: "coDate", label: "CO Date", width: "85px", render: r => String(r.coDate ?? "\u2014") },
+              { key: "estCompletion", label: "Est. Close", width: "85px" },
+              { key: "totalCycleDays", label: "Cycle Days", width: "75px", align: "right" },
               { key: "contractValue", label: "Contract", width: "80px", align: "right", render: r => fmt$(Number(r.contractValue)) },
+              { key: "lotCost", label: "Lot Cost", width: "80px", align: "right", render: r => fmt$(Number(r.lotCost)) },
               { key: "originalBudget", label: "Budget", width: "80px", align: "right", render: r => fmt$(Number(r.originalBudget)) },
               { key: "actualCostToDate", label: "Actual", width: "80px", align: "right", render: r => fmt$(Number(r.actualCostToDate)) },
+              { key: "projectedFinalCost", label: "Proj. Final", width: "85px", align: "right", render: r => fmt$(Number(r.projectedFinalCost)) },
+              { key: "variance", label: "Variance", width: "80px", align: "right", render: r => {
+                const v = Number(r.actualCostToDate) - Number(r.originalBudget);
+                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 700 }}>{fmt$(v)}</span>;
+              }},
               { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: (r) => fmt$(Number(r.wipBalance)) },
               { key: "marginPct", label: "Margin", width: "60px", align: "right", render: r => {
                 const m = Number(r.marginPct);
@@ -100,8 +119,6 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
                 const d = Number(r.daysInCurrentPhase);
                 return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "var(--sh-text-secondary)", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
               }},
-              { key: "estCompletion", label: "Est. Close", width: "85px" },
-              { key: "startDate", label: "Start", width: "85px" },
             ]}
             rows={jobs as unknown as Record<string, unknown>[]}
             maxRows={30}

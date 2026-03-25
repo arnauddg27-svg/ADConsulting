@@ -538,7 +538,7 @@
         Central Florida&rsquo;s residential construction market continues to grow, yet most small-to-midsize home builders (under 200 homes per year) operate without dedicated analytics, repeatable operating systems, or the reporting infrastructure needed to make confident decisions at scale. Leadership teams rely on spreadsheets, tribal knowledge, and ad-hoc data pulls that take hours to assemble and are often stale by the time they arrive.
       </p>
       <p>
-        <strong>A.D. Homes & Consulting</strong> bridges this gap. The practice delivers Power BI dashboards, financial modeling, and ERP process improvement directly to builders who have outgrown manual reporting but are not large enough to justify a full-time analytics hire or Big-4 consulting engagement.
+        <strong>A.D. Homes & Consulting</strong> bridges this gap. The practice delivers custom Next.js dashboards backed by Fivetran and BigQuery, financial modeling, and ERP process improvement directly to builders who have outgrown manual reporting but are not large enough to justify a full-time analytics hire or Big-4 consulting engagement.
       </p>
       <p>
         Every engagement is handled personally by Arnaud Durand &mdash; an MBA-trained operations professional with 6+ years of builder-side experience managing 1,200+ lots and 1,000+ home closings across Central Florida.
@@ -584,7 +584,7 @@
             <li>MBA — Crummer Graduate School, Rollins College (Finance &amp; Ops/Tech, 3.86 GPA)</li>
             <li>6+ years at Brite Homes as Operations Manager</li>
             <li>Led ERP migration (BuildPro / BRIX)</li>
-            <li>Built full life-cycle KPI system in Power BI</li>
+            <li>Built full life-cycle KPI system with custom dashboards</li>
             <li>Bilingual: English &amp; French</li>
           </ul>
         </div>
@@ -679,10 +679,10 @@
           <h3>Dashboards, KPIs & Reporting</h3>
           <span class="price-badge">$8,000 – $15,000</span>
         </div>
-        <div class="desc">Power BI dashboards and KPI systems that turn scattered operating data into a weekly management view. Track cost by plan, margin trends, vendor variance, cycle times, and community profitability &mdash; automated, consistent, and decision-ready.</div>
+        <div class="desc">Custom Next.js dashboards and KPI systems — powered by Fivetran and BigQuery — that turn scattered operating data into a weekly management view. Track cost by plan, margin trends, vendor variance, cycle times, and community profitability &mdash; automated, consistent, and decision-ready.</div>
         <div class="deliverables-label">Deliverables</div>
         <div class="deliverables-grid">
-          <div class="deliverable">Custom Power BI dashboard design &amp; deployment</div>
+          <div class="deliverable">Custom Next.js dashboard design &amp; deployment</div>
           <div class="deliverable">Lot-to-close KPI framework</div>
           <div class="deliverable">Job cost trend and margin reporting</div>
           <div class="deliverable">Critical-path and cycle-time tracking</div>
@@ -902,14 +902,14 @@
         </thead>
         <tbody>
           <tr>
-            <td>Power BI Pro license</td>
-            <td>$10</td>
-            <td>$120</td>
+            <td>Google Workspace</td>
+            <td>$7</td>
+            <td>$84</td>
           </tr>
           <tr>
-            <td>Microsoft 365 Business</td>
-            <td>$22</td>
-            <td>$264</td>
+            <td>Vercel Pro (hosting)</td>
+            <td>$20</td>
+            <td>$240</td>
           </tr>
           <tr>
             <td>Website hosting (Firebase)</td>
@@ -961,6 +961,116 @@
 
       <p style="margin-top: 14px;">
         <strong>Year 1 projected gross margin:</strong> ~$107,000 on $119,500 revenue (89.5%). The solo-practitioner model keeps fixed costs extremely low. The primary cost is Arnaud&rsquo;s time, which scales linearly with project load.
+      </p>
+
+      <h2 style="margin-top: 32px;">Client-Side Infrastructure Costs (Post-Delivery)</h2>
+      <p>
+        After project delivery the client owns and pays for their own data infrastructure. These costs are <em>not</em> included in the AD&nbsp;Homes project fee. The table below gives typical monthly ranges so clients can budget accurately.
+      </p>
+
+      <h4 style="margin-top: 18px;">Google / BigQuery Stack (Default)</h4>
+      <table class="revenue-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Tier / Notes</th>
+            <th>Est. Monthly</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BigQuery &mdash; storage</td>
+            <td>First 10&nbsp;GB free, then $0.02/GB</td>
+            <td>$0 &ndash; $5</td>
+          </tr>
+          <tr>
+            <td>BigQuery &mdash; queries</td>
+            <td>First 1&nbsp;TB/mo free, then $6.25/TB</td>
+            <td>$0 &ndash; $25</td>
+          </tr>
+          <tr>
+            <td>Vercel (dashboard hosting)</td>
+            <td>Pro plan</td>
+            <td>$20</td>
+          </tr>
+          <tr>
+            <td>Fivetran &mdash; Starter</td>
+            <td>1 connector (free tier available)</td>
+            <td>$0 &ndash; $60</td>
+          </tr>
+          <tr>
+            <td>Fivetran &mdash; Standard</td>
+            <td>2&ndash;3 connectors (if multiple ERPs)</td>
+            <td>$120 &ndash; $250</td>
+          </tr>
+          <tr>
+            <td>Domain + DNS</td>
+            <td>Annual, amortized</td>
+            <td>~$1 &ndash; $2</td>
+          </tr>
+          <tr>
+            <td>Google Workspace (optional)</td>
+            <td>If using Sheets as ERP bridge</td>
+            <td>$0 (likely existing)</td>
+          </tr>
+          <tr class="total-row">
+            <td>Typical total &mdash; small builder</td>
+            <td>1 ERP, Sheets bridge, &lt;50 homes/yr</td>
+            <td>$20 &ndash; $80</td>
+          </tr>
+          <tr class="total-row">
+            <td>Typical total &mdash; mid-size builder</td>
+            <td>2&ndash;3 ERPs, Fivetran connectors</td>
+            <td>$140 &ndash; $300</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin-top: 18px;">Standard Pipeline Architecture</h4>
+      <table class="revenue-table">
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Extraction</td>
+            <td>Fivetran (managed connectors)</td>
+            <td>Pulls from client ERPs, spreadsheets, and databases</td>
+          </tr>
+          <tr>
+            <td>Warehouse</td>
+            <td>Google BigQuery</td>
+            <td>Serverless, per-query pricing, no infrastructure management</td>
+          </tr>
+          <tr>
+            <td>Transformation</td>
+            <td>dbt (SQL models)</td>
+            <td>raw &rarr; staging &rarr; mart layers</td>
+          </tr>
+          <tr>
+            <td>Dashboard</td>
+            <td>Next.js (client-owned)</td>
+            <td>Server-rendered app reading from BigQuery via service accounts</td>
+          </tr>
+          <tr>
+            <td>Hosting</td>
+            <td>Vercel</td>
+            <td>Static + SSR deployment</td>
+          </tr>
+          <tr>
+            <td>Auth</td>
+            <td>Vercel Auth / NextAuth</td>
+            <td>Role-based access per client</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top: 14px;">
+        <strong>Key variable:</strong> Fivetran is the largest swing cost. If the client&rsquo;s ERP can export to Google Sheets natively, the Sheets&nbsp;&rarr;&nbsp;BigQuery sync replaces Fivetran entirely and keeps total infrastructure under $25/mo. The Fivetran + BigQuery stack is the default recommendation for all builders due to its generous free tiers, serverless architecture, and minimal ongoing maintenance.
       </p>
     </div>
 
