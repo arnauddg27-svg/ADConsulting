@@ -182,33 +182,78 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "job": {
       const job = jobs.find(j => j.jobCode === detail.value);
       if (!job) break;
-      title = `${job.jobCode} \u2014 ${job.community}`;
-      subtitle = `${job.lot} \u00b7 ${job.plan} \u00b7 ${job.superintendent}`;
+      title = `${job.jobCode} — ${job.community}`;
+      subtitle = `${job.lot} · ${job.plan} · ${job.superintendent}`;
       const jobSales = sales.filter(s => s.jobCode === detail.value);
       const jobLoans = loans.filter(l => l.jobCode === detail.value);
+      const audit = auditJobs.find(a => a.jobCode === detail.value);
       columns = [
         { key: "field", label: "Field", width: "1.2fr" },
         { key: "value", label: "Value", width: "1fr", align: "right" },
       ];
-      rows = [
-        { field: "Stage", value: job.stage },
-        { field: "Completion", value: fmtPct(job.completionPct) },
-        { field: "Days in Phase", value: `${job.daysInCurrentPhase}d` },
-        { field: "Total Cycle Days", value: `${job.totalCycleDays}d` },
-        { field: "Contract Value", value: fmt$(job.contractValue) },
-        { field: "Original Budget", value: fmt$(job.originalBudget) },
-        { field: "Actual Cost", value: fmt$(job.actualCostToDate) },
-        { field: "WIP Balance", value: fmt$(job.wipBalance) },
-        { field: "Projected Final", value: fmt$(job.projectedFinalCost) },
-        { field: "Margin", value: `${fmt$(job.margin)} (${fmtPct(job.marginPct)})` },
-        { field: "Lot Cost", value: fmt$(job.lotCost) },
-        { field: "Start Date", value: job.startDate },
-        { field: "Est. Completion", value: job.estCompletion },
-        ...(jobSales.length > 0 ? [{ field: "\u2014\u2014 Sales \u2014\u2014", value: "" }] : []),
-        ...jobSales.map(s => ({ field: `Sale \u2192 ${s.buyer}`, value: `${fmt$(s.salePrice)} (${s.status})` })),
-        ...(jobLoans.length > 0 ? [{ field: "\u2014\u2014 Loans \u2014\u2014", value: "" }] : []),
-        ...jobLoans.map(l => ({ field: `Loan \u2192 ${l.lender}`, value: `${fmt$(l.loanAmount)} (${fmtPct(l.drawPct)} drawn)` })),
-      ];
+
+      if (audit) {
+        /* Pro Forma P&L Card — like the export.pdf */
+        rows = [
+          { field: "══ REVENUE ══", value: "" },
+          { field: "Sale Price", value: fmt$(audit.salePrice) },
+          { field: "Proceeds", value: fmt$(audit.proceeds) },
+          { field: "Seller Credit", value: fmt$(audit.sellerCredit) },
+          { field: "", value: "" },
+          { field: "══ DIRECT COSTS ══", value: "" },
+          { field: "Lot / Land", value: fmt$(audit.lotLand) },
+          { field: "Permitting", value: fmt$(audit.permitting) },
+          { field: "Site Work", value: fmt$(audit.siteWork) },
+          { field: "Vertical", value: fmt$(audit.vertical) },
+          { field: "Options", value: fmt$(audit.options) },
+          { field: "Dirt / Pad Build", value: fmt$(audit.dirtPad) },
+          { field: "Dumpsters / Toilets", value: fmt$(audit.dumpsters) },
+          { field: "Total Direct", value: fmt$(audit.totalDirectCost) },
+          { field: "", value: "" },
+          { field: "══ INDIRECT COSTS ══", value: "" },
+          { field: "Financing", value: fmt$(audit.financing) },
+          { field: "Insurance / Builder's Risk", value: fmt$(audit.insurance) },
+          { field: "Closing Cost", value: fmt$(audit.closingCost) },
+          { field: "Total Indirect", value: fmt$(audit.totalIndirectCost) },
+          { field: "", value: "" },
+          { field: "══ UTILITIES & ENVIRONMENTAL ══", value: "" },
+          { field: "Individual Well", value: fmt$(audit.well) },
+          { field: "Septic System", value: fmt$(audit.septic) },
+          { field: "Water Filtration", value: fmt$(audit.waterFiltration) },
+          { field: "Gopher Tortoise Survey", value: fmt$(audit.gopherTortoise) },
+          { field: "Tree Survey", value: fmt$(audit.treeSurvey) },
+          { field: "", value: "" },
+          { field: "══ TOTALS ══", value: "" },
+          { field: "Total Cost", value: fmt$(audit.totalCost) },
+          { field: "Builder Fee", value: `${fmt$(audit.builderFee)} (${audit.builderFeePct}%)` },
+          { field: "Contingency", value: fmt$(audit.contingency) },
+          { field: "", value: "" },
+          { field: "══ BOTTOM LINE ══", value: "" },
+          { field: "Net Profit", value: fmt$(audit.netProfit) },
+          { field: "Net Margin", value: fmtPct(audit.netMargin) },
+        ];
+      } else {
+        /* Standard job detail + related sales/loans */
+        rows = [
+          { field: "Stage", value: job.stage },
+          { field: "Completion", value: fmtPct(job.completionPct) },
+          { field: "Days in Phase", value: `${job.daysInCurrentPhase}d` },
+          { field: "Total Cycle Days", value: `${job.totalCycleDays}d` },
+          { field: "Contract Value", value: fmt$(job.contractValue) },
+          { field: "Original Budget", value: fmt$(job.originalBudget) },
+          { field: "Actual Cost", value: fmt$(job.actualCostToDate) },
+          { field: "WIP Balance", value: fmt$(job.wipBalance) },
+          { field: "Projected Final", value: fmt$(job.projectedFinalCost) },
+          { field: "Margin", value: `${fmt$(job.margin)} (${fmtPct(job.marginPct)})` },
+          { field: "Lot Cost", value: fmt$(job.lotCost) },
+          { field: "Start Date", value: job.startDate },
+          { field: "Est. Completion", value: job.estCompletion },
+          ...(jobSales.length > 0 ? [{ field: "—— Sales ——", value: "" }] : []),
+          ...jobSales.map(s => ({ field: `Sale → ${s.buyer}`, value: `${fmt$(s.salePrice)} (${s.status})` })),
+          ...(jobLoans.length > 0 ? [{ field: "—— Loans ——", value: "" }] : []),
+          ...jobLoans.map(l => ({ field: `Loan → ${l.lender}`, value: `${fmt$(l.loanAmount)} (${fmtPct(l.drawPct)} drawn)` })),
+        ];
+      }
       break;
     }
 
