@@ -980,7 +980,7 @@ export function getMilestoneSparklines(allJobs: SHJob[]): SHMilestoneSparkline[]
     const sortedKeys = Array.from(monthMap.keys()).sort();
     const data = sortedKeys.map(k => {
       const vals = monthMap.get(k)!;
-      return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      return Math.round(vals.reduce((a: number, b: number) => a + b, 0) / vals.length);
     });
 
     const current = data.length ? data[data.length - 1] : 0;
