@@ -91,7 +91,7 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
 
       <div className="sh-kpi-row">
         <SHKpiCard label="Total Projects" value={fmtN(subdivisions.length)} sub={`${kpis.activeSubs} active`} />
-        <SHKpiCard label="Total Lots" value={fmtN(kpis.totalLots)} progress={Math.round(((kpis.totalLots - kpis.lotsRemaining) / kpis.totalLots) * 100)} sub={`${kpis.lotsRemaining} remaining`} accent="#22d3ee" />
+        <SHKpiCard label="Total Lots" value={fmtN(kpis.totalLots)} progress={Math.round(((kpis.totalLots - kpis.totalRemaining) / kpis.totalLots) * 100)} sub={`${kpis.totalRemaining} remaining`} accent="#22d3ee" />
         <SHKpiCard label="Total Investment" value={fmt$(kpis.totalInvestment)} sparkline={[8.2, 9.1, 10.5, 12.0, 14.2, 16.8, 19.5, 22.0]} />
         <SHKpiCard label="Avg Absorption" value={`${kpis.avgAbsorption.toFixed(1)}/mo`} sub="Sales velocity" accent="#3b82f6" />
       </div>
