@@ -21,11 +21,11 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
 
   /* Margin distribution */
   const marginBuckets = [
-    { label: "< 0%", value: audits.filter(a => a.netMargin < 0).length, color: "#f46a6a" },
-    { label: "0–10%", value: audits.filter(a => a.netMargin >= 0 && a.netMargin < 10).length, color: "#efb562" },
-    { label: "10–20%", value: audits.filter(a => a.netMargin >= 10 && a.netMargin < 20).length, color: "#22d3ee" },
-    { label: "20–30%", value: audits.filter(a => a.netMargin >= 20 && a.netMargin < 30).length, color: "#14b8a6" },
-    { label: "30%+", value: audits.filter(a => a.netMargin >= 30).length, color: "#0f766e" },
+    { label: "< 0%", value: audits.filter(a => a.netMargin < 0).length, color: "#ef4444" },
+    { label: "0–10%", value: audits.filter(a => a.netMargin >= 0 && a.netMargin < 10).length, color: "#f59e0b" },
+    { label: "10–15%", value: audits.filter(a => a.netMargin >= 10 && a.netMargin < 15).length, color: "#22d3ee" },
+    { label: "15–20%", value: audits.filter(a => a.netMargin >= 15 && a.netMargin < 20).length, color: "#14b8a6" },
+    { label: "20%+", value: audits.filter(a => a.netMargin >= 20).length, color: "#0f766e" },
   ].filter(b => b.value > 0);
 
   /* Top at-risk jobs (worst margin first) */

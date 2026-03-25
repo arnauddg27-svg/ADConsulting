@@ -15,6 +15,7 @@ const OCC_COLORS: Record<string, string> = {
   vacant: "#3b82f6",
   "make-ready": "#efb562",
   eviction: "#f46a6a",
+  "notice-to-vacate": "#a855f7",
 };
 
 interface Props {
@@ -123,7 +124,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
               { key: "sqft", label: "SqFt", width: "60px", align: "right", render: r => fmtN(Number(r.sqft)) },
               { key: "occupancy", label: "Status", width: "90px", render: r => {
                 const s = String(r.occupancy);
-                const tone = s === "leased" ? "good" : s === "vacant" ? "watch" : s === "make-ready" ? "watch" : "alert";
+                const tone = s === "leased" ? "good" : s === "vacant" ? "watch" : s === "make-ready" ? "watch" : s === "notice-to-vacate" ? "watch" : "alert";
                 return <SHPill tone={tone} label={s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")} />;
               }},
               { key: "tenant", label: "Tenant", width: "120px", render: r => String(r.tenant ?? "\u2014") },

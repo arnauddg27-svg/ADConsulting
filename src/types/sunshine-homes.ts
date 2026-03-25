@@ -111,7 +111,7 @@ export interface SHPropertyUnit {
   marketRent: number;
   deposit: number;
   managementPct: number;
-  occupancy: "leased" | "vacant" | "make-ready" | "eviction";
+  occupancy: "leased" | "vacant" | "make-ready" | "eviction" | "notice-to-vacate";
   tenant: string | null;
   leaseEnd: string | null;
   delinquentAmount: number;

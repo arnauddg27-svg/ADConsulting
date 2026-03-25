@@ -13,6 +13,7 @@ const OCC_COLORS: Record<string, string> = {
   vacant: "#3b82f6",
   "make-ready": "#efb562",
   eviction: "#f46a6a",
+  "notice-to-vacate": "#a855f7",
 };
 
 interface Props {

@@ -324,36 +324,44 @@ function generateSales(): SHSale[] {
 export const sales: SHSale[] = generateSales();
 
 /* ═══════════════════════════════════════════════════════════
-   LOANS (50 total) — generated
+   LOANS (~80 total) — generated from actual jobs array
    ═══════════════════════════════════════════════════════════ */
+const EXTRA_LENDERS = [
+  "First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank",
+  "Wells Fargo CRE", "JPMorgan Builder Finance", "Centennial Bank", "Seacoast Bank", "Valley National",
+] as const;
+
 function generateLoans(): SHLoan[] {
   const rng = createRng(271);
-  const { rand, pick, between } = rng;
+  const { rand, pick, between, shuffle } = rng;
   const result: SHLoan[] = [];
 
-  for (let i = 0; i < 50; i++) {
-    const comm = pick(COMMUNITIES);
-    const meta = COMM_META[comm];
-    const lender = pick(LENDERS);
-    const loanAmount = between(250000, 400000);
+  /* Pick ~80 jobs from the actual jobs array to create loans for */
+  const shuffledJobs = shuffle([...jobs]);
+  const loanJobs = shuffledJobs.slice(0, Math.min(80, shuffledJobs.length));
+
+  for (let i = 0; i < loanJobs.length; i++) {
+    const job = loanJobs[i];
+    const lender = pick(EXTRA_LENDERS);
+    const loanAmount = between(220000, 480000);
     const drawPct = Math.round((rand() * 85 + 10) * 10) / 10; // 10-95%
     const totalDrawn = Math.round(loanAmount * drawPct / 100);
-    const interestRate = Math.round((6.75 + rand() * 1.0) * 100) / 100;
-    const daysUntilExpiration = between(5, 300);
+    const interestRate = Math.round((5.50 + rand() * 2.5) * 100) / 100; // 5.50% to 8.00%
+    const daysUntilExpiration = between(-30, 365); // some already expired
     const expDate = addDays("2026-03-25", daysUntilExpiration);
 
     result.push({
       id: i + 1,
-      jobCode: `SH-${between(1001, 8020)}`,
-      community: comm,
-      city: meta.city,
+      jobCode: job.jobCode,
+      community: job.community,
+      city: job.city,
       lender,
       loanAmount,
       totalDrawn,
       drawPct,
       interestRate,
       expirationDate: expDate,
-      daysUntilExpiration,
+      daysUntilExpiration: Math.max(0, daysUntilExpiration),
     });
   }
   return result;
@@ -485,22 +493,22 @@ function generatePermits(): SHPermit[] {
 export const permits: SHPermit[] = generatePermits();
 
 /* ═══════════════════════════════════════════════════════════
-   PROPERTY MANAGEMENT (36 units) — generated
+   PROPERTY MANAGEMENT (~60 units) — generated
    ═══════════════════════════════════════════════════════════ */
 function generatePMUnits(): SHPropertyUnit[] {
   const rng = createRng(503);
   const { rand, pick, between } = rng;
   const result: SHPropertyUnit[] = [];
 
-  const streetNames: Record<string, string> = {
-    "Sunshine Ridge": "Sunshine Blvd",
-    "Palm Coast Estates": "Palm Coast Dr",
-    "Emerald Bay": "Emerald Bay Ln",
-    "Coral Springs Village": "Coral Springs Ct",
-    "Magnolia Park": "Magnolia Way",
-    "Cypress Landing": "Cypress Ct",
-    "Lake Nona Shores": "Nona Shore Dr",
-    "Riverview Heights": "Riverview Blvd",
+  const streetNames: Record<string, string[]> = {
+    "Sunshine Ridge": ["Sunshine Blvd", "Sun Valley Dr"],
+    "Palm Coast Estates": ["Palm Coast Dr", "Coastal Way"],
+    "Emerald Bay": ["Emerald Bay Ln", "Bay View Ct"],
+    "Coral Springs Village": ["Coral Springs Ct", "Village Green Dr"],
+    "Magnolia Park": ["Magnolia Way", "Park Meadow Ln"],
+    "Cypress Landing": ["Cypress Ct", "Landing Cir"],
+    "Lake Nona Shores": ["Nona Shore Dr", "Lakeview Ter"],
+    "Riverview Heights": ["Riverview Blvd", "Heights Way"],
   };
 
   const tenantFamilies = [
@@ -508,7 +516,10 @@ function generatePMUnits(): SHPropertyUnit[] {
     "Garcia", "Owens", "Thompson", "Morgan", "Wilson", "Chang", "Reeves", "Fox",
     "Hayes", "Cooper", "Barnes", "Grant", "Webb", "Cruz", "Lopez", "Turner",
     "Bennett", "Howard", "Reed", "Fisher", "Arnold", "Stone", "Dunn", "Gibson",
-    "Graham", "Price", "Butler", "Hart",
+    "Graham", "Price", "Butler", "Hart", "Marshall", "Watson", "Murray", "Wells",
+    "Jordan", "Flores", "Hunt", "Simmons", "Cole", "Ortega", "Silva", "Shaw",
+    "Tucker", "Powers", "Blake", "Hoffman", "Holland", "Dean", "Kelley", "Page",
+    "Schwartz", "Barker", "Valdez", "Medina", "Hicks", "Chambers",
   ] as const;
 
   const planBedsBaths: Record<string, { beds: string; sqft: number }> = {
@@ -519,35 +530,38 @@ function generatePMUnits(): SHPropertyUnit[] {
     "Catalina 1750": { beds: "3/2", sqft: 1750 },
   };
 
+  /* Occupancy pool for ~60 units: ~44 leased, ~6 vacant, ~4 make-ready, ~3 eviction, ~3 notice-to-vacate */
   const occupancyPool: SHPropertyUnit["occupancy"][] = [
-    ...Array(26).fill("leased" as const),
-    ...Array(4).fill("vacant" as const),
-    ...Array(3).fill("make-ready" as const),
+    ...Array(44).fill("leased" as const),
+    ...Array(6).fill("vacant" as const),
+    ...Array(4).fill("make-ready" as const),
     ...Array(3).fill("eviction" as const),
+    ...Array(3).fill("notice-to-vacate" as const),
   ];
 
   let id = 1;
-  // Distribute across communities: roughly 4-5 per community
-  const commCounts = [5, 5, 4, 5, 4, 4, 5, 4]; // total = 36
+  // Distribute across communities: 7-8 per community, total = 60
+  const commCounts = [8, 8, 7, 8, 7, 7, 8, 7]; // total = 60
 
   for (let ci = 0; ci < COMMUNITIES.length; ci++) {
     const comm = COMMUNITIES[ci];
     const meta = COMM_META[comm];
-    const street = streetNames[comm] ?? "Main St";
+    const streets = streetNames[comm] ?? ["Main St"];
     const count = commCounts[ci];
 
     for (let j = 0; j < count; j++) {
+      const street = streets[j % streets.length];
       const plan = pick(PLANS);
       const info = planBedsBaths[plan];
       const occupancy = occupancyPool[id - 1] ?? "leased";
-      const isOccupied = occupancy === "leased" || occupancy === "eviction";
-      const marketRent = between(2000, 3400);
-      const monthlyRent = isOccupied ? marketRent - between(0, 100) : 0;
+      const isOccupied = occupancy === "leased" || occupancy === "eviction" || occupancy === "notice-to-vacate";
+      const marketRent = between(1800, 3600);
+      const monthlyRent = isOccupied ? marketRent - between(0, 150) : 0;
       const tenant = isOccupied ? `${pick(tenantFamilies)} Family` : null;
       const leaseEnd = isOccupied ? dateToStr(2026 + (rand() > 0.5 ? 1 : 0), between(1, 12), between(1, 28)) : null;
-      const isDelinquent = isOccupied && rand() > 0.78;
+      const isDelinquent = isOccupied && rand() > 0.80;
       const delinquentAmount = isDelinquent ? monthlyRent : 0;
-      const daysPastDue = isDelinquent ? between(5, 28) : 0;
+      const daysPastDue = isDelinquent ? between(3, 27) : 0; // stay under 28
       const managementPct = Math.round((8 + rand() * 2) * 10) / 10;
       const deposit = monthlyRent > 0 ? monthlyRent : marketRent;
 
@@ -1165,15 +1179,12 @@ export function getAuditKPIs(filteredAudits: SHAuditJob[]) {
 
 export function getAuditCostBreakdown(filteredAudits: SHAuditJob[]) {
   return [
-    { label: "Vertical",    value: filteredAudits.reduce((s, a) => s + a.vertical, 0),    color: "#0f766e" },
-    { label: "Lot / Land",  value: filteredAudits.reduce((s, a) => s + a.lotLand, 0),     color: "#0d9488" },
-    { label: "Site Work",   value: filteredAudits.reduce((s, a) => s + a.siteWork, 0),    color: "#14b8a6" },
-    { label: "Permitting",  value: filteredAudits.reduce((s, a) => s + a.permitting, 0),  color: "#22d3ee" },
-    { label: "Financing",   value: filteredAudits.reduce((s, a) => s + a.financing, 0),   color: "#3b82f6" },
-    { label: "Dirt / Pad",  value: filteredAudits.reduce((s, a) => s + a.dirtPad, 0),     color: "#1e40af" },
-    { label: "Dumpsters",   value: filteredAudits.reduce((s, a) => s + a.dumpsters, 0),   color: "#6366f1" },
-    { label: "Utilities",   value: filteredAudits.reduce((s, a) => s + a.well + a.septic + a.waterFiltration, 0), color: "#a855f7" },
-    { label: "Other",       value: filteredAudits.reduce((s, a) => s + a.insurance + a.closingCost + a.options + a.gopherTortoise + a.treeSurvey, 0), color: "#64748b" },
+    { label: "Vertical",                  value: filteredAudits.reduce((s, a) => s + a.vertical, 0),    color: "#0f766e" },
+    { label: "Lot / Land",                value: filteredAudits.reduce((s, a) => s + a.lotLand, 0),     color: "#14b8a6" },
+    { label: "Site Work",                 value: filteredAudits.reduce((s, a) => s + a.siteWork, 0),    color: "#22d3ee" },
+    { label: "Permitting & Fees",         value: filteredAudits.reduce((s, a) => s + a.permitting + a.financing, 0), color: "#3b82f6" },
+    { label: "Utilities & Infrastructure", value: filteredAudits.reduce((s, a) => s + a.dirtPad + a.dumpsters + a.well + a.septic + a.waterFiltration, 0), color: "#6366f1" },
+    { label: "Other",                     value: filteredAudits.reduce((s, a) => s + a.insurance + a.closingCost + a.options + a.gopherTortoise + a.treeSurvey, 0), color: "#64748b" },
   ];
 }
 
