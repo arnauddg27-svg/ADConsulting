@@ -82,7 +82,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
               { key: "lot", label: "Lot", width: "60px" },
               { key: "county", label: "County", width: "90px" },
               { key: "entity", label: "Entity", width: "150px" },
-              { key: "jobType", label: "Job Type", width: "90px", render: r => <SHPill tone={String(r.jobType) === "Closed" ? "good" : String(r.jobType) === "Construction" ? "watch" : undefined} label={String(r.jobType)} /> },
+              { key: "jobType", label: "Job Type", width: "90px", render: r => { const jt = String(r.jobType); return <SHPill tone={jt === "Closed" || jt === "Completed" ? "good" : jt === "Construction" ? "watch" : "alert"} label={jt} />; } },
               { key: "plan", label: "Plan", width: "100px" },
               { key: "superintendent", label: "Super", width: "100px" },
               { key: "stage", label: "Stage", width: "100px", render: (r) => {
