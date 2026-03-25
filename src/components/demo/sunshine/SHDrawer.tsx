@@ -48,7 +48,7 @@ const permitDaysPill = (r: Record<string, unknown>) => {
 
 const permitStatusPill = (r: Record<string, unknown>) => {
   const s = String(r.status);
-  return <SHPill tone={s === "approved" || s === "issued" ? "good" : s === "in-review" ? "watch" : s === "rejected" ? "alert" : "neutral"} label={s.replace(/-/g, " ")} />;
+  return <SHPill tone={s === "approved" || s === "issued" ? "good" : s === "in-review" || s === "pending" ? "watch" : "alert"} label={s.replace(/-/g, " ")} />;
 };
 
 const permitCols: Col[] = [
