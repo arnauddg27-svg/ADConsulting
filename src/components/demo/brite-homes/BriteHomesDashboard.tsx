@@ -27,6 +27,7 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   jobType: null,
   entity: null,
   community: null,
+  timePeriod: "all",
 };
 
 export default function BriteHomesDashboard() {
