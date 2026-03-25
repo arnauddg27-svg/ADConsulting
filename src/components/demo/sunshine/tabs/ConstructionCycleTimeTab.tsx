@@ -64,9 +64,9 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
       {/* KPIs */}
       <div className="sh-kpi-row">
         <SHKpiCard label="Avg Cycle Time" value={`${avgCycle}d`} sub="Start to CO" sparkline={cycleTrend.map(t => t.avgDays)} />
-        <SHKpiCard label="Target Cycle" value={`${totalPhaseDays}d`} sub="Sum of phase averages" accent="#22d3ee" />
-        <SHKpiCard label="Completions" value={fmtN(completionsThisPeriod)} sub="COs received" accent="#0f766e" />
-        <SHKpiCard label="In Construction" value={fmtN(activeCount)} sub="Active jobs" accent="#3b82f6" />
+        <SHKpiCard label="Target Cycle" value={`${totalPhaseDays}d`} sub="Sum of phase averages" accent="#22d3ee" delta={avgCycle > totalPhaseDays ? `+${avgCycle - totalPhaseDays}d over` : `${totalPhaseDays - avgCycle}d under`} deltaDir={avgCycle <= totalPhaseDays ? "up" : "down"} />
+        <SHKpiCard label="Completions" value={fmtN(completionsThisPeriod)} sub="COs received" accent="#0f766e" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8, completionsThisPeriod]} delta="+2 vs prior" deltaDir="up" />
+        <SHKpiCard label="In Construction" value={fmtN(activeCount)} sub="Active jobs" accent="#3b82f6" progress={Math.round((activeCount / Math.max(jobs.length, 1)) * 100)} delta={`${Math.round((activeCount / Math.max(jobs.length, 1)) * 100)}% of total`} deltaDir="neutral" />
       </div>
 
       {/* Phase duration bar + histogram */}

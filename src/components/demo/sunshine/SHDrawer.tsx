@@ -774,7 +774,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         </div>
 
         {/* Table */}
-        <div style={{ flex: 1, overflow: "hidden", padding: "0 4px" }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "0 4px" }}>
           {renderTable(columns, rows)}
         </div>
       </div>

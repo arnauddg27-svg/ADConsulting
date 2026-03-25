@@ -54,7 +54,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
       <div className="sh-kpi-row">
         <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} delta={`+${kpis.activeDeals} in pipeline`} deltaDir="up" />
         <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[80, 95, 110, 120, 135, 150, 160, 170]} delta="+35 lots YoY" deltaDir="up" />
-        <SHKpiCard label="Total Investment" value={fmt$(totalInvestment)} accent="#22d3ee" />
+        <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} delta="+18% YoY" deltaDir="up" />
         <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} delta="+4% vs prior" deltaDir="up" />
       </div>
 

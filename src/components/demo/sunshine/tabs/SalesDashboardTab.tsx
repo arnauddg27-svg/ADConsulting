@@ -38,9 +38,9 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onDrill }: 
 
       <div className="sh-kpi-row">
         <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} delta="+2 this month" deltaDir="up" />
-        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" />
-        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} />
-        <SHKpiCard label="Pending Closings" value={fmtN(kpis.pendingClosings)} accent="#efb562" />
+        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} delta="+15% YoY" deltaDir="up" />
+        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} delta="+3% vs prior" deltaDir="up" />
+        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" />
       </div>
 
       <div className="sh-panels-row">

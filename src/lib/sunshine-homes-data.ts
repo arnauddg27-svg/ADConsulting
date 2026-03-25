@@ -631,7 +631,7 @@ function isInTimePeriod(dateStr: string | null | undefined, period: import("@/ty
   return true;
 }
 
-export function matchFilters<T extends { community?: string; city?: string; entity?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null }>(
+export function matchFilters<T extends { community?: string; city?: string; entity?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseEnd?: string | null }>(
   item: T,
   filters: SHDashboardFilters,
 ): boolean {
@@ -639,7 +639,7 @@ export function matchFilters<T extends { community?: string; city?: string; enti
   if (filters.entity && item.entity !== filters.entity) return false;
   if (filters.community && item.community !== filters.community) return false;
   if (filters.timePeriod && filters.timePeriod !== "all") {
-    const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate;
+    const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate || item.expirationDate || item.leaseEnd;
     if (!isInTimePeriod(dateField, filters.timePeriod)) return false;
   }
   return true;

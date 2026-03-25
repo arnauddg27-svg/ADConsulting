@@ -17,6 +17,16 @@ interface SHCompactTableProps {
 export default function SHCompactTable({ columns, rows, onRowClick }: SHCompactTableProps) {
   const gridCols = columns.map(c => c.width ?? "1fr").join(" ");
 
+  if (rows.length === 0) {
+    return (
+      <div className="sh-compact-table">
+        <div style={{ padding: "20px 12px", fontSize: 11, color: "var(--sh-text-muted)", textAlign: "center" }}>
+          No data for current filters
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sh-compact-table">
       <div className="sh-compact-table-head" style={{ gridTemplateColumns: gridCols }}>

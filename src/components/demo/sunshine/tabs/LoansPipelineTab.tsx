@@ -107,9 +107,12 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
           onClick={() => onDrill({ type: "loan-metric", value: "draw-pct", label: "Avg Draw %" })}
         />
         <SHKpiCard
-          label="Avg Interest Rate"
+          label="Avg Rate"
           value={`${avgRate.toFixed(2)}%`}
           accent="#3b82f6"
+          sparkline={[5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.2, 6.4, 6.3, avgRate]}
+          delta="+0.2% vs Q3"
+          deltaDir="down"
           onClick={() => onDrill({ type: "loan-metric", value: "rate", label: "Avg Interest Rate" })}
         />
       </div>

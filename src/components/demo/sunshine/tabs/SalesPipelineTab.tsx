@@ -71,6 +71,9 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
           label="Under Contract"
           value={fmtN(underContract)}
           accent="#efb562"
+          sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8, underContract]}
+          delta={`${underContract} pending`}
+          deltaDir="neutral"
           onClick={() => onDrill({ type: "sale-status", value: "pending", label: "Under Contract" })}
         />
         <SHKpiCard

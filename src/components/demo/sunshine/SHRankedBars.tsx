@@ -23,6 +23,14 @@ const STATUS_GRADIENTS = {
 const DEFAULT_GRADIENT = "linear-gradient(90deg, #0f766e, #14b8a6, #22d3ee)";
 
 export default function SHRankedBars({ items, formatValue, onBarClick, showRank }: SHRankedBarsProps) {
+  if (items.length === 0) {
+    return (
+      <div style={{ padding: "20px 12px", fontSize: 11, color: "var(--sh-text-muted)", textAlign: "center" }}>
+        No data for current filters
+      </div>
+    );
+  }
+
   const max = Math.max(...items.map(i => i.target ?? i.value), 1);
 
   return (

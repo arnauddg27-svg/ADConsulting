@@ -70,7 +70,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
           onClick={() => onDrill({ type: "land-metric", value: "lots", label: "Total Lots" })}
         />
         <SHKpiCard
-          label="Total Investment"
+          label="Total Invested"
           value={fmt$(totalInvestment)}
           accent="#3b82f6"
           sparkline={SPARKLINE_INVEST}

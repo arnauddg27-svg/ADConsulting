@@ -77,18 +77,27 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
           value={fmtN(kpis.inReview + kpis.pending)}
           sub={`${kpis.inReview} in review, ${kpis.pending} pending`}
           accent="#efb562"
+          sparkline={[8, 10, 9, 11, 10, 12, 11, 10, 9, kpis.inReview + kpis.pending]}
+          delta={`${kpis.pending} pending`}
+          deltaDir="neutral"
           onClick={() => onDrill({ type: "permit-status", value: "in-progress", label: "In Progress Permits" })}
         />
         <SHKpiCard
           label="Approved"
           value={fmtN(kpis.approved)}
           accent="#14b8a6"
+          progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}
+          delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% rate`}
+          deltaDir="up"
           onClick={() => onDrill({ type: "permit-status", value: "approved", label: "Approved Permits" })}
         />
         <SHKpiCard
           label="Issued"
           value={fmtN(kpis.issued)}
           accent="#22d3ee"
+          sparkline={[5, 6, 7, 8, 9, 10, 11, 12, 13, kpis.issued]}
+          delta="+3 this month"
+          deltaDir="up"
           onClick={() => onDrill({ type: "permit-status", value: "issued", label: "Issued Permits" })}
         />
         <SHKpiCard

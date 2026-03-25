@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SECTIONS, jobs, fmt$, fmtN } from "@/lib/sunshine-homes-data";
 import type { SHTab, SHSection } from "@/types/sunshine-homes";
 
@@ -18,6 +18,13 @@ export default function RailNav({ activeTab, onTabChange }: RailNavProps) {
     for (const s of SECTIONS) init[s.id] = s.id === activeSection;
     return init as Record<SHSection, boolean>;
   });
+
+  /* Auto-expand section when activeTab changes */
+  useEffect(() => {
+    if (activeSection) {
+      setExpanded(prev => ({ ...prev, [activeSection]: true }));
+    }
+  }, [activeSection]);
 
   const toggle = (id: SHSection) =>
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));

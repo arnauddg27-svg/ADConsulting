@@ -86,14 +86,14 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Land</div>
         <h2 className="sh-tab-title">Subdivision Pipeline</h2>
-        <p className="sh-tab-desc">Development projects, lot inventory, infrastructure status, and absorption metrics.</p>
+        <p className="sh-tab-desc">Development projects, lot inventory, infrastructure status, and absorption metrics. Click any element for details.</p>
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Projects" value={fmtN(subdivisions.length)} sub={`${kpis.activeSubs} active`} />
+        <SHKpiCard label="Total Projects" value={fmtN(subdivisions.length)} sub={`${kpis.activeSubs} active`} sparkline={[4, 5, 5, 6, 6, 7, 7, 8, 8, subdivisions.length]} delta={`${kpis.activeSubs} active`} deltaDir="up" />
         <SHKpiCard label="Total Lots" value={fmtN(kpis.totalLots)} progress={Math.round(((kpis.totalLots - kpis.totalRemaining) / kpis.totalLots) * 100)} sub={`${kpis.totalRemaining} remaining`} accent="#22d3ee" />
-        <SHKpiCard label="Total Investment" value={fmt$(kpis.totalInvestment)} sparkline={[8.2, 9.1, 10.5, 12.0, 14.2, 16.8, 19.5, 22.0]} />
-        <SHKpiCard label="Avg Absorption" value={`${kpis.avgAbsorption.toFixed(1)}/mo`} sub="Sales velocity" accent="#3b82f6" />
+        <SHKpiCard label="Total Invested" value={fmt$(kpis.totalInvestment)} sparkline={[8.2, 9.1, 10.5, 12.0, 14.2, 16.8, 19.5, 22.0]} />
+        <SHKpiCard label="Avg Absorption" value={`${kpis.avgAbsorption.toFixed(1)}/mo`} sub="Sales velocity" accent="#3b82f6" sparkline={[2.1, 2.3, 2.5, 2.4, 2.6, 2.8, 3.0, 3.1, 3.3, 3.5]} delta="+0.4/mo vs Q3" deltaDir="up" />
       </div>
 
       <div className="sh-panels-row">

@@ -36,8 +36,8 @@ export default function LoansDashboardTab({ loans, onDrill }: Props) {
       <div className="sh-kpi-row">
         <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5]} />
         <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} />
-        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" />
-        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} />
+        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} delta="Diversified" deltaDir="up" />
+        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} sparkline={[4, 3, 5, 4, 3, 2, 3, 4, 3, kpis.expiringSoon]} delta={kpis.expiringSoon > 0 ? "Action needed" : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? "down" : "up"} />
       </div>
 
       <div className="sh-panels-row">

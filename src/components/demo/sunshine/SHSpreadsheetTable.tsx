@@ -22,6 +22,16 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const scrollCols = columns.filter(c => !c.frozen);
   const visibleRows = rows.slice(0, maxRows);
 
+  if (rows.length === 0) {
+    return (
+      <div className="sh-ss-table">
+        <div style={{ padding: "24px 16px", fontSize: 11, color: "var(--sh-text-muted)", textAlign: "center" }}>
+          No matching records for current filters
+        </div>
+      </div>
+    );
+  }
+
   const gridFrozen = frozenCols.map(c => c.width).join(" ");
   const gridScroll = scrollCols.map(c => c.width).join(" ");
 

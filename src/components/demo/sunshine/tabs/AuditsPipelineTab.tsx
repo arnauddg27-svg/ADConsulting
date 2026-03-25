@@ -28,10 +28,10 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Revenue" value={fmt$(totalRevenue)} />
-        <SHKpiCard label="Total Cost" value={fmt$(totalCost)} accent="#22d3ee" />
-        <SHKpiCard label="Total Profit" value={fmt$(totalProfit)} accent={totalProfit > 0 ? "#14b8a6" : "#f46a6a"} />
-        <SHKpiCard label="Avg Builder Fee" value={fmtPct(avgBuilderFee)} accent="#3b82f6" />
+        <SHKpiCard label="Total Revenue" value={fmt$(totalRevenue)} sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" />
+        <SHKpiCard label="Total Cost" value={fmt$(totalCost)} accent="#22d3ee" progress={Math.round((totalCost / Math.max(totalRevenue, 1)) * 100)} delta={`${Math.round((totalCost / Math.max(totalRevenue, 1)) * 100)}% of revenue`} deltaDir="neutral" />
+        <SHKpiCard label="Total Profit" value={fmt$(totalProfit)} accent={totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={totalProfit > 0 ? "up" : "down"} />
+        <SHKpiCard label="Avg Builder Fee" value={fmtPct(avgBuilderFee)} accent="#3b82f6" sparkline={[4.0, 4.2, 4.1, 4.3, 4.5, 4.4, 4.6, 4.5, 4.7, avgBuilderFee]} delta="+0.3% vs prior" deltaDir="up" />
       </div>
 
       <div className="sh-panels-row single">

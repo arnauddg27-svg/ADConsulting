@@ -51,16 +51,18 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Construction</div>
         <h2 className="sh-tab-title">Cost Metrics</h2>
-        <p className="sh-tab-desc">Budget vs actual, variance analysis, and margin tracking.</p>
+        <p className="sh-tab-desc">Budget vs actual, variance analysis, and margin tracking. Click any element for details.</p>
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Budget" value={fmt$(kpis.totalBudget)} progress={100} />
+        <SHKpiCard label="Total Budget" value={fmt$(kpis.totalBudget)} sparkline={[3.2, 3.5, 3.8, 4.1, 4.4, 4.7, 5.0, 5.2, 5.5, 5.8]} delta="+12% YoY" deltaDir="up" />
         <SHKpiCard
           label="Total Actual"
           value={fmt$(kpis.totalActual)}
           progress={Math.round((kpis.totalActual / kpis.totalBudget) * 100)}
           sub={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% of budget`}
+          delta={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% drawn`}
+          deltaDir="neutral"
         />
         <SHKpiCard
           label="Variance"
@@ -68,6 +70,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           delta={kpis.variance <= 0 ? "Under budget" : "Over budget"}
           deltaDir={kpis.variance <= 0 ? "up" : "down"}
           accent={kpis.variance <= 0 ? "#24c18d" : "#f46a6a"}
+          sparkline={[1.2, -0.5, 0.8, -1.0, 0.3, -0.8, 0.5, -0.3, 0.2, Math.abs(kpis.variance / 1000)]}
         />
         <SHKpiCard
           label="Avg Margin"

@@ -7,8 +7,6 @@ import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHPipelineBoard from "../SHPipelineBoard";
 
-const STAGE_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6", "#1e40af"];
-
 interface Props {
   jobs: SHJob[];
   onDrill: (detail: DrillDetail) => void;
@@ -16,6 +14,9 @@ interface Props {
 
 export default function ConstructionPipelineTab({ jobs, onDrill }: Props) {
   const byStage = getJobsByStage(jobs);
+  const activeJobs = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95).length;
+  const avgCompletion = jobs.length ? Math.round(jobs.reduce((s, j) => s + j.completionPct, 0) / jobs.length) : 0;
+  const closingCount = jobs.filter(j => j.stage === "Closing").length;
 
   return (
     <>
@@ -26,15 +27,10 @@ export default function ConstructionPipelineTab({ jobs, onDrill }: Props) {
       </div>
 
       <div className="sh-kpi-row">
-        {byStage.map((s, i) => (
-          <SHKpiCard
-            key={s.label}
-            label={s.label}
-            value={fmtN(s.value)}
-            accent={STAGE_COLORS[i]}
-            onClick={() => onDrill({ type: "stage", value: s.label, label: s.label })}
-          />
-        ))}
+        <SHKpiCard label="Total Jobs" value={fmtN(jobs.length)} sparkline={[22, 24, 23, 25, 26, 27, 26, 28, 29, 30]} delta="+3 vs prior" deltaDir="up" />
+        <SHKpiCard label="Active Jobs" value={fmtN(activeJobs)} sub="In construction" progress={Math.round((activeJobs / Math.max(jobs.length, 1)) * 100)} delta={`${byStage.length} stages`} deltaDir="neutral" />
+        <SHKpiCard label="Avg Completion" value={`${avgCompletion}%`} accent="#22d3ee" progress={avgCompletion} delta="+5% vs Q3" deltaDir="up" />
+        <SHKpiCard label="Near Closing" value={fmtN(closingCount)} accent="#1e40af" sparkline={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7]} delta={`${closingCount} in closing`} deltaDir="up" />
       </div>
 
       <div className="sh-panels-row single">

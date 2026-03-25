@@ -176,7 +176,7 @@ export default function DashboardShell() {
               Operating Overview
             </div>
             <div className="text-[0.68rem] uppercase tracking-[0.16em] text-slate-500">
-              Illustrative project and cost snapshot
+              Builder Operations Console
             </div>
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function DashboardShell() {
           <span className="badge-dash">Updated 7:30 AM</span>
           <span className="badge-dash text-accent-300">
             <Sparkles size={12} />
-            Illustrative example
+            Sample data
           </span>
         </div>
       </div>

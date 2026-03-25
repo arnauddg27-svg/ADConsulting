@@ -5,12 +5,13 @@ import SunshineDashboard from "@/components/demo/sunshine/SunshineDashboard";
 import CTABanner from "@/components/sections/CTABanner";
 
 const demoHighlights = [
-  "Lifecycle navigation",
-  "KPI tracking",
-  "Construction pipeline",
+  "Land acquisition",
+  "Permitting",
+  "Loans & draws",
+  "Construction",
   "Sales analytics",
-  "Loan management",
   "Property mgmt",
+  "P&L audits",
 ];
 
 export default function DemoPageClient() {
@@ -30,7 +31,7 @@ export default function DemoPageClient() {
                 Every platform we deliver is a fully interactive Next.js
                 application connected to your BigQuery or Snowflake warehouse.
                 Below is Sunshine Homes — a working example with 7 lifecycle
-                sections, cross-filtering, pipeline boards, and drill-downs.
+                sections, 18 interactive views, cross-filtering, pipeline boards, and drill-downs.
               </p>
             </div>
 
@@ -53,7 +54,7 @@ export default function DemoPageClient() {
               Next.js
             </span>
             <span className="text-sm text-slate-400">
-              Sunshine Homes — full lifecycle dashboard with 9 interactive views
+              Sunshine Homes — full lifecycle dashboard with 18 interactive views
             </span>
           </div>
           <SunshineDashboard />

@@ -43,14 +43,14 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Permitting</div>
         <h2 className="sh-tab-title">Dashboard</h2>
-        <p className="sh-tab-desc">Permit status tracking and cycle times.</p>
+        <p className="sh-tab-desc">Permit status tracking, cycle times, and community breakdown. Click any element for details.</p>
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} />
-        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" />
-        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" />
-        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" />
+        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" />
+        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" />
+        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" />
+        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" />
       </div>
 
       <div className="sh-panels-row">
