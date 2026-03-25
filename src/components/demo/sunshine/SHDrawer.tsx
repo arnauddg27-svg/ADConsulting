@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, fmt$, fmtPct } f
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit";
+  type: "job" | "community" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy";
   value: string;
   label: string;
 }
