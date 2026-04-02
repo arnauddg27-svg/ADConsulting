@@ -23,15 +23,14 @@ export default function Hero() {
           </span>
 
           <h1 className="mx-auto mt-8 max-w-5xl font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl lg:text-[4.4rem]">
-            Not a read-only dashboard. <span className="text-gradient">A platform your team can run the business on.</span>
+            Your data, extracted.{" "}<span className="text-gradient">Centralized. Delivered.</span>
           </h1>
 
           <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
-            A.D. Homes &amp; Consulting builds custom operational intelligence
-            platforms for residential homebuilders. We extract data from builder
-            ERPs, spreadsheets, and finance systems, centralize it in a cloud
-            warehouse, and deliver interactive applications from land acquisition
-            through audits.
+            A.D. Homes & Consulting builds custom operational intelligence
+            platforms for residential homebuilders. We connect your ERPs,
+            spreadsheets, and finance systems into a single cloud warehouse —
+            then deliver interactive dashboards your team actually uses.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
