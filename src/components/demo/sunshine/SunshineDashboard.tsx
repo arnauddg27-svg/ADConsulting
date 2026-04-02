@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, Suspense, lazy } from "react";
 import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
@@ -13,28 +13,32 @@ import {
 } from "@/lib/sunshine-homes-data";
 import type { SHTab, SHDashboardFilters } from "@/types/sunshine-homes";
 
-/* Tab components */
-import ConstructionDashboardTab from "./tabs/ConstructionDashboardTab";
-import ConstructionPipelineTab from "./tabs/ConstructionPipelineTab";
-import ConstructionCycleTimeTab from "./tabs/ConstructionCycleTimeTab";
-import ConstructionCostTab from "./tabs/ConstructionCostTab";
-import SalesDashboardTab from "./tabs/SalesDashboardTab";
-import LoansDashboardTab from "./tabs/LoansDashboardTab";
-import LandDashboardTab from "./tabs/LandDashboardTab";
-import SubdivisionPipelineTab from "./tabs/SubdivisionPipelineTab";
-import PermittingDashboardTab from "./tabs/PermittingDashboardTab";
-import PropertyMgmtDashboardTab from "./tabs/PropertyMgmtDashboardTab";
+/* Lazy-load all tabs — only the active tab's code is fetched */
+const ConstructionDashboardTab = lazy(() => import("./tabs/ConstructionDashboardTab"));
+const ConstructionPipelineTab = lazy(() => import("./tabs/ConstructionPipelineTab"));
+const ConstructionCycleTimeTab = lazy(() => import("./tabs/ConstructionCycleTimeTab"));
+const ConstructionCostTab = lazy(() => import("./tabs/ConstructionCostTab"));
+const SalesDashboardTab = lazy(() => import("./tabs/SalesDashboardTab"));
+const LoansDashboardTab = lazy(() => import("./tabs/LoansDashboardTab"));
+const LandDashboardTab = lazy(() => import("./tabs/LandDashboardTab"));
+const SubdivisionPipelineTab = lazy(() => import("./tabs/SubdivisionPipelineTab"));
+const PermittingDashboardTab = lazy(() => import("./tabs/PermittingDashboardTab"));
+const PropertyMgmtDashboardTab = lazy(() => import("./tabs/PropertyMgmtDashboardTab"));
+const LandPipelineTab = lazy(() => import("./tabs/LandPipelineTab"));
+const PermittingPipelineTab = lazy(() => import("./tabs/PermittingPipelineTab"));
+const LoansPipelineTab = lazy(() => import("./tabs/LoansPipelineTab"));
+const SalesPipelineTab = lazy(() => import("./tabs/SalesPipelineTab"));
+const PMPipelineTab = lazy(() => import("./tabs/PMPipelineTab"));
+const AuditsDashboardTab = lazy(() => import("./tabs/AuditsDashboardTab"));
+const AuditsPipelineTab = lazy(() => import("./tabs/AuditsPipelineTab"));
 
-/* New pipeline tabs */
-import LandPipelineTab from "./tabs/LandPipelineTab";
-import PermittingPipelineTab from "./tabs/PermittingPipelineTab";
-import LoansPipelineTab from "./tabs/LoansPipelineTab";
-import SalesPipelineTab from "./tabs/SalesPipelineTab";
-import PMPipelineTab from "./tabs/PMPipelineTab";
-
-/* Audit tabs */
-import AuditsDashboardTab from "./tabs/AuditsDashboardTab";
-import AuditsPipelineTab from "./tabs/AuditsPipelineTab";
+function TabLoader() {
+  return (
+    <div style={{ padding: 40, textAlign: "center", color: "var(--sh-text-muted)", fontSize: 12 }}>
+      Loading...
+    </div>
+  );
+}
 
 const EMPTY_FILTERS: SHDashboardFilters = {
   city: null,
@@ -129,7 +133,9 @@ export default function SunshineDashboard() {
         <FilterBar filters={filters} onChange={setFilters} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="sh-main">
-          {tabContent()}
+          <Suspense fallback={<TabLoader />}>
+            {tabContent()}
+          </Suspense>
         </main>
         <SHDrawer detail={drawerDetail} onClose={closeDrawer} />
       </div>
