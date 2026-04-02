@@ -14,8 +14,8 @@ export default function Home() {
       <WhyChooseUs />
       <DashboardPreview />
       <CTABanner
-        headline="Start with a discovery call, not a software demo."
-        description="We will talk through your current systems, where the spreadsheets take over, and whether the right next step is a quick fix or a deeper systems mapping engagement."
+        headline="Start with a 30-minute discovery call."
+        description="We will walk through your current systems, identify where data breaks down, and outline the path to a centralized platform your team can run on."
         primaryCTA={{ label: "Book a Discovery Call", href: "/contact/" }}
       />
     </>

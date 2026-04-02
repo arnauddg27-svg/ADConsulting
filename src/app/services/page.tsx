@@ -28,40 +28,6 @@ const iconMap: Record<string, React.ReactNode> = {
   Wrench: <Wrench size={28} />,
 };
 
-const pricingTiers = [
-  {
-    segment: "Insights Lite",
-    volume: "Best fit: 20-100 homes / year",
-    painPoint:
-      "Builders still living in spreadsheets who need structured KPI visibility without a full platform build.",
-    range: "$20,000",
-    note: "Google Sheets or Excel analytics platform with 15-25 KPIs, data mapping documentation, and walkthrough support. Typical timeline: 4-6 weeks.",
-  },
-  {
-    segment: "Insights Pro",
-    volume: "Best fit: single-ERP builders needing a real application layer",
-    painPoint:
-      "Teams need more than exports and pivots, but the environment is still relatively centralized.",
-    range: "$70,000",
-    note: "Next.js dashboard, warehouse setup, automated ingestion pipeline, pre-computed KPI marts, and team training. Typical timeline: 8-12 weeks.",
-  },
-  {
-    segment: "Builder Ops",
-    volume: "Best fit: 100-300 home / year operators",
-    painPoint:
-      "Processes are breaking at scale, multiple departments need visibility, and community complexity is rising.",
-    range: "$80,000",
-    note: "One to three dashboards, multi-source warehouse, spreadsheet-grade pipeline tables, configurable pro forma engine, and broader team enablement. Typical timeline: 12-18 weeks.",
-  },
-  {
-    segment: "Enterprise",
-    volume: "Best fit: 300-500+ homes / year or multi-entity teams",
-    painPoint:
-      "Multi-source consolidation, audit pressure, and more formal operating protocols require a deeper system build.",
-    range: "$120,000",
-    note: "Full custom data ecosystem with 12+ dashboards, 80+ KPIs, enterprise integrations, SOPs, documentation, and onsite-style training. Typical timeline: 20-25 weeks.",
-  },
-];
 
 export default function ServicesPage() {
   return (
@@ -121,9 +87,9 @@ export default function ServicesPage() {
                     {service.deliverables.map((deliverable) => (
                       <div
                         key={deliverable}
-                        className="flex items-center gap-3 rounded-[1rem] border border-white/[0.06] bg-black/20 px-4 py-3"
+                        className="flex items-start gap-3 rounded-[1rem] border border-white/[0.06] bg-black/20 px-4 py-3.5"
                       >
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent-300" />
+                        <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-300" />
                         <span className="text-sm leading-6 text-slate-200">
                           {deliverable}
                         </span>
@@ -134,56 +100,6 @@ export default function ServicesPage() {
               </div>
             </div>
           ))}
-        </Container>
-      </section>
-
-      <section className="section-space pt-6 md:pt-8">
-        <Container>
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Packages</span>
-            <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
-              Engagements sized to the builder's complexity.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-300">
-              The documents provided outline four implementation packages, from a
-              lighter analytics layer to a full Builder Ops platform. Support
-              retainers are available after go-live.
-            </p>
-          </div>
-
-          <div className="reveal-stagger mt-12 grid gap-5 md:grid-cols-2">
-            {pricingTiers.map((tier) => (
-              <div key={tier.segment} className="reveal glow-card p-8">
-                <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
-                  {tier.segment}
-                </div>
-                <div className="mt-1 text-sm text-slate-400">{tier.volume}</div>
-                <div className="mt-6 font-heading text-4xl tracking-[-0.02em] text-slate-50">
-                  {tier.range}
-                </div>
-                <p className="mt-4 text-sm leading-6 text-slate-400">
-                  {tier.painPoint}
-                </p>
-                <div className="mt-5 border-t border-white/[0.08] pt-5 text-sm leading-6 text-slate-300">
-                  {tier.note}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="reveal mt-5 glow-card mx-auto max-w-md p-6 text-center">
-            <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
-              Ongoing Support Retainers
-            </div>
-            <div className="mt-3 font-heading text-3xl tracking-[-0.02em] text-slate-50">
-              $2K-$5K / month
-            </div>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              Maintenance, KPI iterations, dashboard updates, data optimization,
-              and architecture evolution support after launch, with scope-based
-              tiers and no hourly tracking.
-            </p>
-          </div>
         </Container>
       </section>
 
@@ -215,8 +131,8 @@ export default function ServicesPage() {
       </section>
 
       <CTABanner
-        headline="The first call is about fit, not pressure."
-        description="If the right answer is a lighter analytics engagement, I will say that. If it needs warehouse and platform work, you will get a precise roadmap, package fit, and budget range."
+        headline="Ready to see what your data can do?"
+        description="The discovery call maps your current systems and outlines what a custom data platform looks like for your operation."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

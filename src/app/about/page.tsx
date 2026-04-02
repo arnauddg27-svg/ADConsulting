@@ -9,26 +9,26 @@ import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About Arnaud Durand | Founder & Data Architect for Residential Homebuilders",
+  title: "About A.D. Homes & Consulting | Technology & Data Consulting for Homebuilders",
   description:
-    "Learn how A.D. Homes & Consulting helps residential homebuilders across North America replace fragmented reporting with custom operational intelligence platforms.",
+    "A technology and data consulting firm building custom cloud data platforms for residential homebuilders. Founded by Arnaud Durand — cloud architecture, data engineering, and full-stack development.",
 };
 
 const services = [
   {
     icon: <Wrench size={20} />,
-    stat: "Data Extraction",
-    label: "ERP, spreadsheet, and file-based source mapping",
+    stat: "Cloud Data Engineering",
+    label: "BigQuery, Snowflake, ETL pipelines, and warehouse design",
   },
   {
     icon: <Layers size={20} />,
-    stat: "Warehouse & KPI Logic",
-    label: "Raw plus mart datasets with consistent reporting logic",
+    stat: "Full-Stack Development",
+    label: "Next.js dashboards, APIs, and production deployments on Vercel",
   },
   {
     icon: <DollarSign size={20} />,
-    stat: "Operational Intelligence",
-    label: "Interactive lifecycle views, pro forma, and audit tools",
+    stat: "Builder Operations",
+    label: "KPI modeling, lifecycle analytics, and pro forma tools",
   },
 ];
 
@@ -43,8 +43,8 @@ export default function AboutPage() {
               About A.D. Homes &amp; Consulting
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              A specialized data consulting firm for residential homebuilders,
-              led directly by Arnaud Durand.
+              A technology and data consulting firm building custom cloud
+              infrastructure for residential homebuilders across North America.
             </p>
           </div>
         </Container>
@@ -67,7 +67,7 @@ export default function AboutPage() {
                 <div className="font-heading text-lg tracking-[-0.01em] text-slate-50">
                   Arnaud Durand
                 </div>
-                <div className="text-sm text-slate-400">Founder and Data Architect</div>
+                <div className="text-sm text-slate-400">Founder &amp; Data Architect</div>
               </div>
             </div>
 
@@ -88,30 +88,33 @@ export default function AboutPage() {
 
               <div className="mt-10 space-y-4 text-base leading-7 text-slate-300">
                 <p>
-                  A.D. Homes &amp; Consulting was built around a clear market gap:
-                  most data consultants do not understand the operating reality of
-                  a residential builder, and most construction consultants cannot
-                  design warehouses, KPI models, and custom applications.
+                  A.D. Homes &amp; Consulting is a technology and data consulting
+                  firm founded by Arnaud Durand. The firm designs and builds custom
+                  cloud data platforms for residential homebuilders using modern
+                  engineering practices: Next.js for application delivery, BigQuery
+                  and Snowflake for warehousing, automated ETL pipelines, and
+                  infrastructure-as-code deployment on Vercel and GCP.
                 </p>
                 <p>
-                  The firm helps builders doing roughly 20-500+ homes per year
-                  replace fragmented reporting with a connected operating platform.
-                  Data is extracted from builder ERPs, spreadsheets, finance tools,
-                  and operational trackers, centralized in a cloud warehouse, and
-                  delivered through interactive applications organized around the
-                  builder lifecycle.
+                  Arnaud holds a Master&apos;s degree with a concentration in data
+                  analytics and technology management. His background spans cloud
+                  architecture, data engineering, full-stack development, and
+                  construction operations — a combination that allows the firm to
+                  bridge the gap between builder workflows and production-grade
+                  data infrastructure.
                 </p>
                 <p>
-                  That lifecycle can span land acquisition, permitting, loans,
-                  construction, sales, property management, and audits. The goal is
-                  to give builders access to the same kind of operational intelligence
-                  national players invest heavily to build, without the cost, delay,
-                  or vendor lock-in that usually comes with it.
+                  The firm serves builders doing 20 to 500+ homes per year across
+                  North America. Engagements cover the full data lifecycle: ERP
+                  extraction, warehouse design, KPI modeling, interactive dashboard
+                  development, and ongoing platform support. Every platform spans
+                  the builder lifecycle from land acquisition through construction,
+                  sales, and audits.
                 </p>
                 <p>
-                  Every engagement is handled directly by Arnaud Durand as founder
-                  and data architect. Clients keep their code, warehouse, and
-                  hosting. If the relationship ends, the platform stays with them.
+                  Every engagement is handled directly by Arnaud. Clients own
+                  their entire stack — code, warehouse, data, and hosting. No
+                  vendor lock-in. If the relationship ends, the platform stays.
                 </p>
               </div>
             </div>
@@ -120,8 +123,8 @@ export default function AboutPage() {
       </section>
 
       <CTABanner
-        headline="Start with the systems underneath the reporting."
-        description="The first conversation is meant to surface where data, workflows, and decisions stop lining up. If it is a quick fix, you will hear that. If it needs a full platform build, you will get a clear next step."
+        headline="Ready to centralize your data?"
+        description="The discovery call maps your current systems, identifies what data is available, and outlines what a custom platform looks like for your operation."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

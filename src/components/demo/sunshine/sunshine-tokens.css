@@ -54,7 +54,7 @@
   display: grid;
   grid-template-columns: var(--sh-rail-width) 1fr;
   grid-template-rows: var(--sh-bar-height) var(--sh-filter-height) 1fr;
-  height: 720px;
+  min-height: 600px;
   max-height: 80vh;
   border: 1px solid var(--sh-border);
 }
