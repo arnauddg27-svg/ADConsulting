@@ -83,12 +83,13 @@ export default function ContactPageClient() {
             <div>
               <span className="eyebrow">Start the Conversation</span>
               <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.05em] text-slate-50 sm:text-6xl">
-                Tell me where the systems stop matching reality.
+                Let&apos;s talk about your data.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                If finance is rebuilding reports by hand, if the field and the
-                office are looking at different numbers, or if your ERP data is
-                trapped in exports, let&apos;s walk through it.
+                Whether you need a centralized warehouse, lifecycle dashboards,
+                or a full operational platform — it starts with a 30-minute
+                discovery call to map your current systems and identify
+                what&apos;s possible.
               </p>
             </div>
           </div>
@@ -264,14 +265,24 @@ export default function ContactPageClient() {
                 className="bg-[linear-gradient(135deg,rgba(209,133,63,0.18),rgba(255,255,255,0.05)_60%,rgba(255,255,255,0.03))]"
               >
                 <h3 className="font-heading text-3xl tracking-[0.04em] text-slate-50">
-                  Free 30-minute discovery call
+                  Book a 30-minute discovery call
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-slate-200 md:text-base">
-                  The goal of the first call is to understand where the current
-                  reporting stack is breaking down, not to force a canned pitch.
-                  If there is an easier fix than a full platform build, that will
-                  be part of the conversation.
+                  Skip the form and book a time directly. The first call is about
+                  understanding where your reporting stack is breaking down, not
+                  a canned pitch.
                 </p>
+                <div className="mt-5">
+                  <a
+                    href="https://calendly.com/arnauddg27/30min"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-accent-400/30 bg-accent-500/15 px-5 py-3 text-sm font-semibold text-accent-200 transition-all duration-300 hover:bg-accent-500/25 hover:border-accent-400/50"
+                  >
+                    <Clock size={16} />
+                    Pick a Time on My Calendar
+                  </a>
+                </div>
               </Card>
             </div>
           </div>
