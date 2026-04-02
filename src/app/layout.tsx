@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Sora, DM_Sans, Space_Grotesk } from "next/font/google";
-import Script from "next/script";
+import { Sora, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -20,12 +19,6 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "600"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
 
 const siteUrl = "https://consulting.aderpsystems.com";
 const siteTitle = "A.D. Homes & Consulting | Custom Data Ecosystems for Residential Homebuilders";
@@ -89,23 +82,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${dmSans.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`${sora.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased">
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('consent', 'default', {
-              analytics_storage: 'granted'
-            });
-            gtag('config', 'G-XXXXXXXXXX');
-          `}
-        </Script>
+{/* Google Analytics — add real ID when ready */}
         <div className="relative min-h-screen overflow-x-hidden">
           <Header />
           <main>{children}</main>
