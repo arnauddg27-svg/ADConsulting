@@ -1,23 +1,7 @@
 import type { Metadata } from "next";
-import { Sora, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ScrollReveal from "@/components/ui/ScrollReveal";
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  weight: ["400", "500", "600"],
-});
 
 
 const siteUrl = "https://consulting.aderpsystems.com";
@@ -82,14 +66,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${dmSans.variable}`}>
+    <html lang="en">
       <body className="font-sans antialiased">
 {/* Google Analytics — add real ID when ready */}
         <div className="relative min-h-screen overflow-x-hidden">
           <Header />
           <main>{children}</main>
           <Footer />
-          <ScrollReveal />
         </div>
       </body>
     </html>

@@ -1,10 +1,6 @@
-"use client";
-
 import { ArrowRight, DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { NumberTicker } from "@/components/magicui/number-ticker";
-import { BorderBeam } from "@/components/magicui/border-beam";
 
 const previewModules = [
   {
@@ -41,23 +37,28 @@ export default function DashboardPreview() {
     <section className="section-space">
       <Container>
         <div className="reveal panel relative overflow-hidden">
-          <BorderBeam
-            size={120}
-            duration={8}
-            colorFrom="#34d399"
-            colorTo="#10b981"
-            borderWidth={1}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-[inherit] border border-accent-400/20"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-12 top-8 h-28 w-28 rounded-full bg-accent-400/20 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-8 bottom-6 h-32 w-32 rounded-full bg-accent-500/15 blur-3xl"
           />
           <div className="grid lg:grid-cols-[0.45fr_0.55fr]">
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
               <span className="eyebrow">Illustrative Example</span>
               <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-                This is what your operating system looks like.
+                Next.js dashboards built on your data.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
                 Job profitability, pipeline status, exception flags, and schedule
-                pressure — unified in one system that your entire team can work
-                from. No more exporting data to do your actual job.
+                pressure — delivered through interactive Next.js applications
+                connected to your cloud data warehouse.
               </p>
               <p className="mt-2 text-xs italic text-slate-500">
                 Illustrative only. Every implementation is shaped around the
@@ -97,14 +98,10 @@ export default function DashboardPreview() {
                       {kpi.label}
                     </div>
                     <div className="mt-2 font-heading text-2xl text-slate-50">
-                      {kpi.prefix}
-                      <NumberTicker
-                        value={kpi.value}
-                        decimalPlaces={kpi.decimals ?? 0}
-                        delay={0.3}
-                        className="text-slate-50"
-                      />
-                      {kpi.suffix}
+                      {`${kpi.prefix}${kpi.value.toLocaleString("en-US", {
+                        minimumFractionDigits: kpi.decimals ?? 0,
+                        maximumFractionDigits: kpi.decimals ?? 0,
+                      })}${kpi.suffix}`}
                     </div>
                   </div>
                 ))}

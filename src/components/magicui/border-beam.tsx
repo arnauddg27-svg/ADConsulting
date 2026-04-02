@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Transition } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface BorderBeamProps {
@@ -9,7 +9,7 @@ interface BorderBeamProps {
   delay?: number;
   colorFrom?: string;
   colorTo?: string;
-  transition?: Transition;
+  transition?: Record<string, unknown>;
   className?: string;
   style?: React.CSSProperties;
   reverse?: boolean;

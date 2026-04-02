@@ -25,6 +25,7 @@
 *.pem
 .claude/
 .playwright-cli/
+.local/
 docs/
 firebase-debug.log
 

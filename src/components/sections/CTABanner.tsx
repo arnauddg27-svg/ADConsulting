@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight, PhoneCall } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";

@@ -47,7 +47,7 @@ export function NumberTicker({
 
   useEffect(
     () =>
-      springValue.on("change", (latest) => {
+      springValue.on("change", (latest: number) => {
         if (ref.current) {
           ref.current.textContent = Intl.NumberFormat("en-US", {
             minimumFractionDigits: decimalPlaces,
