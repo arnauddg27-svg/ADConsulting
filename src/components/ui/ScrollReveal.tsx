@@ -4,6 +4,13 @@ import { useEffect } from "react";
 
 export default function ScrollReveal() {
   useEffect(() => {
+    const elements = document.querySelectorAll(".reveal");
+
+    /* Fallback: if IntersectionObserver hasn't fired after 1.5s, show everything */
+    const fallback = setTimeout(() => {
+      elements.forEach((el) => el.classList.add("visible"));
+    }, 1500);
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -13,12 +20,15 @@ export default function ScrollReveal() {
           }
         });
       },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
 
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    elements.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(fallback);
+      observer.disconnect();
+    };
   }, []);
 
   return null;
