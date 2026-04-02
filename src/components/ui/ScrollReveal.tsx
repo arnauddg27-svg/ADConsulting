@@ -6,11 +6,6 @@ export default function ScrollReveal() {
   useEffect(() => {
     const elements = document.querySelectorAll(".reveal");
 
-    /* Fallback: if IntersectionObserver hasn't fired after 1.5s, show everything */
-    const fallback = setTimeout(() => {
-      elements.forEach((el) => el.classList.add("visible"));
-    }, 1500);
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -23,12 +18,24 @@ export default function ScrollReveal() {
       { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
 
-    elements.forEach((el) => observer.observe(el));
+    /* Add will-animate class first (enables opacity:0), then observe.
+       Content is visible by default in CSS — only hidden after JS loads. */
+    elements.forEach((el) => {
+      el.classList.add("will-animate");
+      observer.observe(el);
+    });
 
-    return () => {
-      clearTimeout(fallback);
-      observer.disconnect();
-    };
+    /* Trigger immediately for elements already in viewport */
+    requestAnimationFrame(() => {
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          el.classList.add("visible");
+        }
+      });
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   return null;

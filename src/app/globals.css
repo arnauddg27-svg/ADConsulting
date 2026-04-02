@@ -35,6 +35,17 @@
   --color-slate-800: #1a2332;
   --color-slate-900: #0f172a;
 
+  --color-gold-50: #fefce8;
+  --color-gold-100: #fef9c3;
+  --color-gold-200: #fef08a;
+  --color-gold-300: #fde047;
+  --color-gold-400: #facc15;
+  --color-gold-500: #c8a415;
+  --color-gold-600: #a38312;
+  --color-gold-700: #7a6310;
+  --color-gold-800: #5c4a0c;
+  --color-gold-900: #3d3108;
+
   --color-emerald-400: #34d399;
   --color-emerald-500: #10b981;
   --color-red-400: #f87171;
@@ -254,12 +265,17 @@
     box-shadow: 0 20px 60px -30px rgba(16, 185, 129, 0.15);
   }
 
-  /* Scroll-reveal animation */
+  /* Scroll-reveal animation — content visible by default, JS adds animation */
   .reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal.will-animate {
     opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-                transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .reveal.visible {
@@ -268,10 +284,10 @@
   }
 
   /* Stagger children */
-  .reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
-  .reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
-  .reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
-  .reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
-  .reveal-stagger > .reveal:nth-child(5) { transition-delay: 320ms; }
-  .reveal-stagger > .reveal:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(1) { transition-delay: 0ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger > .reveal.will-animate:nth-child(6) { transition-delay: 400ms; }
 }
