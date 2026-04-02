@@ -1,8 +1,38 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Container from "@/components/ui/Container";
-import SunshineDashboard from "@/components/demo/sunshine/SunshineDashboard";
 import CTABanner from "@/components/sections/CTABanner";
+
+const SunshineDashboard = dynamic(
+  () => import("@/components/demo/sunshine/SunshineDashboard"),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{
+        minHeight: 600,
+        borderRadius: 12,
+        background: "#08111a",
+        border: "1px solid #1e2d3d",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#5a6b7e",
+        fontSize: 13,
+        gap: 8,
+      }}>
+        <div style={{
+          width: 16, height: 16, borderRadius: "50%",
+          border: "2px solid #24c18d",
+          borderTopColor: "transparent",
+          animation: "spin 0.8s linear infinite",
+        }} />
+        Loading dashboard...
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    ),
+  }
+);
 
 const demoHighlights = [
   "Land acquisition",
