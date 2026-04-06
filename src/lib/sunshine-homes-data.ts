@@ -384,51 +384,36 @@ function generateLoans(): SHLoan[] {
 export const loans: SHLoan[] = generateLoans();
 
 /* ═══════════════════════════════════════════════════════════
-   LAND DEALS (25 total) — generated, multi-year 2021-2026
+   LAND DEALS (120 total) — generated, multi-year 2021-2026
    ═══════════════════════════════════════════════════════════ */
 function generateLandDeals(): SHLandDeal[] {
   const rng = createRng(311);
   const { rand, pick, between } = rng;
   const result: SHLandDeal[] = [];
 
-  const dealNames = [
-    "Sunshine Ridge Phase 3", "Sunshine Ridge Phase 4", "Sunshine Ridge Phase 5",
-    "Palm Coast South", "Palm Coast North Expansion", "Palm Coast West",
-    "Emerald Bay Phase 2", "Emerald Bay Phase 3", "Emerald Bay Lakefront",
-    "Coral Springs Expansion", "Coral Springs Phase 2", "Coral Springs South",
-    "Magnolia Park Phase 2", "Magnolia Park Annex", "South Tampa Reserve",
-    "Cypress Landing North", "Cypress Landing Phase 2", "Cypress Landing East",
-    "Lake Nona Shores Parcel A", "Lake Nona Shores Parcel B", "Lake Nona West",
-    "Riverview Heights Tract", "Riverview Heights Phase 2", "Riverview South",
-    "Ocoee Gateway",
-  ];
+  const TOTAL = 120;
 
-  const statusPool: SHLandDeal["status"][] = [
-    "closed", "closed", "closed", "closed", "closed", "closed", "closed", "closed", "closed", "closed",
-    "under-contract", "under-contract", "under-contract", "under-contract", "under-contract",
-    "under-contract", "under-contract", "under-contract", "under-contract", "under-contract",
-    "under-contract", "under-contract",
-    "cancelled", "cancelled", "cancelled",
-  ];
-
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < TOTAL; i++) {
     const comm = pick(COMMUNITIES);
     const meta = COMM_META[comm];
     const acres = between(10, 45);
     const lots = between(16, 68);
     const costPerLot = LOT_COSTS[comm] ?? 42000;
     const acquisitionCost = lots * costPerLot;
-    const year = between(2021, 2026);
+    // Spread evenly across years — ~20 per year
+    const year = 2021 + (i % 6);
     const contractMonth = between(1, 12);
     const contractDate = dateToStr(year, contractMonth, between(1, 28));
-    const status = statusPool[i] ?? "under-contract";
+    // 55% closed, 35% under-contract, 10% cancelled
+    const roll = rand();
+    const status: SHLandDeal["status"] = roll < 0.55 ? "closed" : roll < 0.9 ? "under-contract" : "cancelled";
     const closeDate = status === "closed"
       ? addDays(contractDate, between(60, 180))
       : null;
 
     result.push({
       id: i + 1,
-      name: dealNames[i] ?? `${comm} Parcel ${i}`,
+      name: `${comm} Parcel ${String.fromCharCode(65 + (i % 26))}-${Math.floor(i / 26) + 1}`,
       city: meta.city,
       county: meta.county,
       community: comm,
@@ -448,7 +433,7 @@ function generateLandDeals(): SHLandDeal[] {
 export const landDeals: SHLandDeal[] = generateLandDeals();
 
 /* ═══════════════════════════════════════════════════════════
-   PERMITS (40 total) — generated
+   PERMITS (120 total) — generated, multi-year 2021-2026
    ═══════════════════════════════════════════════════════════ */
 function generatePermits(): SHPermit[] {
   const rng = createRng(401);
@@ -460,26 +445,21 @@ function generatePermits(): SHPermit[] {
     "Site Plans", "House Plans", "Septic",
     "Building Permit Submitted", "Permit Approved", "Permit Issued",
   ] as const;
-  const statuses: SHPermit["status"][] = [
-    "approved", "approved", "approved", "approved", "approved", "approved", "approved", "approved",
-    "approved", "approved", "approved", "approved", "approved", "approved", "approved",
-    "issued", "issued", "issued", "issued", "issued",
-    "in-review", "in-review", "in-review", "in-review", "in-review", "in-review",
-    "pending", "pending", "pending", "pending", "pending", "pending",
-    "rejected", "rejected", "rejected",
-    "approved", "approved", "in-review", "pending",
-    "issued",
-  ];
 
-  for (let i = 0; i < 40; i++) {
+  const TOTAL = 120;
+
+  for (let i = 0; i < TOTAL; i++) {
     const comm = pick(COMMUNITIES);
     const meta = COMM_META[comm];
     const permitType = pick(permitTypes);
     const permitSubType = pick(permitSubTypes);
-    const year = between(2025, 2026);
+    // Spread across 2021-2026 — ~20 per year
+    const year = 2021 + (i % 6);
     const subMonth = between(1, 12);
     const submittedDate = dateToStr(year, subMonth, between(1, 28));
-    const status = statuses[i] ?? "pending";
+    // 40% approved, 15% issued, 20% in-review, 18% pending, 7% rejected
+    const roll = rand();
+    const status: SHPermit["status"] = roll < 0.40 ? "approved" : roll < 0.55 ? "issued" : roll < 0.75 ? "in-review" : roll < 0.93 ? "pending" : "rejected";
     const daysInReview = status === "approved" || status === "issued" ? between(7, 18) :
       status === "rejected" ? between(30, 60) :
         between(14, 45);
