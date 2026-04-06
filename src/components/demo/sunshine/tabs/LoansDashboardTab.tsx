@@ -7,6 +7,8 @@ import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
+import SHAreaChart from "../SHAreaChart";
+import SHHistogram from "../SHHistogram";
 
 const LENDER_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
 
@@ -20,6 +22,57 @@ export default function LoansDashboardTab({ loans, onDrill }: Props) {
   const lenders = getLenderDistribution(loans).map((l, i) => ({
     ...l, color: LENDER_COLORS[i % LENDER_COLORS.length],
   }));
+
+  /* Donut: Interest rate distribution */
+  const rateDistribution = (() => {
+    const buckets = [
+      { label: "5–6%", min: 5, max: 6, color: "#0f766e" },
+      { label: "6–7%", min: 6, max: 7, color: "#14b8a6" },
+      { label: "7–8%", min: 7, max: 8, color: "#22d3ee" },
+      { label: "8%+",  min: 8, max: Infinity, color: "#3b82f6" },
+    ];
+    return buckets.map(b => ({
+      label: b.label,
+      color: b.color,
+      value: loans.filter(l => l.interestRate >= b.min && l.interestRate < b.max).length,
+    })).filter(b => b.value > 0);
+  })();
+
+  /* Area Chart: Loan exposure trend (8 quarters, synthetic) */
+  const exposureTrend = [
+    { label: "Q1 '23", value: 18.4 },
+    { label: "Q2 '23", value: 21.7 },
+    { label: "Q3 '23", value: 25.3 },
+    { label: "Q4 '23", value: 29.8 },
+    { label: "Q1 '24", value: 33.2 },
+    { label: "Q2 '24", value: 37.5 },
+    { label: "Q3 '24", value: 41.1 },
+    { label: "Q4 '24", value: 44.6 },
+  ];
+
+  /* Ranked Bars: Loan exposure by city */
+  const exposureByCity = (() => {
+    const map = new Map<string, number>();
+    for (const l of loans) map.set(l.city, (map.get(l.city) || 0) + l.loanAmount);
+    return Array.from(map.entries())
+      .map(([label, value]) => ({ label, value: Math.round(value / 1_000_000) }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  /* Histogram: Days until expiration distribution */
+  const expirationBuckets = (() => {
+    const thresholds = [30, 60, 90, 180, Infinity];
+    const labels = ["0–30d", "31–60d", "61–90d", "91–180d", "180d+"];
+    const colors = ["#f46a6a", "#efb562", "#22d3ee", "#14b8a6", "#0f766e"];
+    const counts = [0, 0, 0, 0, 0];
+    for (const l of loans) {
+      const d = l.daysUntilExpiration;
+      for (let i = 0; i < thresholds.length; i++) {
+        if (d <= thresholds[i]) { counts[i]++; break; }
+      }
+    }
+    return labels.map((bucket, i) => ({ bucket, count: counts[i], color: colors[i] }));
+  })();
 
   return (
     <>
@@ -60,6 +113,37 @@ export default function LoansDashboardTab({ loans, onDrill }: Props) {
             formatValue={v => `${v}%`}
             onBarClick={label => onDrill({ type: "community", value: label, label })}
           />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Rates" title="Interest Rate Distribution">
+          <SHDonutChart
+            segments={rateDistribution}
+            onSegmentClick={label => onDrill({ type: "loan-rate", value: label, label })}
+          />
+        </SHPanel>
+        <SHPanel kicker="Geography" title="Exposure by City ($M)">
+          <SHRankedBars
+            items={exposureByCity}
+            formatValue={v => `$${v}M`}
+            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Trend" title="Loan Exposure Trend ($M)">
+          <SHAreaChart
+            data={exposureTrend}
+            color="#22d3ee"
+            label1="Exposure ($M)"
+            formatY={v => `$${v.toFixed(1)}M`}
+          />
+        </SHPanel>
+        <SHPanel kicker="Expiration" title="Days Until Expiration">
+          <SHHistogram buckets={expirationBuckets} />
         </SHPanel>
       </div>
 

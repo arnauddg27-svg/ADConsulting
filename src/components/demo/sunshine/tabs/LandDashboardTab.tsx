@@ -2,11 +2,14 @@
 
 import type { SHLandDeal } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLandKPIs, fmt$, fmtN } from "@/lib/sunshine-homes-data";
+import { getLandKPIs, buildCrossTab, fmt$, fmtN } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
 import SHDonutChart from "../SHDonutChart";
+import SHCrossTab from "../SHCrossTab";
+import SHAreaChart from "../SHAreaChart";
+import SHHistogram from "../SHHistogram";
 
 interface Props {
   deals: SHLandDeal[];
@@ -41,6 +44,46 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
   const totalInvestment = nonCancelled.reduce((s, d) => s + d.acquisitionCost, 0);
   const totalLots = nonCancelled.reduce((s, d) => s + d.lots, 0);
 
+  /* CrossTab: City x Year (closed deals only) */
+  const closedDeals = deals.filter(d => d.status === "closed");
+  const cityYearCross = buildCrossTab(closedDeals, "city", "year");
+
+  /* Ranked Bars: Under Contract lots by city */
+  const underContractByCity = (() => {
+    const activeDeals = deals.filter(d => d.status === "under-contract");
+    const map = new Map<string, number>();
+    for (const d of activeDeals) map.set(d.city, (map.get(d.city) || 0) + d.lots);
+    return Array.from(map.entries())
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  /* Area Chart: Cumulative investment trend over 8 quarters */
+  const investmentTrend = [
+    { label: "Q1 '23", value: 4.2 },
+    { label: "Q2 '23", value: 7.8 },
+    { label: "Q3 '23", value: 11.5 },
+    { label: "Q4 '23", value: 16.1 },
+    { label: "Q1 '24", value: 20.4 },
+    { label: "Q2 '24", value: 25.9 },
+    { label: "Q3 '24", value: 31.3 },
+    { label: "Q4 '24", value: 37.6 },
+  ];
+
+  /* Histogram: Cost/Lot distribution (5 buckets) */
+  const costPerLotBuckets = (() => {
+    const thresholds = [30000, 40000, 50000, 60000, Infinity];
+    const labels = ["<$30K", "$30–40K", "$40–50K", "$50–60K", "$60K+"];
+    const colors = ["#0f766e", "#14b8a6", "#22d3ee", "#3b82f6", "#6366f1"];
+    const counts = [0, 0, 0, 0, 0];
+    for (const d of nonCancelled) {
+      for (let i = 0; i < thresholds.length; i++) {
+        if (d.costPerLot < thresholds[i]) { counts[i]++; break; }
+      }
+    }
+    return labels.map((bucket, i) => ({ bucket, count: counts[i], color: colors[i] }));
+  })();
+
   return (
     <>
       <div className="sh-tab-header">
@@ -62,6 +105,38 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
         </SHPanel>
         <SHPanel kicker="Geography" title="Lots by City">
           <SHRankedBars items={byCity} onBarClick={label => onDrill({ type: "city", value: label, label })} showRank />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="City × Year" title="Closed Deals: City by Year">
+          <SHCrossTab
+            {...cityYearCross}
+            onCellClick={(row, col, value) =>
+              onDrill({ type: "land-city-year", value: `${row}|${col}`, label: `${row} ${col} (${value} deals)` })
+            }
+          />
+        </SHPanel>
+        <SHPanel kicker="Pipeline" title="Under Contract — Lots by City">
+          <SHRankedBars
+            items={underContractByCity}
+            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Trend" title="Cumulative Investment ($M)">
+          <SHAreaChart
+            data={investmentTrend}
+            color="#14b8a6"
+            label1="Cumulative ($M)"
+            formatY={v => `$${v.toFixed(1)}M`}
+          />
+        </SHPanel>
+        <SHPanel kicker="Distribution" title="Cost per Lot Distribution">
+          <SHHistogram buckets={costPerLotBuckets} />
         </SHPanel>
       </div>
 

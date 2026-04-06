@@ -7,6 +7,19 @@ import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
+import SHHistogram from "../SHHistogram";
+import SHAreaChart from "../SHAreaChart";
+
+const PROFIT_TREND = [
+  { label: "Q1 '24", value: 1.1 },
+  { label: "Q2 '24", value: 1.5 },
+  { label: "Q3 '24", value: 2.0 },
+  { label: "Q4 '24", value: 2.8 },
+  { label: "Q1 '25", value: 3.5 },
+  { label: "Q2 '25", value: 4.4 },
+  { label: "Q3 '25", value: 5.2 },
+  { label: "Q4 '25", value: 6.3 },
+];
 
 interface Props {
   audits: SHAuditJob[];
@@ -25,6 +38,22 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
     { label: "15–20%", value: audits.filter(a => a.netMargin >= 15 && a.netMargin < 20).length, color: "#14b8a6" },
     { label: "20%+", value: audits.filter(a => a.netMargin >= 20).length, color: "#0f766e" },
   ].filter(b => b.value > 0);
+
+  /* Builder fee histogram — 5 buckets */
+  const fees = audits.map(a => a.builderFeePct);
+  const feeMin = Math.min(...fees);
+  const feeMax = Math.max(...fees);
+  const feeStep = (feeMax - feeMin) / 5 || 1;
+  const FEE_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
+  const feeHistogram = Array.from({ length: 5 }, (_, i) => {
+    const lo = feeMin + i * feeStep;
+    const hi = lo + feeStep;
+    return {
+      bucket: `${lo.toFixed(1)}–${hi.toFixed(1)}%`,
+      count: audits.filter(a => a.builderFeePct >= lo && (i === 4 ? a.builderFeePct <= hi : a.builderFeePct < hi)).length,
+      color: FEE_COLORS[i],
+    };
+  });
 
   /* By community avg margin */
   const byCommunity = (() => {
@@ -75,6 +104,20 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
             formatValue={v => `${v}%`}
             onBarClick={label => onDrill({ type: "community", value: label, label })}
             showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Builder Fee" title="Fee % Distribution">
+          <SHHistogram buckets={feeHistogram} />
+        </SHPanel>
+        <SHPanel kicker="Profit Trend" title="Cumulative Profit">
+          <SHAreaChart
+            data={PROFIT_TREND}
+            color="#14b8a6"
+            label1="Profit ($M)"
+            formatY={v => `$${v.toFixed(1)}M`}
           />
         </SHPanel>
       </div>

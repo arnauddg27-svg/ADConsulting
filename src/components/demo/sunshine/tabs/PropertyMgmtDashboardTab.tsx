@@ -5,6 +5,9 @@ import { getPMKPIs, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
+import SHRankedBars from "../SHRankedBars";
+import SHHistogram from "../SHHistogram";
+import SHAreaChart from "../SHAreaChart";
 
 const OCC_COLORS: Record<string, string> = {
   leased: "#14b8a6",
@@ -13,6 +16,19 @@ const OCC_COLORS: Record<string, string> = {
   eviction: "#f46a6a",
   "notice-to-vacate": "#a855f7",
 };
+
+const CLASS_COLORS = ["#14b8a6", "#22d3ee", "#6366f1"];
+
+const REVENUE_TREND = [
+  { label: "Q1 '24", value: 28.4 },
+  { label: "Q2 '24", value: 31.0 },
+  { label: "Q3 '24", value: 33.5 },
+  { label: "Q4 '24", value: 36.2 },
+  { label: "Q1 '25", value: 38.9 },
+  { label: "Q2 '25", value: 41.4 },
+  { label: "Q3 '25", value: 44.1 },
+  { label: "Q4 '25", value: 47.3 },
+];
 
 interface Props {
   units: SHPropertyUnit[];
@@ -33,6 +49,54 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
       }))
       .sort((a, b) => b.value - a.value);
   })();
+
+  /* Ranked bars: revenue by city */
+  const revenueByCity = (() => {
+    const map = new Map<string, number>();
+    for (const u of units) map.set(u.city, (map.get(u.city) ?? 0) + u.monthlyRent);
+    return Array.from(map.entries())
+      .map(([label, value]) => ({ label, value: Math.round(value) }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  /* Ranked bars: delinquent amount by community */
+  const delinquentByCommunity = (() => {
+    const map = new Map<string, number>();
+    for (const u of units) {
+      if (u.delinquentAmount > 0) {
+        map.set(u.community, (map.get(u.community) ?? 0) + u.delinquentAmount);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([label, value]) => ({ label, value: Math.round(value), status: "alert" as const }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  /* Histogram: rent distribution — 5 buckets */
+  const rents = units.map(u => u.monthlyRent);
+  const rentMin = Math.min(...rents);
+  const rentMax = Math.max(...rents);
+  const rentStep = (rentMax - rentMin) / 5;
+  const HIST_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
+  const rentHistogram = Array.from({ length: 5 }, (_, i) => {
+    const lo = rentMin + i * rentStep;
+    const hi = lo + rentStep;
+    return {
+      bucket: `$${Math.round(lo / 100) * 100}–$${Math.round(hi / 100) * 100}`,
+      count: units.filter(u => u.monthlyRent >= lo && (i === 4 ? u.monthlyRent <= hi : u.monthlyRent < hi)).length,
+      color: HIST_COLORS[i],
+    };
+  });
+
+  /* Donut: property class A/B/C distribution */
+  const classes = ["A", "B", "C"];
+  const classCounts = [0, 0, 0];
+  for (const u of units) classCounts[Number(u.id) % classes.length]++;
+  const byClass = classes.map((cls, i) => ({
+    label: `Class ${cls}`,
+    value: classCounts[i],
+    color: CLASS_COLORS[i],
+  }));
 
   return (
     <>
@@ -59,6 +123,45 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
       <div className="sh-panels-row">
         <SHPanel kicker="Occupancy" title="Units by Status">
           <SHDonutChart segments={byOccupancy} onSegmentClick={label => onDrill({ type: "occupancy", value: label.toLowerCase(), label })} />
+        </SHPanel>
+        <SHPanel kicker="Property Class" title="Class Distribution">
+          <SHDonutChart
+            segments={byClass}
+            onSegmentClick={label => onDrill({ type: "occupancy", value: label, label })}
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="By City" title="Monthly Revenue">
+          <SHRankedBars
+            items={revenueByCity}
+            formatValue={v => fmt$(v)}
+            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            showRank
+          />
+        </SHPanel>
+        <SHPanel kicker="Delinquency" title="Past Due by Community">
+          <SHRankedBars
+            items={delinquentByCommunity.length > 0 ? delinquentByCommunity : [{ label: "No delinquencies", value: 0 }]}
+            formatValue={v => fmt$(v)}
+            onBarClick={label => onDrill({ type: "community", value: label, label })}
+            showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Rent Distribution" title="Monthly Rent Histogram">
+          <SHHistogram buckets={rentHistogram} />
+        </SHPanel>
+        <SHPanel kicker="Revenue Trend" title="Cumulative Revenue">
+          <SHAreaChart
+            data={REVENUE_TREND}
+            color="#22d3ee"
+            label1="Revenue ($K)"
+            formatY={v => `$${v.toFixed(1)}K`}
+          />
         </SHPanel>
       </div>
     </>

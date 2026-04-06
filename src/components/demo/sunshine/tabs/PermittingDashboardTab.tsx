@@ -8,6 +8,7 @@ import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
 import SHCrossTab from "../SHCrossTab";
+import SHHistogram from "../SHHistogram";
 
 const STATUS_COLORS: Record<string, string> = {
   approved: "#14b8a6",
@@ -44,6 +45,35 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
 
   /* Cross-tab: City x Status */
   const cityStatusCross = buildCrossTab(permits, "city", "status");
+
+  /* Histogram: Cycle time distribution (daysInReview, 5 buckets) */
+  const cycleTimeBuckets = (() => {
+    const thresholds = [15, 30, 45, 60, Infinity];
+    const labels = ["0–15d", "16–30d", "31–45d", "46–60d", "60d+"];
+    const colors = ["#14b8a6", "#22d3ee", "#efb562", "#f97316", "#f46a6a"];
+    const counts = [0, 0, 0, 0, 0];
+    for (const p of permits) {
+      const d = p.daysInReview;
+      for (let i = 0; i < thresholds.length; i++) {
+        if (d <= thresholds[i]) { counts[i]++; break; }
+      }
+    }
+    return labels.map((bucket, i) => ({ bucket, count: counts[i], color: colors[i] }));
+  })();
+
+  /* Ranked Bars: Avg cycle time by city */
+  const avgCycleByCity = (() => {
+    const map = new Map<string, { total: number; count: number }>();
+    for (const p of permits) {
+      const e = map.get(p.city) || { total: 0, count: 0 };
+      e.total += p.daysInReview;
+      e.count++;
+      map.set(p.city, e);
+    }
+    return Array.from(map.entries())
+      .map(([label, d]) => ({ label, value: Math.round(d.total / d.count) }))
+      .sort((a, b) => b.value - a.value);
+  })();
 
   return (
     <>
@@ -84,6 +114,20 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
             onCellClick={(row, col, value) =>
               onDrill({ type: "permit-city-status", value: `${row}|${col}`, label: `${row} \u2014 ${col} (${value})` })
             }
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="Distribution" title="Cycle Time Distribution">
+          <SHHistogram buckets={cycleTimeBuckets} />
+        </SHPanel>
+        <SHPanel kicker="Performance" title="Avg Cycle Time by City (days)">
+          <SHRankedBars
+            items={avgCycleByCity}
+            formatValue={v => `${v}d`}
+            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            showRank
           />
         </SHPanel>
       </div>

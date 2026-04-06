@@ -2,13 +2,27 @@
 
 import type { SHSale } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, fmt$, fmtN } from "@/lib/sunshine-homes-data";
+import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
 import SHDonutChart from "../SHDonutChart";
+import SHCrossTab from "../SHCrossTab";
+import SHAreaChart from "../SHAreaChart";
+import SHHistogram from "../SHHistogram";
 
 const PLAN_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6"];
+
+const SALES_VALUE_TREND = [
+  { label: "Q1 '24", value: 4.2 },
+  { label: "Q2 '24", value: 5.8 },
+  { label: "Q3 '24", value: 7.1 },
+  { label: "Q4 '24", value: 9.3 },
+  { label: "Q1 '25", value: 11.0 },
+  { label: "Q2 '25", value: 13.4 },
+  { label: "Q3 '25", value: 15.9 },
+  { label: "Q4 '25", value: 18.7 },
+];
 
 interface Props {
   sales: SHSale[];
@@ -20,6 +34,39 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onDrill }: 
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
+
+  /* CrossTab: city x status */
+  const crossTab = buildCrossTab(sales, "city", "status");
+
+  /* Ranked bars: avg sale price by city */
+  const avgPriceByCity = (() => {
+    const map = new Map<string, { total: number; count: number }>();
+    for (const s of sales) {
+      const e = map.get(s.city) ?? { total: 0, count: 0 };
+      e.total += s.salePrice;
+      e.count++;
+      map.set(s.city, e);
+    }
+    return Array.from(map.entries())
+      .map(([label, d]) => ({ label, value: Math.round(d.total / d.count) }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
+  /* Histogram: sale price distribution — 5 buckets */
+  const prices = sales.map(s => s.salePrice);
+  const priceMin = Math.min(...prices);
+  const priceMax = Math.max(...prices);
+  const priceStep = (priceMax - priceMin) / 5;
+  const HIST_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
+  const priceHistogram = Array.from({ length: 5 }, (_, i) => {
+    const lo = priceMin + i * priceStep;
+    const hi = lo + priceStep;
+    return {
+      bucket: `${fmt$(Math.round(lo / 1000) * 1000)}–${fmt$(Math.round(hi / 1000) * 1000)}`,
+      count: sales.filter(s => s.salePrice >= lo && (i === 4 ? s.salePrice <= hi : s.salePrice < hi)).length,
+      color: HIST_COLORS[i],
+    };
+  });
 
   return (
     <>
@@ -49,6 +96,37 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onDrill }: 
             segments={byPlan}
             onSegmentClick={label => onDrill({ type: "plan", value: label, label })}
           />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="City × Status" title="Sales CrossTab">
+          <SHCrossTab
+            {...crossTab}
+            onCellClick={(row, col, value) => onDrill({ type: "city", value: row, label: `${row} — ${col} (${value})` })}
+          />
+        </SHPanel>
+        <SHPanel kicker="Revenue Trend" title="Cumulative Sales Value">
+          <SHAreaChart
+            data={SALES_VALUE_TREND}
+            color="#14b8a6"
+            label1="Cumulative ($M)"
+            formatY={v => `$${v.toFixed(1)}M`}
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row">
+        <SHPanel kicker="By City" title="Avg Sale Price">
+          <SHRankedBars
+            items={avgPriceByCity}
+            formatValue={v => fmt$(v)}
+            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            showRank
+          />
+        </SHPanel>
+        <SHPanel kicker="Price Distribution" title="Sale Price Histogram">
+          <SHHistogram buckets={priceHistogram} />
         </SHPanel>
       </div>
 
