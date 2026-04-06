@@ -1,6 +1,6 @@
 "use client";
 
-import type { SHPropertyUnit } from "@/types/sunshine-homes";
+import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
 import { getPMKPIs, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -32,10 +32,13 @@ const REVENUE_TREND = [
 
 interface Props {
   units: SHPropertyUnit[];
-  onDrill: (detail: import("../SHDrawer").DrillDetail) => void;
+  onCommunityClick: (community: string) => void;
+  onCityClick: (city: string) => void;
+  onStatusClick: (status: string) => void;
+  onTabChange: (tab: SHTab) => void;
 }
 
-export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
+export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange }: Props) {
   const kpis = getPMKPIs(units);
 
   const byOccupancy = (() => {
@@ -107,9 +110,9 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" />
-        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" />
-        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" />
+        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
+        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
+        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
         <SHKpiCard
           label="Delinquent"
           value={fmtN(kpis.delinquentUnits)}
@@ -117,17 +120,23 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
           sparkline={[5, 4, 6, 5, 3, 4, 3, 2, 3, kpis.delinquentUnits]}
           delta={kpis.delinquentUnits > 0 ? "Past due" : "All current"}
           deltaDir={kpis.delinquentUnits > 0 ? "down" : "up"}
+          onClick={() => onTabChange("pm-pipeline")}
         />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="Occupancy" title="Units by Status">
-          <SHDonutChart segments={byOccupancy} onSegmentClick={label => onDrill({ type: "occupancy", value: label.toLowerCase(), label })} />
+          <SHDonutChart
+            segments={byOccupancy}
+            onSegmentClick={label => {
+              const map: Record<string, string> = { "Leased": "leased", "Vacant": "vacant", "Make ready": "make-ready", "Eviction": "eviction", "Notice to vacate": "notice-to-vacate" };
+              onStatusClick(map[label] ?? label.toLowerCase().replace(/ /g, "-"));
+            }}
+          />
         </SHPanel>
         <SHPanel kicker="Property Class" title="Class Distribution">
           <SHDonutChart
             segments={byClass}
-            onSegmentClick={label => onDrill({ type: "occupancy", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -137,7 +146,7 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
           <SHRankedBars
             items={revenueByCity}
             formatValue={v => fmt$(v)}
-            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            onBarClick={onCityClick}
             showRank
           />
         </SHPanel>
@@ -145,7 +154,7 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
           <SHRankedBars
             items={delinquentByCommunity.length > 0 ? delinquentByCommunity : [{ label: "No delinquencies", value: 0 }]}
             formatValue={v => fmt$(v)}
-            onBarClick={label => onDrill({ type: "community", value: label, label })}
+            onBarClick={onCommunityClick}
             showRank
           />
         </SHPanel>

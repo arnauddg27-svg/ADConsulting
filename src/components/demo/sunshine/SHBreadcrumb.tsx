@@ -22,6 +22,9 @@ export default function SHBreadcrumb({ filters, onClear, onClearAll }: SHBreadcr
   if (filters.entity) crumbs.push({ key: "entity", label: "Entity", value: filters.entity, color: "#8b5cf6" });
   if (filters.community) crumbs.push({ key: "community", label: "Community", value: filters.community, color: "#14b8a6" });
   if (filters.stage) crumbs.push({ key: "stage", label: "Stage", value: filters.stage, color: "#3b82f6" });
+  if (filters.status) crumbs.push({ key: "status", label: "Status", value: filters.status.charAt(0).toUpperCase() + filters.status.slice(1), color: "#f97316" });
+  if (filters.drillYear) crumbs.push({ key: "drillYear", label: "Year", value: String(filters.drillYear), color: "#8b5cf6" });
+  if (filters.drillQuarter) crumbs.push({ key: "drillQuarter", label: "Quarter", value: `Q${filters.drillQuarter}`, color: "#8b5cf6" });
   if (filters.timePeriod !== "all") crumbs.push({ key: "timePeriod", label: "Period", value: filters.timePeriod === "month" ? "This Month" : filters.timePeriod === "quarter" ? "This Quarter" : "This Year", color: "#6b7280" });
 
   if (crumbs.length === 0) return null;

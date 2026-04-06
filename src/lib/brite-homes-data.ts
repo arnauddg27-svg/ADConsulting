@@ -176,6 +176,22 @@ export const matchFilters = (item: any, filters: SHDashboardFilters): boolean =>
   if (filters.city && item.city !== filters.city) return false;
   if (filters.entity && item.entity !== filters.entity) return false;
   if (filters.community && item.community !== filters.community) return false;
+  if (filters.stage && item.stage && item.stage !== filters.stage) return false;
+  if (filters.status) {
+    const itemStatus = item.status ?? item.occupancy ?? null;
+    if (itemStatus && String(itemStatus).toLowerCase() !== filters.status.toLowerCase()) return false;
+  }
+  if (filters.drillYear || filters.drillQuarter) {
+    const dateStr: string | null = item.startDate ?? item.contractDate ?? item.submittedDate ?? item.closeDate ?? item.expirationDate ?? item.leaseEnd ?? null;
+    if (dateStr) {
+      const d = new Date(dateStr);
+      if (filters.drillYear && d.getFullYear() !== filters.drillYear) return false;
+      if (filters.drillQuarter) {
+        const q = Math.ceil((d.getMonth() + 1) / 3);
+        if (q !== filters.drillQuarter) return false;
+      }
+    }
+  }
   return true;
 };
 

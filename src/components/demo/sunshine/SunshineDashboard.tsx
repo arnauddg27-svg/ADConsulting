@@ -47,6 +47,9 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   entity: null,
   community: null,
   stage: null,
+  status: null,
+  drillYear: null,
+  drillQuarter: null,
   timePeriod: "all",
 };
 
@@ -74,8 +77,22 @@ export default function SunshineDashboard() {
   const setCity = (city: string | null) =>
     setFilters(prev => ({ ...prev, city: prev.city === city ? null : city }));
 
-  const clearFilter = (key: keyof SHDashboardFilters) =>
-    setFilters(prev => ({ ...prev, [key]: key === "timePeriod" ? "all" : null }));
+  const setStatus = (status: string | null) =>
+    setFilters(prev => ({ ...prev, status: prev.status === status ? null : status }));
+
+  const setDrillYear = (year: number | null) =>
+    setFilters(prev => ({ ...prev, drillYear: prev.drillYear === year ? null : year, drillQuarter: null }));
+
+  const setDrillQuarter = (quarter: number | null) =>
+    setFilters(prev => ({ ...prev, drillQuarter: prev.drillQuarter === quarter ? null : quarter }));
+
+  const clearFilter = (key: keyof SHDashboardFilters) => {
+    if (key === "drillYear") {
+      setFilters(prev => ({ ...prev, drillYear: null, drillQuarter: null }));
+    } else {
+      setFilters(prev => ({ ...prev, [key]: key === "timePeriod" ? "all" : null }));
+    }
+  };
 
   const onDrill = useCallback((detail: DrillDetail) => setDrawerDetail(detail), []);
   const closeDrawer = useCallback(() => setDrawerDetail(null), []);
@@ -84,7 +101,7 @@ export default function SunshineDashboard() {
     switch (activeTab) {
       /* Construction */
       case "construction-dashboard":
-        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onDrill={onDrill} />;
+        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onStatusClick={setStatus} />;
       case "construction-pipeline":
         return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} onStageClick={setStage} />;
       case "construction-cycle":
@@ -96,19 +113,19 @@ export default function SunshineDashboard() {
 
       /* Sales */
       case "sales-dashboard":
-        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onDrill={onDrill} />;
+        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
       case "sales-pipeline":
         return <SalesPipelineTab sales={filteredSales} onDrill={onDrill} />;
 
       /* Loans */
       case "loans-dashboard":
-        return <LoansDashboardTab loans={filteredLoans} onDrill={onDrill} />;
+        return <LoansDashboardTab loans={filteredLoans} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
       case "loans-pipeline":
         return <LoansPipelineTab loans={filteredLoans} onDrill={onDrill} />;
 
       /* Land */
       case "land-dashboard":
-        return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onDrill={onDrill} />;
+        return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} />;
       case "land-pipeline":
         return <LandPipelineTab deals={filteredLand} onDrill={onDrill} />;
       case "land-subdivisions":
@@ -116,19 +133,19 @@ export default function SunshineDashboard() {
 
       /* Permitting */
       case "permitting-dashboard":
-        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} onDrill={onDrill} />;
+        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} />;
       case "permitting-pipeline":
         return <PermittingPipelineTab permits={filteredPermits} onDrill={onDrill} />;
 
       /* Property Management */
       case "pm-dashboard":
-        return <PropertyMgmtDashboardTab units={filteredUnits} onDrill={onDrill} />;
+        return <PropertyMgmtDashboardTab units={filteredUnits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
       case "pm-pipeline":
         return <PMPipelineTab units={filteredUnits} onDrill={onDrill} />;
 
       /* Audits */
       case "audits-dashboard":
-        return <AuditsDashboardTab audits={filteredAudits} onDrill={onDrill} />;
+        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
       case "audits-pipeline":
         return <AuditsPipelineTab audits={filteredAudits} onDrill={onDrill} />;
 

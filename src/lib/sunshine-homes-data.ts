@@ -667,11 +667,38 @@ export function matchFilters<T extends { community?: string; city?: string; enti
   if (filters.entity && item.entity !== filters.entity) return false;
   if (filters.community && item.community !== filters.community) return false;
   if (filters.stage && item.stage && item.stage !== filters.stage) return false;
+  if (filters.status) {
+    // Check 'status' property (most types) or 'occupancy' (PropertyUnit)
+    const itemStatus = (item as any).status ?? (item as any).occupancy ?? null;
+    if (itemStatus && String(itemStatus).toLowerCase() !== filters.status.toLowerCase()) return false;
+  }
+  if (filters.drillYear || filters.drillQuarter) {
+    // Find the primary date field
+    const dateStr: string | null = (item as any).startDate ?? (item as any).contractDate ?? (item as any).submittedDate ?? (item as any).closeDate ?? (item as any).expirationDate ?? (item as any).leaseEnd ?? null;
+    if (dateStr) {
+      const d = new Date(dateStr);
+      if (filters.drillYear && d.getFullYear() !== filters.drillYear) return false;
+      if (filters.drillQuarter) {
+        const q = Math.ceil((d.getMonth() + 1) / 3);
+        if (q !== filters.drillQuarter) return false;
+      }
+    }
+  }
   if (filters.timePeriod && filters.timePeriod !== "all") {
     const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate || item.expirationDate || item.leaseEnd;
     if (!isInTimePeriod(dateField, filters.timePeriod)) return false;
   }
   return true;
+}
+
+/** Extract quarter (1-4) from a date string */
+export function getQuarter(dateStr: string): number {
+  return Math.ceil((new Date(dateStr).getMonth() + 1) / 3);
+}
+
+/** Extract month name from a date string */
+export function getMonthLabel(dateStr: string): string {
+  return new Date(dateStr).toLocaleString("en-US", { month: "short" });
 }
 
 /* ═══════════════════════════════════════════════════════════

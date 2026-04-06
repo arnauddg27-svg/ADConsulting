@@ -1,8 +1,7 @@
 "use client";
 
-import type { SHPermit } from "@/types/sunshine-homes";
-import type { DrillDetail } from "../SHDrawer";
-import { getPermitKPIs, buildCrossTab, fmtN } from "@/lib/sunshine-homes-data";
+import type { SHPermit, SHTab } from "@/types/sunshine-homes";
+import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -20,10 +19,16 @@ const STATUS_COLORS: Record<string, string> = {
 interface Props {
   permits: SHPermit[];
   onCommunityClick: (community: string) => void;
-  onDrill: (detail: DrillDetail) => void;
+  onCityClick: (city: string) => void;
+  onTabChange: (tab: SHTab) => void;
+  onStatusClick: (status: string) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
 }
 
-export default function PermittingDashboardTab({ permits, onCommunityClick, onDrill }: Props) {
+export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, onYearClick, onQuarterClick }: Props) {
   const kpis = getPermitKPIs(permits);
 
   const byStatus = [
@@ -40,8 +45,22 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
       .sort((a, b) => b.value - a.value);
   })();
 
-  /* Cross-tab: City x Year of permit starts */
-  const cityYearCross = buildCrossTab(permits, "city", "year");
+  /* Cross-tab: City x Time — drill-aware (Year → Quarter → Month) */
+  const cityTimeCross = (() => {
+    if (drillQuarter) {
+      const withMonth = permits
+        .filter(p => p.submittedDate)
+        .map(p => ({ ...p, month: getMonthLabel(p.submittedDate) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = permits
+        .filter(p => p.submittedDate)
+        .map(p => ({ ...p, quarter: `Q${getQuarter(p.submittedDate)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(permits, "city", "year");
+  })();
 
   /* Cross-tab: City x Status */
   const cityStatusCross = buildCrossTab(permits, "city", "status");
@@ -84,36 +103,45 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" />
-        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" />
-        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" />
-        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" />
+        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
+        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
+        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" onClick={() => onTabChange("permitting-pipeline")} />
+        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Permits by Status">
-          <SHDonutChart segments={byStatus} onSegmentClick={label => onDrill({ type: "permit-status", value: label, label })} />
+          <SHDonutChart segments={byStatus} onSegmentClick={label => {
+            const map: Record<string, string> = { "Approved": "approved", "In Review": "in-review", "Pending": "pending", "Rejected": "rejected" };
+            onStatusClick(map[label] ?? label.toLowerCase());
+          }} />
         </SHPanel>
         <SHPanel kicker="Communities" title="Permits by Community">
-          <SHRankedBars items={byCommunity} onBarClick={label => onDrill({ type: "community", value: label, label })} showRank />
+          <SHRankedBars items={byCommunity} onBarClick={onCommunityClick} showRank />
         </SHPanel>
       </div>
 
       <div className="sh-panels-row">
-        <SHPanel kicker="Timeline" title="City x Year (Permit Count)">
+        <SHPanel kicker="City × Time" title={
+          drillQuarter ? `City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `City by Quarter (${drillYear})` :
+          "City x Year (Permit Count)"
+        }>
           <SHCrossTab
-            {...cityYearCross}
-            onCellClick={(row, col, value) =>
-              onDrill({ type: "permit-city-year", value: `${row}|${col}`, label: `${row} ${col} (${value} permits)` })
+            {...cityTimeCross}
+            onCellClick={(row) => onCityClick(row)}
+            onColHeaderClick={
+              drillQuarter ? undefined :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
             }
           />
         </SHPanel>
         <SHPanel kicker="Status" title="City x Permit Status">
           <SHCrossTab
             {...cityStatusCross}
-            onCellClick={(row, col, value) =>
-              onDrill({ type: "permit-city-status", value: `${row}|${col}`, label: `${row} \u2014 ${col} (${value})` })
-            }
+            onCellClick={(row) => onCityClick(row)}
+            onColHeaderClick={(col) => onStatusClick(col)}
           />
         </SHPanel>
       </div>
@@ -126,7 +154,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onDr
           <SHRankedBars
             items={avgCycleByCity}
             formatValue={v => `${v}d`}
-            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            onBarClick={onCityClick}
             showRank
           />
         </SHPanel>

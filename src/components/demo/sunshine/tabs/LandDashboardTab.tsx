@@ -1,8 +1,7 @@
 "use client";
 
-import type { SHLandDeal } from "@/types/sunshine-homes";
-import type { DrillDetail } from "../SHDrawer";
-import { getLandKPIs, buildCrossTab, fmt$, fmtN } from "@/lib/sunshine-homes-data";
+import type { SHLandDeal, SHTab } from "@/types/sunshine-homes";
+import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -14,10 +13,16 @@ import SHHistogram from "../SHHistogram";
 interface Props {
   deals: SHLandDeal[];
   onCommunityClick: (community: string) => void;
-  onDrill: (detail: DrillDetail) => void;
+  onCityClick: (city: string) => void;
+  onTabChange: (tab: SHTab) => void;
+  onStatusClick: (status: string) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
 }
 
-export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: Props) {
+export default function LandDashboardTab({ deals, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, onYearClick, onQuarterClick }: Props) {
   const kpis = getLandKPIs(deals);
   const nonCancelled = deals.filter(d => d.status !== "cancelled");
 
@@ -44,9 +49,26 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
   const totalInvestment = nonCancelled.reduce((s, d) => s + d.acquisitionCost, 0);
   const totalLots = nonCancelled.reduce((s, d) => s + d.lots, 0);
 
-  /* CrossTab: City x Year (closed deals only) */
+  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month) */
   const closedDeals = deals.filter(d => d.status === "closed");
-  const cityYearCross = buildCrossTab(closedDeals, "city", "year");
+  const cityTimeCross = (() => {
+    if (drillQuarter) {
+      // Level 3: show months within the selected quarter
+      const withMonth = closedDeals
+        .filter(d => d.closeDate)
+        .map(d => ({ ...d, month: getMonthLabel(d.closeDate!) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      // Level 2: show quarters within the selected year
+      const withQuarter = closedDeals
+        .filter(d => d.closeDate)
+        .map(d => ({ ...d, quarter: `Q${getQuarter(d.closeDate!)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    // Level 1: show years (default)
+    return buildCrossTab(closedDeals, "city", "year");
+  })();
 
   /* Ranked Bars: Under Contract lots by city */
   const underContractByCity = (() => {
@@ -93,34 +115,44 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} delta={`+${kpis.activeDeals} in pipeline`} deltaDir="up" />
-        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[80, 95, 110, 120, 135, 150, 160, 170]} delta="+35 lots YoY" deltaDir="up" />
-        <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} delta="+18% YoY" deltaDir="up" />
-        <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} delta="+4% vs prior" deltaDir="up" />
+        <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} delta={`+${kpis.activeDeals} in pipeline`} deltaDir="up" onClick={() => onTabChange("land-pipeline")} />
+        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[80, 95, 110, 120, 135, 150, 160, 170]} delta="+35 lots YoY" deltaDir="up" onClick={() => onTabChange("land-pipeline")} />
+        <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} delta="+18% YoY" deltaDir="up" onClick={() => onTabChange("land-pipeline")} />
+        <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} delta="+4% vs prior" deltaDir="up" onClick={() => onTabChange("land-pipeline")} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Deal Status Distribution">
-          <SHDonutChart segments={byStatus} onSegmentClick={label => onDrill({ type: "land-status", value: label.toLowerCase().replace(" ", "-"), label })} />
+          <SHDonutChart segments={byStatus} onSegmentClick={label => {
+            const map: Record<string, string> = { "Closed": "closed", "Under Contract": "under-contract", "Cancelled": "cancelled" };
+            onStatusClick(map[label] ?? label.toLowerCase());
+          }} />
         </SHPanel>
         <SHPanel kicker="Geography" title="Lots by City">
-          <SHRankedBars items={byCity} onBarClick={label => onDrill({ type: "city", value: label, label })} showRank />
+          <SHRankedBars items={byCity} onBarClick={onCityClick} showRank />
         </SHPanel>
       </div>
 
       <div className="sh-panels-row">
-        <SHPanel kicker="City × Year" title="Closed Deals: City by Year">
+        <SHPanel kicker="City × Time" title={
+          drillQuarter ? `Closed Deals: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Closed Deals: City by Quarter (${drillYear})` :
+          "Closed Deals: City by Year"
+        }>
           <SHCrossTab
-            {...cityYearCross}
-            onCellClick={(row, col, value) =>
-              onDrill({ type: "land-city-year", value: `${row}|${col}`, label: `${row} ${col} (${value} deals)` })
+            {...cityTimeCross}
+            onCellClick={(row) => onCityClick(row)}
+            onColHeaderClick={
+              drillQuarter ? undefined :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
             }
           />
         </SHPanel>
         <SHPanel kicker="Pipeline" title="Under Contract — Lots by City">
           <SHRankedBars
             items={underContractByCity}
-            onBarClick={label => onDrill({ type: "city", value: label, label })}
+            onBarClick={onCityClick}
             showRank
           />
         </SHPanel>

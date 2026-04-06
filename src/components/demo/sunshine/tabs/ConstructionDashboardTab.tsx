@@ -1,7 +1,6 @@
 "use client";
 
 import type { SHJob, SHTab } from "@/types/sunshine-homes";
-import type { DrillDetail } from "../SHDrawer";
 import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -40,11 +39,11 @@ interface Props {
   jobs: SHJob[];
   onCommunityClick: (community: string) => void;
   onStageClick: (stage: string) => void;
+  onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
-  onDrill: (detail: DrillDetail) => void;
 }
 
-export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onTabChange, onDrill }: Props) {
+export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange }: Props) {
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
@@ -112,9 +111,9 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" />
+        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" onClick={() => onTabChange("construction-pipeline")} />
         <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onTabChange("construction-pipeline")} />
-        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" />
+        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" onClick={() => onTabChange("construction-pipeline")} />
         <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onTabChange("construction-cost")} />
       </div>
 
@@ -188,6 +187,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             items={avgDaysByStage}
             showRank
             formatValue={(v: number) => `${v}d`}
+            onBarClick={onStageClick}
           />
         </SHPanel>
       </div>

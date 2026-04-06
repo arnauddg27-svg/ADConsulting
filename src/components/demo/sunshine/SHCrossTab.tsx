@@ -11,6 +11,7 @@ interface SHCrossTabProps {
   colTotals: Record<string, number>;
   grandTotal: number;
   onCellClick?: (row: string, col: string, value: number) => void;
+  onColHeaderClick?: (col: string) => void;
 }
 
 export default function SHCrossTab({
@@ -22,8 +23,10 @@ export default function SHCrossTab({
   colTotals,
   grandTotal,
   onCellClick,
+  onColHeaderClick,
 }: SHCrossTabProps) {
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
+  const [hoveredColHeader, setHoveredColHeader] = useState<string | null>(null);
 
   // Compute max value for intensity coloring
   const allValues: number[] = [];
@@ -54,7 +57,21 @@ export default function SHCrossTab({
         {/* Header row */}
         <div className="sh-crosstab-header sh-crosstab-corner" />
         {cols.map(col => (
-          <div key={col} className="sh-crosstab-header">{col}</div>
+          <div
+            key={col}
+            className="sh-crosstab-header"
+            onClick={onColHeaderClick ? () => onColHeaderClick(col) : undefined}
+            onMouseEnter={onColHeaderClick ? () => setHoveredColHeader(col) : undefined}
+            onMouseLeave={onColHeaderClick ? () => setHoveredColHeader(null) : undefined}
+            role={onColHeaderClick ? "button" : undefined}
+            style={{
+              cursor: onColHeaderClick ? "pointer" : "default",
+              textDecoration: onColHeaderClick && hoveredColHeader === col ? "underline" : "none",
+              transition: "all 0.12s",
+            }}
+          >
+            {col}
+          </div>
         ))}
         <div className="sh-crosstab-header sh-crosstab-total-header">Total</div>
 

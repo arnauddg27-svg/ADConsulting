@@ -1,7 +1,6 @@
 "use client";
 
-import type { SHAuditJob } from "@/types/sunshine-homes";
-import type { DrillDetail } from "../SHDrawer";
+import type { SHAuditJob, SHTab } from "@/types/sunshine-homes";
 import { getAuditKPIs, getAuditCostBreakdown, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -23,10 +22,12 @@ const PROFIT_TREND = [
 
 interface Props {
   audits: SHAuditJob[];
-  onDrill: (detail: DrillDetail) => void;
+  onCommunityClick: (community: string) => void;
+  onStatusClick: (status: string) => void;
+  onTabChange: (tab: SHTab) => void;
 }
 
-export default function AuditsDashboardTab({ audits, onDrill }: Props) {
+export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusClick, onTabChange }: Props) {
   const kpis = getAuditKPIs(audits);
   const costBreakdown = getAuditCostBreakdown(audits);
 
@@ -82,18 +83,18 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={[15, 18, 20, 22, 24, 26, 28, 30, 32, kpis.count]} delta="+5 this quarter" deltaDir="up" />
-        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" />
-        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={kpis.totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={kpis.totalProfit > 0 ? "up" : "down"} />
-        <SHKpiCard label="Avg Net Margin" value={fmtPct(kpis.avgMargin)} accent={kpis.avgMargin >= 15 ? "#14b8a6" : kpis.avgMargin >= 5 ? "#efb562" : "#f46a6a"} progress={Math.min(100, Math.round(kpis.avgMargin * 3))} delta={kpis.atRisk > 0 ? `${kpis.atRisk} at-risk` : "All profitable"} deltaDir={kpis.atRisk > 0 ? "down" : "up"} />
+        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={[15, 18, 20, 22, 24, 26, 28, 30, 32, kpis.count]} delta="+5 this quarter" deltaDir="up" onClick={() => onTabChange("audits-pipeline")} />
+        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" onClick={() => onTabChange("audits-pipeline")} />
+        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={kpis.totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={kpis.totalProfit > 0 ? "up" : "down"} onClick={() => onTabChange("audits-pipeline")} />
+        <SHKpiCard label="Avg Net Margin" value={fmtPct(kpis.avgMargin)} accent={kpis.avgMargin >= 15 ? "#14b8a6" : kpis.avgMargin >= 5 ? "#efb562" : "#f46a6a"} progress={Math.min(100, Math.round(kpis.avgMargin * 3))} delta={kpis.atRisk > 0 ? `${kpis.atRisk} at-risk` : "All profitable"} deltaDir={kpis.atRisk > 0 ? "down" : "up"} onClick={() => onTabChange("audits-pipeline")} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="PL-02" title="Cost Distribution">
-          <SHDonutChart segments={costBreakdown} onSegmentClick={label => onDrill({ type: "cost-category", value: label, label })} />
+          <SHDonutChart segments={costBreakdown} />
         </SHPanel>
         <SHPanel kicker="PL-03" title="Net Margin Distribution">
-          <SHDonutChart segments={marginBuckets} onSegmentClick={label => onDrill({ type: "margin-bucket", value: label, label })} />
+          <SHDonutChart segments={marginBuckets} />
         </SHPanel>
       </div>
 
@@ -102,7 +103,7 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
           <SHRankedBars
             items={byCommunity}
             formatValue={v => `${v}%`}
-            onBarClick={label => onDrill({ type: "community", value: label, label })}
+            onBarClick={onCommunityClick}
             showRank
           />
         </SHPanel>

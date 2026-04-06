@@ -10,9 +10,10 @@ interface Bucket {
 
 interface SHHistogramProps {
   buckets: Bucket[];
+  onBucketClick?: (bucket: string) => void;
 }
 
-export default function SHHistogram({ buckets }: SHHistogramProps) {
+export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps) {
   const [hovered, setHovered] = useState<number | null>(null);
   const max = Math.max(...buckets.map(b => b.count), 1);
 
@@ -24,9 +25,13 @@ export default function SHHistogram({ buckets }: SHHistogramProps) {
         return (
           <div
             key={b.bucket}
-            className="sh-histogram-bar"
+            className={`sh-histogram-bar${onBucketClick ? " clickable" : ""}`}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
+            onClick={onBucketClick ? () => onBucketClick(b.bucket) : undefined}
+            role={onBucketClick ? "button" : undefined}
+            tabIndex={onBucketClick ? 0 : undefined}
+            style={{ cursor: onBucketClick ? "pointer" : undefined }}
           >
             <div className="sh-histogram-count" style={{
               opacity: isHovered ? 1 : 0.7,

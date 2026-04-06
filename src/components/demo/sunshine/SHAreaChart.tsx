@@ -16,12 +16,13 @@ interface SHAreaChartProps {
   label2?: string;
   formatY?: (v: number) => string;
   height?: number;
+  onPointClick?: (label: string) => void;
 }
 
 export default function SHAreaChart({
   data, color = "#14b8a6", color2 = "#3b82f6",
   label1 = "Actual", label2 = "Planned",
-  formatY, height = 160,
+  formatY, height = 160, onPointClick,
 }: SHAreaChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -107,8 +108,9 @@ export default function SHAreaChart({
             fill={color}
             stroke="var(--sh-bg-shell)"
             strokeWidth="1.5"
-            style={{ transition: "r 0.15s", cursor: "pointer" }}
+            style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default" }}
             onMouseEnter={() => setHovered(i)}
+            onClick={onPointClick ? () => onPointClick(d.label) : undefined}
           />
         ))}
 

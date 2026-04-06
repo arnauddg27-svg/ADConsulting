@@ -166,6 +166,9 @@ export interface SHDashboardFilters {
   entity: string | null;
   community: string | null;
   stage: string | null;
+  status: string | null;          // status/occupancy cross-filter
+  drillYear: number | null;       // date drill: year level
+  drillQuarter: number | null;    // date drill: quarter level
   timePeriod: SHTimePeriod;
 }
 

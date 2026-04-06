@@ -28,6 +28,9 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   entity: null,
   community: null,
   stage: null,
+  status: null,
+  drillYear: null,
+  drillQuarter: null,
   timePeriod: "all",
 };
 
