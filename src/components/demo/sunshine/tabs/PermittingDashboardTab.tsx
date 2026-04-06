@@ -130,6 +130,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={
               drillQuarter ? undefined :
               drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
@@ -141,6 +142,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           <SHCrossTab
             {...cityStatusCross}
             onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={(col) => onStatusClick(col)}
           />
         </SHPanel>

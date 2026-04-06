@@ -159,6 +159,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             colTotals={crossTab.colTotals}
             grandTotal={crossTab.grandTotal}
             onCellClick={(row, col) => { onCommunityClick(row); onStageClick(col); }}
+            onRowLabelClick={(row) => onCommunityClick(row)}
           />
         </SHPanel>
       </div>

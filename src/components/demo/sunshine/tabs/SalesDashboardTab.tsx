@@ -104,6 +104,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
           <SHCrossTab
             {...crossTab}
             onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={(col) => onStatusClick(col)}
           />
         </SHPanel>

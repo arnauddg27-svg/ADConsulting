@@ -11,6 +11,7 @@ interface SHCrossTabProps {
   colTotals: Record<string, number>;
   grandTotal: number;
   onCellClick?: (row: string, col: string, value: number) => void;
+  onRowLabelClick?: (row: string) => void;
   onColHeaderClick?: (col: string) => void;
 }
 
@@ -23,6 +24,7 @@ export default function SHCrossTab({
   colTotals,
   grandTotal,
   onCellClick,
+  onRowLabelClick,
   onColHeaderClick,
 }: SHCrossTabProps) {
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
@@ -79,7 +81,15 @@ export default function SHCrossTab({
         {rows.map((row, ri) => (
           <>
             {/* Row label (frozen column) */}
-            <div key={`rl-${row}`} className="sh-crosstab-row-label">{row}</div>
+            <div
+              key={`rl-${row}`}
+              className="sh-crosstab-row-label"
+              onClick={onRowLabelClick ? () => onRowLabelClick(row) : undefined}
+              role={onRowLabelClick ? "button" : undefined}
+              style={{ cursor: onRowLabelClick ? "pointer" : "default" }}
+            >
+              {row}
+            </div>
 
             {/* Data cells */}
             {cols.map((col, ci) => {

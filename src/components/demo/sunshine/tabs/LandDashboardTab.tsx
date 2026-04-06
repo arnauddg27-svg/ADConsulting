@@ -142,6 +142,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={
               drillQuarter ? undefined :
               drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
