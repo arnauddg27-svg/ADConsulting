@@ -36,7 +36,7 @@ export default function SHAreaChart({
   const chartW = w - padX;
   const chartH = h - padT - padB;
 
-  const toX = (i: number) => padX + (i / (data.length - 1)) * chartW;
+  const toX = (i: number) => padX + (i / Math.max(data.length - 1, 1)) * chartW;
   const toY = (v: number) => padT + chartH - ((v - minV) / range) * chartH;
 
   const makePath = (key: "value" | "value2") =>

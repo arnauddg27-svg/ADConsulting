@@ -25,6 +25,7 @@ const PROFIT_TREND = [
 interface Props {
   audits: SHAuditJob[];
   onCommunityClick: (community: string) => void;
+  onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
   onDrill: (detail: DrillDetail) => void;
@@ -36,7 +37,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function AuditsDashboardTab({ audits, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getAuditKPIs(audits);
   const costBreakdown = getAuditCostBreakdown(audits);
 
@@ -50,20 +51,23 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
   ].filter(b => b.value > 0);
 
   /* Builder fee histogram — 5 buckets */
-  const fees = audits.map(a => a.builderFeePct);
-  const feeMin = Math.min(...fees);
-  const feeMax = Math.max(...fees);
-  const feeStep = (feeMax - feeMin) / 5 || 1;
   const FEE_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
-  const feeHistogram = Array.from({ length: 5 }, (_, i) => {
-    const lo = feeMin + i * feeStep;
-    const hi = lo + feeStep;
-    return {
-      bucket: `${lo.toFixed(1)}–${hi.toFixed(1)}%`,
-      count: audits.filter(a => a.builderFeePct >= lo && (i === 4 ? a.builderFeePct <= hi : a.builderFeePct < hi)).length,
-      color: FEE_COLORS[i],
-    };
-  });
+  const feeHistogram = (() => {
+    if (audits.length === 0) return [];
+    const fees = audits.map(a => a.builderFeePct);
+    const feeMin = Math.min(...fees);
+    const feeMax = Math.max(...fees);
+    const feeStep = (feeMax - feeMin) / 5 || 1;
+    return Array.from({ length: 5 }, (_, i) => {
+      const lo = feeMin + i * feeStep;
+      const hi = lo + feeStep;
+      return {
+        bucket: `${lo.toFixed(1)}–${hi.toFixed(1)}%`,
+        count: audits.filter(a => a.builderFeePct >= lo && (i === 4 ? a.builderFeePct <= hi : a.builderFeePct < hi)).length,
+        color: FEE_COLORS[i],
+      };
+    });
+  })();
 
   /* By community avg margin */
   const byCommunity = (() => {

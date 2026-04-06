@@ -79,20 +79,23 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   })();
 
   /* Histogram: sale price distribution — 5 buckets */
-  const prices = sales.map(s => s.salePrice);
-  const priceMin = Math.min(...prices);
-  const priceMax = Math.max(...prices);
-  const priceStep = (priceMax - priceMin) / 5;
   const HIST_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
-  const priceHistogram = Array.from({ length: 5 }, (_, i) => {
-    const lo = priceMin + i * priceStep;
-    const hi = lo + priceStep;
-    return {
-      bucket: `${fmt$(Math.round(lo / 1000) * 1000)}–${fmt$(Math.round(hi / 1000) * 1000)}`,
-      count: sales.filter(s => s.salePrice >= lo && (i === 4 ? s.salePrice <= hi : s.salePrice < hi)).length,
-      color: HIST_COLORS[i],
-    };
-  });
+  const priceHistogram = (() => {
+    if (sales.length === 0) return [];
+    const prices = sales.map(s => s.salePrice);
+    const priceMin = Math.min(...prices);
+    const priceMax = Math.max(...prices);
+    const priceStep = (priceMax - priceMin) / 5 || 1;
+    return Array.from({ length: 5 }, (_, i) => {
+      const lo = priceMin + i * priceStep;
+      const hi = lo + priceStep;
+      return {
+        bucket: `${fmt$(Math.round(lo / 1000) * 1000)}–${fmt$(Math.round(hi / 1000) * 1000)}`,
+        count: sales.filter(s => s.salePrice >= lo && (i === 4 ? s.salePrice <= hi : s.salePrice < hi)).length,
+        color: HIST_COLORS[i],
+      };
+    });
+  })();
 
   return (
     <>

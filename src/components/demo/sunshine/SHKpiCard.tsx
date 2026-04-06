@@ -49,7 +49,7 @@ export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, 
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? e => { if (e.key === "Enter") onClick(); } : undefined}
+      onKeyDown={onClick ? e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
     >
       <div className="sh-kpi-label">{label}</div>
       <div className="sh-kpi-value">{value}</div>

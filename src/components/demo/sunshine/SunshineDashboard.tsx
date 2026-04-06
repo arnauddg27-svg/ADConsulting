@@ -151,7 +151,7 @@ export default function SunshineDashboard() {
 
       /* Audits */
       case "audits-dashboard":
-        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "audits-pipeline":
         return <AuditsPipelineTab audits={filteredAudits} onDrill={onDrill} />;
 

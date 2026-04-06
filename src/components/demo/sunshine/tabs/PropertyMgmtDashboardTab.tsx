@@ -85,20 +85,23 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
   })();
 
   /* Histogram: rent distribution — 5 buckets */
-  const rents = units.map(u => u.monthlyRent);
-  const rentMin = Math.min(...rents);
-  const rentMax = Math.max(...rents);
-  const rentStep = (rentMax - rentMin) / 5;
   const HIST_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
-  const rentHistogram = Array.from({ length: 5 }, (_, i) => {
-    const lo = rentMin + i * rentStep;
-    const hi = lo + rentStep;
-    return {
-      bucket: `$${Math.round(lo / 100) * 100}–$${Math.round(hi / 100) * 100}`,
-      count: units.filter(u => u.monthlyRent >= lo && (i === 4 ? u.monthlyRent <= hi : u.monthlyRent < hi)).length,
-      color: HIST_COLORS[i],
-    };
-  });
+  const rentHistogram = (() => {
+    if (units.length === 0) return [];
+    const rents = units.map(u => u.monthlyRent);
+    const rentMin = Math.min(...rents);
+    const rentMax = Math.max(...rents);
+    const rentStep = (rentMax - rentMin) / 5 || 1;
+    return Array.from({ length: 5 }, (_, i) => {
+      const lo = rentMin + i * rentStep;
+      const hi = lo + rentStep;
+      return {
+        bucket: `$${Math.round(lo / 100) * 100}–$${Math.round(hi / 100) * 100}`,
+        count: units.filter(u => u.monthlyRent >= lo && (i === 4 ? u.monthlyRent <= hi : u.monthlyRent < hi)).length,
+        color: HIST_COLORS[i],
+      };
+    });
+  })();
 
   /* Donut: property class A/B/C distribution */
   const classes = ["A", "B", "C"];

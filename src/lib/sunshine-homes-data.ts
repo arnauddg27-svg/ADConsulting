@@ -626,6 +626,7 @@ export function fmtN(v: number): string {
 }
 
 export function fmtPct(v: number): string {
+  if (!isFinite(v)) return "N/A";
   return `${v.toFixed(1)}%`;
 }
 
@@ -685,17 +686,26 @@ export function matchFilters<T extends { community?: string; city?: string; enti
 
 /** Extract quarter (1-4) from a date string */
 export function getQuarter(dateStr: string): number {
-  return Math.ceil((new Date(dateStr).getMonth() + 1) / 3);
+  if (!dateStr) return 1;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 1;
+  return Math.ceil((d.getMonth() + 1) / 3);
 }
 
 /** Extract month name from a date string */
 export function getMonthLabel(dateStr: string): string {
-  return new Date(dateStr).toLocaleString("en-US", { month: "short" });
+  if (!dateStr) return "N/A";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "N/A";
+  return d.toLocaleString("en-US", { month: "short" });
 }
 
 /** Extract day number from a date string */
 export function getDayLabel(dateStr: string): string {
-  return `Day ${new Date(dateStr).getDate()}`;
+  if (!dateStr) return "Day ?";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "Day ?";
+  return `Day ${d.getDate()}`;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -769,7 +779,7 @@ export function getSalesByPlan(filteredSales: SHSale[]) {
 export function getLoanKPIs(filteredLoans: SHLoan[]) {
   const totalBalance = filteredLoans.reduce((s, l) => s + l.loanAmount, 0);
   const totalDrawn = filteredLoans.reduce((s, l) => s + l.totalDrawn, 0);
-  const avgDraw = filteredLoans.length ? (totalDrawn / totalBalance) * 100 : 0;
+  const avgDraw = (filteredLoans.length && totalBalance > 0) ? (totalDrawn / totalBalance) * 100 : 0;
   const expiringSoon = filteredLoans.filter(l => l.daysUntilExpiration <= 60).length;
   const lenders = new Set(filteredLoans.map(l => l.lender)).size;
   return { totalBalance, totalDrawn, avgDrawPct: avgDraw, expiringSoon, lenderCount: lenders };
@@ -1131,7 +1141,8 @@ export function buildCrossTab<T>(
   for (const item of items) {
     const r = String(item[rowKey]);
     const c = String(item[colKey]);
-    const v = valueKey ? Number(item[valueKey]) || 1 : 1;
+    const raw = valueKey ? Number(item[valueKey]) : NaN;
+    const v = isFinite(raw) ? raw : 1;
 
     rowSet.add(r);
     colSet.add(c);

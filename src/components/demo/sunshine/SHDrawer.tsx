@@ -200,7 +200,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         break;
       }
       const job = jobs.find(j => j.jobCode === detail.value);
-      if (!job) break;
+      if (!job) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Record may have been filtered out" }];
+        break;
+      }
       title = `${job.jobCode} — ${job.community}`;
       subtitle = `${job.lot} · ${job.plan} · ${job.superintendent}`;
       const jobSales = sales.filter(s => s.jobCode === detail.value);
@@ -356,7 +362,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         return key === detail.value;
       });
       /* Fall back to all completed if no cohort match */
-      const result = cohortJobs.length > 0 ? cohortJobs : jobs.filter(j => j.coDate);
+      const isFallback = cohortJobs.length === 0;
+      const result = isFallback ? jobs.filter(j => j.coDate) : cohortJobs;
       /* Helper: days between two date strings (null-safe) */
       const daysBetween = (a: string | null, b: string | null) => {
         if (!a || !b) return null;
@@ -364,7 +371,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         return Math.round(ms / 86400000);
       };
       title = `${detail.label}`;
-      subtitle = `${result.length} completed jobs`;
+      subtitle = isFallback ? `${result.length} completed jobs (all — cohort empty)` : `${result.length} completed jobs`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
@@ -531,6 +538,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "permit": {
       const p = permits.find(p => p.jobCode === detail.value || String(p.id) === detail.value);
+      if (!p) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Permit may have been filtered out" }];
+        break;
+      }
       if (p) {
         title = `Permit \u2014 ${p.jobCode}`;
         subtitle = `${p.permitType} \u00b7 ${p.city}`;
@@ -567,6 +581,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "loan": {
       const l = loans.find(l => l.jobCode === detail.value || String(l.id) === detail.value);
+      if (!l) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Loan may have been filtered out" }];
+        break;
+      }
       if (l) {
         title = `Loan \u2014 ${l.jobCode}`;
         subtitle = `${l.lender} \u00b7 ${l.community}`;
@@ -627,6 +648,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sale": {
       const s = sales.find(s => s.jobCode === detail.value || String(s.id) === detail.value);
+      if (!s) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Sale may have been filtered out" }];
+        break;
+      }
       if (s) {
         title = `Sale \u2014 ${s.jobCode}`;
         subtitle = `${s.buyer} \u00b7 ${s.community}`;
@@ -706,6 +734,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "unit":
     case "property": {
       const u = propertyUnits.find(u => u.address === detail.value || String(u.id) === detail.value);
+      if (!u) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Unit may have been filtered out" }];
+        break;
+      }
       if (u) {
         title = `Unit \u2014 ${u.address}`;
         subtitle = `${u.community} \u00b7 ${u.city}`;
