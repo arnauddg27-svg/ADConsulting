@@ -2,15 +2,10 @@
 
 import type { SHLoan } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLoanKPIs, fmt$, fmtN, fmtPct, jobs, sales } from "@/lib/sunshine-homes-data";
-import SHKpiCard from "../SHKpiCard";
+import { fmt$, fmtPct, jobs, sales } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
-import SHRankedBars from "../SHRankedBars";
-import SHDonutChart from "../SHDonutChart";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
-
-const RATE_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
 
 function CompletionBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? "#14b8a6" : pct >= 50 ? "#22d3ee" : pct >= 25 ? "#3b82f6" : "#5a6b7e";
@@ -42,38 +37,6 @@ interface Props {
 }
 
 export default function LoansPipelineTab({ loans, onDrill }: Props) {
-  const kpis = getLoanKPIs(loans);
-  const totalExposure = loans.reduce((s, l) => s + l.loanAmount, 0);
-  const totalDrawn = loans.reduce((s, l) => s + l.totalDrawn, 0);
-  const avgDrawPct = loans.length ? loans.reduce((s, l) => s + l.drawPct, 0) / loans.length : 0;
-  const avgRate = loans.length ? loans.reduce((s, l) => s + l.interestRate, 0) / loans.length : 0;
-
-  /* Draw % by community */
-  const drawByCommunity = (() => {
-    const map = new Map<string, { total: number; drawn: number }>();
-    for (const l of loans) {
-      const e = map.get(l.community) || { total: 0, drawn: 0 };
-      e.total += l.loanAmount;
-      e.drawn += l.totalDrawn;
-      map.set(l.community, e);
-    }
-    return Array.from(map.entries())
-      .map(([label, d]) => ({ label, value: Math.round((d.drawn / d.total) * 100) }))
-      .sort((a, b) => b.value - a.value);
-  })();
-
-  /* Interest Rate Distribution — bucket by rate */
-  const rateBuckets = (() => {
-    const buckets: Record<string, number> = {};
-    for (const l of loans) {
-      const bucket = `${Math.floor(l.interestRate)}%\u2013${Math.floor(l.interestRate) + 1}%`;
-      buckets[bucket] = (buckets[bucket] || 0) + 1;
-    }
-    return Object.entries(buckets)
-      .map(([label, value], i) => ({ label, value, color: RATE_COLORS[i % RATE_COLORS.length] }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  })();
-
   const sortedLoans = [...loans].sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
 
   return (
@@ -81,57 +44,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Loans</div>
         <h2 className="sh-tab-title">Pipeline</h2>
-        <p className="sh-tab-desc">Full loan roster with draw progress, rate distribution, and expiration tracking. Click any element for details.</p>
-      </div>
-
-      <div className="sh-kpi-row">
-        <SHKpiCard
-          label="Total Exposure"
-          value={fmt$(totalExposure)}
-          sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5, 5.6]}
-          onClick={() => onDrill({ type: "loan-metric", value: "exposure", label: "Total Exposure" })}
-        />
-        <SHKpiCard
-          label="Total Drawn"
-          value={fmt$(totalDrawn)}
-          accent="#22d3ee"
-          progress={Math.round(avgDrawPct)}
-          sub={`${Math.round(avgDrawPct)}% avg draw`}
-          onClick={() => onDrill({ type: "loan-metric", value: "drawn", label: "Total Drawn" })}
-        />
-        <SHKpiCard
-          label="Avg Draw %"
-          value={fmtPct(avgDrawPct)}
-          accent="#14b8a6"
-          progress={Math.round(avgDrawPct)}
-          onClick={() => onDrill({ type: "loan-metric", value: "draw-pct", label: "Avg Draw %" })}
-        />
-        <SHKpiCard
-          label="Avg Rate"
-          value={`${avgRate.toFixed(2)}%`}
-          accent="#3b82f6"
-          sparkline={[5.8, 5.9, 6.0, 6.1, 6.2, 6.3, 6.2, 6.4, 6.3, avgRate]}
-          delta="+0.2% vs Q3"
-          deltaDir="down"
-          onClick={() => onDrill({ type: "loan-metric", value: "rate", label: "Avg Interest Rate" })}
-        />
-      </div>
-
-      <div className="sh-panels-row">
-        <SHPanel kicker="Draw Status" title="Draw % by Community">
-          <SHRankedBars
-            items={drawByCommunity}
-            formatValue={v => `${v}%`}
-            onBarClick={label => onDrill({ type: "community", value: label, label })}
-            showRank
-          />
-        </SHPanel>
-        <SHPanel kicker="Rates" title="Interest Rate Distribution">
-          <SHDonutChart
-            segments={rateBuckets}
-            onSegmentClick={label => onDrill({ type: "loan-rate", value: label, label })}
-          />
-        </SHPanel>
+        <p className="sh-tab-desc">Full loan roster with draw progress, rates, and expiration tracking. Click any row for details.</p>
       </div>
 
       <div className="sh-panels-row single">

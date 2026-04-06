@@ -2,10 +2,8 @@
 
 import type { SHSale } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getSalesKPIs, buildCrossTab, fmt$, fmtN, fmtPct, jobs } from "@/lib/sunshine-homes-data";
-import SHKpiCard from "../SHKpiCard";
+import { fmt$, fmtPct, jobs } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
-import SHCrossTab from "../SHCrossTab";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
 
@@ -29,23 +27,6 @@ interface Props {
 }
 
 export default function SalesPipelineTab({ sales, onDrill }: Props) {
-  const kpis = getSalesKPIs(sales);
-
-  const closedSales = sales.filter(s => s.status === "closed");
-  const closedValue = closedSales.reduce((s, sale) => s + sale.salePrice, 0);
-  const underContract = sales.filter(s => s.status === "pending").length;
-  const avgPrice = sales.length ? sales.reduce((s, sale) => s + sale.salePrice, 0) / sales.length : 0;
-
-  /* Cross-tab: City x Status (inventory) */
-  const inventoryCross = buildCrossTab(sales, "city", "status");
-
-  /* Cross-tab: Entity x Year (derive year from contractDate) */
-  const salesWithYear = sales.map(s => ({
-    ...s,
-    saleYear: String(new Date(s.contractDate).getFullYear()),
-  }));
-  const entityYearCross = buildCrossTab(salesWithYear, "entity", "saleYear");
-
   const sortedSales = [...sales].sort((a, b) => b.contractDate.localeCompare(a.contractDate));
 
   return (
@@ -53,64 +34,7 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Sales</div>
         <h2 className="sh-tab-title">Pipeline</h2>
-        <p className="sh-tab-desc">Inventory cross-tabs, entity performance, and full sales roster. Click any element for details.</p>
-      </div>
-
-      <div className="sh-kpi-row">
-        <SHKpiCard
-          label="Closed"
-          value={`${fmtN(closedSales.length)} / ${fmt$(closedValue)}`}
-          sub={`${closedSales.length} closed sales`}
-          accent="#14b8a6"
-          sparkline={[8, 10, 12, 11, 14, 15, 16, 18, 19, 20]}
-          delta="+12% vs Q3"
-          deltaDir="up"
-          onClick={() => onDrill({ type: "sale-status", value: "closed", label: "Closed Sales" })}
-        />
-        <SHKpiCard
-          label="Under Contract"
-          value={fmtN(underContract)}
-          accent="#efb562"
-          sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8, underContract]}
-          delta={`${underContract} pending`}
-          deltaDir="neutral"
-          onClick={() => onDrill({ type: "sale-status", value: "pending", label: "Under Contract" })}
-        />
-        <SHKpiCard
-          label="Total Sales"
-          value={fmtN(kpis.totalSales)}
-          sub={fmt$(kpis.totalValue)}
-          sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18, 20]}
-          onClick={() => onDrill({ type: "sale-status", value: "all", label: "All Sales" })}
-        />
-        <SHKpiCard
-          label="Avg Price"
-          value={fmt$(avgPrice)}
-          accent="#3b82f6"
-          sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505, 510]}
-          delta="+3% YoY"
-          deltaDir="up"
-          onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: "Avg Sale Price" })}
-        />
-      </div>
-
-      <div className="sh-panels-row">
-        <SHPanel kicker="Inventory" title="City x Status (Lot Count)">
-          <SHCrossTab
-            {...inventoryCross}
-            onCellClick={(row, col, value) =>
-              onDrill({ type: "sale-city-status", value: `${row}|${col}`, label: `${row} \u2014 ${col} (${value})` })
-            }
-          />
-        </SHPanel>
-        <SHPanel kicker="Entities" title="Entity x Year">
-          <SHCrossTab
-            {...entityYearCross}
-            onCellClick={(row, col, value) =>
-              onDrill({ type: "sale-entity-year", value: `${row}|${col}`, label: `${row} ${col} (${value})` })
-            }
-          />
-        </SHPanel>
+        <p className="sh-tab-desc">Full sales roster with contract details, financing, and closing status. Click any row for details.</p>
       </div>
 
       <div className="sh-panels-row single">

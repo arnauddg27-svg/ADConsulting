@@ -2,50 +2,21 @@
 
 import type { SHSubdivision } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getSubdivisionKPIs, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
-import SHKpiCard from "../SHKpiCard";
+import { fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
-import SHDonutChart from "../SHDonutChart";
-import SHRankedBars from "../SHRankedBars";
+import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
-
-const STATUS_COLORS: Record<string, string> = {
-  active: "#14b8a6",
-  "pre-development": "#22d3ee",
-  "sold-out": "#3b82f6",
-  planning: "#efb562",
-};
-
-function InfraFlag({ label, done }: { label: string; done: boolean }) {
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 3,
-      fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 3,
-      background: done ? "rgba(20,184,166,0.1)" : "rgba(255,255,255,0.04)",
-      color: done ? "var(--sh-accent)" : "var(--sh-text-muted)",
-      border: `1px solid ${done ? "rgba(20,184,166,0.2)" : "rgba(255,255,255,0.06)"}`,
-    }}>
-      {done ? "✓" : "○"} {label}
-    </span>
-  );
-}
 
 function LotBar({ sold, construction, completed, remaining, total }: { sold: number; construction: number; completed: number; remaining: number; total: number }) {
   const pctSold = (sold / total) * 100;
   const pctConst = (construction / total) * 100;
   const pctDone = (completed / total) * 100;
   return (
-    <div>
-      <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", background: "rgba(255,255,255,0.04)" }}>
+    <div style={{ minWidth: 80 }}>
+      <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", background: "rgba(255,255,255,0.04)" }}>
         <div style={{ width: `${pctDone}%`, background: "#14b8a6" }} title={`${completed} completed`} />
         <div style={{ width: `${pctConst}%`, background: "#22d3ee" }} title={`${construction} under construction`} />
         <div style={{ width: `${pctSold}%`, background: "#3b82f6" }} title={`${sold} sold`} />
-      </div>
-      <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, color: "var(--sh-text-muted)" }}>
-        <span><span style={{ color: "#14b8a6", fontWeight: 700 }}>{completed}</span> done</span>
-        <span><span style={{ color: "#22d3ee", fontWeight: 700 }}>{construction}</span> building</span>
-        <span><span style={{ color: "#3b82f6", fontWeight: 700 }}>{sold}</span> sold</span>
-        <span><span style={{ fontWeight: 700 }}>{remaining}</span> avail</span>
       </div>
     </div>
   );
@@ -57,106 +28,64 @@ interface Props {
 }
 
 export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props) {
-  const kpis = getSubdivisionKPIs(subdivisions);
-
-  const statusMap = {
-    active: kpis.activeSubs,
-    "pre-development": kpis.preDev,
-    "sold-out": kpis.soldOut,
-    planning: kpis.planning,
-  };
-  const byStatus = Object.entries(statusMap)
-    .filter(([, v]) => v > 0)
-    .map(([label, value]) => ({
-      label: label.charAt(0).toUpperCase() + label.slice(1).replace("-", " "),
-      value,
-      color: STATUS_COLORS[label] ?? "#14b8a6",
-    }));
-
-  const byCity = (() => {
-    const map = new Map<string, number>();
-    for (const s of subdivisions) map.set(s.city, (map.get(s.city) || 0) + s.totalLots);
-    return Array.from(map.entries())
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value);
-  })();
-
   return (
     <>
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Land</div>
         <h2 className="sh-tab-title">Subdivision Pipeline</h2>
-        <p className="sh-tab-desc">Development projects, lot inventory, infrastructure status, and absorption metrics. Click any element for details.</p>
+        <p className="sh-tab-desc">Development projects with lot inventory, infrastructure status, and absorption metrics. Click any row for details.</p>
       </div>
 
-      <div className="sh-kpi-row">
-        <SHKpiCard label="Total Projects" value={fmtN(subdivisions.length)} sub={`${kpis.activeSubs} active`} sparkline={[4, 5, 5, 6, 6, 7, 7, 8, 8, subdivisions.length]} delta={`${kpis.activeSubs} active`} deltaDir="up" />
-        <SHKpiCard label="Total Lots" value={fmtN(kpis.totalLots)} progress={Math.round(((kpis.totalLots - kpis.totalRemaining) / kpis.totalLots) * 100)} sub={`${kpis.totalRemaining} remaining`} accent="#22d3ee" />
-        <SHKpiCard label="Total Invested" value={fmt$(kpis.totalInvestment)} sparkline={[8.2, 9.1, 10.5, 12.0, 14.2, 16.8, 19.5, 22.0]} />
-        <SHKpiCard label="Avg Absorption" value={`${kpis.avgAbsorption.toFixed(1)}/mo`} sub="Sales velocity" accent="#3b82f6" sparkline={[2.1, 2.3, 2.5, 2.4, 2.6, 2.8, 3.0, 3.1, 3.3, 3.5]} delta="+0.4/mo vs Q3" deltaDir="up" />
-      </div>
-
-      <div className="sh-panels-row">
-        <SHPanel kicker="Status" title="Projects by Status">
-          <SHDonutChart segments={byStatus} />
+      <div className="sh-panels-row single">
+        <SHPanel kicker="Roster" title="Subdivision Roster">
+          <SHSpreadsheetTable
+            columns={[
+              { key: "projectName", label: "Project", width: "160px", frozen: true },
+              { key: "community", label: "Community", width: "130px", frozen: true },
+              { key: "city", label: "City", width: "90px" },
+              { key: "status", label: "Status", width: "100px", render: r => {
+                const s = String(r.status);
+                const tone = s === "active" ? "good" : s === "sold-out" ? "good" : s === "pre-development" ? "watch" : "alert";
+                return <SHPill tone={tone} label={s.replace("-", " ")} />;
+              }},
+              { key: "totalAcres", label: "Acres", width: "65px", align: "right" },
+              { key: "totalLots", label: "Total Lots", width: "70px", align: "right" },
+              { key: "lotsCompleted", label: "Completed", width: "75px", align: "right" },
+              { key: "lotsUnderConstruction", label: "Building", width: "70px", align: "right" },
+              { key: "lotsSold", label: "Sold", width: "55px", align: "right" },
+              { key: "lotsRemaining", label: "Available", width: "70px", align: "right" },
+              { key: "lotProgress", label: "Lot Progress", width: "110px", render: r => (
+                <LotBar
+                  sold={Number(r.lotsSold)}
+                  construction={Number(r.lotsUnderConstruction)}
+                  completed={Number(r.lotsCompleted)}
+                  remaining={Number(r.lotsRemaining)}
+                  total={Number(r.totalLots)}
+                />
+              )},
+              { key: "totalInvestment", label: "Investment", width: "90px", align: "right", render: r => fmt$(Number(r.totalInvestment)) },
+              { key: "profitMarginPct", label: "Proj Margin", width: "80px", align: "right", render: r => {
+                const m = Number(r.profitMarginPct);
+                return <SHPill tone={m >= 20 ? "good" : m >= 10 ? "watch" : "alert"} label={fmtPct(m)} />;
+              }},
+              { key: "absorptionRate", label: "Absorption", width: "80px", align: "right", render: r => `${Number(r.absorptionRate)}/mo` },
+              { key: "zoningApproved", label: "Zoning", width: "65px", render: r => <SHPill tone={r.zoningApproved ? "good" : "alert"} label={r.zoningApproved ? "✓" : "○"} /> },
+              { key: "platRecorded", label: "Plat", width: "55px", render: r => <SHPill tone={r.platRecorded ? "good" : "alert"} label={r.platRecorded ? "✓" : "○"} /> },
+              { key: "utilityStubs", label: "Utilities", width: "65px", render: r => <SHPill tone={r.utilityStubs ? "good" : "alert"} label={r.utilityStubs ? "✓" : "○"} /> },
+              { key: "roadsComplete", label: "Roads", width: "60px", render: r => <SHPill tone={r.roadsComplete ? "good" : "alert"} label={r.roadsComplete ? "✓" : "○"} /> },
+              { key: "retentionPonds", label: "Retention", width: "70px", render: r => <SHPill tone={r.retentionPonds ? "good" : "alert"} label={r.retentionPonds ? "✓" : "○"} /> },
+              { key: "monthsRemaining", label: "Mo. Remain", width: "75px", align: "right", render: r => {
+                const remaining = Number(r.lotsRemaining);
+                const rate = Number(r.absorptionRate);
+                if (rate <= 0) return "\u2014";
+                return `${Math.round(remaining / rate)}mo`;
+              }},
+            ]}
+            rows={subdivisions as unknown as Record<string, unknown>[]}
+            maxRows={40}
+            onRowClick={onDrill ? r => onDrill({ type: "community", value: String(r.community), label: String(r.projectName) }) : undefined}
+          />
         </SHPanel>
-        <SHPanel kicker="Geography" title="Lots by City">
-          <SHRankedBars items={byCity} showRank />
-        </SHPanel>
-      </div>
-
-      {/* Subdivision cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 14 }}>
-        {subdivisions.map(sub => (
-          <div
-            key={sub.id}
-            className="sh-panel"
-            style={{ cursor: onDrill ? "pointer" : "default" }}
-            onClick={onDrill ? () => onDrill({ type: "community", value: sub.community, label: sub.projectName }) : undefined}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--sh-text-primary)" }}>{sub.projectName}</div>
-                <div style={{ fontSize: 10, color: "var(--sh-text-muted)" }}>{sub.community} · {sub.city} · {sub.totalAcres} acres</div>
-              </div>
-              <SHPill
-                tone={sub.status === "active" ? "good" : sub.status === "sold-out" ? "good" : sub.status === "pre-development" ? "watch" : "alert"}
-                label={sub.status.replace("-", " ")}
-              />
-            </div>
-
-            <LotBar
-              sold={sub.lotsSold}
-              construction={sub.lotsUnderConstruction}
-              completed={sub.lotsCompleted}
-              remaining={sub.lotsRemaining}
-              total={sub.totalLots}
-            />
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 10 }}>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--sh-text-muted)" }}>Investment</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--sh-text-primary)" }}>{fmt$(sub.totalInvestment)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--sh-text-muted)" }}>Proj. Margin</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: sub.profitMarginPct >= 20 ? "var(--sh-accent)" : "var(--sh-warning)" }}>{fmtPct(sub.profitMarginPct)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--sh-text-muted)" }}>Absorption</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--sh-text-primary)" }}>{sub.absorptionRate}/mo</div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-              <InfraFlag label="Zoning" done={sub.zoningApproved} />
-              <InfraFlag label="Plat" done={sub.platRecorded} />
-              <InfraFlag label="Utilities" done={sub.utilityStubs} />
-              <InfraFlag label="Roads" done={sub.roadsComplete} />
-              <InfraFlag label="Retention" done={sub.retentionPonds} />
-            </div>
-          </div>
-        ))}
       </div>
     </>
   );

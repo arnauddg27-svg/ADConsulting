@@ -3,7 +3,6 @@
 import type { SHAuditJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
 import { fmt$, fmtPct } from "@/lib/sunshine-homes-data";
-import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
@@ -14,24 +13,12 @@ interface Props {
 }
 
 export default function AuditsPipelineTab({ audits, onDrill }: Props) {
-  const totalRevenue = audits.reduce((s, a) => s + a.salePrice, 0);
-  const totalCost = audits.reduce((s, a) => s + a.totalCost, 0);
-  const totalProfit = audits.reduce((s, a) => s + a.netProfit, 0);
-  const avgBuilderFee = audits.length ? audits.reduce((s, a) => s + a.builderFeePct, 0) / audits.length : 0;
-
   return (
     <>
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Audits</div>
         <h2 className="sh-tab-title">Per-Job P&L Audits</h2>
-        <p className="sh-tab-desc">Detailed cost breakdown for every audited job. Pro forma P&L with Lot/Land, Permitting, Site Work, Vertical, Financing, and all line items. Click any row for full detail.</p>
-      </div>
-
-      <div className="sh-kpi-row">
-        <SHKpiCard label="Total Revenue" value={fmt$(totalRevenue)} sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" />
-        <SHKpiCard label="Total Cost" value={fmt$(totalCost)} accent="#22d3ee" progress={Math.round((totalCost / Math.max(totalRevenue, 1)) * 100)} delta={`${Math.round((totalCost / Math.max(totalRevenue, 1)) * 100)}% of revenue`} deltaDir="neutral" />
-        <SHKpiCard label="Total Profit" value={fmt$(totalProfit)} accent={totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={totalProfit > 0 ? "up" : "down"} />
-        <SHKpiCard label="Avg Builder Fee" value={fmtPct(avgBuilderFee)} accent="#3b82f6" sparkline={[4.0, 4.2, 4.1, 4.3, 4.5, 4.4, 4.6, 4.5, 4.7, avgBuilderFee]} delta="+0.3% vs prior" deltaDir="up" />
+        <p className="sh-tab-desc">Detailed cost breakdown for every audited job. Click any row for full pro forma detail.</p>
       </div>
 
       <div className="sh-panels-row single">
