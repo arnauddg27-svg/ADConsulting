@@ -159,9 +159,9 @@ export default function SunshineDashboard() {
       <div className="sh-shell" style={{ position: "relative" }}>
         <ShellBar />
         <FilterBar filters={filters} onChange={setFilters} />
-        <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
+          <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
           <Suspense fallback={<TabLoader />}>
             {tabContent()}
           </Suspense>

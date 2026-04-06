@@ -63,6 +63,7 @@
 
 /* ── Top Bar ── */
 .sh-bar {
+  grid-row: 1;
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -128,6 +129,7 @@
 
 /* ── Filter Bar ── */
 .sh-filter-bar {
+  grid-row: 2;
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
