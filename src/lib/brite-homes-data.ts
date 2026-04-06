@@ -181,7 +181,7 @@ export const matchFilters = (item: any, filters: SHDashboardFilters): boolean =>
     const itemStatus = item.status ?? item.occupancy ?? null;
     if (itemStatus && String(itemStatus).toLowerCase() !== filters.status.toLowerCase()) return false;
   }
-  if (filters.drillYear || filters.drillQuarter) {
+  if (filters.drillYear || filters.drillQuarter || filters.drillMonth) {
     const dateStr: string | null = item.startDate ?? item.contractDate ?? item.submittedDate ?? item.closeDate ?? item.expirationDate ?? item.leaseEnd ?? null;
     if (dateStr) {
       const d = new Date(dateStr);
@@ -190,6 +190,7 @@ export const matchFilters = (item: any, filters: SHDashboardFilters): boolean =>
         const q = Math.ceil((d.getMonth() + 1) / 3);
         if (q !== filters.drillQuarter) return false;
       }
+      if (filters.drillMonth && d.getMonth() + 1 !== filters.drillMonth) return false;
     }
   }
   return true;

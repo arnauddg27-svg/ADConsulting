@@ -1,7 +1,7 @@
 "use client";
 
 import type { SHLandDeal, SHTab } from "@/types/sunshine-homes";
-import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel } from "@/lib/sunshine-homes-data";
+import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -18,11 +18,13 @@ interface Props {
   onStatusClick: (status: string) => void;
   drillYear: number | null;
   drillQuarter: number | null;
+  drillMonth: number | null;
   onYearClick: (year: number) => void;
   onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function LandDashboardTab({ deals, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, onYearClick, onQuarterClick }: Props) {
+export default function LandDashboardTab({ deals, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getLandKPIs(deals);
   const nonCancelled = deals.filter(d => d.status !== "cancelled");
 
@@ -49,9 +51,16 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
   const totalInvestment = nonCancelled.reduce((s, d) => s + d.acquisitionCost, 0);
   const totalLots = nonCancelled.reduce((s, d) => s + d.lots, 0);
 
-  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month) */
+  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
   const closedDeals = deals.filter(d => d.status === "closed");
   const cityTimeCross = (() => {
+    if (drillMonth) {
+      // Level 4: show days within the selected month
+      const withDay = closedDeals
+        .filter(d => d.closeDate)
+        .map(d => ({ ...d, day: getDayLabel(d.closeDate!) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
     if (drillQuarter) {
       // Level 3: show months within the selected quarter
       const withMonth = closedDeals
@@ -135,6 +144,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
 
       <div className="sh-panels-row">
         <SHPanel kicker="City × Time" title={
+          drillMonth ? `Closed Deals: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
           drillQuarter ? `Closed Deals: City by Month (Q${drillQuarter} ${drillYear})` :
           drillYear ? `Closed Deals: City by Quarter (${drillYear})` :
           "Closed Deals: City by Year"
@@ -144,7 +154,8 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             onCellClick={(row) => onCityClick(row)}
             onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={
-              drillQuarter ? undefined :
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
               drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
               (col) => onYearClick(Number(col))
             }

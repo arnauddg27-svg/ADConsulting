@@ -31,6 +31,7 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   status: null,
   drillYear: null,
   drillQuarter: null,
+  drillMonth: null,
   timePeriod: "all",
 };
 

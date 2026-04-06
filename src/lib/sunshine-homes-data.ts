@@ -672,7 +672,7 @@ export function matchFilters<T extends { community?: string; city?: string; enti
     const itemStatus = (item as any).status ?? (item as any).occupancy ?? null;
     if (itemStatus && String(itemStatus).toLowerCase() !== filters.status.toLowerCase()) return false;
   }
-  if (filters.drillYear || filters.drillQuarter) {
+  if (filters.drillYear || filters.drillQuarter || filters.drillMonth) {
     // Find the primary date field
     const dateStr: string | null = (item as any).startDate ?? (item as any).contractDate ?? (item as any).submittedDate ?? (item as any).closeDate ?? (item as any).expirationDate ?? (item as any).leaseEnd ?? null;
     if (dateStr) {
@@ -682,6 +682,7 @@ export function matchFilters<T extends { community?: string; city?: string; enti
         const q = Math.ceil((d.getMonth() + 1) / 3);
         if (q !== filters.drillQuarter) return false;
       }
+      if (filters.drillMonth && d.getMonth() + 1 !== filters.drillMonth) return false;
     }
   }
   if (filters.timePeriod && filters.timePeriod !== "all") {
@@ -699,6 +700,11 @@ export function getQuarter(dateStr: string): number {
 /** Extract month name from a date string */
 export function getMonthLabel(dateStr: string): string {
   return new Date(dateStr).toLocaleString("en-US", { month: "short" });
+}
+
+/** Extract day number from a date string */
+export function getDayLabel(dateStr: string): string {
+  return `Day ${new Date(dateStr).getDate()}`;
 }
 
 /* ═══════════════════════════════════════════════════════════

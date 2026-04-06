@@ -1,7 +1,7 @@
 "use client";
 
 import type { SHPermit, SHTab } from "@/types/sunshine-homes";
-import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel } from "@/lib/sunshine-homes-data";
+import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -24,11 +24,13 @@ interface Props {
   onStatusClick: (status: string) => void;
   drillYear: number | null;
   drillQuarter: number | null;
+  drillMonth: number | null;
   onYearClick: (year: number) => void;
   onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, onYearClick, onQuarterClick }: Props) {
+export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPermitKPIs(permits);
 
   const byStatus = [
@@ -45,8 +47,14 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
       .sort((a, b) => b.value - a.value);
   })();
 
-  /* Cross-tab: City x Time — drill-aware (Year → Quarter → Month) */
+  /* Cross-tab: City x Time — drill-aware (Year → Quarter → Month → Day) */
   const cityTimeCross = (() => {
+    if (drillMonth) {
+      const withDay = permits
+        .filter(p => p.submittedDate)
+        .map(p => ({ ...p, day: getDayLabel(p.submittedDate) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
     if (drillQuarter) {
       const withMonth = permits
         .filter(p => p.submittedDate)
@@ -123,6 +131,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
 
       <div className="sh-panels-row">
         <SHPanel kicker="City × Time" title={
+          drillMonth ? `City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
           drillQuarter ? `City by Month (Q${drillQuarter} ${drillYear})` :
           drillYear ? `City by Quarter (${drillYear})` :
           "City x Year (Permit Count)"
@@ -132,7 +141,8 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
             onCellClick={(row) => onCityClick(row)}
             onRowLabelClick={(row) => onCityClick(row)}
             onColHeaderClick={
-              drillQuarter ? undefined :
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
               drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
               (col) => onYearClick(Number(col))
             }

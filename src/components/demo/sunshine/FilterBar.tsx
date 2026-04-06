@@ -19,7 +19,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
   const set = (key: keyof SHDashboardFilters, value: string | null) =>
     onChange({ ...filters, [key]: value });
 
-  const hasAny = filters.city || filters.entity || filters.community || filters.stage || filters.status || filters.drillYear || filters.drillQuarter || filters.timePeriod !== "all";
+  const hasAny = filters.city || filters.entity || filters.community || filters.stage || filters.status || filters.drillYear || filters.drillQuarter || filters.drillMonth || filters.timePeriod !== "all";
 
   return (
     <div className="sh-filter-bar">
@@ -91,14 +91,21 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
       {filters.drillQuarter && (
         <span className="sh-filter-chip" style={{ borderColor: "#8b5cf633", background: "#8b5cf610" }}>
           Q{filters.drillQuarter}
-          <button onClick={() => onChange({ ...filters, drillQuarter: null })}>✕</button>
+          <button onClick={() => onChange({ ...filters, drillQuarter: null, drillMonth: null })}>✕</button>
+        </span>
+      )}
+
+      {filters.drillMonth && (
+        <span className="sh-filter-chip" style={{ borderColor: "#8b5cf633", background: "#8b5cf610" }}>
+          {new Date(2000, filters.drillMonth - 1).toLocaleString("en-US", { month: "short" })}
+          <button onClick={() => onChange({ ...filters, drillMonth: null })}>✕</button>
         </span>
       )}
 
       {hasAny && (
         <button
           className="sh-filter-clear"
-          onClick={() => onChange({ city: null, jobType: null, entity: null, community: null, stage: null, status: null, drillYear: null, drillQuarter: null, timePeriod: "all" })}
+          onClick={() => onChange({ city: null, jobType: null, entity: null, community: null, stage: null, status: null, drillYear: null, drillQuarter: null, drillMonth: null, timePeriod: "all" })}
         >
           Clear all
         </button>

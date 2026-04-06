@@ -169,6 +169,7 @@ export interface SHDashboardFilters {
   status: string | null;          // status/occupancy cross-filter
   drillYear: number | null;       // date drill: year level
   drillQuarter: number | null;    // date drill: quarter level
+  drillMonth: number | null;      // date drill: month level
   timePeriod: SHTimePeriod;
 }
 
