@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHLoan, SHTab } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -18,6 +19,7 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  onDrill: (detail: DrillDetail) => void;
   drillYear: number | null;
   drillQuarter: number | null;
   drillMonth: number | null;
@@ -26,7 +28,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getLoanKPIs(loans);
   const lenders = getLenderDistribution(loans).map((l, i) => ({
     ...l, color: LENDER_COLORS[i % LENDER_COLORS.length],
@@ -109,16 +111,17 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5]} onClick={() => onTabChange("loans-pipeline")} />
-        <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} onClick={() => onTabChange("loans-pipeline")} />
-        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} delta="Diversified" deltaDir="up" onClick={() => onTabChange("loans-pipeline")} />
-        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} sparkline={[4, 3, 5, 4, 3, 2, 3, 4, 3, kpis.expiringSoon]} delta={kpis.expiringSoon > 0 ? "Action needed" : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? "down" : "up"} onClick={() => onTabChange("loans-pipeline")} />
+        <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5]} onClick={() => onDrill({ type: "loan-metric", value: "exposure", label: `Total Exposure — ${fmt$(kpis.totalBalance)}` })} />
+        <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} onClick={() => onDrill({ type: "loan-metric", value: "drawn", label: `Total Drawn — ${fmt$(kpis.totalDrawn)}` })} />
+        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} delta="Diversified" deltaDir="up" onClick={() => onDrill({ type: "loan-metric", value: "lenders", label: `${fmtN(kpis.lenderCount)} Lenders` })} />
+        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} sparkline={[4, 3, 5, 4, 3, 2, 3, 4, 3, kpis.expiringSoon]} delta={kpis.expiringSoon > 0 ? "Action needed" : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? "down" : "up"} onClick={() => onDrill({ type: "loan-metric", value: "expiring", label: `${fmtN(kpis.expiringSoon)} Expiring < 60d` })} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="Lenders" title="Loan Distribution">
           <SHDonutChart
             segments={lenders}
+            onSegmentClick={label => onDrill({ type: "lender", value: label, label })}
           />
         </SHPanel>
         <SHPanel kicker="Draw Status" title="Draw % by Community">
@@ -136,7 +139,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
                 .sort((a, b) => b.value - a.value);
             })()}
             formatValue={v => `${v}%`}
-            onBarClick={onCommunityClick}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
           />
         </SHPanel>
       </div>
@@ -145,13 +148,14 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
         <SHPanel kicker="Rates" title="Interest Rate Distribution">
           <SHDonutChart
             segments={rateDistribution}
+            onSegmentClick={label => onDrill({ type: "loan-rate", value: label, label })}
           />
         </SHPanel>
         <SHPanel kicker="Geography" title="Exposure by City ($M)">
           <SHRankedBars
             items={exposureByCity}
             formatValue={v => `$${v}M`}
-            onBarClick={onCityClick}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -166,8 +170,8 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -188,7 +192,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
           />
         </SHPanel>
         <SHPanel kicker="Expiration" title="Days Until Expiration">
-          <SHHistogram buckets={expirationBuckets} />
+          <SHHistogram buckets={expirationBuckets} onBucketClick={bucket => onDrill({ type: "loan-metric", value: bucket, label: `Expiration ${bucket}` })} />
         </SHPanel>
       </div>
 

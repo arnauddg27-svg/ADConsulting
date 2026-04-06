@@ -107,7 +107,7 @@ export default function SunshineDashboard() {
     switch (activeTab) {
       /* Construction */
       case "construction-dashboard":
-        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "construction-pipeline":
         return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} onStageClick={setStage} />;
       case "construction-cycle":
@@ -119,19 +119,19 @@ export default function SunshineDashboard() {
 
       /* Sales */
       case "sales-dashboard":
-        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "sales-pipeline":
         return <SalesPipelineTab sales={filteredSales} onDrill={onDrill} />;
 
       /* Loans */
       case "loans-dashboard":
-        return <LoansDashboardTab loans={filteredLoans} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <LoansDashboardTab loans={filteredLoans} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "loans-pipeline":
         return <LoansPipelineTab loans={filteredLoans} onDrill={onDrill} />;
 
       /* Land */
       case "land-dashboard":
-        return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "land-pipeline":
         return <LandPipelineTab deals={filteredLand} onDrill={onDrill} />;
       case "land-subdivisions":
@@ -139,19 +139,19 @@ export default function SunshineDashboard() {
 
       /* Permitting */
       case "permitting-dashboard":
-        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <PermittingDashboardTab permits={filteredPermits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "permitting-pipeline":
         return <PermittingPipelineTab permits={filteredPermits} onDrill={onDrill} />;
 
       /* Property Management */
       case "pm-dashboard":
-        return <PropertyMgmtDashboardTab units={filteredUnits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <PropertyMgmtDashboardTab units={filteredUnits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "pm-pipeline":
         return <PMPipelineTab units={filteredUnits} onDrill={onDrill} />;
 
       /* Audits */
       case "audits-dashboard":
-        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
+        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "audits-pipeline":
         return <AuditsPipelineTab audits={filteredAudits} onDrill={onDrill} />;
 

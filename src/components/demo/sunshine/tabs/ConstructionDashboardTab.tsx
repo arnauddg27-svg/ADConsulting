@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHJob, SHTab } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -41,6 +42,7 @@ interface Props {
   onStageClick: (stage: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  onDrill: (detail: DrillDetail) => void;
   drillYear: number | null;
   drillQuarter: number | null;
   drillMonth: number | null;
@@ -49,7 +51,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
@@ -140,10 +142,10 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" onClick={() => onTabChange("construction-pipeline")} />
-        <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onTabChange("construction-pipeline")} />
-        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" onClick={() => onTabChange("construction-pipeline")} />
-        <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onTabChange("construction-cost")} />
+        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
+        <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onDrill({ type: "job", value: "active", label: `Active Jobs — ${fmtN(kpis.activeJobs)}` })} />
+        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
+        <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onDrill({ type: "cost-category", value: "wip", label: `Total WIP — ${fmt$(kpis.totalWip)}` })} />
       </div>
 
       {/* Row 1: Jobs by Stage + Active Jobs by Community */}
@@ -151,13 +153,13 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         <SHPanel kicker="Portfolio" title="Jobs by Stage">
           <SHDonutChart
             segments={byStage}
-            onSegmentClick={label => onStageClick(label)}
+            onSegmentClick={label => { onStageClick(label); onDrill({ type: "stage", value: label, label }); }}
           />
         </SHPanel>
         <SHPanel kicker="Communities" title="Active Jobs by Community">
           <SHRankedBars
             items={byCommunity}
-            onBarClick={label => onCommunityClick(label)}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -166,13 +168,14 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       {/* Row 2: Completion Distribution (Histogram) + WIP by Superintendent */}
       <div className="sh-panels-row">
         <SHPanel kicker="Distribution" title="Completion Distribution">
-          <SHHistogram buckets={completionBuckets} />
+          <SHHistogram buckets={completionBuckets} onBucketClick={bucket => onDrill({ type: "margin-bucket", value: bucket, label: `Completion ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Workload" title="WIP by Superintendent">
           <SHRankedBars
             items={wipBySuper.map(item => ({ ...item, value: Math.round(item.value / 1000) }))}
             showRank
             formatValue={(v: number) => `$${v}K`}
+            onBarClick={label => onDrill({ type: "super", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -187,8 +190,8 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             rowTotals={crossTab.rowTotals}
             colTotals={crossTab.colTotals}
             grandTotal={crossTab.grandTotal}
-            onCellClick={(row, col) => { onCommunityClick(row); onStageClick(col); }}
-            onRowLabelClick={(row) => onCommunityClick(row)}
+            onCellClick={(row, col) => { onCommunityClick(row); onStageClick(col); onDrill({ type: "community", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "community", value: row, label: row }); }}
           />
         </SHPanel>
       </div>
@@ -203,8 +206,8 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row) => onCommunityClick(row)}
-            onRowLabelClick={(row) => onCommunityClick(row)}
+            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -228,6 +231,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         <SHPanel kicker="Mix" title="Jobs by Type">
           <SHDonutChart
             segments={byJobType}
+            onSegmentClick={label => onDrill({ type: "job", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -239,7 +243,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             items={avgDaysByStage}
             showRank
             formatValue={(v: number) => `${v}d`}
-            onBarClick={onStageClick}
+            onBarClick={label => { onStageClick(label); onDrill({ type: "stage", value: label, label: `Avg Days — ${label}` }); }}
           />
         </SHPanel>
       </div>

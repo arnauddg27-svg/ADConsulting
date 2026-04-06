@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHSale, SHTab } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -29,6 +30,7 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  onDrill: (detail: DrillDetail) => void;
   drillYear: number | null;
   drillQuarter: number | null;
   drillMonth: number | null;
@@ -37,7 +39,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
@@ -101,23 +103,24 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} delta="+2 this month" deltaDir="up" onClick={() => onTabChange("sales-pipeline")} />
-        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} delta="+15% YoY" deltaDir="up" onClick={() => onTabChange("sales-pipeline")} />
-        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} delta="+3% vs prior" deltaDir="up" onClick={() => onTabChange("sales-pipeline")} />
-        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" onClick={() => onTabChange("sales-pipeline")} />
+        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} delta="+2 this month" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-sales", label: `Total Sales — ${fmtN(kpis.totalSales)}` })} />
+        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} delta="+15% YoY" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-value", label: `Total Value — ${fmt$(kpis.totalValue)}` })} />
+        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} delta="+3% vs prior" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: `Avg Sale Price — ${fmt$(kpis.avgPrice)}` })} />
+        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" onClick={() => onDrill({ type: "sale-metric", value: "pending-close", label: `Pending Close — ${fmtN(kpis.pendingClosings)}` })} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="By Community" title="Sales Volume">
           <SHRankedBars
             items={byCommunity}
-            onBarClick={onCommunityClick}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
             showRank
           />
         </SHPanel>
         <SHPanel kicker="By Plan" title="Sales by Floor Plan">
           <SHDonutChart
             segments={byPlan}
+            onSegmentClick={label => onDrill({ type: "plan", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -126,9 +129,9 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         <SHPanel kicker="City × Status" title="Sales CrossTab">
           <SHCrossTab
             {...crossTab}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
-            onColHeaderClick={(col) => onStatusClick(col)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sale-city-status", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "sale-status", value: col, label: col }); }}
           />
         </SHPanel>
         <SHPanel kicker="Revenue Trend" title="Cumulative Sales Value">
@@ -150,8 +153,8 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -167,12 +170,12 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
           <SHRankedBars
             items={avgPriceByCity}
             formatValue={v => fmt$(v)}
-            onBarClick={onCityClick}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
             showRank
           />
         </SHPanel>
         <SHPanel kicker="Price Distribution" title="Sale Price Histogram">
-          <SHHistogram buckets={priceHistogram} />
+          <SHHistogram buckets={priceHistogram} onBucketClick={bucket => onDrill({ type: "sale-metric", value: bucket, label: `Sale Price ${bucket}` })} />
         </SHPanel>
       </div>
 

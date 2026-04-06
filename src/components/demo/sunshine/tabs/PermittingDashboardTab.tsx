@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHPermit, SHTab } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -22,6 +23,7 @@ interface Props {
   onCityClick: (city: string) => void;
   onTabChange: (tab: SHTab) => void;
   onStatusClick: (status: string) => void;
+  onDrill: (detail: DrillDetail) => void;
   drillYear: number | null;
   drillQuarter: number | null;
   drillMonth: number | null;
@@ -30,7 +32,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPermitKPIs(permits);
 
   const byStatus = [
@@ -111,10 +113,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
-        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
-        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" onClick={() => onTabChange("permitting-pipeline")} />
-        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" onClick={() => onTabChange("permitting-pipeline")} />
+        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "total", label: `Total Permits — ${fmtN(kpis.total)}` })} />
+        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "approved", label: `Approved — ${fmtN(kpis.approved)}` })} />
+        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" onClick={() => onDrill({ type: "permit-status", value: "in-review", label: `In Review — ${fmtN(kpis.inReview)}` })} />
+        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "avg-days", label: `Avg Days — ${Math.round(kpis.avgDaysToApproval)}d` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -122,10 +124,11 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           <SHDonutChart segments={byStatus} onSegmentClick={label => {
             const map: Record<string, string> = { "Approved": "approved", "In Review": "in-review", "Pending": "pending", "Rejected": "rejected" };
             onStatusClick(map[label] ?? label.toLowerCase());
+            onDrill({ type: "permit-status", value: label, label });
           }} />
         </SHPanel>
         <SHPanel kicker="Communities" title="Permits by Community">
-          <SHRankedBars items={byCommunity} onBarClick={onCommunityClick} showRank />
+          <SHRankedBars items={byCommunity} onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }} showRank />
         </SHPanel>
       </div>
 
@@ -138,8 +141,8 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-year", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -151,22 +154,22 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
         <SHPanel kicker="Status" title="City x Permit Status">
           <SHCrossTab
             {...cityStatusCross}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
-            onColHeaderClick={(col) => onStatusClick(col)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-status", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "permit-status", value: col, label: col }); }}
           />
         </SHPanel>
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="Distribution" title="Cycle Time Distribution">
-          <SHHistogram buckets={cycleTimeBuckets} />
+          <SHHistogram buckets={cycleTimeBuckets} onBucketClick={bucket => onDrill({ type: "permit-status", value: bucket, label: `Cycle Time ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Performance" title="Avg Cycle Time by City (days)">
           <SHRankedBars
             items={avgCycleByCity}
             formatValue={v => `${v}d`}
-            onBarClick={onCityClick}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
             showRank
           />
         </SHPanel>

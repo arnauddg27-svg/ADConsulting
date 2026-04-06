@@ -388,14 +388,14 @@ function generateLoans(): SHLoan[] {
 export const loans: SHLoan[] = generateLoans();
 
 /* ═══════════════════════════════════════════════════════════
-   LAND DEALS (120 total) — generated, multi-year 2021-2026
+   LAND DEALS (600 total) — dense enough for day-level drill-down
    ═══════════════════════════════════════════════════════════ */
 function generateLandDeals(): SHLandDeal[] {
   const rng = createRng(311);
   const { rand, pick, between } = rng;
   const result: SHLandDeal[] = [];
 
-  const TOTAL = 120;
+  const TOTAL = 600;
 
   for (let i = 0; i < TOTAL; i++) {
     const comm = pick(COMMUNITIES);
@@ -404,15 +404,17 @@ function generateLandDeals(): SHLandDeal[] {
     const lots = between(16, 68);
     const costPerLot = LOT_COSTS[comm] ?? 42000;
     const acquisitionCost = lots * costPerLot;
-    // Spread evenly across years — ~20 per year
+    // 100 per year across 6 years
     const year = 2021 + (i % 6);
     const contractMonth = between(1, 12);
-    const contractDate = dateToStr(year, contractMonth, between(1, 28));
-    // 55% closed, 35% under-contract, 10% cancelled
+    const contractDay = between(1, 28);
+    const contractDate = dateToStr(year, contractMonth, contractDay);
+    // 60% closed, 30% under-contract, 10% cancelled
     const roll = rand();
-    const status: SHLandDeal["status"] = roll < 0.55 ? "closed" : roll < 0.9 ? "under-contract" : "cancelled";
+    const status: SHLandDeal["status"] = roll < 0.60 ? "closed" : roll < 0.90 ? "under-contract" : "cancelled";
+    // For closed deals, close in the SAME month (small offset) so drill-down date matches
     const closeDate = status === "closed"
-      ? addDays(contractDate, between(60, 180))
+      ? dateToStr(year, contractMonth, Math.min(contractDay + between(1, 10), 28))
       : null;
 
     result.push({

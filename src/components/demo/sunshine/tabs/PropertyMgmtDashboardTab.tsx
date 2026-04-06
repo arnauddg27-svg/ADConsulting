@@ -1,6 +1,7 @@
 "use client";
 
 import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
+import type { DrillDetail } from "../SHDrawer";
 import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
@@ -37,6 +38,7 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  onDrill: (detail: DrillDetail) => void;
   drillYear: number | null;
   drillQuarter: number | null;
   drillMonth: number | null;
@@ -45,7 +47,7 @@ interface Props {
   onMonthClick: (month: number) => void;
 }
 
-export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPMKPIs(units);
 
   const byOccupancy = (() => {
@@ -134,9 +136,9 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
-        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
-        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" onClick={() => onTabChange("pm-pipeline")} />
+        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "total-units", label: `Total Units — ${fmtN(kpis.totalUnits)}` })} />
+        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "occupancy", label: `Occupancy Rate — ${fmtPct(kpis.occupancyRate)}` })} />
+        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "revenue", label: `Monthly Revenue — ${fmt$(kpis.monthlyRent)}` })} />
         <SHKpiCard
           label="Delinquent"
           value={fmtN(kpis.delinquentUnits)}
@@ -144,7 +146,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           sparkline={[5, 4, 6, 5, 3, 4, 3, 2, 3, kpis.delinquentUnits]}
           delta={kpis.delinquentUnits > 0 ? "Past due" : "All current"}
           deltaDir={kpis.delinquentUnits > 0 ? "down" : "up"}
-          onClick={() => onTabChange("pm-pipeline")}
+          onClick={() => onDrill({ type: "pm-metric", value: "delinquent", label: `Delinquent — ${fmtN(kpis.delinquentUnits)}` })}
         />
       </div>
 
@@ -155,12 +157,14 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             onSegmentClick={label => {
               const map: Record<string, string> = { "Leased": "leased", "Vacant": "vacant", "Make ready": "make-ready", "Eviction": "eviction", "Notice to vacate": "notice-to-vacate" };
               onStatusClick(map[label] ?? label.toLowerCase().replace(/ /g, "-"));
+              onDrill({ type: "pm-occupancy", value: label, label });
             }}
           />
         </SHPanel>
         <SHPanel kicker="Property Class" title="Class Distribution">
           <SHDonutChart
             segments={byClass}
+            onSegmentClick={label => onDrill({ type: "pm-metric", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -170,7 +174,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHRankedBars
             items={revenueByCity}
             formatValue={v => fmt$(v)}
-            onBarClick={onCityClick}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -178,7 +182,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHRankedBars
             items={delinquentByCommunity.length > 0 ? delinquentByCommunity : [{ label: "No delinquencies", value: 0 }]}
             formatValue={v => fmt$(v)}
-            onBarClick={onCommunityClick}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -193,8 +197,8 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row) => onCityClick(row)}
-            onRowLabelClick={(row) => onCityClick(row)}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -207,7 +211,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
 
       <div className="sh-panels-row">
         <SHPanel kicker="Rent Distribution" title="Monthly Rent Histogram">
-          <SHHistogram buckets={rentHistogram} />
+          <SHHistogram buckets={rentHistogram} onBucketClick={bucket => onDrill({ type: "pm-metric", value: bucket, label: `Rent ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Revenue Trend" title="Cumulative Revenue">
           <SHAreaChart
