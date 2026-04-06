@@ -180,6 +180,14 @@ function generateJobs(): SHJob[] {
       const actualCost = Math.round(estimatedCost * spentRatio * (0.95 + rand() * 0.1));
       const budget = Math.round(estimatedCost * (1.01 + rand() * 0.03));
       const projectedFinalCost = Math.round(budget * (0.97 + rand() * 0.05));
+
+      /* Cost category breakdowns — realistic splits of total budget/actual */
+      const permittingBudget = Math.round(budget * (0.03 + rand() * 0.02));  // 3-5% of budget
+      const permittingActual = Math.round(permittingBudget * (0.90 + rand() * 0.20)); // -10% to +10%
+      const sidewalkBudget = Math.round(budget * (0.06 + rand() * 0.03));   // 6-9% of budget
+      const sidewalkActual = Math.round(sidewalkBudget * (0.92 + rand() * 0.18));
+      const verticalBudget = Math.round(budget * (0.45 + rand() * 0.10));   // 45-55% of budget
+      const verticalActual = Math.round(verticalBudget * (0.94 + rand() * 0.12));
       const margin = contractValue - estimatedCost;
       const marginPct = Math.round((margin / contractValue) * 1000) / 10;
 
@@ -239,6 +247,12 @@ function generateJobs(): SHJob[] {
         marginPct,
         daysInCurrentPhase: daysInPhase,
         totalCycleDays,
+        permittingBudget,
+        permittingActual,
+        sidewalkBudget,
+        sidewalkActual,
+        verticalBudget,
+        verticalActual,
         permitDate,
         foundationDate,
         framingDate,
@@ -645,13 +659,14 @@ function isInTimePeriod(dateStr: string | null | undefined, period: import("@/ty
   return true;
 }
 
-export function matchFilters<T extends { community?: string; city?: string; entity?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseEnd?: string | null }>(
+export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseEnd?: string | null }>(
   item: T,
   filters: SHDashboardFilters,
 ): boolean {
   if (filters.city && item.city !== filters.city) return false;
   if (filters.entity && item.entity !== filters.entity) return false;
   if (filters.community && item.community !== filters.community) return false;
+  if (filters.stage && item.stage && item.stage !== filters.stage) return false;
   if (filters.timePeriod && filters.timePeriod !== "all") {
     const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate || item.expirationDate || item.leaseEnd;
     if (!isInTimePeriod(dateField, filters.timePeriod)) return false;
@@ -827,6 +842,42 @@ export function getCostBreakdown() {
     { label: "Land & Permits", value: 3600000, color: "#3b82f6" },
     { label: "Overhead",       value: 1800000, color: "#1e40af" },
   ];
+}
+
+/** Community-level cost category variance: Permitting Δ, Sidewalk Δ, Vertical Δ, Total Δ */
+export function getCostCategoryVariance(filteredJobs: SHJob[]) {
+  const commMap = new Map<string, {
+    permBudget: number; permActual: number;
+    sideBudget: number; sideActual: number;
+    vertBudget: number; vertActual: number;
+    jobCount: number;
+  }>();
+
+  for (const j of filteredJobs) {
+    const e = commMap.get(j.community) || {
+      permBudget: 0, permActual: 0,
+      sideBudget: 0, sideActual: 0,
+      vertBudget: 0, vertActual: 0,
+      jobCount: 0,
+    };
+    e.permBudget += j.permittingBudget;
+    e.permActual += j.permittingActual;
+    e.sideBudget += j.sidewalkBudget;
+    e.sideActual += j.sidewalkActual;
+    e.vertBudget += j.verticalBudget;
+    e.vertActual += j.verticalActual;
+    e.jobCount++;
+    commMap.set(j.community, e);
+  }
+
+  return Array.from(commMap.entries()).map(([community, d]) => ({
+    community,
+    jobCount: d.jobCount,
+    permittingDelta: d.permActual - d.permBudget,
+    sidewalkDelta: d.sideActual - d.sideBudget,
+    verticalDelta: d.vertActual - d.vertBudget,
+    totalDelta: (d.permActual - d.permBudget) + (d.sideActual - d.sideBudget) + (d.vertActual - d.vertBudget),
+  })).sort((a, b) => a.totalDelta - b.totalDelta);
 }
 
 /* ═══════════════════════════════════════════════════════════

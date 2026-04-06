@@ -19,9 +19,10 @@ function MiniProgress({ pct, color }: { pct: number; color: string }) {
 interface SHPipelineBoardProps {
   jobs: SHJob[];
   onDrill?: (detail: DrillDetail) => void;
+  onStageClick?: (stage: string) => void;
 }
 
-export default function SHPipelineBoard({ jobs, onDrill }: SHPipelineBoardProps) {
+export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipelineBoardProps) {
   const phaseFlow = (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: 14 }}>
       {STAGES.map((stage, i) => {
@@ -30,7 +31,7 @@ export default function SHPipelineBoard({ jobs, onDrill }: SHPipelineBoardProps)
           <div key={stage} style={{ display: "flex", alignItems: "center" }}>
             <div
               style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80, cursor: onDrill ? "pointer" : "default" }}
-              onClick={onDrill ? () => onDrill({ type: "stage", value: stage, label: stage }) : undefined}
+              onClick={onStageClick ? () => onStageClick(stage) : onDrill ? () => onDrill({ type: "stage", value: stage, label: stage }) : undefined}
             >
               <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${STAGE_COLORS[i]}33, ${STAGE_COLORS[i]}11)`, border: `1px solid ${STAGE_COLORS[i]}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, boxShadow: `0 0 12px ${STAGE_COLORS[i]}22` }}>
                 {STAGE_ICONS[i]}

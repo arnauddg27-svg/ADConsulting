@@ -2,7 +2,7 @@
 
 import type { SHJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getCostKPIs, getCostBreakdown, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import { getCostKPIs, getCostBreakdown, getCostCategoryVariance, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -29,12 +29,15 @@ const MONTHLY_TREND = [
 interface Props {
   jobs: SHJob[];
   onDrill: (detail: DrillDetail) => void;
+  onCommunityClick?: (community: string) => void;
 }
 
-export default function ConstructionCostTab({ jobs, onDrill }: Props) {
+export default function ConstructionCostTab({ jobs, onDrill, onCommunityClick }: Props) {
   const kpis = getCostKPIs(jobs);
   const breakdown = getCostBreakdown();
+  const categoryVariance = getCostCategoryVariance(jobs);
 
+  /* Per-job variance rows — sorted worst to best */
   const varianceRows = jobs
     .map(j => ({
       jobCode: j.jobCode,
@@ -42,6 +45,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
       budget: j.originalBudget,
       actual: j.actualCostToDate,
       variance: j.actualCostToDate - j.originalBudget,
+      variancePct: j.originalBudget > 0 ? ((j.actualCostToDate - j.originalBudget) / j.originalBudget) * 100 : 0,
       marginPct: j.marginPct,
     }))
     .sort((a, b) => a.variance - b.variance);
@@ -51,11 +55,17 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
       <div className="sh-tab-header">
         <div className="sh-tab-kicker">Construction</div>
         <h2 className="sh-tab-title">Cost Metrics</h2>
-        <p className="sh-tab-desc">Budget vs actual, variance analysis, and margin tracking. Click any element for details.</p>
+        <p className="sh-tab-desc">Budget vs actual, category variance analysis, and margin tracking. Click any element for details.</p>
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Budget" value={fmt$(kpis.totalBudget)} sparkline={[3.2, 3.5, 3.8, 4.1, 4.4, 4.7, 5.0, 5.2, 5.5, 5.8]} delta="+12% YoY" deltaDir="up" />
+        <SHKpiCard
+          label="Total Budget"
+          value={fmt$(kpis.totalBudget)}
+          sparkline={[3.2, 3.5, 3.8, 4.1, 4.4, 4.7, 5.0, 5.2, 5.5, 5.8]}
+          delta="+12% YoY" deltaDir="up"
+          onClick={() => onDrill({ type: "cost-category", value: "budget", label: "Total Budget — All Jobs" })}
+        />
         <SHKpiCard
           label="Total Actual"
           value={fmt$(kpis.totalActual)}
@@ -63,6 +73,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           sub={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% of budget`}
           delta={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% drawn`}
           deltaDir="neutral"
+          onClick={() => onDrill({ type: "cost-category", value: "actual", label: "Total Actual — All Jobs" })}
         />
         <SHKpiCard
           label="Variance"
@@ -71,6 +82,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           deltaDir={kpis.variance <= 0 ? "up" : "down"}
           accent={kpis.variance <= 0 ? "#24c18d" : "#f46a6a"}
           sparkline={[1.2, -0.5, 0.8, -1.0, 0.3, -0.8, 0.5, -0.3, 0.2, Math.abs(kpis.variance / 1000)]}
+          onClick={() => onDrill({ type: "cost-category", value: "variance", label: "Variance — All Jobs" })}
         />
         <SHKpiCard
           label="Avg Margin"
@@ -78,6 +90,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           accent="#22d3ee"
           sparkline={[22.1, 23.0, 22.8, 23.5, 24.0, 23.8, 24.2, 24.5, 24.3, 24.6]}
           delta="Healthy" deltaDir="up"
+          onClick={() => onDrill({ type: "cost-category", value: "margin", label: "Margin — All Jobs" })}
         />
       </div>
 
@@ -93,25 +106,64 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           />
         </SHPanel>
         <SHPanel kicker="Breakdown" title="Cost Distribution">
-          <SHDonutChart segments={breakdown} />
+          <SHDonutChart
+            segments={breakdown}
+            onSegmentClick={label => onDrill({ type: "cost-category", value: label, label: `${label} — Cost Detail` })}
+          />
         </SHPanel>
       </div>
 
+      {/* Spec item 7: Cost Category Variance by Community */}
       <div className="sh-panels-row single">
-        <SHPanel kicker="Variance" title="Budget vs Actual by Job">
+        <SHPanel kicker="Category Variance" title="Permitting / Sidewalk / Vertical Δ by Community">
           <SHCompactTable
             columns={[
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "budget", label: "Budget", width: "90px", align: "right", render: r => fmt$(Number(r.budget)) },
-              { key: "actual", label: "Actual", width: "90px", align: "right", render: r => fmt$(Number(r.actual)) },
-              { key: "variance", label: "Var", width: "80px", align: "right", render: r => {
+              { key: "community", label: "Community", width: "140px" },
+              { key: "jobCount", label: "Jobs", width: "45px", align: "right" },
+              { key: "permittingDelta", label: "Permitting Δ", width: "90px", align: "right", render: r => {
+                const v = Number(r.permittingDelta);
+                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
+              }},
+              { key: "sidewalkDelta", label: "Sidewalk Δ", width: "90px", align: "right", render: r => {
+                const v = Number(r.sidewalkDelta);
+                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
+              }},
+              { key: "verticalDelta", label: "Vertical Δ", width: "90px", align: "right", render: r => {
+                const v = Number(r.verticalDelta);
+                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
+              }},
+              { key: "totalDelta", label: "Total Δ", width: "90px", align: "right", render: r => {
+                const v = Number(r.totalDelta);
+                const tone = v > 0 ? "alert" : "good";
+                return <SHPill tone={tone} label={fmt$(v)} />;
+              }},
+            ]}
+            rows={categoryVariance as unknown as Record<string, unknown>[]}
+            onRowClick={r => onCommunityClick ? onCommunityClick(String(r.community)) : onDrill({ type: "cost-category", value: "community-detail", label: `${r.community} — Cost Breakdown`, community: String(r.community) })}
+          />
+        </SHPanel>
+      </div>
+
+      {/* Budget vs Actual by Job — tight layout with Variance % */}
+      <div className="sh-panels-row single">
+        <SHPanel kicker="Per-Job" title="Budget vs Actual by Job">
+          <SHCompactTable
+            columns={[
+              { key: "jobCode", label: "Job", width: "75px" },
+              { key: "community", label: "Community", width: "130px" },
+              { key: "budget", label: "Budget", width: "80px", align: "right", render: r => fmt$(Number(r.budget)) },
+              { key: "actual", label: "Actual", width: "80px", align: "right", render: r => fmt$(Number(r.actual)) },
+              { key: "variance", label: "Variance", width: "80px", align: "right", render: r => {
                 const v = Number(r.variance);
                 return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
               }},
-              { key: "marginPct", label: "Margin", width: "70px", align: "right", render: r => {
+              { key: "variancePct", label: "Var %", width: "60px", align: "right", render: r => {
+                const v = Number(r.variancePct);
+                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{v >= 0 ? "+" : ""}{v.toFixed(1)}%</span>;
+              }},
+              { key: "marginPct", label: "Margin", width: "65px", align: "right", render: r => {
                 const m = Number(r.marginPct);
-                const tone = m >= 24 ? "good" : m >= 20 ? "watch" : "alert";
+                const tone = m >= 18 ? "good" : m >= 14 ? "watch" : "alert";
                 return <SHPill tone={tone} label={fmtPct(m)} />;
               }},
             ]}

@@ -5,6 +5,7 @@ import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
 import FilterBar from "./FilterBar";
+import SHBreadcrumb from "./SHBreadcrumb";
 import SHDrawer from "./SHDrawer";
 import type { DrillDetail } from "./SHDrawer";
 import {
@@ -45,6 +46,7 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   jobType: null,
   entity: null,
   community: null,
+  stage: null,
   timePeriod: "all",
 };
 
@@ -66,6 +68,15 @@ export default function SunshineDashboard() {
   const setCommunity = (community: string | null) =>
     setFilters(prev => ({ ...prev, community: prev.community === community ? null : community }));
 
+  const setStage = (stage: string | null) =>
+    setFilters(prev => ({ ...prev, stage: prev.stage === stage ? null : stage }));
+
+  const setCity = (city: string | null) =>
+    setFilters(prev => ({ ...prev, city: prev.city === city ? null : city }));
+
+  const clearFilter = (key: keyof SHDashboardFilters) =>
+    setFilters(prev => ({ ...prev, [key]: key === "timePeriod" ? "all" : null }));
+
   const onDrill = useCallback((detail: DrillDetail) => setDrawerDetail(detail), []);
   const closeDrawer = useCallback(() => setDrawerDetail(null), []);
 
@@ -73,13 +84,13 @@ export default function SunshineDashboard() {
     switch (activeTab) {
       /* Construction */
       case "construction-dashboard":
-        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onTabChange={setActiveTab} onDrill={onDrill} />;
+        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onDrill={onDrill} />;
       case "construction-pipeline":
-        return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} />;
+        return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} onStageClick={setStage} />;
       case "construction-cycle":
-        return <ConstructionCycleTimeTab jobs={filteredJobs} onDrill={onDrill} />;
+        return <ConstructionCycleTimeTab jobs={filteredJobs} onDrill={onDrill} onCityClick={setCity} />;
       case "construction-cost":
-        return <ConstructionCostTab jobs={filteredJobs} onDrill={onDrill} />;
+        return <ConstructionCostTab jobs={filteredJobs} onDrill={onDrill} onCommunityClick={setCommunity} />;
       case "construction-subdivisions":
         return <SubdivisionPipelineTab subdivisions={filteredSubs} onDrill={onDrill} />;
 
@@ -131,6 +142,7 @@ export default function SunshineDashboard() {
       <div className="sh-shell" style={{ position: "relative" }}>
         <ShellBar />
         <FilterBar filters={filters} onChange={setFilters} />
+        <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="sh-main">
           <Suspense fallback={<TabLoader />}>

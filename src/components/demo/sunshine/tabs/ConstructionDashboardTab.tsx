@@ -33,11 +33,12 @@ function CompletionBar({ pct }: { pct: number }) {
 interface Props {
   jobs: SHJob[];
   onCommunityClick: (community: string) => void;
+  onStageClick: (stage: string) => void;
   onTabChange: (tab: SHTab) => void;
   onDrill: (detail: DrillDetail) => void;
 }
 
-export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTabChange, onDrill }: Props) {
+export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onTabChange, onDrill }: Props) {
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
@@ -61,13 +62,13 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
         <SHPanel kicker="Portfolio" title="Jobs by Stage">
           <SHDonutChart
             segments={byStage}
-            onSegmentClick={label => onDrill({ type: "stage", value: label, label })}
+            onSegmentClick={label => onStageClick(label)}
           />
         </SHPanel>
         <SHPanel kicker="Communities" title="Active Jobs by Community">
           <SHRankedBars
             items={byCommunity}
-            onBarClick={label => onDrill({ type: "community", value: label, label })}
+            onBarClick={label => onCommunityClick(label)}
             showRank
           />
         </SHPanel>
@@ -84,13 +85,13 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onTab
               { key: "entity", label: "Entity", width: "150px" },
               { key: "jobType", label: "Job Type", width: "90px", render: r => { const jt = String(r.jobType); return <SHPill tone={jt === "Closed" || jt === "Completed" ? "good" : jt === "Construction" ? "watch" : "alert"} label={jt} />; } },
               { key: "plan", label: "Plan", width: "100px" },
-              { key: "superintendent", label: "Super", width: "100px" },
+              { key: "superintendent", label: "Super", width: "110px" },
               { key: "stage", label: "Stage", width: "100px", render: (r) => {
                 const stage = r.stage as string;
                 const tone = stage === "Closing" ? "good" : stage === "Permit" ? "watch" : undefined;
                 return tone ? <SHPill tone={tone} label={stage} /> : <span style={{ color: STAGE_COLORS[stage] }}>{stage}</span>;
               }},
-              { key: "completionPct", label: "Completion", width: "110px", render: (r) => <CompletionBar pct={Number(r.completionPct)} /> },
+              { key: "completionPct", label: "Comp %", width: "100px", align: "right", render: (r) => <CompletionBar pct={Number(r.completionPct)} /> },
               { key: "startDate", label: "Start", width: "85px" },
               { key: "permitDate", label: "Permit", width: "85px", render: r => String(r.permitDate ?? "\u2014") },
               { key: "foundationDate", label: "Foundation", width: "85px", render: r => String(r.foundationDate ?? "\u2014") },

@@ -19,7 +19,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
   const set = (key: keyof SHDashboardFilters, value: string | null) =>
     onChange({ ...filters, [key]: value });
 
-  const hasAny = filters.city || filters.entity || filters.community || filters.timePeriod !== "all";
+  const hasAny = filters.city || filters.entity || filters.community || filters.stage || filters.timePeriod !== "all";
 
   return (
     <div className="sh-filter-bar">
@@ -67,10 +67,17 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
         </span>
       )}
 
+      {filters.stage && (
+        <span className="sh-filter-chip" style={{ borderColor: "#3b82f633", background: "#3b82f610" }}>
+          {filters.stage}
+          <button onClick={() => set("stage", null)}>✕</button>
+        </span>
+      )}
+
       {hasAny && (
         <button
           className="sh-filter-clear"
-          onClick={() => onChange({ city: null, jobType: null, entity: null, community: null, timePeriod: "all" })}
+          onClick={() => onChange({ city: null, jobType: null, entity: null, community: null, stage: null, timePeriod: "all" })}
         >
           Clear all
         </button>

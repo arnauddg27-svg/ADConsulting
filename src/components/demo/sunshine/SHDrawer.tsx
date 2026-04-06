@@ -6,9 +6,10 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort";
   value: string;
   label: string;
+  community?: string; // optional community pre-filter for cost drill-downs
 }
 
 interface SHDrawerProps {
@@ -324,6 +325,84 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
       ];
       rows = superJobs as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cycle-time-cohort": {
+      /* Drill-down for cycle time trendline clicks — filter by quarter cohort */
+      const cohortJobs = jobs.filter(j => {
+        if (!j.coDate) return false;
+        const d = new Date(j.startDate);
+        const q = Math.floor(d.getMonth() / 3) + 1;
+        const key = `${d.getFullYear()} Q${q}`;
+        return key === detail.value;
+      });
+      /* Fall back to all completed if no cohort match */
+      const result = cohortJobs.length > 0 ? cohortJobs : jobs.filter(j => j.coDate);
+      /* Helper: days between two date strings (null-safe) */
+      const daysBetween = (a: string | null, b: string | null) => {
+        if (!a || !b) return null;
+        const ms = new Date(b).getTime() - new Date(a).getTime();
+        return Math.round(ms / 86400000);
+      };
+      title = `${detail.label}`;
+      subtitle = `${result.length} completed jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "70px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "startDate", label: "Start", width: "75px" },
+        { key: "coDate", label: "End Date", width: "75px", render: r => String(r.coDate ?? "\u2014") },
+        { key: "totalCycleDays", label: "Cycle", width: "55px", align: "right", render: r => {
+          const d = Number(r.totalCycleDays);
+          return <span>{(d / 30.44).toFixed(1)}mo</span>;
+        }},
+        { key: "foundation", label: "Found.", width: "50px", align: "right", render: r => {
+          const d = daysBetween(String(r.foundationDate || ""), String(r.framingDate || ""));
+          return <span style={{ color: "var(--sh-text-secondary)" }}>{d != null ? `${d}d` : "\u2014"}</span>;
+        }},
+        { key: "framing", label: "Frame", width: "50px", align: "right", render: r => {
+          const d = daysBetween(String(r.framingDate || ""), String(r.mepDate || ""));
+          return <span style={{ color: "var(--sh-text-secondary)" }}>{d != null ? `${d}d` : "\u2014"}</span>;
+        }},
+        { key: "mep", label: "MEP", width: "45px", align: "right", render: r => {
+          const d = daysBetween(String(r.mepDate || ""), String(r.drywallDate || ""));
+          return <span style={{ color: "var(--sh-text-secondary)" }}>{d != null ? `${d}d` : "\u2014"}</span>;
+        }},
+        { key: "finishes", label: "Finish", width: "50px", align: "right", render: r => {
+          const d = daysBetween(String(r.finishesDate || ""), String(r.coDate || ""));
+          return <span style={{ color: "var(--sh-text-secondary)" }}>{d != null ? `${d}d` : "\u2014"}</span>;
+        }},
+        { key: "marginPct", label: "Margin", width: "55px", align: "right", render: r => fmtPct(Number(r.marginPct)) },
+      ];
+      rows = result as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cost-category": {
+      /* Drill-down for cost metric KPI clicks — per-cost-code rows with optional community filter */
+      const filtered = detail.community
+        ? jobs.filter(j => j.community === detail.community)
+        : jobs;
+      /* Flatten each job into 3 cost-code rows: Permitting, Sidewalk, Vertical */
+      const costCodeRows = filtered.flatMap(j => [
+        { jobCode: j.jobCode, community: j.community, costCode: "Permitting", budget: j.permittingBudget, actual: j.permittingActual, variance: j.permittingActual - j.permittingBudget },
+        { jobCode: j.jobCode, community: j.community, costCode: "Sidewalk", budget: j.sidewalkBudget, actual: j.sidewalkActual, variance: j.sidewalkActual - j.sidewalkBudget },
+        { jobCode: j.jobCode, community: j.community, costCode: "Vertical", budget: j.verticalBudget, actual: j.verticalActual, variance: j.verticalActual - j.verticalBudget },
+      ]).sort((a, b) => a.variance - b.variance);
+      title = detail.label;
+      subtitle = `${filtered.length} jobs · ${costCodeRows.length} line items`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "70px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "costCode", label: "Cost Code", width: "80px" },
+        { key: "budget", label: "Budget", width: "70px", align: "right", render: r => fmt$(Number(r.budget)) },
+        { key: "actual", label: "Actual", width: "70px", align: "right", render: r => fmt$(Number(r.actual)) },
+        { key: "variance", label: "Variance", width: "75px", align: "right", render: r => {
+          const v = Number(r.variance);
+          return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
+        }},
+      ];
+      rows = costCodeRows as unknown as Record<string, unknown>[];
       break;
     }
 

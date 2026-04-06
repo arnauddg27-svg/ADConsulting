@@ -28,6 +28,13 @@ export interface SHJob {
   marginPct: number;
   daysInCurrentPhase: number;
   totalCycleDays: number;
+  /* cost category breakdowns (budget vs actual) */
+  permittingBudget: number;
+  permittingActual: number;
+  sidewalkBudget: number;
+  sidewalkActual: number;
+  verticalBudget: number;
+  verticalActual: number;
   /* milestone dates */
   permitDate: string | null;
   foundationDate: string | null;
@@ -158,6 +165,7 @@ export interface SHDashboardFilters {
   jobType: string | null;
   entity: string | null;
   community: string | null;
+  stage: string | null;
   timePeriod: SHTimePeriod;
 }
 

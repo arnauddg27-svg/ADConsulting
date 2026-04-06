@@ -10,9 +10,10 @@ import SHPipelineBoard from "../SHPipelineBoard";
 interface Props {
   jobs: SHJob[];
   onDrill: (detail: DrillDetail) => void;
+  onStageClick?: (stage: string) => void;
 }
 
-export default function ConstructionPipelineTab({ jobs, onDrill }: Props) {
+export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }: Props) {
   const byStage = getJobsByStage(jobs);
   const activeJobs = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95).length;
   const avgCompletion = jobs.length ? Math.round(jobs.reduce((s, j) => s + j.completionPct, 0) / jobs.length) : 0;
@@ -35,7 +36,7 @@ export default function ConstructionPipelineTab({ jobs, onDrill }: Props) {
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Pipeline" title="Jobs by Phase">
-          <SHPipelineBoard jobs={jobs} onDrill={onDrill} />
+          <SHPipelineBoard jobs={jobs} onDrill={onDrill} onStageClick={onStageClick} />
         </SHPanel>
       </div>
     </>

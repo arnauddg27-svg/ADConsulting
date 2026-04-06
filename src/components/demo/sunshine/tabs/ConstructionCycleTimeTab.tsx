@@ -8,6 +8,11 @@ import {
   getMilestoneSparklines, getStageOutliers,
   fmtN,
 } from "@/lib/sunshine-homes-data";
+
+/* Target duration lookup from avgPhaseDays benchmarks */
+const TARGET_DAYS: Record<string, number> = Object.fromEntries(
+  avgPhaseDays.map(p => [p.phase, p.days])
+);
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHCycleTimePipeline from "../SHCycleTimePipeline";
@@ -21,15 +26,18 @@ import SHPill from "../SHPill";
 interface Props {
   jobs: SHJob[];
   onDrill: (detail: DrillDetail) => void;
+  onCityClick?: (city: string) => void;
 }
 
-export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
+export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }: Props) {
   const completedJobs = jobs.filter(j => j.totalCycleDays > 200);
-  const avgCycle = completedJobs.length
-    ? Math.round(completedJobs.reduce((s, j) => s + j.totalCycleDays, 0) / completedJobs.length)
+  const avgCycleDays = completedJobs.length
+    ? completedJobs.reduce((s, j) => s + j.totalCycleDays, 0) / completedJobs.length
     : 0;
+  const avgCycleMonths = (avgCycleDays / 30.44); // days → months
 
   const totalPhaseDays = avgPhaseDays.reduce((s, p) => s + p.days, 0);
+  const targetMonths = (totalPhaseDays / 30.44);
   const activeCount = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95).length;
   const completionsThisPeriod = jobs.filter(j => j.coDate).length;
 
@@ -50,7 +58,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
   const cycleTimeLine = [{
     label: "Avg Cycle Time",
     color: "#14b8a6",
-    data: cycleTrend.map(t => ({ x: t.period, y: t.avgDays })),
+    data: cycleTrend.map(t => ({ x: t.period, y: Math.round(t.avgDays / 30.44 * 10) / 10 })),
   }];
 
   return (
@@ -63,8 +71,8 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
 
       {/* KPIs */}
       <div className="sh-kpi-row">
-        <SHKpiCard label="Avg Cycle Time" value={`${avgCycle}d`} sub="Start to CO" sparkline={cycleTrend.map(t => t.avgDays)} />
-        <SHKpiCard label="Target Cycle" value={`${totalPhaseDays}d`} sub="Sum of phase averages" accent="#22d3ee" delta={avgCycle > totalPhaseDays ? `+${avgCycle - totalPhaseDays}d over` : `${totalPhaseDays - avgCycle}d under`} deltaDir={avgCycle <= totalPhaseDays ? "up" : "down"} />
+        <SHKpiCard label="Average Cycle Time" value={`${avgCycleMonths.toFixed(1)} months`} sub="Start → CO" sparkline={cycleTrend.map(t => t.avgDays)} />
+        <SHKpiCard label="Target Cycle" value={`${targetMonths.toFixed(1)} months`} sub="Start → CO target" accent="#22d3ee" delta={avgCycleMonths > targetMonths ? `+${(avgCycleMonths - targetMonths).toFixed(1)}mo over` : `${(targetMonths - avgCycleMonths).toFixed(1)}mo under`} deltaDir={avgCycleMonths <= targetMonths ? "up" : "down"} />
         <SHKpiCard label="Completions" value={fmtN(completionsThisPeriod)} sub="COs received" accent="#0f766e" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8, completionsThisPeriod]} delta="+2 vs prior" deltaDir="up" />
         <SHKpiCard label="In Construction" value={fmtN(activeCount)} sub="Active jobs" accent="#3b82f6" progress={Math.round((activeCount / Math.max(jobs.length, 1)) * 100)} delta={`${Math.round((activeCount / Math.max(jobs.length, 1)) * 100)}% of total`} deltaDir="neutral" />
       </div>
@@ -84,7 +92,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
         <SHPanel kicker="CP-11" title="Cycle Time by City — Phase Breakdown">
           <SHStackedCycleBar
             cities={cycleByCity}
-            onPhaseClick={(city, phase) => onDrill({ type: "community", value: city, label: `${city} — ${phase}` })}
+            onPhaseClick={(city) => onCityClick ? onCityClick(city) : onDrill({ type: "community", value: city, label: city })}
           />
         </SHPanel>
       </div>
@@ -95,11 +103,11 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
           <SHPanel kicker="CP-12" title="Cycle Time Trendline — by Start Date Cohort">
             <SHMultiLineChart
               lines={cycleTimeLine}
-              goalLine={totalPhaseDays}
-              formatY={v => `${v}d`}
+              goalLine={Math.round(targetMonths * 10) / 10}
+              formatY={v => `${v.toFixed(1)}mo`}
               onPointClick={(_, x) => {
                 const point = cycleTrend.find(t => t.period === x);
-                if (point) onDrill({ type: "stage", value: x, label: `${x} cohort (${point.jobCount} jobs)` });
+                if (point) onDrill({ type: "cycle-time-cohort", value: x, label: `${x} cohort (${point.jobCount} jobs)` });
               }}
             />
           </SHPanel>
@@ -113,7 +121,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
             <SHMultiLineChart
               lines={trendLines}
               formatY={v => `${v}d`}
-              onPointClick={(lineLabel, x) => onDrill({ type: "stage", value: x, label: `${lineLabel} — ${x}` })}
+              onPointClick={(lineLabel, x) => onDrill({ type: "cycle-time-cohort", value: x, label: `${lineLabel} — ${x}` })}
             />
           </SHPanel>
         </div>
@@ -145,21 +153,35 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill }: Props) {
           <SHPanel kicker="CP-10" title="Stage Duration Outliers — Jobs Exceeding Community Average">
             <SHCompactTable
               columns={[
-                { key: "jobCode", label: "Job", width: "80px" },
-                { key: "community", label: "Community", width: "1fr" },
-                { key: "stage", label: "Stage", width: "100px" },
-                { key: "daysInCurrentPhase", label: "Days", width: "60px", align: "right", render: r => {
+                { key: "jobCode", label: "Job", width: "68px" },
+                { key: "community", label: "Community", width: "110px" },
+                { key: "stage", label: "Stage", width: "85px" },
+                { key: "superintendent", label: "Super", width: "85px" },
+                { key: "completionPct", label: "Comp %", width: "50px", align: "right", render: r => `${r.completionPct}%` },
+                { key: "daysInCurrentPhase", label: "Actual", width: "50px", align: "right", render: r => {
                   const d = Number(r.daysInCurrentPhase);
                   return <span style={{ color: d > 30 ? "var(--sh-danger)" : "var(--sh-warning)", fontWeight: 700 }}>{d}d</span>;
                 }},
-                { key: "completionPct", label: "Comp %", width: "65px", align: "right", render: r => `${r.completionPct}%` },
-                { key: "superintendent", label: "Super", width: "100px" },
-                { key: "city", label: "City", width: "90px" },
-                { key: "plan", label: "Plan", width: "100px" },
-                { key: "marginPct", label: "Margin", width: "65px", align: "right", render: r => {
-                  const m = Number(r.marginPct);
-                  const tone = m >= 24 ? "good" : m >= 20 ? "watch" : "alert";
-                  return <SHPill tone={tone} label={`${m}%`} />;
+                { key: "targetDuration", label: "Target", width: "50px", align: "right", render: r => {
+                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
+                  return <span style={{ color: "var(--sh-text-muted)" }}>{target}d</span>;
+                }},
+                { key: "avgDuration", label: "Avg", width: "45px", align: "right", render: r => {
+                  const comm = String(r.community);
+                  const stg = String(r.stage);
+                  const peers = jobs.filter(j => j.community === comm && j.stage === stg);
+                  const avg = peers.length ? Math.round(peers.reduce((s, j) => s + j.daysInCurrentPhase, 0) / peers.length) : 0;
+                  return <span style={{ color: "var(--sh-text-secondary)" }}>{avg}d</span>;
+                }},
+                { key: "variance", label: "Var", width: "45px", align: "right", render: r => {
+                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
+                  const v = Number(r.daysInCurrentPhase) - target;
+                  return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 700 }}>{v > 0 ? "+" : ""}{v}d</span>;
+                }},
+                { key: "flag", label: "Flag", width: "55px", align: "center", render: r => {
+                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
+                  const over = Number(r.daysInCurrentPhase) - target;
+                  return <SHPill tone={over > 20 ? "alert" : "watch"} label={over > 20 ? "Critical" : "At Risk"} />;
                 }},
               ]}
               rows={outliers as unknown as Record<string, unknown>[]}
