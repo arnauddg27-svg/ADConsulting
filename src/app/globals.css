@@ -163,7 +163,7 @@
     z-index: -1;
   }
 
-  main {
+  main:not(.sh-main) {
     position: relative;
     isolation: isolate;
   }

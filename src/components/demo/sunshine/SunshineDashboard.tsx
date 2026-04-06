@@ -161,11 +161,11 @@ export default function SunshineDashboard() {
         <FilterBar filters={filters} onChange={setFilters} />
         <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="sh-main">
+        <div className="sh-main">
           <Suspense fallback={<TabLoader />}>
             {tabContent()}
           </Suspense>
-        </main>
+        </div>
         <SHDrawer detail={drawerDetail} onClose={closeDrawer} />
       </div>
     </div>

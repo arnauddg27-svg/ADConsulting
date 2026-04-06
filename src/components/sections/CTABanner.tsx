@@ -20,7 +20,7 @@ export default function CTABanner({
   variant = "dark",
 }: CTABannerProps) {
   return (
-    <section className="pb-20 md:pb-28">
+    <section className="pb-20 md:pb-28" style={{ position: "relative", zIndex: 0, pointerEvents: "none" }}>
       <Container>
         <div
           className={clsx(
@@ -29,6 +29,7 @@ export default function CTABanner({
               ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.15),rgba(255,255,255,0.04)_55%,rgba(255,255,255,0.02))]"
               : "bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03)_55%,rgba(16,185,129,0.08))]"
           )}
+          style={{ pointerEvents: "auto" }}
         >
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
