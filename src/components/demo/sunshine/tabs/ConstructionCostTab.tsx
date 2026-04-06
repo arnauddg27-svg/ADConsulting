@@ -2,13 +2,11 @@
 
 import type { SHJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getCostKPIs, getCostBreakdown, getCostCategoryVariance, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import { getCostKPIs, getCostBreakdown, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHAreaChart from "../SHAreaChart";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 /* Monthly budget vs actual trend data */
 const MONTHLY_TREND = [
@@ -32,24 +30,9 @@ interface Props {
   onCommunityClick?: (community: string) => void;
 }
 
-export default function ConstructionCostTab({ jobs, onDrill, onCommunityClick }: Props) {
+export default function ConstructionCostTab({ jobs, onDrill }: Props) {
   const kpis = getCostKPIs(jobs);
   const breakdown = getCostBreakdown();
-  const categoryVariance = getCostCategoryVariance(jobs);
-
-  /* Per-job variance rows — sorted worst to best */
-  const varianceRows = jobs
-    .map(j => ({
-      jobCode: j.jobCode,
-      community: j.community,
-      budget: j.originalBudget,
-      actual: j.actualCostToDate,
-      variance: j.actualCostToDate - j.originalBudget,
-      variancePct: j.originalBudget > 0 ? ((j.actualCostToDate - j.originalBudget) / j.originalBudget) * 100 : 0,
-      marginPct: j.marginPct,
-    }))
-    .sort((a, b) => a.variance - b.variance);
-
   return (
     <>
       <div className="sh-tab-header">
@@ -113,65 +96,6 @@ export default function ConstructionCostTab({ jobs, onDrill, onCommunityClick }:
         </SHPanel>
       </div>
 
-      {/* Spec item 7: Cost Category Variance by Community */}
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Category Variance" title="Permitting / Sidewalk / Vertical Δ by Community">
-          <SHCompactTable
-            columns={[
-              { key: "community", label: "Community", width: "140px" },
-              { key: "jobCount", label: "Jobs", width: "45px", align: "right" },
-              { key: "permittingDelta", label: "Permitting Δ", width: "90px", align: "right", render: r => {
-                const v = Number(r.permittingDelta);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "sidewalkDelta", label: "Sidewalk Δ", width: "90px", align: "right", render: r => {
-                const v = Number(r.sidewalkDelta);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "verticalDelta", label: "Vertical Δ", width: "90px", align: "right", render: r => {
-                const v = Number(r.verticalDelta);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "totalDelta", label: "Total Δ", width: "90px", align: "right", render: r => {
-                const v = Number(r.totalDelta);
-                const tone = v > 0 ? "alert" : "good";
-                return <SHPill tone={tone} label={fmt$(v)} />;
-              }},
-            ]}
-            rows={categoryVariance as unknown as Record<string, unknown>[]}
-            onRowClick={r => onCommunityClick ? onCommunityClick(String(r.community)) : onDrill({ type: "cost-category", value: "community-detail", label: `${r.community} — Cost Breakdown`, community: String(r.community) })}
-          />
-        </SHPanel>
-      </div>
-
-      {/* Budget vs Actual by Job — tight layout with Variance % */}
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Per-Job" title="Budget vs Actual by Job">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "75px" },
-              { key: "community", label: "Community", width: "130px" },
-              { key: "budget", label: "Budget", width: "80px", align: "right", render: r => fmt$(Number(r.budget)) },
-              { key: "actual", label: "Actual", width: "80px", align: "right", render: r => fmt$(Number(r.actual)) },
-              { key: "variance", label: "Variance", width: "80px", align: "right", render: r => {
-                const v = Number(r.variance);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "variancePct", label: "Var %", width: "60px", align: "right", render: r => {
-                const v = Number(r.variancePct);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{v >= 0 ? "+" : ""}{v.toFixed(1)}%</span>;
-              }},
-              { key: "marginPct", label: "Margin", width: "65px", align: "right", render: r => {
-                const m = Number(r.marginPct);
-                const tone = m >= 18 ? "good" : m >= 14 ? "watch" : "alert";
-                return <SHPill tone={tone} label={fmtPct(m)} />;
-              }},
-            ]}
-            rows={varianceRows as unknown as Record<string, unknown>[]}
-            onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: String(r.jobCode) })}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

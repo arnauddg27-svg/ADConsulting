@@ -6,8 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHDonutChart from "../../sunshine/SHDonutChart";
 import SHRankedBars from "../../sunshine/SHRankedBars";
-import SHCompactTable from "../../sunshine/SHCompactTable";
-import SHPill from "../../sunshine/SHPill";
 
 interface Props {
   jobs: SHJob[];
@@ -20,17 +18,6 @@ export default function BHConstructionCostTab({ jobs }: Props) {
     label: c.label,
     value: jobs.filter(j => j.community === c.label).reduce((s, j) => s + j.wipBalance, 0),
   }));
-
-  const budgetRows = jobs
-    .map(j => ({
-      jobCode: j.jobCode,
-      community: j.community,
-      budget: j.originalBudget,
-      actual: j.actualCostToDate,
-      variance: j.actualCostToDate - j.originalBudget,
-      marginPct: j.marginPct,
-    }))
-    .sort((a, b) => a.variance - b.variance);
 
   return (
     <>
@@ -56,28 +43,6 @@ export default function BHConstructionCostTab({ jobs }: Props) {
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Variance" title="Budget vs Actual by Job">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "budget", label: "Budget", width: "90px", align: "right", render: r => fmt$(Number(r.budget)) },
-              { key: "actual", label: "Actual", width: "90px", align: "right", render: r => fmt$(Number(r.actual)) },
-              { key: "variance", label: "Var", width: "80px", align: "right", render: r => {
-                const v = Number(r.variance);
-                return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "marginPct", label: "Margin", width: "70px", align: "right", render: r => {
-                const m = Number(r.marginPct);
-                const tone = m >= 24 ? "good" : m >= 20 ? "watch" : "alert";
-                return <SHPill tone={tone} label={fmtPct(m)} />;
-              }},
-            ]}
-            rows={budgetRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

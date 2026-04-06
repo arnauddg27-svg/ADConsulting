@@ -6,7 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHRankedBars from "../../sunshine/SHRankedBars";
 import SHDonutChart from "../../sunshine/SHDonutChart";
-import SHCompactTable from "../../sunshine/SHCompactTable";
 
 interface Props {
   sales: SHSale[];
@@ -23,18 +22,6 @@ export default function BHSalesDashboardTab({ sales, onCommunityClick }: Props) 
       value: sales.filter(s => s.community === comm).length,
     }))
     .sort((a, b) => b.value - a.value);
-
-  const contractRows = sales
-    .map(s => ({
-      jobCode: s.jobCode,
-      community: s.community,
-      plan: s.plan,
-      buyer: s.buyer,
-      salePrice: s.salePrice,
-      contractDate: s.contractDate,
-      status: s.status,
-    }))
-    .sort((a, b) => new Date(b.contractDate).getTime() - new Date(a.contractDate).getTime());
 
   return (
     <>
@@ -60,25 +47,6 @@ export default function BHSalesDashboardTab({ sales, onCommunityClick }: Props) 
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Recent" title="Signed Contracts">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "130px" },
-              { key: "plan", label: "Plan", width: "100px" },
-              { key: "buyer", label: "Buyer", width: "130px" },
-              { key: "salePrice", label: "Price", width: "100px", align: "right", render: r => fmt$(Number(r.salePrice)) },
-              { key: "contractDate", label: "Contract Date", width: "100px" },
-              { key: "status", label: "Status", width: "80px", render: r => {
-                const status = String(r.status);
-                return status === "pending" ? <span style={{ color: "var(--sh-warning)", fontWeight: 600 }}>Pending</span> : <span style={{ color: "var(--sh-accent)" }}>Active</span>;
-              }},
-            ]}
-            rows={contractRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

@@ -6,7 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHRankedBars from "../../sunshine/SHRankedBars";
 import SHHistogram from "../../sunshine/SHHistogram";
-import SHCompactTable from "../../sunshine/SHCompactTable";
 
 interface Props {
   jobs: SHJob[];
@@ -26,13 +25,6 @@ export default function BHConstructionCycleTab({ jobs }: Props) {
     { bucket: "180-270d", count: jobs.filter(j => j.totalCycleDays >= 180 && j.totalCycleDays < 270).length, color: "#f59e0b" },
     { bucket: ">270d", count: jobs.filter(j => j.totalCycleDays >= 270).length, color: "#ef4444" },
   ];
-
-  const cycleTimeRows = jobs.map(j => ({
-    jobCode: j.jobCode,
-    community: j.community,
-    cycleDays: j.totalCycleDays,
-    completion: j.completionPct,
-  })).sort((a, b) => b.cycleDays - a.cycleDays);
 
   return (
     <>
@@ -58,19 +50,6 @@ export default function BHConstructionCycleTab({ jobs }: Props) {
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Roster" title="Cycle Time by Job">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "cycleDays", label: "Cycle Days", width: "100px", align: "right", render: r => `${Number(r.cycleDays)}d` },
-              { key: "completion", label: "Completion", width: "100px", align: "right", render: r => `${Number(r.completion)}%` },
-            ]}
-            rows={cycleTimeRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

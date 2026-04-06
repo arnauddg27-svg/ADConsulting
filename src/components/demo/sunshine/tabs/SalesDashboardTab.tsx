@@ -7,8 +7,6 @@ import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
 import SHDonutChart from "../SHDonutChart";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 const PLAN_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6"];
 
@@ -22,11 +20,6 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onDrill }: 
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
-
-  const recentSales = sales
-    .filter(s => s.status !== "cancelled")
-    .sort((a, b) => b.contractDate.localeCompare(a.contractDate))
-    .slice(0, 15);
 
   return (
     <>
@@ -59,28 +52,6 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onDrill }: 
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Recent" title="Latest Contracts">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "80px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "buyer", label: "Buyer", width: "1fr" },
-              { key: "plan", label: "Plan", width: "100px" },
-              { key: "salePrice", label: "Price", width: "80px", align: "right", render: r => fmt$(Number(r.salePrice)) },
-              { key: "contractDate", label: "Contract", width: "90px" },
-              { key: "closingDate", label: "Closing", width: "90px", render: r => String(r.closingDate ?? "—") },
-              { key: "status", label: "Status", width: "80px", render: r => {
-                const status = String(r.status);
-                const tone = status === "pending" ? "watch" : status === "active" ? "good" : "alert";
-                return <SHPill tone={tone} label={status} />;
-              }},
-            ]}
-            rows={recentSales as unknown as Record<string, unknown>[]}
-            onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: String(r.jobCode) })}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

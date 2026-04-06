@@ -6,8 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHDonutChart from "../../sunshine/SHDonutChart";
 import SHRankedBars from "../../sunshine/SHRankedBars";
-import SHCompactTable from "../../sunshine/SHCompactTable";
-import SHPill from "../../sunshine/SHPill";
 
 interface Props {
   permits: SHPermit[];
@@ -28,19 +26,6 @@ export default function BHPermittingDashboardTab({ permits, onCommunityClick }: 
       value: permits.filter(p => p.city === city).length,
     }))
     .sort((a, b) => b.value - a.value);
-
-  const permitRows = permits
-    .map(p => ({
-      permitType: p.permitType,
-      jobCode: p.jobCode,
-      community: p.community,
-      city: p.city,
-      submittedDate: p.submittedDate,
-      approvedDate: p.approvedDate,
-      status: p.status,
-      daysElapsed: p.daysInReview,
-    }))
-    .sort((a, b) => b.daysElapsed - a.daysElapsed);
 
   return (
     <>
@@ -66,29 +51,6 @@ export default function BHPermittingDashboardTab({ permits, onCommunityClick }: 
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Roster" title="Permit Tracking">
-          <SHCompactTable
-            columns={[
-              { key: "permitType", label: "Permit Type", width: "110px" },
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "120px" },
-              { key: "city", label: "City", width: "100px" },
-              { key: "submittedDate", label: "Submitted", width: "100px" },
-              { key: "status", label: "Status", width: "100px", render: r => {
-                const status = String(r.status);
-                return status === "approved" ? <SHPill tone="good" label="Approved" /> : <SHPill tone="watch" label="In Review" />;
-              }},
-              { key: "daysElapsed", label: "Days", width: "70px", align: "right", render: r => {
-                const days = Number(r.daysElapsed);
-                const tone = days > 90 ? "alert" : days > 60 ? "watch" : "good";
-                return <span style={{ color: tone === "alert" ? "var(--sh-danger)" : tone === "watch" ? "var(--sh-warning)" : "var(--sh-accent)" }}>{days}d</span>;
-              }},
-            ]}
-            rows={permitRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

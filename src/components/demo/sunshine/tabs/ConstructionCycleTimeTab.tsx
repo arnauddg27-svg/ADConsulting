@@ -5,14 +5,10 @@ import type { DrillDetail } from "../SHDrawer";
 import {
   avgPhaseDays, cycleTimeDistribution,
   getCycleTimeByCity, getCycleTimeTrend, getCompletionTrendlines,
-  getMilestoneSparklines, getStageOutliers,
+  getMilestoneSparklines,
   fmtN,
 } from "@/lib/sunshine-homes-data";
 
-/* Target duration lookup from avgPhaseDays benchmarks */
-const TARGET_DAYS: Record<string, number> = Object.fromEntries(
-  avgPhaseDays.map(p => [p.phase, p.days])
-);
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHCycleTimePipeline from "../SHCycleTimePipeline";
@@ -20,8 +16,6 @@ import SHHistogram from "../SHHistogram";
 import SHStackedCycleBar from "../SHStackedCycleBar";
 import SHMultiLineChart from "../SHMultiLineChart";
 import SHSparklineCards from "../SHSparklineCards";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 interface Props {
   jobs: SHJob[];
@@ -46,8 +40,6 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
   const cycleTrend = getCycleTimeTrend(jobs);
   const completionTrends = getCompletionTrendlines(jobs);
   const sparklines = getMilestoneSparklines(jobs);
-  const outliers = getStageOutliers(jobs);
-
   /* Multi-line chart data */
   const trendLines = [
     { label: "Foundation→CO", color: "#1e3a5f", data: completionTrends.map(t => ({ x: t.period, y: t.foundationToCompletion })) },
@@ -147,49 +139,6 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
         </div>
       )}
 
-      {/* CP-10: Stage Duration Outliers */}
-      {outliers.length > 0 && (
-        <div className="sh-panels-row single">
-          <SHPanel kicker="CP-10" title="Stage Duration Outliers — Jobs Exceeding Community Average">
-            <SHCompactTable
-              columns={[
-                { key: "jobCode", label: "Job", width: "68px" },
-                { key: "community", label: "Community", width: "110px" },
-                { key: "stage", label: "Stage", width: "85px" },
-                { key: "superintendent", label: "Super", width: "85px" },
-                { key: "completionPct", label: "Comp %", width: "50px", align: "right", render: r => `${r.completionPct}%` },
-                { key: "daysInCurrentPhase", label: "Actual", width: "50px", align: "right", render: r => {
-                  const d = Number(r.daysInCurrentPhase);
-                  return <span style={{ color: d > 30 ? "var(--sh-danger)" : "var(--sh-warning)", fontWeight: 700 }}>{d}d</span>;
-                }},
-                { key: "targetDuration", label: "Target", width: "50px", align: "right", render: r => {
-                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
-                  return <span style={{ color: "var(--sh-text-muted)" }}>{target}d</span>;
-                }},
-                { key: "avgDuration", label: "Avg", width: "45px", align: "right", render: r => {
-                  const comm = String(r.community);
-                  const stg = String(r.stage);
-                  const peers = jobs.filter(j => j.community === comm && j.stage === stg);
-                  const avg = peers.length ? Math.round(peers.reduce((s, j) => s + j.daysInCurrentPhase, 0) / peers.length) : 0;
-                  return <span style={{ color: "var(--sh-text-secondary)" }}>{avg}d</span>;
-                }},
-                { key: "variance", label: "Var", width: "45px", align: "right", render: r => {
-                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
-                  const v = Number(r.daysInCurrentPhase) - target;
-                  return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 700 }}>{v > 0 ? "+" : ""}{v}d</span>;
-                }},
-                { key: "flag", label: "Flag", width: "55px", align: "center", render: r => {
-                  const target = TARGET_DAYS[String(r.stage)] ?? 0;
-                  const over = Number(r.daysInCurrentPhase) - target;
-                  return <SHPill tone={over > 20 ? "alert" : "watch"} label={over > 20 ? "Critical" : "At Risk"} />;
-                }},
-              ]}
-              rows={outliers as unknown as Record<string, unknown>[]}
-              onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: String(r.jobCode) })}
-            />
-          </SHPanel>
-        </div>
-      )}
     </>
   );
 }

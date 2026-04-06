@@ -6,9 +6,7 @@ import { getLandKPIs, fmt$, fmtN } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
-import SHCompactTable from "../SHCompactTable";
 import SHDonutChart from "../SHDonutChart";
-import SHPill from "../SHPill";
 
 interface Props {
   deals: SHLandDeal[];
@@ -67,28 +65,6 @@ export default function LandDashboardTab({ deals, onCommunityClick, onDrill }: P
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Deals" title="Land Acquisition Pipeline">
-          <SHCompactTable
-            columns={[
-              { key: "name", label: "Deal Name", width: "1.5fr" },
-              { key: "city", label: "City", width: "100px" },
-              { key: "county", label: "County", width: "110px" },
-              { key: "acres", label: "Acres", width: "60px", align: "right" },
-              { key: "lots", label: "Lots", width: "55px", align: "right" },
-              { key: "costPerLot", label: "$/Lot", width: "75px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
-              { key: "acquisitionCost", label: "Total Cost", width: "90px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
-              { key: "status", label: "Status", width: "110px", render: r => {
-                const s = String(r.status);
-                const tone = s === "closed" ? "good" : s === "under-contract" ? "watch" : "alert";
-                return <SHPill tone={tone} label={s.replace("-", " ")} />;
-              }},
-            ]}
-            rows={deals as unknown as Record<string, unknown>[]}
-            onRowClick={r => onDrill({ type: "land-status", value: String(r.name), label: String(r.name) })}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

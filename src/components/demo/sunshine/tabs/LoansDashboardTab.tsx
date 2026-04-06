@@ -2,13 +2,11 @@
 
 import type { SHLoan } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLoanKPIs, getLenderDistribution, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
+import { getLoanKPIs, getLenderDistribution, fmt$, fmtN } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 const LENDER_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
 
@@ -22,8 +20,6 @@ export default function LoansDashboardTab({ loans, onDrill }: Props) {
   const lenders = getLenderDistribution(loans).map((l, i) => ({
     ...l, color: LENDER_COLORS[i % LENDER_COLORS.length],
   }));
-
-  const allLoans = [...loans].sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
 
   return (
     <>
@@ -67,29 +63,6 @@ export default function LoansDashboardTab({ loans, onDrill }: Props) {
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="All Loans" title="Loan Roster by Expiration">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "80px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "lender", label: "Lender", width: "130px" },
-              { key: "loanAmount", label: "Amount", width: "80px", align: "right", render: r => fmt$(Number(r.loanAmount)) },
-              { key: "totalDrawn", label: "Drawn", width: "80px", align: "right", render: r => fmt$(Number(r.totalDrawn)) },
-              { key: "drawPct", label: "Draw %", width: "65px", align: "right", render: r => fmtPct(Number(r.drawPct)) },
-              { key: "interestRate", label: "Rate", width: "50px", align: "right", render: r => `${Number(r.interestRate)}%` },
-              { key: "expirationDate", label: "Expires", width: "85px" },
-              { key: "daysUntilExpiration", label: "Exp", width: "60px", align: "right", render: r => {
-                const d = Number(r.daysUntilExpiration);
-                const tone = d <= 30 ? "alert" : d <= 60 ? "watch" : "good";
-                return <SHPill tone={tone} label={`${d}d`} />;
-              }},
-            ]}
-            rows={allLoans as unknown as Record<string, unknown>[]}
-            onRowClick={r => onDrill({ type: "lender", value: String(r.lender), label: String(r.lender) })}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

@@ -6,7 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHDonutChart from "../../sunshine/SHDonutChart";
 import SHRankedBars from "../../sunshine/SHRankedBars";
-import SHCompactTable from "../../sunshine/SHCompactTable";
 
 interface Props {
   loans: SHLoan[];
@@ -29,18 +28,6 @@ export default function BHLoansDashboardTab({ loans }: Props) {
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 6);
-
-  const loanRows = loans
-    .map(l => ({
-      jobCode: l.jobCode,
-      community: l.community,
-      lender: l.lender,
-      amount: l.loanAmount,
-      drawn: l.totalDrawn,
-      drawPct: l.drawPct,
-      rate: l.interestRate,
-    }))
-    .sort((a, b) => Number(b.amount) - Number(a.amount));
 
   return (
     <>
@@ -66,22 +53,6 @@ export default function BHLoansDashboardTab({ loans }: Props) {
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Roster" title="Active Loans">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "90px" },
-              { key: "community", label: "Community", width: "120px" },
-              { key: "lender", label: "Lender", width: "160px" },
-              { key: "amount", label: "Commitment", width: "100px", align: "right", render: r => fmt$(Number(r.amount)) },
-              { key: "drawn", label: "Drawn", width: "100px", align: "right", render: r => fmt$(Number(r.drawn)) },
-              { key: "drawPct", label: "Draw %", width: "80px", align: "right", render: r => `${Math.round(Number(r.drawPct))}%` },
-              { key: "rate", label: "Rate", width: "70px", align: "right", render: r => `${Number(r.rate).toFixed(2)}%` },
-            ]}
-            rows={loanRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }

@@ -5,8 +5,6 @@ import { getPMKPIs, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 const OCC_COLORS: Record<string, string> = {
   leased: "#14b8a6",
@@ -36,9 +34,6 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
       .sort((a, b) => b.value - a.value);
   })();
 
-  const delinquent = units.filter(u => u.delinquentAmount > 0)
-    .sort((a, b) => b.daysPastDue - a.daysPastDue);
-
   return (
     <>
       <div className="sh-tab-header">
@@ -56,7 +51,7 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
           value={fmtN(kpis.delinquentUnits)}
           accent={kpis.delinquentUnits > 0 ? "#f46a6a" : "#24c18d"}
           sparkline={[5, 4, 6, 5, 3, 4, 3, 2, 3, kpis.delinquentUnits]}
-          delta={kpis.delinquentUnits > 0 ? `${fmt$(delinquent.reduce((s, u) => s + Number(u.delinquentAmount), 0))} past due` : "All current"}
+          delta={kpis.delinquentUnits > 0 ? "Past due" : "All current"}
           deltaDir={kpis.delinquentUnits > 0 ? "down" : "up"}
         />
       </div>
@@ -64,26 +59,6 @@ export default function PropertyMgmtDashboardTab({ units, onDrill }: Props) {
       <div className="sh-panels-row">
         <SHPanel kicker="Occupancy" title="Units by Status">
           <SHDonutChart segments={byOccupancy} onSegmentClick={label => onDrill({ type: "occupancy", value: label.toLowerCase(), label })} />
-        </SHPanel>
-        <SHPanel kicker="Delinquency" title="Past-Due Tenants">
-          {delinquent.length > 0 ? (
-            <SHCompactTable
-              columns={[
-                { key: "address", label: "Address", width: "1fr" },
-                { key: "community", label: "Community", width: "130px" },
-                { key: "delinquentAmount", label: "Amount", width: "80px", align: "right", render: r => fmt$(Number(r.delinquentAmount)) },
-                { key: "daysPastDue", label: "Days", width: "70px", align: "right", render: r => {
-                  const d = Number(r.daysPastDue);
-                  const tone = d >= 60 ? "alert" : d >= 30 ? "watch" : "good";
-                  return <SHPill tone={tone} label={`${d}d`} />;
-                }},
-              ]}
-              rows={delinquent as unknown as Record<string, unknown>[]}
-              onRowClick={r => onDrill({ type: "unit", value: String(r.address), label: String(r.address) })}
-            />
-          ) : (
-            <div style={{ fontSize: 11, color: "var(--sh-text-muted)", padding: 12 }}>No delinquent tenants</div>
-          )}
         </SHPanel>
       </div>
     </>

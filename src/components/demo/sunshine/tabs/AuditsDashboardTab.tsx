@@ -7,8 +7,6 @@ import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
-import SHCompactTable from "../SHCompactTable";
-import SHPill from "../SHPill";
 
 interface Props {
   audits: SHAuditJob[];
@@ -27,9 +25,6 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
     { label: "15–20%", value: audits.filter(a => a.netMargin >= 15 && a.netMargin < 20).length, color: "#14b8a6" },
     { label: "20%+", value: audits.filter(a => a.netMargin >= 20).length, color: "#0f766e" },
   ].filter(b => b.value > 0);
-
-  /* Top at-risk jobs (worst margin first) */
-  const atRiskJobs = [...audits].sort((a, b) => a.netMargin - b.netMargin).slice(0, 15);
 
   /* By community avg margin */
   const byCommunity = (() => {
@@ -80,27 +75,6 @@ export default function AuditsDashboardTab({ audits, onDrill }: Props) {
             formatValue={v => `${v}%`}
             onBarClick={label => onDrill({ type: "community", value: label, label })}
             showRank
-          />
-        </SHPanel>
-        <SHPanel kicker="PL-03" title="Jobs Sorted by Margin (Worst First)">
-          <SHCompactTable
-            columns={[
-              { key: "jobCode", label: "Job", width: "80px" },
-              { key: "community", label: "Community", width: "1fr" },
-              { key: "salePrice", label: "Sale", width: "75px", align: "right", render: r => fmt$(Number(r.salePrice)) },
-              { key: "totalCost", label: "Cost", width: "75px", align: "right", render: r => fmt$(Number(r.totalCost)) },
-              { key: "netProfit", label: "Profit", width: "75px", align: "right", render: r => {
-                const v = Number(r.netProfit);
-                return <span style={{ color: v >= 0 ? "var(--sh-accent)" : "var(--sh-danger)", fontWeight: 600 }}>{fmt$(v)}</span>;
-              }},
-              { key: "netMargin", label: "Margin", width: "70px", align: "right", render: r => {
-                const m = Number(r.netMargin);
-                const tone = m >= 15 ? "good" : m >= 5 ? "watch" : "alert";
-                return <SHPill tone={tone} label={fmtPct(m)} />;
-              }},
-            ]}
-            rows={atRiskJobs as unknown as Record<string, unknown>[]}
-            onRowClick={r => onDrill({ type: "job", value: String(r.jobCode), label: String(r.jobCode) })}
           />
         </SHPanel>
       </div>

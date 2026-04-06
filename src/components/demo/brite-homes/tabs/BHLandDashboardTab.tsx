@@ -6,7 +6,6 @@ import SHKpiCard from "../../sunshine/SHKpiCard";
 import SHPanel from "../../sunshine/SHPanel";
 import SHRankedBars from "../../sunshine/SHRankedBars";
 import SHDonutChart from "../../sunshine/SHDonutChart";
-import SHCompactTable from "../../sunshine/SHCompactTable";
 
 interface Props {
   deals: SHLandDeal[];
@@ -27,18 +26,6 @@ export default function BHLandDashboardTab({ deals, onCommunityClick }: Props) {
     { label: "Active", value: kpis.activeDeals, color: "#14b8a6" },
     { label: "Closed", value: kpis.closed, color: "#0d9488" },
   ];
-
-  const dealRows = deals
-    .map(d => ({
-      name: d.name,
-      community: d.community,
-      city: d.city,
-      lots: d.lots,
-      costPerLot: d.costPerLot,
-      acquisitionCost: d.acquisitionCost,
-      status: d.status,
-    }))
-    .sort((a, b) => Number(b.lots) - Number(a.lots));
 
   return (
     <>
@@ -64,21 +51,6 @@ export default function BHLandDashboardTab({ deals, onCommunityClick }: Props) {
         </SHPanel>
       </div>
 
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Inventory" title="Land Deals">
-          <SHCompactTable
-            columns={[
-              { key: "name", label: "Deal", width: "100px" },
-              { key: "community", label: "Community", width: "120px" },
-              { key: "city", label: "City", width: "100px" },
-              { key: "lots", label: "Total Lots", width: "90px", align: "right" },
-              { key: "costPerLot", label: "Cost/Lot", width: "100px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
-              { key: "acquisitionCost", label: "Total Cost", width: "110px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
-            ]}
-            rows={dealRows as unknown as Record<string, unknown>[]}
-          />
-        </SHPanel>
-      </div>
     </>
   );
 }
