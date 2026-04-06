@@ -84,7 +84,7 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return fmt$(job?.wipBalance ?? 0);
               }},
-              { key: "marginPct", label: "Margin %", width: "70px", align: "right", render: r => {
+              { key: "marginPct", label: "Margin %", width: "80px", align: "right", render: r => {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 if (!job) return "\u2014";
                 const m = job.marginPct;
@@ -109,7 +109,7 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
                 const attys = ["Smith & Associates", "Johnson Law", "Davis Legal", "Wilson Group", "Brown Partners"];
                 return attys[Number(r.id) % attys.length];
               }},
-              { key: "commissionPct", label: "Comm %", width: "65px", align: "right", render: r => {
+              { key: "commissionPct", label: "Comm %", width: "75px", align: "right", render: r => {
                 const pct = 3 + (Number(r.id) % 4);
                 return `${pct}%`;
               }},

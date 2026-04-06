@@ -43,12 +43,12 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
                 return <SHPill tone={tone} label={s.replace("-", " ")} />;
               }},
               { key: "acres", label: "Acres", width: "65px", align: "right" },
-              { key: "lots", label: "Lots", width: "55px", align: "right" },
+              { key: "lots", label: "Lots", width: "65px", align: "right" },
               { key: "costPerLot", label: "Cost/Lot", width: "80px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
               { key: "acquisitionCost", label: "Total Cost", width: "90px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
               { key: "revenuePotential", label: "Rev Potential", width: "95px", align: "right", render: r => fmt$(Number(r.lots) * 480000) },
               { key: "profitPotential", label: "Profit Pot.", width: "90px", align: "right", render: r => fmt$(Number(r.lots) * 480000 - Number(r.acquisitionCost)) },
-              { key: "roi", label: "ROI %", width: "65px", align: "right", render: r => {
+              { key: "roi", label: "ROI %", width: "75px", align: "right", render: r => {
                 const cost = Number(r.acquisitionCost);
                 const rev = Number(r.lots) * 480000;
                 return cost > 0 ? fmtPct(((rev - cost) / cost) * 100) : "\u2014";

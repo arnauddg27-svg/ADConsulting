@@ -75,7 +75,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return <CompletionBar pct={job?.completionPct ?? 0} />;
               }},
-              { key: "daysInReview", label: "Total Days", width: "70px", align: "right", render: r => {
+              { key: "daysInReview", label: "Total Days", width: "80px", align: "right", render: r => {
                 const d = Number(r.daysInReview);
                 return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "var(--sh-text-secondary)", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
               }},

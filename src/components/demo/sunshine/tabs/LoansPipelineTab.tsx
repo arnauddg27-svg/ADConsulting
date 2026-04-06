@@ -87,12 +87,12 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
               { key: "totalDrawn", label: "Drawn", width: "90px", align: "right", render: r => fmt$(Number(r.totalDrawn)) },
               { key: "remaining", label: "Remaining", width: "85px", align: "right", render: r => fmt$(Number(r.loanAmount) - Number(r.totalDrawn)) },
               { key: "drawPct", label: "Draw %", width: "100px", align: "right", render: r => <DrawBar pct={Number(r.drawPct)} /> },
-              { key: "interestRate", label: "Rate", width: "60px", align: "right", render: r => `${Number(r.interestRate)}%` },
+              { key: "interestRate", label: "Rate", width: "70px", align: "right", render: r => `${Number(r.interestRate)}%` },
               { key: "salePrice", label: "Sale Price", width: "85px", align: "right", render: r => {
                 const sale = sales.find(s => s.jobCode === String(r.jobCode));
                 return sale ? fmt$(sale.salePrice) : "\u2014";
               }},
-              { key: "ltv", label: "LTV", width: "60px", align: "right", render: r => {
+              { key: "ltv", label: "LTV", width: "70px", align: "right", render: r => {
                 const sale = sales.find(s => s.jobCode === String(r.jobCode));
                 if (!sale) return "\u2014";
                 return fmtPct((Number(r.loanAmount) / sale.salePrice) * 100);
