@@ -52,7 +52,7 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
               { key: "totalLots", label: "Total Lots", width: "70px", align: "right" },
               { key: "lotsCompleted", label: "Completed", width: "75px", align: "right" },
               { key: "lotsUnderConstruction", label: "Building", width: "70px", align: "right" },
-              { key: "lotsSold", label: "Sold", width: "55px", align: "right" },
+              { key: "lotsSold", label: "Sold", width: "60px", align: "right" },
               { key: "lotsRemaining", label: "Available", width: "70px", align: "right" },
               { key: "lotProgress", label: "Lot Progress", width: "110px", render: r => (
                 <LotBar
@@ -70,9 +70,9 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
               }},
               { key: "absorptionRate", label: "Absorption", width: "80px", align: "right", render: r => `${Number(r.absorptionRate)}/mo` },
               { key: "zoningApproved", label: "Zoning", width: "65px", render: r => <SHPill tone={r.zoningApproved ? "good" : "alert"} label={r.zoningApproved ? "✓" : "○"} /> },
-              { key: "platRecorded", label: "Plat", width: "55px", render: r => <SHPill tone={r.platRecorded ? "good" : "alert"} label={r.platRecorded ? "✓" : "○"} /> },
+              { key: "platRecorded", label: "Plat", width: "60px", render: r => <SHPill tone={r.platRecorded ? "good" : "alert"} label={r.platRecorded ? "✓" : "○"} /> },
               { key: "utilityStubs", label: "Utilities", width: "65px", render: r => <SHPill tone={r.utilityStubs ? "good" : "alert"} label={r.utilityStubs ? "✓" : "○"} /> },
-              { key: "roadsComplete", label: "Roads", width: "60px", render: r => <SHPill tone={r.roadsComplete ? "good" : "alert"} label={r.roadsComplete ? "✓" : "○"} /> },
+              { key: "roadsComplete", label: "Roads", width: "65px", render: r => <SHPill tone={r.roadsComplete ? "good" : "alert"} label={r.roadsComplete ? "✓" : "○"} /> },
               { key: "retentionPonds", label: "Retention", width: "70px", render: r => <SHPill tone={r.retentionPonds ? "good" : "alert"} label={r.retentionPonds ? "✓" : "○"} /> },
               { key: "monthsRemaining", label: "Mo. Remain", width: "75px", align: "right", render: r => {
                 const remaining = Number(r.lotsRemaining);

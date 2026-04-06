@@ -139,23 +139,30 @@ function parsePipe(value: string): [string, string] {
 
 function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
   const grid = columns.map(c => c.width).join(" ");
+  /* Compute min-width so the grid can scroll horizontally when content overflows */
+  const minW = columns.reduce((s, c) => {
+    if (c.width.endsWith("fr")) return s + Math.round(parseFloat(c.width) * 120);
+    return s + (parseInt(c.width) || 80);
+  }, 0);
   return (
-    <div style={{ maxHeight: "calc(100% - 60px)", overflowY: "auto" }}>
-      <div style={{ display: "grid", gridTemplateColumns: grid, padding: "6px 0", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
-        {columns.map(c => (
-          <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align }}>{c.label}</span>
-        ))}
-      </div>
-      {rows.map((r, i) => (
-        <div key={i} style={{ display: "grid", gridTemplateColumns: grid, padding: "5px 0", borderBottom: "1px solid var(--sh-border-dim)", fontSize: 11, color: "var(--sh-text-primary)" }}>
+    <div style={{ flex: 1, overflow: "auto" }}>
+      <div style={{ minWidth: minW }}>
+        <div style={{ display: "grid", gridTemplateColumns: grid, padding: "6px 0", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
           {columns.map(c => (
-            <span key={c.key} style={{ padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {c.render ? c.render(r) : String(r[c.key] ?? "\u2014")}
-            </span>
+            <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align }}>{c.label}</span>
           ))}
         </div>
-      ))}
-      {rows.length === 0 && <div style={{ padding: 16, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>No data</div>}
+        {rows.map((r, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: grid, padding: "5px 0", borderBottom: "1px solid var(--sh-border-dim)", fontSize: 11, color: "var(--sh-text-primary)" }}>
+            {columns.map(c => (
+              <span key={c.key} style={{ padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {c.render ? c.render(r) : String(r[c.key] ?? "\u2014")}
+              </span>
+            ))}
+          </div>
+        ))}
+        {rows.length === 0 && <div style={{ padding: 16, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>No data</div>}
+      </div>
     </div>
   );
 }
@@ -900,7 +907,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         </div>
 
         {/* Table */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "0 4px" }}>
+        <div style={{ flex: 1, overflow: "hidden", padding: "0 4px", display: "flex", flexDirection: "column" }}>
           {renderTable(columns, rows)}
         </div>
       </div>

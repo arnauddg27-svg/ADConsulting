@@ -46,14 +46,14 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
               { key: "permitting", label: "Permit", width: "70px", align: "right", render: r => fmt$(Number(r.permitting)) },
               { key: "siteWork", label: "Site Work", width: "75px", align: "right", render: r => fmt$(Number(r.siteWork)) },
               { key: "vertical", label: "Vertical", width: "75px", align: "right", render: r => fmt$(Number(r.vertical)) },
-              { key: "options", label: "Options", width: "65px", align: "right", render: r => fmt$(Number(r.options)) },
-              { key: "dirtPad", label: "Dirt/Pad", width: "70px", align: "right", render: r => fmt$(Number(r.dirtPad)) },
-              { key: "dumpsters", label: "Dumpster", width: "70px", align: "right", render: r => fmt$(Number(r.dumpsters)) },
-              { key: "financing", label: "Finance", width: "70px", align: "right", render: r => fmt$(Number(r.financing)) },
-              { key: "insurance", label: "Insure", width: "65px", align: "right", render: r => fmt$(Number(r.insurance)) },
-              { key: "closingCost", label: "Closing", width: "65px", align: "right", render: r => fmt$(Number(r.closingCost)) },
-              { key: "septic", label: "Septic", width: "65px", align: "right", render: r => fmt$(Number(r.septic)) },
-              { key: "well", label: "Well", width: "55px", align: "right", render: r => fmt$(Number(r.well)) },
+              { key: "options", label: "Options", width: "80px", align: "right", render: r => fmt$(Number(r.options)) },
+              { key: "dirtPad", label: "Dirt/Pad", width: "80px", align: "right", render: r => fmt$(Number(r.dirtPad)) },
+              { key: "dumpsters", label: "Dumpster", width: "80px", align: "right", render: r => fmt$(Number(r.dumpsters)) },
+              { key: "financing", label: "Finance", width: "80px", align: "right", render: r => fmt$(Number(r.financing)) },
+              { key: "insurance", label: "Insure", width: "80px", align: "right", render: r => fmt$(Number(r.insurance)) },
+              { key: "closingCost", label: "Closing", width: "80px", align: "right", render: r => fmt$(Number(r.closingCost)) },
+              { key: "septic", label: "Septic", width: "80px", align: "right", render: r => fmt$(Number(r.septic)) },
+              { key: "well", label: "Well", width: "75px", align: "right", render: r => fmt$(Number(r.well)) },
               { key: "totalCost", label: "Total Cost", width: "85px", align: "right", render: r => <span style={{ fontWeight: 700 }}>{fmt$(Number(r.totalCost))}</span> },
               { key: "builderFee", label: "Builder Fee", width: "80px", align: "right", render: r => fmt$(Number(r.builderFee)) },
               { key: "contingency", label: "Conting.", width: "70px", align: "right", render: r => fmt$(Number(r.contingency)) },
@@ -61,7 +61,7 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
                 const v = Number(r.netProfit);
                 return <span style={{ color: v >= 0 ? "var(--sh-accent)" : "var(--sh-danger)", fontWeight: 700 }}>{fmt$(v)}</span>;
               }},
-              { key: "netMargin", label: "Margin", width: "65px", align: "right", render: r => {
+              { key: "netMargin", label: "Margin", width: "80px", align: "right", render: r => {
                 const m = Number(r.netMargin);
                 const tone = m >= 15 ? "good" : m >= 5 ? "watch" : "alert";
                 return <SHPill tone={tone} label={fmtPct(m)} />;

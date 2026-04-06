@@ -34,7 +34,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
               }},
               { key: "entity", label: "Entity", width: "150px" },
               { key: "bedsBaths", label: "Beds/Baths", width: "80px" },
-              { key: "sqft", label: "SqFt", width: "60px", align: "right", render: r => fmtN(Number(r.sqft)) },
+              { key: "sqft", label: "SqFt", width: "70px", align: "right", render: r => fmtN(Number(r.sqft)) },
               { key: "occupancy", label: "Status", width: "90px", render: r => {
                 const s = String(r.occupancy);
                 const tone = s === "leased" ? "good" : s === "vacant" ? "watch" : s === "make-ready" ? "watch" : s === "notice-to-vacate" ? "watch" : "alert";
@@ -43,12 +43,12 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
               { key: "tenant", label: "Tenant", width: "120px", render: r => String(r.tenant ?? "\u2014") },
               { key: "monthlyRent", label: "Rent", width: "75px", align: "right", render: r => fmt$(Number(r.monthlyRent)) },
               { key: "marketRent", label: "Market", width: "75px", align: "right", render: r => fmt$(Number(r.marketRent)) },
-              { key: "deposit", label: "Deposit", width: "70px", align: "right", render: r => fmt$(Number(r.deposit)) },
-              { key: "managementPct", label: "Mgmt %", width: "65px", align: "right", render: r => fmtPct(Number(r.managementPct)) },
+              { key: "deposit", label: "Deposit", width: "80px", align: "right", render: r => fmt$(Number(r.deposit)) },
+              { key: "managementPct", label: "Mgmt %", width: "75px", align: "right", render: r => fmtPct(Number(r.managementPct)) },
               { key: "leaseEnd", label: "Lease End", width: "90px", render: r => String(r.leaseEnd ?? "\u2014") },
               { key: "yearBuilt", label: "Year Built", width: "75px", align: "right", render: r => 2020 + (Number(r.id) % 6) },
-              { key: "lotSize", label: "Lot SqFt", width: "70px", align: "right", render: r => fmtN(4500 + (Number(r.id) % 8) * 500) },
-              { key: "hoa", label: "HOA/Mo", width: "70px", align: "right", render: r => fmt$(150 + (Number(r.id) % 5) * 50) },
+              { key: "lotSize", label: "Lot SqFt", width: "75px", align: "right", render: r => fmtN(4500 + (Number(r.id) % 8) * 500) },
+              { key: "hoa", label: "HOA/Mo", width: "80px", align: "right", render: r => fmt$(150 + (Number(r.id) % 5) * 50) },
               { key: "propertyTax", label: "Tax/Yr", width: "75px", align: "right", render: r => fmt$(3000 + (Number(r.id) % 6) * 1000) },
               { key: "insurance", label: "Insure/Yr", width: "75px", align: "right", render: r => fmt$(1200 + (Number(r.id) % 7) * 300) },
               { key: "lastInspection", label: "Last Inspect", width: "90px", render: r => {
@@ -74,7 +74,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
                 const expenses = (150 + (Number(r.id) % 5) * 50) + ((3000 + (Number(r.id) % 6) * 1000) / 12) + ((1200 + (Number(r.id) % 7) * 300) / 12) + (rent * Number(r.managementPct) / 100);
                 return fmt$(rent - expenses);
               }},
-              { key: "capRate", label: "Cap Rate", width: "70px", align: "right", render: r => {
+              { key: "capRate", label: "Cap Rate", width: "80px", align: "right", render: r => {
                 const rent = Number(r.monthlyRent);
                 const expenses = (150 + (Number(r.id) % 5) * 50) + ((3000 + (Number(r.id) % 6) * 1000) / 12) + ((1200 + (Number(r.id) % 7) * 300) / 12) + (rent * Number(r.managementPct) / 100);
                 const noi = (rent - expenses) * 12;
@@ -86,7 +86,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
                 const owners = ["Sunshine Holdings", "Palm Coast Trust", "Emerald Bay LLC", "Coral Springs LP", "Magnolia Inv."];
                 return owners[Number(r.id) % owners.length];
               }},
-              { key: "propertyClass", label: "Class", width: "55px", render: r => {
+              { key: "propertyClass", label: "Class", width: "65px", render: r => {
                 const classes = ["A", "A", "B", "B", "C"];
                 const c = classes[Number(r.id) % classes.length];
                 return <SHPill tone={c === "A" ? "good" : c === "B" ? "watch" : "alert"} label={c} />;
