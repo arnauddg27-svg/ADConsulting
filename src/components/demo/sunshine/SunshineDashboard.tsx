@@ -107,7 +107,7 @@ export default function SunshineDashboard() {
     switch (activeTab) {
       /* Construction */
       case "construction-dashboard":
-        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onStatusClick={setStatus} />;
+        return <ConstructionDashboardTab jobs={filteredJobs} onCommunityClick={setCommunity} onStageClick={setStage} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "construction-pipeline":
         return <ConstructionPipelineTab jobs={filteredJobs} onDrill={onDrill} onStageClick={setStage} />;
       case "construction-cycle":
@@ -119,13 +119,13 @@ export default function SunshineDashboard() {
 
       /* Sales */
       case "sales-dashboard":
-        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
+        return <SalesDashboardTab sales={filteredSales} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "sales-pipeline":
         return <SalesPipelineTab sales={filteredSales} onDrill={onDrill} />;
 
       /* Loans */
       case "loans-dashboard":
-        return <LoansDashboardTab loans={filteredLoans} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
+        return <LoansDashboardTab loans={filteredLoans} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "loans-pipeline":
         return <LoansPipelineTab loans={filteredLoans} onDrill={onDrill} />;
 
@@ -145,13 +145,13 @@ export default function SunshineDashboard() {
 
       /* Property Management */
       case "pm-dashboard":
-        return <PropertyMgmtDashboardTab units={filteredUnits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
+        return <PropertyMgmtDashboardTab units={filteredUnits} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "pm-pipeline":
         return <PMPipelineTab units={filteredUnits} onDrill={onDrill} />;
 
       /* Audits */
       case "audits-dashboard":
-        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} />;
+        return <AuditsDashboardTab audits={filteredAudits} onCommunityClick={setCommunity} onTabChange={setActiveTab} onStatusClick={setStatus} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "audits-pipeline":
         return <AuditsPipelineTab audits={filteredAudits} onDrill={onDrill} />;
 

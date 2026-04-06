@@ -1,13 +1,14 @@
 "use client";
 
 import type { SHLoan, SHTab } from "@/types/sunshine-homes";
-import { getLoanKPIs, getLenderDistribution, fmt$, fmtN } from "@/lib/sunshine-homes-data";
+import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
 import SHAreaChart from "../SHAreaChart";
 import SHHistogram from "../SHHistogram";
+import SHCrossTab from "../SHCrossTab";
 
 const LENDER_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
 
@@ -17,9 +18,15 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  drillMonth: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick, onStatusClick, onTabChange }: Props) {
+export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getLoanKPIs(loans);
   const lenders = getLenderDistribution(loans).map((l, i) => ({
     ...l, color: LENDER_COLORS[i % LENDER_COLORS.length],
@@ -59,6 +66,23 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
     return Array.from(map.entries())
       .map(([label, value]) => ({ label, value: Math.round(value / 1_000_000) }))
       .sort((a, b) => b.value - a.value);
+  })();
+
+  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
+  const cityTimeCross = (() => {
+    if (drillMonth) {
+      const withDay = loans.map(l => ({ ...l, day: getDayLabel(l.startDate) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
+    if (drillQuarter) {
+      const withMonth = loans.map(l => ({ ...l, month: getMonthLabel(l.startDate) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = loans.map(l => ({ ...l, quarter: `Q${getQuarter(l.startDate)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(loans, "city", "year");
   })();
 
   /* Histogram: Days until expiration distribution */
@@ -129,6 +153,27 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
             formatValue={v => `$${v}M`}
             onBarClick={onCityClick}
             showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row single">
+        <SHPanel kicker="City × Time" title={
+          drillMonth ? `Loans: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Loans: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Loans: City by Quarter (${drillYear})` :
+          "Loans by Year"
+        }>
+          <SHCrossTab
+            {...cityTimeCross}
+            onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
+            onColHeaderClick={
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
+            }
           />
         </SHPanel>
       </div>

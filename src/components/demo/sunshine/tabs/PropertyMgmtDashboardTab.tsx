@@ -1,13 +1,14 @@
 "use client";
 
 import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
-import { getPMKPIs, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
+import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
 import SHHistogram from "../SHHistogram";
 import SHAreaChart from "../SHAreaChart";
+import SHCrossTab from "../SHCrossTab";
 
 const OCC_COLORS: Record<string, string> = {
   leased: "#14b8a6",
@@ -36,9 +37,15 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  drillMonth: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange }: Props) {
+export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPMKPIs(units);
 
   const byOccupancy = (() => {
@@ -101,6 +108,23 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
     color: CLASS_COLORS[i],
   }));
 
+  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
+  const cityTimeCross = (() => {
+    if (drillMonth) {
+      const withDay = units.map(u => ({ ...u, day: getDayLabel(u.leaseStart) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
+    if (drillQuarter) {
+      const withMonth = units.map(u => ({ ...u, month: getMonthLabel(u.leaseStart) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = units.map(u => ({ ...u, quarter: `Q${getQuarter(u.leaseStart)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(units, "city", "year");
+  })();
+
   return (
     <>
       <div className="sh-tab-header">
@@ -156,6 +180,27 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             formatValue={v => fmt$(v)}
             onBarClick={onCommunityClick}
             showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row single">
+        <SHPanel kicker="City × Time" title={
+          drillMonth ? `Leases: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Leases: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Leases: City by Quarter (${drillYear})` :
+          "Leases by Year"
+        }>
+          <SHCrossTab
+            {...cityTimeCross}
+            onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
+            onColHeaderClick={
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
+            }
           />
         </SHPanel>
       </div>

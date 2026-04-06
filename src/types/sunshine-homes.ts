@@ -28,6 +28,7 @@ export interface SHJob {
   marginPct: number;
   daysInCurrentPhase: number;
   totalCycleDays: number;
+  year: number;
   /* cost category breakdowns (budget vs actual) */
   permittingBudget: number;
   permittingActual: number;
@@ -59,6 +60,7 @@ export interface SHSale {
   contractDate: string;
   closingDate: string | null;
   status: "active" | "pending" | "closed" | "cancelled";
+  year: number;
 }
 
 export interface SHLoan {
@@ -71,8 +73,10 @@ export interface SHLoan {
   totalDrawn: number;
   drawPct: number;
   interestRate: number;
+  startDate: string;
   expirationDate: string;
   daysUntilExpiration: number;
+  year: number;
 }
 
 export interface SHLandDeal {
@@ -120,9 +124,11 @@ export interface SHPropertyUnit {
   managementPct: number;
   occupancy: "leased" | "vacant" | "make-ready" | "eviction" | "notice-to-vacate";
   tenant: string | null;
+  leaseStart: string;
   leaseEnd: string | null;
   delinquentAmount: number;
   daysPastDue: number;
+  year: number;
 }
 
 export interface SHSubdivision {
@@ -184,6 +190,8 @@ export interface SHAuditJob {
   plan: string;
   jobType: string;
   salesStatus: string;
+  startDate: string;
+  year: number;
   salePrice: number;
   /* Revenue */
   proceeds: number;

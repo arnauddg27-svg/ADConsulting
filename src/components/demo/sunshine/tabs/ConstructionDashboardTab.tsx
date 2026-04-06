@@ -1,7 +1,7 @@
 "use client";
 
 import type { SHJob, SHTab } from "@/types/sunshine-homes";
-import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
+import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -41,9 +41,15 @@ interface Props {
   onStageClick: (stage: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  drillMonth: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange }: Props) {
+export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
@@ -77,6 +83,29 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
   const sortedCols = [...crossTab.cols].sort(
     (a, b) => (STAGE_ORDER.indexOf(a) ?? 99) - (STAGE_ORDER.indexOf(b) ?? 99)
   );
+
+  // --- CrossTab: City x Time (drill-aware) ---
+  const cityTimeCross = (() => {
+    if (drillMonth) {
+      const withDay = jobs
+        .filter(j => j.startDate)
+        .map(j => ({ ...j, day: getDayLabel(j.startDate) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
+    if (drillQuarter) {
+      const withMonth = jobs
+        .filter(j => j.startDate)
+        .map(j => ({ ...j, month: getMonthLabel(j.startDate) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = jobs
+        .filter(j => j.startDate)
+        .map(j => ({ ...j, quarter: `Q${getQuarter(j.startDate)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(jobs, "city", "year");
+  })();
 
   // --- Donut: Jobs by Job Type ---
   const jobTypeMap = new Map<string, number>();
@@ -164,7 +193,29 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         </SHPanel>
       </div>
 
-      {/* Row 4: WIP Trend (Area) + Jobs by Job Type (Donut) */}
+      {/* Row 4: Completions by Year — City × Time drill-down */}
+      <div className="sh-panels-row single">
+        <SHPanel kicker="City × Time" title={
+          drillMonth ? `Completions: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Completions: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Completions: City by Quarter (${drillYear})` :
+          "Completions by Year"
+        }>
+          <SHCrossTab
+            {...cityTimeCross}
+            onCellClick={(row) => onCommunityClick(row)}
+            onRowLabelClick={(row) => onCommunityClick(row)}
+            onColHeaderClick={
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
+            }
+          />
+        </SHPanel>
+      </div>
+
+      {/* Row 5: WIP Trend (Area) + Jobs by Job Type (Donut) */}
       <div className="sh-panels-row">
         <SHPanel kicker="Trend" title="WIP Balance Trend">
           <SHAreaChart

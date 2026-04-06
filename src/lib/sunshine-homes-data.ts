@@ -247,6 +247,7 @@ function generateJobs(): SHJob[] {
         marginPct,
         daysInCurrentPhase: daysInPhase,
         totalCycleDays,
+        year: startYear,
         permittingBudget,
         permittingActual,
         sidewalkBudget,
@@ -330,6 +331,7 @@ function generateSales(): SHSale[] {
       contractDate,
       closingDate,
       status,
+      year: cy,
     });
   }
   return result;
@@ -374,8 +376,10 @@ function generateLoans(): SHLoan[] {
       totalDrawn,
       drawPct,
       interestRate,
+      startDate: job.startDate,
       expirationDate: expDate,
       daysUntilExpiration: Math.max(0, daysUntilExpiration),
+      year: new Date(job.startDate).getFullYear(),
     });
   }
   return result;
@@ -552,6 +556,9 @@ function generatePMUnits(): SHPropertyUnit[] {
       const marketRent = between(1800, 3600);
       const monthlyRent = isOccupied ? marketRent - between(0, 150) : 0;
       const tenant = isOccupied ? `${pick(tenantFamilies)} Family` : null;
+      const leaseStartYear = 2022 + (id % 5); // spread across 2022-2026
+      const leaseStartMonth = between(1, 12);
+      const leaseStart = dateToStr(leaseStartYear, leaseStartMonth, between(1, 28));
       const leaseEnd = isOccupied ? dateToStr(2026 + (rand() > 0.5 ? 1 : 0), between(1, 12), between(1, 28)) : null;
       const isDelinquent = isOccupied && rand() > 0.80;
       const delinquentAmount = isDelinquent ? monthlyRent : 0;
@@ -573,9 +580,11 @@ function generatePMUnits(): SHPropertyUnit[] {
         managementPct,
         occupancy,
         tenant,
+        leaseStart,
         leaseEnd,
         delinquentAmount,
         daysPastDue,
+        year: leaseStartYear,
       });
       id++;
     }
@@ -639,7 +648,7 @@ function isInTimePeriod(dateStr: string | null | undefined, period: import("@/ty
   return true;
 }
 
-export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseEnd?: string | null }>(
+export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseStart?: string; leaseEnd?: string | null }>(
   item: T,
   filters: SHDashboardFilters,
 ): boolean {
@@ -654,7 +663,7 @@ export function matchFilters<T extends { community?: string; city?: string; enti
   }
   if (filters.drillYear || filters.drillQuarter || filters.drillMonth) {
     // Find the primary date field
-    const dateStr: string | null = (item as any).startDate ?? (item as any).contractDate ?? (item as any).submittedDate ?? (item as any).closeDate ?? (item as any).expirationDate ?? (item as any).leaseEnd ?? null;
+    const dateStr: string | null = (item as any).startDate ?? (item as any).contractDate ?? (item as any).submittedDate ?? (item as any).closeDate ?? (item as any).expirationDate ?? (item as any).leaseStart ?? (item as any).leaseEnd ?? null;
     if (dateStr) {
       const d = new Date(dateStr);
       if (filters.drillYear && d.getFullYear() !== filters.drillYear) return false;
@@ -666,7 +675,7 @@ export function matchFilters<T extends { community?: string; city?: string; enti
     }
   }
   if (filters.timePeriod && filters.timePeriod !== "all") {
-    const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate || item.expirationDate || item.leaseEnd;
+    const dateField = item.startDate || item.contractDate || item.submittedDate || item.closeDate || item.expirationDate || item.leaseStart || item.leaseEnd;
     if (!isInTimePeriod(dateField, filters.timePeriod)) return false;
   }
   return true;
@@ -1197,6 +1206,8 @@ function generateAuditJobs(): SHAuditJob[] {
       plan: job.plan,
       jobType: job.completionPct >= 95 ? "Completed" : "Construction",
       salesStatus: job.completionPct >= 95 ? "Closed" : "Under Contract",
+      startDate: job.startDate,
+      year: new Date(job.startDate).getFullYear(),
       salePrice,
       proceeds,
       sellerCredit: rng.between(0, 5000),

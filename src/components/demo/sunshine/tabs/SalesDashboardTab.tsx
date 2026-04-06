@@ -1,7 +1,7 @@
 "use client";
 
 import type { SHSale, SHTab } from "@/types/sunshine-homes";
-import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN } from "@/lib/sunshine-homes-data";
+import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -29,15 +29,39 @@ interface Props {
   onCityClick: (city: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  drillMonth: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick, onStatusClick, onTabChange }: Props) {
+export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
 
   /* CrossTab: city x status */
   const crossTab = buildCrossTab(sales, "city", "status");
+
+  /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
+  const cityTimeCross = (() => {
+    const closedSales = sales.filter(s => s.closingDate);
+    if (drillMonth) {
+      const withDay = closedSales.map(s => ({ ...s, day: getDayLabel(s.closingDate!) }));
+      return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
+    }
+    if (drillQuarter) {
+      const withMonth = closedSales.map(s => ({ ...s, month: getMonthLabel(s.closingDate!) }));
+      return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = closedSales.map(s => ({ ...s, quarter: `Q${getQuarter(s.closingDate!)}` }));
+      return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(sales, "city", "year");
+  })();
 
   /* Ranked bars: avg sale price by city */
   const avgPriceByCity = (() => {
@@ -114,6 +138,27 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row single">
+        <SHPanel kicker="City × Time" title={
+          drillMonth ? `Sales: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Sales: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Sales: City by Quarter (${drillYear})` :
+          "Sales by Year"
+        }>
+          <SHCrossTab
+            {...cityTimeCross}
+            onCellClick={(row) => onCityClick(row)}
+            onRowLabelClick={(row) => onCityClick(row)}
+            onColHeaderClick={
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
+            }
           />
         </SHPanel>
       </div>

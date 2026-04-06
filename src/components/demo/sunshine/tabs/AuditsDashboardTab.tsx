@@ -1,13 +1,14 @@
 "use client";
 
 import type { SHAuditJob, SHTab } from "@/types/sunshine-homes";
-import { getAuditKPIs, getAuditCostBreakdown, fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
+import { getAuditKPIs, getAuditCostBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHRankedBars from "../SHRankedBars";
 import SHHistogram from "../SHHistogram";
 import SHAreaChart from "../SHAreaChart";
+import SHCrossTab from "../SHCrossTab";
 
 const PROFIT_TREND = [
   { label: "Q1 '24", value: 1.1 },
@@ -25,9 +26,15 @@ interface Props {
   onCommunityClick: (community: string) => void;
   onStatusClick: (status: string) => void;
   onTabChange: (tab: SHTab) => void;
+  drillYear: number | null;
+  drillQuarter: number | null;
+  drillMonth: number | null;
+  onYearClick: (year: number) => void;
+  onQuarterClick: (quarter: number) => void;
+  onMonthClick: (month: number) => void;
 }
 
-export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusClick, onTabChange }: Props) {
+export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusClick, onTabChange, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getAuditKPIs(audits);
   const costBreakdown = getAuditCostBreakdown(audits);
 
@@ -74,6 +81,23 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
       .sort((a, b) => b.value - a.value);
   })();
 
+  /* CrossTab: Community x Time — drill-aware (Year → Quarter → Month → Day) */
+  const communityTimeCross = (() => {
+    if (drillMonth) {
+      const withDay = audits.map(a => ({ ...a, day: getDayLabel(a.startDate) }));
+      return buildCrossTab(withDay, "community", "day" as keyof typeof withDay[0]);
+    }
+    if (drillQuarter) {
+      const withMonth = audits.map(a => ({ ...a, month: getMonthLabel(a.startDate) }));
+      return buildCrossTab(withMonth, "community", "month" as keyof typeof withMonth[0]);
+    }
+    if (drillYear) {
+      const withQuarter = audits.map(a => ({ ...a, quarter: `Q${getQuarter(a.startDate)}` }));
+      return buildCrossTab(withQuarter, "community", "quarter" as keyof typeof withQuarter[0]);
+    }
+    return buildCrossTab(audits, "community", "year");
+  })();
+
   return (
     <>
       <div className="sh-tab-header">
@@ -105,6 +129,27 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
             formatValue={v => `${v}%`}
             onBarClick={onCommunityClick}
             showRank
+          />
+        </SHPanel>
+      </div>
+
+      <div className="sh-panels-row single">
+        <SHPanel kicker="Community × Time" title={
+          drillMonth ? `Audits: Community by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Audits: Community by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Audits: Community by Quarter (${drillYear})` :
+          "Audits by Year"
+        }>
+          <SHCrossTab
+            {...communityTimeCross}
+            onCellClick={(row) => onCommunityClick(row)}
+            onRowLabelClick={(row) => onCommunityClick(row)}
+            onColHeaderClick={
+              drillMonth ? undefined :
+              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
+              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
+              (col) => onYearClick(Number(col))
+            }
           />
         </SHPanel>
       </div>
