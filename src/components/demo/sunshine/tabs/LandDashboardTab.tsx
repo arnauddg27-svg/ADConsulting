@@ -52,31 +52,20 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
   const totalLots = nonCancelled.reduce((s, d) => s + d.lots, 0);
 
   /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
-  const closedDeals = deals.filter(d => d.status === "closed");
   const cityTimeCross = (() => {
     if (drillMonth) {
-      // Level 4: show days within the selected month
-      const withDay = closedDeals
-        .filter(d => d.closeDate)
-        .map(d => ({ ...d, day: getDayLabel(d.closeDate!) }));
+      const withDay = deals.map(d => ({ ...d, day: getDayLabel(d.contractDate) }));
       return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
     }
     if (drillQuarter) {
-      // Level 3: show months within the selected quarter
-      const withMonth = closedDeals
-        .filter(d => d.closeDate)
-        .map(d => ({ ...d, month: getMonthLabel(d.closeDate!) }));
+      const withMonth = deals.map(d => ({ ...d, month: getMonthLabel(d.contractDate) }));
       return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
     }
     if (drillYear) {
-      // Level 2: show quarters within the selected year
-      const withQuarter = closedDeals
-        .filter(d => d.closeDate)
-        .map(d => ({ ...d, quarter: `Q${getQuarter(d.closeDate!)}` }));
+      const withQuarter = deals.map(d => ({ ...d, quarter: `Q${getQuarter(d.contractDate)}` }));
       return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
     }
-    // Level 1: show years (default)
-    return buildCrossTab(closedDeals, "city", "year");
+    return buildCrossTab(deals, "city", "year");
   })();
 
   /* Ranked Bars: Under Contract lots by city */

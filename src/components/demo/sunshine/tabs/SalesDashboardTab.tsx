@@ -47,17 +47,16 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
 
   /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
   const cityTimeCross = (() => {
-    const closedSales = sales.filter(s => s.closingDate);
     if (drillMonth) {
-      const withDay = closedSales.map(s => ({ ...s, day: getDayLabel(s.closingDate!) }));
+      const withDay = sales.map(s => ({ ...s, day: getDayLabel(s.contractDate) }));
       return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
     }
     if (drillQuarter) {
-      const withMonth = closedSales.map(s => ({ ...s, month: getMonthLabel(s.closingDate!) }));
+      const withMonth = sales.map(s => ({ ...s, month: getMonthLabel(s.contractDate) }));
       return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
     }
     if (drillYear) {
-      const withQuarter = closedSales.map(s => ({ ...s, quarter: `Q${getQuarter(s.closingDate!)}` }));
+      const withQuarter = sales.map(s => ({ ...s, quarter: `Q${getQuarter(s.contractDate)}` }));
       return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
     }
     return buildCrossTab(sales, "city", "year");
