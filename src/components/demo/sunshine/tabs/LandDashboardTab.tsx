@@ -169,6 +169,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
+            onPointClick={label => onDrill({ type: "land-metric", value: label, label: `Investment — ${label}` })}
           />
         </SHPanel>
         <SHPanel kicker="Distribution" title="Cost per Lot Distribution">

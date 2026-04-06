@@ -140,6 +140,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
+            onPointClick={label => onDrill({ type: "sale-metric", value: label, label: `Sales Trend — ${label}` })}
           />
         </SHPanel>
       </div>

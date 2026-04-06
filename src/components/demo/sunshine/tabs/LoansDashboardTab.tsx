@@ -189,6 +189,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
             color="#22d3ee"
             label1="Exposure ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
+            onPointClick={label => onDrill({ type: "loan-metric", value: label, label: `Exposure — ${label}` })}
           />
         </SHPanel>
         <SHPanel kicker="Expiration" title="Days Until Expiration">

@@ -109,15 +109,15 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={[15, 18, 20, 22, 24, 26, 28, 30, 32, kpis.count]} delta="+5 this quarter" deltaDir="up" onClick={() => onDrill({ type: "cost-category", value: "audited-jobs", label: `Audited Jobs — ${fmtN(kpis.count)}` })} />
-        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" onClick={() => onDrill({ type: "cost-category", value: "total-revenue", label: `Total Revenue — ${fmt$(kpis.totalRevenue)}` })} />
-        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={kpis.totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={kpis.totalProfit > 0 ? "up" : "down"} onClick={() => onDrill({ type: "cost-category", value: "total-profit", label: `Total Profit — ${fmt$(kpis.totalProfit)}` })} />
+        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={[15, 18, 20, 22, 24, 26, 28, 30, 32, kpis.count]} delta="+5 this quarter" deltaDir="up" onClick={() => onDrill({ type: "audit-cost", value: "audited-jobs", label: `Audited Jobs — ${fmtN(kpis.count)}` })} />
+        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" onClick={() => onDrill({ type: "audit-cost", value: "total-revenue", label: `Total Revenue — ${fmt$(kpis.totalRevenue)}` })} />
+        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={kpis.totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={kpis.totalProfit > 0 ? "up" : "down"} onClick={() => onDrill({ type: "audit-cost", value: "total-profit", label: `Total Profit — ${fmt$(kpis.totalProfit)}` })} />
         <SHKpiCard label="Avg Net Margin" value={fmtPct(kpis.avgMargin)} accent={kpis.avgMargin >= 15 ? "#14b8a6" : kpis.avgMargin >= 5 ? "#efb562" : "#f46a6a"} progress={Math.min(100, Math.round(kpis.avgMargin * 3))} delta={kpis.atRisk > 0 ? `${kpis.atRisk} at-risk` : "All profitable"} deltaDir={kpis.atRisk > 0 ? "down" : "up"} onClick={() => onDrill({ type: "margin-bucket", value: "avg-margin", label: `Avg Net Margin — ${fmtPct(kpis.avgMargin)}` })} />
       </div>
 
       <div className="sh-panels-row">
         <SHPanel kicker="PL-02" title="Cost Distribution">
-          <SHDonutChart segments={costBreakdown} onSegmentClick={label => onDrill({ type: "cost-category", value: label, label })} />
+          <SHDonutChart segments={costBreakdown} onSegmentClick={label => onDrill({ type: "audit-cost", value: label, label })} />
         </SHPanel>
         <SHPanel kicker="PL-03" title="Net Margin Distribution">
           <SHDonutChart segments={marginBuckets} onSegmentClick={label => onDrill({ type: "margin-bucket", value: label, label })} />
@@ -158,7 +158,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
 
       <div className="sh-panels-row">
         <SHPanel kicker="Builder Fee" title="Fee % Distribution">
-          <SHHistogram buckets={feeHistogram} onBucketClick={bucket => onDrill({ type: "cost-category", value: bucket, label: `Builder Fee ${bucket}` })} />
+          <SHHistogram buckets={feeHistogram} onBucketClick={bucket => onDrill({ type: "audit-cost", value: bucket, label: `Builder Fee ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Profit Trend" title="Cumulative Profit">
           <SHAreaChart
@@ -166,6 +166,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onStatusC
             color="#14b8a6"
             label1="Profit ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
+            onPointClick={label => onDrill({ type: "audit-cost", value: label, label: `Profit Trend — ${label}` })}
           />
         </SHPanel>
       </div>

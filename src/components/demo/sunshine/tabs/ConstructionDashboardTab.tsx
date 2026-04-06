@@ -226,6 +226,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             color="#14b8a6"
             label1="WIP ($M)"
             formatY={(v: number) => `$${v.toFixed(1)}M`}
+            onPointClick={label => onDrill({ type: "job", value: label, label: `WIP Trend — ${label}` })}
           />
         </SHPanel>
         <SHPanel kicker="Mix" title="Jobs by Type">

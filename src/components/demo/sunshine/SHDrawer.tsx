@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "audit-cost";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -755,7 +755,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     /* ═══════════════ AUDITS ═══════════════ */
 
-    case "cost-category": {
+    case "audit-cost": {
       title = detail.label;
       subtitle = `${auditJobs.length} jobs`;
       columns = auditCols;

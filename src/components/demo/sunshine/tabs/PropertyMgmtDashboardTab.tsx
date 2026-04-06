@@ -219,6 +219,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             color="#22d3ee"
             label1="Revenue ($K)"
             formatY={v => `$${v.toFixed(1)}K`}
+            onPointClick={label => onDrill({ type: "pm-metric", value: label, label: `Revenue — ${label}` })}
           />
         </SHPanel>
       </div>
