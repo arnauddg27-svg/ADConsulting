@@ -77,7 +77,7 @@ export default function DemoPageClient() {
       </section>
 
       {/* ── Sunshine Homes Dashboard ── */}
-      <section className="section-space pt-0">
+      <section className="section-space pt-0" style={{ position: "relative", zIndex: 2 }}>
         <Container className="max-w-[96rem]">
           <div className="mb-4 flex items-center gap-3">
             <span className="inline-flex rounded-lg bg-emerald-500/15 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
