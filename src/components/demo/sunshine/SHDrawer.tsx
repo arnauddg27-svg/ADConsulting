@@ -181,6 +181,24 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     /* ═══════════════ CONSTRUCTION ═══════════════ */
 
     case "job": {
+      /* Aggregate KPI values → show full job list */
+      if (detail.value === "all" || detail.value === "active" || detail.value === "completion") {
+        const filtered = detail.value === "active"
+          ? jobs.filter(j => j.stage !== "Closing" && j.stage !== "Complete")
+          : jobs;
+        title = detail.label;
+        subtitle = `${filtered.length} jobs`;
+        columns = [
+          { key: "jobCode", label: "Job", width: "80px" },
+          { key: "community", label: "Community", width: "130px" },
+          { key: "stage", label: "Stage", width: "90px" },
+          { key: "plan", label: "Plan", width: "90px" },
+          { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+          { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+        ];
+        rows = filtered as unknown as Record<string, unknown>[];
+        break;
+      }
       const job = jobs.find(j => j.jobCode === detail.value);
       if (!job) break;
       title = `${job.jobCode} — ${job.community}`;
@@ -472,8 +490,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "permit-status": {
       const v = detail.value.toLowerCase().replace(/\s+/g, "-");
-      /* "in-progress" means in-review + pending; "all" means everything */
-      const statusPermits = v === "all" ? permits
+      /* "in-progress" means in-review + pending; "all"/"total"/"avg-days" means everything */
+      const statusPermits = (v === "all" || v === "total" || v === "avg-days") ? permits
         : v === "in-progress" ? permits.filter(p => p.status === "in-review" || p.status === "pending")
         : permits.filter(p => p.status === v || p.status.replace(/-/g, " ") === detail.value.toLowerCase());
       title = `${detail.value} Permits`;
