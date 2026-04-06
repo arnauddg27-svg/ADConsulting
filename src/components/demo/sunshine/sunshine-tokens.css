@@ -47,6 +47,8 @@
   background: var(--sh-bg-shell);
   border-radius: 12px;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Shell Grid ── */
