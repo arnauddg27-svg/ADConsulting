@@ -996,8 +996,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         onClick={e => e.stopPropagation()}
         style={{
           position: "absolute", top: 0, right: 0, bottom: 0,
-          width: "clamp(620px, 66vw, 980px)",
-          maxWidth: "calc(100% - 12px)",
+          width: "clamp(860px, 82vw, 1400px)",
+          maxWidth: "calc(100% - 4px)",
           background: "var(--sh-bg-surface-raised)",
           borderLeft: "1px solid var(--sh-border)",
           boxShadow: "-8px 0 32px rgba(0,0,0,0.5)",
