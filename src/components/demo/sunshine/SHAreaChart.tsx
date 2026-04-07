@@ -16,7 +16,7 @@ interface SHAreaChartProps {
   label2?: string;
   formatY?: (v: number) => string;
   height?: number;
-  onPointClick?: (label: string) => void;
+  onPointClick?: (label: string, index: number) => void;
 }
 
 export default function SHAreaChart({
@@ -110,7 +110,7 @@ export default function SHAreaChart({
             strokeWidth="1.5"
             style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default" }}
             onMouseEnter={() => setHovered(i)}
-            onClick={onPointClick ? () => onPointClick(d.label) : undefined}
+            onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
           />
         ))}
 
@@ -128,7 +128,7 @@ export default function SHAreaChart({
               fill="transparent"
               style={{ cursor: onPointClick ? "pointer" : "default" }}
               onMouseEnter={() => setHovered(i)}
-              onClick={onPointClick ? () => onPointClick(d.label) : undefined}
+              onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
             />
           );
         })}
@@ -148,7 +148,7 @@ export default function SHAreaChart({
             x={toX(i)} y={h - 6}
             textAnchor="middle" fill="var(--sh-text-muted)" fontSize="8" fontWeight="500"
             style={{ cursor: onPointClick ? "pointer" : "default" }}
-            onClick={onPointClick ? () => onPointClick(d.label) : undefined}
+            onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
           >
             {d.label}
           </text>

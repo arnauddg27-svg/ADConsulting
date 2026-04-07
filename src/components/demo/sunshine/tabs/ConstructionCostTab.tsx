@@ -86,7 +86,13 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
             label1="Actual"
             label2="Planned"
             formatY={v => `$${(v / 1000).toFixed(0)}K`}
-            onPointClick={(month) => onDrill({ type: "cost-trend-month", value: month, label: `Budget vs. Actual — ${month}` })}
+            onPointClick={(month, monthIndex) =>
+              onDrill({
+                type: "cost-trend-month",
+                value: `month-${monthIndex + 1}`,
+                label: `Budget vs. Actual — ${month}`,
+              })
+            }
           />
         </SHPanel>
         <SHPanel kicker="Breakdown" title="Cost Distribution">

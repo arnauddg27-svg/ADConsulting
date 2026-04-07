@@ -531,14 +531,21 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "cost-trend-month": {
       const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const monthIdx = monthOrder.findIndex(m => m.toLowerCase() === detail.value.toLowerCase());
-      const monthlyJobs = jobs.filter(j => new Date(j.startDate).getMonth() === monthIdx);
-      const result = monthlyJobs.length > 0 ? monthlyJobs : jobs;
+      let monthIdx = -1;
+      const explicitMatch = detail.value.match(/^month-(\d{1,2})$/i);
+      if (explicitMatch) {
+        monthIdx = Number(explicitMatch[1]) - 1;
+      } else {
+        monthIdx = monthOrder.findIndex(m => m.toLowerCase() === detail.value.toLowerCase());
+      }
+      const monthlyJobs = monthIdx >= 0
+        ? jobs.filter(j => new Date(j.startDate).getMonth() === monthIdx)
+        : [];
+      const result = [...monthlyJobs].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
       title = detail.label;
-      subtitle = monthlyJobs.length > 0
-        ? `${monthlyJobs.length} jobs started in ${detail.value}`
-        : `${result.length} jobs (month had no starts, showing all)`;
+      const monthLabel = monthIdx >= 0 ? monthOrder[monthIdx] : detail.value;
+      subtitle = `${result.length} jobs started in ${monthLabel}`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
