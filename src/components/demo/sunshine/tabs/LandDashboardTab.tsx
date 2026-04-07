@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHLandDeal, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -80,17 +81,14 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
       .sort((a, b) => b.value - a.value);
   })();
 
-  /* Area Chart: Cumulative investment trend over 8 quarters */
-  const investmentTrend = [
-    { label: "Q1 '23", value: 4.2 },
-    { label: "Q2 '23", value: 7.8 },
-    { label: "Q3 '23", value: 11.5 },
-    { label: "Q4 '23", value: 16.1 },
-    { label: "Q1 '24", value: 20.4 },
-    { label: "Q2 '24", value: 25.9 },
-    { label: "Q3 '24", value: 31.3 },
-    { label: "Q4 '24", value: 37.6 },
-  ];
+  const investmentTrend = useMemo(() => (
+    buildQuarterTrend(
+      nonCancelled,
+      d => d.contractDate,
+      d => d.acquisitionCost,
+      { cumulative: true, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [nonCancelled]);
 
   /* Histogram: Cost/Lot distribution (5 buckets) */
   const costPerLotBuckets = (() => {

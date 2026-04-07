@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHAuditJob, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getAuditKPIs, getAuditCostBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getAuditKPIs, getAuditCostBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -10,17 +11,6 @@ import SHRankedBars from "../SHRankedBars";
 import SHHistogram from "../SHHistogram";
 import SHAreaChart from "../SHAreaChart";
 import SHCrossTab from "../SHCrossTab";
-
-const PROFIT_TREND = [
-  { label: "Q1 '24", value: 1.1 },
-  { label: "Q2 '24", value: 1.5 },
-  { label: "Q3 '24", value: 2.0 },
-  { label: "Q4 '24", value: 2.8 },
-  { label: "Q1 '25", value: 3.5 },
-  { label: "Q2 '25", value: 4.4 },
-  { label: "Q3 '25", value: 5.2 },
-  { label: "Q4 '25", value: 6.3 },
-];
 
 interface Props {
   audits: SHAuditJob[];
@@ -40,6 +30,14 @@ interface Props {
 export default function AuditsDashboardTab({ audits, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getAuditKPIs(audits);
   const costBreakdown = getAuditCostBreakdown(audits);
+  const profitTrend = useMemo(() => (
+    buildQuarterTrend(
+      audits,
+      a => a.startDate,
+      a => a.netProfit,
+      { cumulative: true, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [audits]);
 
   /* Margin distribution */
   const marginBuckets = [
@@ -166,7 +164,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
         </SHPanel>
         <SHPanel kicker="Profit Trend" title="Cumulative Profit">
           <SHAreaChart
-            data={PROFIT_TREND}
+            data={profitTrend}
             color="#14b8a6"
             label1="Profit ($M)"
             formatY={v => `$${v.toFixed(1)}M`}

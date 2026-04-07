@@ -121,6 +121,53 @@ function dateToStr(y: number, m: number, d: number): string {
   return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
+function quarterKey(dateStr: string): string | null {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}-Q${Math.ceil((d.getMonth() + 1) / 3)}`;
+}
+
+function quarterSortValue(key: string): number {
+  const m = key.match(/^(\d{4})-Q([1-4])$/);
+  if (!m) return 0;
+  return Number(m[1]) * 10 + Number(m[2]);
+}
+
+function quarterDisplayLabel(key: string): string {
+  const m = key.match(/^(\d{4})-Q([1-4])$/);
+  if (!m) return key;
+  return `Q${m[2]} '${String(m[1]).slice(2)}`;
+}
+
+export function buildQuarterTrend<T>(
+  rows: T[],
+  getDate: (row: T) => string | null | undefined,
+  getValue: (row: T) => number,
+  opts?: { cumulative?: boolean; maxPoints?: number },
+): Array<{ label: string; value: number }> {
+  const byQuarter = new Map<string, number>();
+  for (const row of rows) {
+    const key = quarterKey(String(getDate(row) ?? ""));
+    if (!key) continue;
+    byQuarter.set(key, (byQuarter.get(key) ?? 0) + getValue(row));
+  }
+  const sorted = Array.from(byQuarter.entries())
+    .sort((a, b) => quarterSortValue(a[0]) - quarterSortValue(b[0]));
+
+  const points: Array<{ label: string; value: number }> = [];
+  let running = 0;
+  for (const [key, value] of sorted) {
+    running += value;
+    points.push({
+      label: quarterDisplayLabel(key),
+      value: opts?.cumulative ? running : value,
+    });
+  }
+  const maxPoints = opts?.maxPoints ?? 8;
+  const finalPoints = points.length > maxPoints ? points.slice(-maxPoints) : points;
+  return finalPoints.length > 0 ? finalPoints : [{ label: "Q1 '24", value: 0 }];
+}
+
 /* ═══════════════════════════════════════════════════════════
    JOB TYPE DERIVATION
    ═══════════════════════════════════════════════════════════ */
@@ -1250,8 +1297,7 @@ function generateAuditJobs(): SHAuditJob[] {
     // Target realistic residential builder net margin band with occasional outliers.
     const marginRoll = rng.rand();
     const targetNetMarginPct =
-      marginRoll < 0.08 ? rng.between(-2, 3) / 100 :   // a few weak/breakeven jobs
-      marginRoll < 0.25 ? rng.between(4, 8) / 100 :    // lower-margin jobs
+      marginRoll < 0.20 ? rng.between(4, 8) / 100 :    // lower-margin but positive jobs
       marginRoll < 0.90 ? rng.between(9, 16) / 100 :   // typical operating band
       rng.between(17, 20) / 100;                       // a few stronger jobs
 

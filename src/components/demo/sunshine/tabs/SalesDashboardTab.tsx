@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHSale, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -12,17 +13,6 @@ import SHAreaChart from "../SHAreaChart";
 import SHHistogram from "../SHHistogram";
 
 const PLAN_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6"];
-
-const SALES_VALUE_TREND = [
-  { label: "Q1 '24", value: 4.2 },
-  { label: "Q2 '24", value: 5.8 },
-  { label: "Q3 '24", value: 7.1 },
-  { label: "Q4 '24", value: 9.3 },
-  { label: "Q1 '25", value: 11.0 },
-  { label: "Q2 '25", value: 13.4 },
-  { label: "Q3 '25", value: 15.9 },
-  { label: "Q4 '25", value: 18.7 },
-];
 
 interface Props {
   sales: SHSale[];
@@ -43,6 +33,14 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
+  const salesValueTrend = useMemo(() => (
+    buildQuarterTrend(
+      sales.filter(s => s.status !== "cancelled"),
+      s => s.contractDate,
+      s => s.salePrice,
+      { cumulative: true, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [sales]);
 
   /* CrossTab: city x status */
   const crossTab = buildCrossTab(sales, "city", "status");
@@ -139,7 +137,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         </SHPanel>
         <SHPanel kicker="Revenue Trend" title="Cumulative Sales Value">
           <SHAreaChart
-            data={SALES_VALUE_TREND}
+            data={salesValueTrend}
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}

@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHLoan, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -49,17 +50,14 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
     })).filter(b => b.value > 0);
   })();
 
-  /* Area Chart: Loan exposure trend (8 quarters, synthetic) */
-  const exposureTrend = [
-    { label: "Q1 '23", value: 18.4 },
-    { label: "Q2 '23", value: 21.7 },
-    { label: "Q3 '23", value: 25.3 },
-    { label: "Q4 '23", value: 29.8 },
-    { label: "Q1 '24", value: 33.2 },
-    { label: "Q2 '24", value: 37.5 },
-    { label: "Q3 '24", value: 41.1 },
-    { label: "Q4 '24", value: 44.6 },
-  ];
+  const exposureTrend = useMemo(() => (
+    buildQuarterTrend(
+      loans,
+      l => l.startDate,
+      l => l.loanAmount,
+      { cumulative: true, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [loans]);
 
   /* Ranked Bars: Loan exposure by city */
   const exposureByCity = (() => {

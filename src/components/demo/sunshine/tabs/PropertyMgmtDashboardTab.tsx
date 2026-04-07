@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -21,17 +22,6 @@ const OCC_COLORS: Record<string, string> = {
 
 const CLASS_COLORS = ["#14b8a6", "#22d3ee", "#6366f1"];
 
-const REVENUE_TREND = [
-  { label: "Q1 '24", value: 28.4 },
-  { label: "Q2 '24", value: 31.0 },
-  { label: "Q3 '24", value: 33.5 },
-  { label: "Q4 '24", value: 36.2 },
-  { label: "Q1 '25", value: 38.9 },
-  { label: "Q2 '25", value: 41.4 },
-  { label: "Q3 '25", value: 44.1 },
-  { label: "Q4 '25", value: 47.3 },
-];
-
 interface Props {
   units: SHPropertyUnit[];
   onCommunityClick: (community: string) => void;
@@ -49,6 +39,14 @@ interface Props {
 
 export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCityClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPMKPIs(units);
+  const revenueTrend = useMemo(() => (
+    buildQuarterTrend(
+      units,
+      u => u.leaseStart,
+      u => u.monthlyRent,
+      { cumulative: false, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000) * 10) / 10 }))
+  ), [units]);
 
   const byOccupancy = (() => {
     const map = new Map<string, number>();
@@ -216,9 +214,9 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
         <SHPanel kicker="Rent Distribution" title="Monthly Rent Histogram">
           <SHHistogram buckets={rentHistogram} onBucketClick={bucket => onDrill({ type: "pm-metric", value: bucket, label: `Rent ${bucket}` })} />
         </SHPanel>
-        <SHPanel kicker="Revenue Trend" title="Cumulative Revenue">
+        <SHPanel kicker="Revenue Trend" title="Lease Revenue by Quarter">
           <SHAreaChart
-            data={REVENUE_TREND}
+            data={revenueTrend}
             color="#22d3ee"
             label1="Revenue ($K)"
             formatY={v => `$${v.toFixed(1)}K`}

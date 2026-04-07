@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHJob, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -21,18 +22,6 @@ const TEAL_BLUE_PALETTE = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"
 
 const SPARKLINE_JOBS = [22, 24, 23, 25, 26, 27, 26, 28, 29, 30];
 const SPARKLINE_WIP = [3.8, 4.1, 4.0, 4.3, 4.5, 4.7, 4.9, 5.0, 5.1, 5.3];
-
-// Synthetic 8-quarter WIP trend ($ millions)
-const WIP_TREND_DATA = [
-  { label: "Q1 '24", value: 3.2 },
-  { label: "Q2 '24", value: 3.8 },
-  { label: "Q3 '24", value: 4.1 },
-  { label: "Q4 '24", value: 4.4 },
-  { label: "Q1 '25", value: 4.7 },
-  { label: "Q2 '25", value: 5.0 },
-  { label: "Q3 '25", value: 5.3 },
-  { label: "Q4 '25", value: 5.8 },
-];
 
 const STAGE_ORDER = ["Permit", "Foundation", "Framing", "MEP / Drywall", "Finishes", "Closing"];
 
@@ -55,6 +44,14 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
+  const wipTrendData = useMemo(() => (
+    buildQuarterTrend(
+      jobs,
+      j => j.startDate,
+      j => j.wipBalance,
+      { cumulative: false, maxPoints: 8 },
+    ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [jobs]);
 
   // --- Histogram: Completion Distribution ---
   const completionBuckets = [
@@ -222,7 +219,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       <div className="sh-panels-row">
         <SHPanel kicker="Trend" title="WIP Balance Trend">
           <SHAreaChart
-            data={WIP_TREND_DATA}
+            data={wipTrendData}
             color="#14b8a6"
             label1="WIP ($M)"
             formatY={(v: number) => `$${v.toFixed(1)}M`}
