@@ -15,74 +15,73 @@ import {
   Building2,
   TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
 import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About | A.D. Homes & Consulting",
   description:
-    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders — data infrastructure, operational reporting, and builder decision tools, backed by direct experience in construction and real estate.",
+    "About A.D. Homes & Consulting, a firm that builds custom data platforms for residential homebuilders with practical, client-owned delivery.",
 };
 
 const credentials = [
-  { icon: <HardHat size={18} />, label: "Residential construction operations" },
-  { icon: <Home size={18} />, label: "Real estate development lifecycle" },
-  { icon: <MapPin size={18} />, label: "Land acquisition & entitlement" },
-  { icon: <Landmark size={18} />, label: "Construction lending & draws" },
-  { icon: <Building2 size={18} />, label: "Subdivision development & lot delivery" },
-  { icon: <TrendingUp size={18} />, label: "Builder financial reporting & audits" },
+  { icon: <HardHat size={18} />, label: "Residential development and construction operations" },
+  { icon: <Home size={18} />, label: "Builder ERP and spreadsheet reporting" },
+  { icon: <MapPin size={18} />, label: "Land, lot, and community pipeline oversight" },
+  { icon: <Landmark size={18} />, label: "Permitting, lending, and draw workflows" },
+  { icon: <Building2 size={18} />, label: "Construction cost and schedule reporting" },
+  { icon: <TrendingUp size={18} />, label: "Portfolio and executive reporting" },
 ];
 
 const pillars = [
   {
     icon: <Database size={22} />,
-    title: "Cloud Data Engineering",
-    desc: "BigQuery, Snowflake, ETL pipelines, and warehouse design — structured around how builders actually track jobs, draws, and closings.",
-  },
-  {
-    icon: <Code2 size={22} />,
-    title: "Full-Stack Development",
-    desc: "Next.js dashboards, APIs, and production deployments. Interactive tools your PMs, supers, and executives actually use in the field.",
+    title: "Data Infrastructure",
+    desc: "Extraction, ingestion, transformation, and warehouse design to centralize ERP, spreadsheet, API, and operating data in one structured model.",
   },
   {
     icon: <BarChart3 size={22} />,
-    title: "Builder Operations Analytics",
-    desc: "KPI modeling, cost-to-complete tracking, cycle-time analysis, and pro forma tools that span land acquisition through close-out.",
+    title: "Operational Reporting",
+    desc: "Reporting systems and builder dashboards across land, development, permitting, lending and draws, construction, sales, and portfolio oversight.",
+  },
+  {
+    icon: <Code2 size={22} />,
+    title: "Builder Decision Tools",
+    desc: "Pro formas, budget-vs-actual analysis, cost-to-complete, variance tracking, at-risk job flagging, sync monitoring, admin controls, and internal apps.",
   },
 ];
 
 const benefits = [
   {
-    icon: <Users size={20} />,
-    title: "Direct Engagement",
-    desc: "No account managers, no hand-offs between teams. The people who design your warehouse are the same people who build your dashboards and deploy your platform.",
+    icon: <Shield size={20} />,
+    title: "Client Ownership",
+    desc: "Clients own their code, data, hosting, and infrastructure. The system stays with your team and can be expanded over time.",
   },
   {
-    icon: <Shield size={20} />,
-    title: "You Own Everything",
-    desc: "Code, data warehouse, hosting accounts, domain — it's all yours. If the engagement ends, the platform stays. Zero vendor lock-in.",
+    icon: <Users size={20} />,
+    title: "Direct Working Model",
+    desc: "You work directly with the team designing and building your reporting system, which keeps communication clear and delivery focused.",
   },
   {
     icon: <Zap size={20} />,
-    title: "Construction-Native Expertise",
-    desc: "The firm's experience comes from inside residential construction and real estate — not from a generic consulting background. We already understand the data problems because we've seen them firsthand.",
+    title: "Practical Delivery",
+    desc: "Clear scope, practical milestones, and working releases focused on visibility, reporting quality, and day-to-day operational decisions.",
   },
 ];
 
 const compared = [
-  { them: "6-month discovery phase", us: "Weeks to first dashboard" },
-  { them: "Generalist analysts staffed to your project", us: "Team with direct construction & real estate experience" },
-  { them: "Generic BI templates", us: "Custom-built for homebuilder operations" },
-  { them: "Platform lock-in", us: "You own the code and data" },
-  { them: "$200K+ annual contracts", us: "Project-based, transparent pricing" },
-  { them: "Quarterly business reviews", us: "Direct access to your consultant anytime" },
+  { them: "Multi-industry delivery model", us: "Residential homebuilder specialization" },
+  { them: "Framework-first implementation", us: "Scope tailored to your systems and reporting priorities" },
+  { them: "Limited platform ownership", us: "Client ownership of code, data, and hosting" },
+  { them: "Layered communication model", us: "Direct senior involvement throughout delivery" },
+  { them: "Reporting outputs only", us: "Reporting systems with monitoring and admin controls" },
+  { them: "Large fixed scopes", us: "Phased delivery aligned to operating priorities" },
 ];
 
 export default function AboutPage() {
   return (
     <>
-      {/* ─── Hero ─── */}
       <section className="page-hero">
         <Container>
           <div className="mx-auto max-w-5xl">
@@ -90,13 +89,14 @@ export default function AboutPage() {
               <div>
                 <span className="eyebrow">About the Firm</span>
                 <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-                  Construction-First Data Platform
+                  Custom data platforms for residential homebuilders
                 </h1>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  A.D. Homes &amp; Consulting builds data infrastructure,
-                  operational reporting, and decision tools for residential
-                  homebuilders — backed by direct experience in construction
-                  and real estate development.
+                  We help residential homebuilders centralize data from ERPs,
+                  spreadsheets, APIs, and other operating systems; move it into
+                  a structured warehouse; apply builder KPI logic; and deliver
+                  reporting systems, dashboards, and internal tools that support
+                  operational decision-making.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -115,90 +115,43 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Founder Origin — left/right split ─── */}
       <section className="section-space pt-0">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <div className="grid gap-12 lg:grid-cols-2">
-              <div>
-                <span className="eyebrow">Our Background</span>
-                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  Rooted in real estate &amp; construction
-                </h2>
-                <p className="mt-6 text-base leading-7 text-slate-400">
-                  The firm was founded out of residential real estate
-                  development and construction operations — not a software
-                  company. That background shapes every platform we build:
-                  the data models, the KPI logic, and the way reporting is
-                  organized all reflect how builders actually run their
-                  operations.
-                </p>
-              </div>
-              <div>
-                <span className="eyebrow">Technical Foundation</span>
-                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  Construction experience, engineering delivery
-                </h2>
-                <p className="mt-6 text-base leading-7 text-slate-400">
-                  The team combines graduate-level training in data analytics
-                  and technology management with hands-on construction and
-                  real estate experience. We already understand
-                  cost-to-complete variance, absorption rates, draw
-                  processes, and the operational metrics that drive a
-                  builder&apos;s P&amp;L.
-                </p>
-              </div>
+            <span className="eyebrow">Industry Context</span>
+            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+              Built around residential builder operations
+            </h2>
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <p className="text-base leading-7 text-slate-400">
+                The firm is built around experience in residential development,
+                construction operations, and builder reporting. That background
+                informs how data is modeled, how KPI definitions are built, and
+                how reporting is organized for finance, construction,
+                development, and leadership teams.
+              </p>
+              <p className="text-base leading-7 text-slate-400">
+                The focus is practical system delivery: reliable extraction,
+                clean warehouse structure, builder workflows, and reporting
+                tools teams can use every week. The result is clearer visibility
+                and better decisions across the business.
+              </p>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ─── Industry Experience — full-width badges ─── */}
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">Industry Experience</span>
+            <span className="eyebrow">What We Build</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Direct experience across builder operations
+              Three connected solution categories
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-              The firm&apos;s experience spans land acquisition, subdivision
-              development, construction management, builder financial
-              reporting, and real estate operations — which means firsthand
-              familiarity with the ERP systems, draw processes, permit
-              timelines, and cost structures every platform is built around.
-            </p>
-
-            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {credentials.map((c) => (
-                <div
-                  key={c.label}
-                  className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-5 text-center"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent-400/20 bg-accent-500/10 text-accent-300">
-                    {c.icon}
-                  </div>
-                  <span className="text-xs font-medium leading-4 text-slate-300">{c.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* ─── What You Get — full-width cards ─── */}
-      <section className="section-space">
-        <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">What You Get</span>
-            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              A complete builder data platform
-            </h2>
-            <p className="mt-4 max-w-2xl text-base text-slate-400">
-              Each engagement delivers three layers: centralized data
-              infrastructure, operational dashboards for every department,
-              and builder-specific tools for financial analysis and daily
-              operations.
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-400">
+              Each engagement combines centralized builder data, operational
+              reporting systems, and decision tools used by teams managing
+              communities, jobs, costs, sales, and portfolio performance.
             </p>
 
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
@@ -218,15 +171,13 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Why Builders Choose Us — full-width cards ─── */}
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">The Advantage</span>
+            <span className="eyebrow">Why Clients Choose Us</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Why builders choose us
+              Ownership, directness, and practical delivery
             </h2>
-
             <div className="mt-10 grid gap-8 sm:grid-cols-3">
               {benefits.map((b) => (
                 <div key={b.title} className="flex flex-col">
@@ -244,7 +195,6 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Compared — left heading, right table ─── */}
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
@@ -252,18 +202,18 @@ export default function AboutPage() {
               <div>
                 <span className="eyebrow">Comparison</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  Big firm vs. dedicated consultant
+                  Delivery model differences
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
-                  Large firms charge enterprise rates for generalist teams.
-                  Here&apos;s how a construction-focused data firm compares.
+                  The key differences are specialization, ownership, direct
+                  involvement, and practical reporting depth.
                 </p>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/[0.06]">
                 <div className="grid grid-cols-2 border-b border-white/[0.06] bg-white/[0.02]">
                   <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Typical Firm
+                    Typical Approach
                   </div>
                   <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
                     A.D. Homes &amp; Consulting
@@ -271,7 +221,7 @@ export default function AboutPage() {
                 </div>
                 {compared.map((row, i) => (
                   <div
-                    key={i}
+                    key={row.them}
                     className={`grid grid-cols-2 border-b border-white/[0.04] ${
                       i % 2 === 0 ? "" : "bg-white/[0.015]"
                     }`}
@@ -290,7 +240,6 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── How It Works — left heading, right steps ─── */}
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
@@ -298,12 +247,11 @@ export default function AboutPage() {
               <div>
                 <span className="eyebrow">Process</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  From discovery call to production
+                  How engagements work
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
-                  Every engagement follows the same proven path — scoped to
-                  your operation, delivered incrementally, and fully owned by
-                  you at the end.
+                  Projects move from system review to working delivery in clear
+                  stages, with ownership kept on the client side throughout.
                 </p>
                 <div className="mt-8">
                   <Link
@@ -320,22 +268,22 @@ export default function AboutPage() {
                   {
                     step: "01",
                     title: "Discovery Call",
-                    desc: "We map your current systems — ERP, spreadsheets, accounting — and identify what construction and real estate data is available across your operation.",
+                    desc: "We review your current systems, reporting pain points, and operating priorities.",
                   },
                   {
                     step: "02",
                     title: "Architecture & Scope",
-                    desc: "You get a clear proposal scoped to your builder workflow: what gets built, what it costs, and when it ships.",
+                    desc: "You receive a practical scope covering data sources, warehouse approach, reporting deliverables, timeline, and cost.",
                   },
                   {
                     step: "03",
                     title: "Build & Deploy",
-                    desc: "Cloud warehouse, ETL pipelines, and interactive dashboards — structured around the builder lifecycle with weekly demos.",
+                    desc: "We deliver extraction pipelines, warehouse models, KPI logic, dashboards, and internal tools in working increments.",
                   },
                   {
                     step: "04",
                     title: "Handoff & Support",
-                    desc: "Everything deploys to your accounts. You own it all. Ongoing support is available but never required.",
+                    desc: "Everything is deployed to your accounts with documentation and training. Ongoing support is optional.",
                   },
                 ].map((s) => (
                   <div key={s.step} className="flex gap-5">
@@ -357,8 +305,8 @@ export default function AboutPage() {
       </section>
 
       <CTABanner
-        headline="Start with a discovery call."
-        description="We map your current systems, identify where data breaks down, and outline what a centralized platform looks like for your operation."
+        headline="Discuss your current systems and reporting needs."
+        description="We will review your ERP, spreadsheets, and reporting workflow, then outline a practical path to centralized builder data, reporting systems, and operational tools."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

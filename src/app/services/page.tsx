@@ -14,9 +14,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import { SERVICES, PROCESS_STEPS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Services | Data Platforms for Residential Homebuilders",
+  title: "Services | Custom Data Platforms for Residential Homebuilders",
   description:
-    "Explore A.D. Homes & Consulting services for residential homebuilders: data extraction, warehouse design, lifecycle dashboards, pro forma tools, and ongoing platform support.",
+    "Explore services for residential homebuilders: data infrastructure, operational reporting systems, and builder decision tools.",
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -40,9 +40,8 @@ export default function ServicesPage() {
               Custom data platforms for residential homebuilders
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              We build the stack behind better builder decisions: extraction,
-              warehousing, KPI logic, and interactive applications organized
-              around the operational lifecycle.
+              Services are organized into three layers: data infrastructure,
+              operational reporting systems, and builder decision tools.
             </p>
           </div>
         </Container>
@@ -132,7 +131,7 @@ export default function ServicesPage() {
 
       <CTABanner
         headline="Start with a discovery call."
-        description="We map your current systems, identify where data breaks down, and outline what a centralized platform looks like for your operation."
+        description="We review your current systems and reporting needs, then outline a practical path to centralized builder data and working reporting."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

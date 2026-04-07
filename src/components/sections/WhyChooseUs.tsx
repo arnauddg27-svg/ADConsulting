@@ -9,23 +9,23 @@ import Container from "@/components/ui/Container";
 const reasons = [
   {
     icon: <Building2 size={22} />,
-    title: "Next.js + BigQuery architecture",
-    body: "Every platform is built on a modern cloud stack: Next.js for interactive dashboards, BigQuery or Snowflake for warehousing, and automated pipelines for daily data ingestion.",
+    title: "Builder-specific data scope",
+    body: "We design around residential builder workflows, not generic reporting templates.",
   },
   {
     icon: <Wrench size={22} />,
-    title: "Full lifecycle data coverage",
-    body: "Land acquisition, permitting, loans, construction, sales, and audits — connected in a single warehouse with KPI logic defined once and used everywhere.",
+    title: "Connected reporting coverage",
+    body: "Land, development, permitting, lending and draws, construction, sales, and portfolio reporting in one system.",
   },
   {
     icon: <GraduationCap size={22} />,
-    title: "You own the entire stack",
-    body: "Code, warehouse, hosting, and data — all yours. No vendor lock-in, no proprietary layers. If the engagement ends, the platform stays with you.",
+    title: "Client ownership by default",
+    body: "Code, warehouse, hosting, and data stay in your accounts so your team keeps full control.",
   },
   {
     icon: <MapPin size={22} />,
-    title: "Built for 20-500+ homes per year",
-    body: "Enterprise-grade data infrastructure without the enterprise price tag. Sized for builders who have outgrown spreadsheets but need more than off-the-shelf BI tools.",
+    title: "Practical delivery model",
+    body: "Direct senior involvement, phased delivery, and a faster path from discovery to working reporting.",
   },
 ];
 
@@ -37,13 +37,12 @@ export default function WhyChooseUs() {
           <div>
             <span className="eyebrow">Why Us</span>
             <h2 className="mt-5 max-w-lg font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-              Built for how <span className="text-gradient">builders actually operate.</span>
+              Why homebuilders <span className="text-gradient">choose this model.</span>
             </h2>
             <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
-              Cloud warehousing, modern application development, and deep
-              familiarity with builder operations — delivered as one
-              engagement. You get infrastructure that works the way your
-              teams already think about jobs, draws, permits, and closings.
+              The approach is focused on clarity and ownership: one centralized
+              data foundation, reporting built for builder workflows, and tools
+              teams can use to run operations with better visibility.
             </p>
           </div>
 

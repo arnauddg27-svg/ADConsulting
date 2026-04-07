@@ -28,9 +28,9 @@ export default function Hero() {
 
           <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
             We build custom data platforms for residential homebuilders.
-            Your ERPs, spreadsheets, and finance systems feed into one
-            structured warehouse — powering dashboards, reporting, and
-            operational tools your team runs on every day.
+            ERP systems, spreadsheets, finance systems, APIs, and exports
+            feed one structured warehouse that powers dashboards, reporting
+            systems, and operational tools.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -56,7 +56,7 @@ export default function Hero() {
             },
             {
               value: "Interactive Apps",
-              label: "Lifecycle views for executives, finance, and operations",
+              label: "Reporting systems and operational tools for daily decisions",
             },
           ].map((stat) => (
             <div

@@ -388,23 +388,23 @@ function generateLoans(): SHLoan[] {
 export const loans: SHLoan[] = generateLoans();
 
 /* ═══════════════════════════════════════════════════════════
-   LAND DEALS (600 total) — dense enough for day-level drill-down
+   LAND DEALS (15 total) — realistic for a mid-size builder (~600 total lots)
    ═══════════════════════════════════════════════════════════ */
 function generateLandDeals(): SHLandDeal[] {
   const rng = createRng(311);
   const { rand, pick, between } = rng;
   const result: SHLandDeal[] = [];
 
-  const TOTAL = 600;
+  const TOTAL = 15;
 
   for (let i = 0; i < TOTAL; i++) {
     const comm = pick(COMMUNITIES);
     const meta = COMM_META[comm];
     const acres = between(10, 45);
-    const lots = between(16, 68);
+    const lots = between(25, 55);
     const costPerLot = LOT_COSTS[comm] ?? 42000;
     const acquisitionCost = lots * costPerLot;
-    // 100 per year across 6 years
+    // Spread across 2021-2026
     const year = 2021 + (i % 6);
     const contractMonth = between(1, 12);
     const contractDay = between(1, 28);
@@ -419,7 +419,7 @@ function generateLandDeals(): SHLandDeal[] {
 
     result.push({
       id: i + 1,
-      name: `${comm} Parcel ${String.fromCharCode(65 + (i % 26))}-${Math.floor(i / 26) + 1}`,
+      name: `${comm} Parcel ${String.fromCharCode(65 + (i % 15))}-${i + 1}`,
       city: meta.city,
       county: meta.county,
       community: comm,

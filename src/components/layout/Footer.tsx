@@ -3,13 +3,6 @@ import { MapPin, Phone, Mail } from "lucide-react";
 import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
 
-const practiceAreas = [
-  "Data Extraction",
-  "Warehouse & KPIs",
-  "Lifecycle Dashboards",
-  "Pro Forma & Audits",
-];
-
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-white/[0.06] bg-[#070b14]">
@@ -32,18 +25,11 @@ export default function Footer() {
               </div>
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 md:text-base">
-                Data infrastructure, operational reporting, and decision
-                tools for residential homebuilders. Extraction, warehousing,
-                KPI logic, dashboards, and internal applications.
+                We build custom data platforms for residential homebuilders by
+                centralizing ERP, spreadsheet, finance, API, and export data in
+                a structured warehouse and turning it into reporting systems,
+                dashboards, and operational tools.
               </p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {practiceAreas.map((area) => (
-                  <span key={area} className="badge-dash">
-                    {area}
-                  </span>
-                ))}
-              </div>
             </div>
 
             <div>

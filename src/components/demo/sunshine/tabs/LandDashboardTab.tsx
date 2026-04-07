@@ -116,7 +116,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
 
       <div className="sh-kpi-row">
         <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} delta={`+${kpis.activeDeals} in pipeline`} deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "active-deals", label: `Active Deals — ${fmtN(kpis.activeDeals)}` })} />
-        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[80, 95, 110, 120, 135, 150, 160, 170]} delta="+35 lots YoY" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "total-lots", label: `Total Lots — ${fmtN(totalLots)}` })} />
+        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[320, 380, 420, 460, 510, 540, 570, 600]} delta="+35 lots YoY" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "total-lots", label: `Total Lots — ${fmtN(totalLots)}` })} />
         <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} delta="+18% YoY" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "invested", label: `Total Invested — ${fmt$(totalInvestment)}` })} />
         <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} delta="+4% vs prior" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "avg-cost", label: `Avg Cost/Lot — ${fmt$(kpis.avgCostPerLot)}` })} />
       </div>

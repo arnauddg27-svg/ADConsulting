@@ -24,8 +24,8 @@ const painPoints = [
   },
   {
     icon: <AlertTriangle size={22} />,
-    problem: "Off-the-shelf dashboards miss the full lifecycle and trap your data",
-    solution: "A client-owned platform spanning land, construction, sales, and audits",
+    problem: "Off-the-shelf dashboards rarely fit builder workflows end to end",
+    solution: "Client-owned reporting systems built around your actual operating model",
   },
 ];
 
@@ -40,9 +40,9 @@ export default function SocialProof() {
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
             Most builders have the data they need — it&apos;s scattered across
-            ERPs, spreadsheets, loan trackers, and email. We centralize it
-            into one structured warehouse and deliver it as reporting and
-            tools the team can act on.
+            ERPs, spreadsheets, finance systems, and exports. We centralize it
+            into one structured warehouse, apply KPI logic once, and deliver
+            reporting systems teams can act on.
           </p>
         </div>
 

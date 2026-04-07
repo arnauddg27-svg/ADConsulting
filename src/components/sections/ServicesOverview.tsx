@@ -30,9 +30,9 @@ export default function ServicesOverview() {
             Data infrastructure, reporting, <span className="text-gradient">and decision tools.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
-            Each platform covers three layers: centralized data infrastructure,
-            operational dashboards across every department, and builder-specific
-            tools for financial analysis, exception tracking, and daily operations.
+            Each engagement delivers three connected layers: centralized data
+            infrastructure, operational reporting systems, and builder decision
+            tools.
           </p>
         </div>
 

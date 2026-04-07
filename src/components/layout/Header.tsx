@@ -50,11 +50,10 @@ export default function Header() {
             <div className="absolute right-0 top-14 z-50 w-[min(92vw,22rem)] panel overflow-hidden p-6">
               <div className="mb-6 border-b border-white/[0.08] pb-5">
                 <div className="font-heading text-2xl tracking-[0.12em] text-slate-50">
-                  Builder Data Consulting
+                  A.D. Homes &amp; Consulting
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Custom data platforms for residential homebuilders
-                  across North America.
+                  Custom data platforms for residential homebuilders.
                 </p>
               </div>
               <nav className="flex flex-col gap-2">

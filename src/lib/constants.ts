@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
   businessName: "A.D. Homes & Consulting",
   tagline: "Custom Data Platforms for Residential Homebuilders",
   description:
-    "A.D. Homes & Consulting builds data infrastructure, operational reporting, and decision tools for residential homebuilders across North America. Centralized warehouses, lifecycle dashboards, and builder-specific applications — fully client-owned.",
+    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
   phone: "(407) 840-1368",
   email: "arnauddg27@gmail.com",
@@ -56,11 +56,11 @@ export const SERVICES: Service[] = [
   },
   {
     id: "builder-ops",
-    title: "Builder Ops Console",
-    shortTitle: "Builder Ops",
-    headline: "Interactive applications organized around the builder lifecycle, not generic BI tabs",
+    title: "Reporting Systems & Dashboards",
+    shortTitle: "Reporting Systems",
+    headline: "Interactive reporting systems built for builder workflows",
     description:
-      "The application layer is built around how the business actually runs. Instead of a read-only dashboard, the team gets a platform with drill-downs, pipeline tables, filters, and operating views that support daily decisions.",
+      "We build reporting systems teams can use daily. Instead of static BI tabs, you get drill-downs, operating views, and workflow-oriented tools that support operational decisions.",
     icon: "TrendingUp",
     deliverables: [
       "Interactive Next.js dashboards and operating views",
@@ -73,11 +73,11 @@ export const SERVICES: Service[] = [
   },
   {
     id: "lifecycle",
-    title: "Lifecycle Dashboards",
-    shortTitle: "Lifecycle Views",
+    title: "Operational Reporting Coverage",
+    shortTitle: "Operational Coverage",
     headline: "Land, permitting, loans, construction, sales, and portfolio views in one connected system",
     description:
-      "Off-the-shelf tools usually show only one slice of the operation. We organize the platform around the full builder lifecycle so leadership can move from acquisition through closing and beyond without changing systems or definitions.",
+      "Reporting is organized across the full operation so teams can move from acquisition through closeout without switching systems or definitions.",
     icon: "Users",
     deliverables: [
       "Land acquisition and subdivision pipeline views",
@@ -133,24 +133,24 @@ export const PROCESS_STEPS = [
     step: 1,
     title: "Discovery Call",
     description:
-      "A 30-minute conversation focused on where spreadsheets, stale reporting, or ERP gaps are costing time and margin.",
+      "A 30-minute conversation focused on current systems, reporting gaps, and where teams are relying on manual workarounds.",
   },
   {
     step: 2,
     title: "Systems Mapping",
     description:
-      "A technical review of source systems, data quality, KPI requirements, and the right extraction path for the builder's environment.",
+      "A technical review of source systems, data quality, KPI definitions, and the right extraction and warehouse approach.",
   },
   {
     step: 3,
     title: "Platform Build",
     description:
-      "Warehouse, mart logic, and application views are delivered in working iterations so the platform improves with real feedback.",
+      "Extraction pipelines, warehouse models, reporting systems, and tools are delivered in working iterations with feedback.",
   },
   {
     step: 4,
     title: "Handoff & Support",
     description:
-      "Training, documentation, production rollout, and optional monthly support to keep the system useful as operations evolve.",
+      "Training, documentation, production rollout, and optional support for ongoing reporting and operational needs.",
   },
 ];

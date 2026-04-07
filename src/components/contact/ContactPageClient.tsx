@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: "How long do projects usually take?",
-    a: "Typical timelines follow the package structure in the playbook: 4-6 weeks for lighter analytics work, 8-12 weeks for single-ERP dashboard builds, 12-18 weeks for Builder Ops engagements, and 20-25 weeks for enterprise-level multi-source systems.",
+    a: "Timeline depends on scope and source-system complexity. Many projects deliver a first working reporting release in a few weeks, then expand in phases.",
   },
   {
     q: "Do you replace our current systems?",
@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "What happens on the first call?",
-    a: "The discovery call focuses on where your operation is losing time or margin: fragmented data, manual exports, stale reports, or mismatched numbers between teams. If the issue is straightforward, we'll tell you. If it needs a deeper systems mapping session, that becomes the next step.",
+    a: "The discovery call reviews your current systems, reporting gaps, and priority decisions. You leave with a clear recommendation for scope and next steps.",
   },
 ];
 
@@ -83,13 +83,12 @@ export default function ContactPageClient() {
             <div>
               <span className="eyebrow">Start the Conversation</span>
               <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.05em] text-slate-50 sm:text-6xl">
-                Let&apos;s talk about your data.
+                Discuss your current systems and reporting needs.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                Whether you need a centralized warehouse, lifecycle dashboards,
-                or a full operational platform — it starts with a 30-minute
-                discovery call to map your current systems and identify
-                what&apos;s possible.
+                The first call is focused on fit and clarity: what data you
+                have, where reporting breaks down, and what a practical plan
+                could look like for your team.
               </p>
             </div>
           </div>
@@ -107,9 +106,8 @@ export default function ContactPageClient() {
                     Message received.
                   </h2>
                   <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-200">
-                    Thanks. I&apos;ll reply with the best next step, whether that is
-                    a quick fix, a systems mapping call, or a fuller platform
-                    conversation.
+                    Thanks. We&apos;ll reply with the best next step, whether that is
+                    a focused systems-mapping session or a scoped platform plan.
                   </p>
                   <Button
                     variant="secondary"
@@ -268,9 +266,8 @@ export default function ContactPageClient() {
                   Book a 30-minute discovery call
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-slate-200 md:text-base">
-                  Skip the form and book a time directly. The first call is about
-                  understanding where your reporting stack is breaking down, not
-                  a canned pitch.
+                  Skip the form and book directly. We will review your systems,
+                  reporting workflow, and decision priorities to confirm scope and fit.
                 </p>
                 <div className="mt-5">
                   <a
@@ -293,8 +290,8 @@ export default function ContactPageClient() {
         <Container>
           <SectionHeading
             label="FAQ"
-            title="Questions builders usually ask before the discovery call."
-            subtitle="If you are not sure whether the problem is extraction, reporting, data quality, or process alignment, that is exactly what the first conversation is meant to clarify."
+            title="Questions teams usually ask before the first call."
+            subtitle="If you are not sure whether the bottleneck is extraction, reporting design, data quality, or workflow alignment, that is exactly what the first conversation clarifies."
           />
 
           <div className="grid gap-5 md:grid-cols-2">
