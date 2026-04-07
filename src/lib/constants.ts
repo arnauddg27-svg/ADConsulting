@@ -3,9 +3,9 @@ import type { Service, NavLink, Stat, Testimonial } from "@/types";
 export const SITE_CONFIG = {
   name: "A.D. Homes & Consulting",
   businessName: "A.D. Homes & Consulting",
-  tagline: "Custom Data Ecosystems & Analytics Platforms for Residential Homebuilders.",
+  tagline: "Custom Data Platforms for Residential Homebuilders",
   description:
-    "A.D. Homes & Consulting builds custom operational intelligence platforms for residential homebuilders across North America. We extract data from builder ERPs, spreadsheets, and finance systems, centralize it in a warehouse, and deliver interactive applications from land acquisition through audits.",
+    "A.D. Homes & Consulting builds data infrastructure, operational reporting, and decision tools for residential homebuilders across North America. Centralized warehouses, lifecycle dashboards, and builder-specific applications — fully client-owned.",
   location: "North America (U.S. & Canada)",
   phone: "(407) 840-1368",
   email: "arnauddg27@gmail.com",

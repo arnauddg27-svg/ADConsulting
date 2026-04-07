@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: "What happens on the first call?",
-    a: "The discovery call is meant to uncover where the operation is bleeding time or margin: fragmented data, manual exports, stale reports, or mismatched numbers between teams. If the issue is simple, I will say that. If it needs a deeper systems mapping session, that becomes the next step.",
+    a: "The discovery call focuses on where your operation is losing time or margin: fragmented data, manual exports, stale reports, or mismatched numbers between teams. If the issue is straightforward, we'll tell you. If it needs a deeper systems mapping session, that becomes the next step.",
   },
 ];
 

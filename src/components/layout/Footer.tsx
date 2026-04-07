@@ -26,15 +26,15 @@ export default function Footer() {
                     {SITE_CONFIG.name.toUpperCase()}
                   </div>
                   <div className="text-[0.7rem] uppercase tracking-[0.24em] text-slate-400">
-                    Custom Data Ecosystems for Residential Homebuilders
+                    Custom Data Platforms for Residential Homebuilders
                   </div>
                 </div>
               </div>
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 md:text-base">
-                Custom operational intelligence platforms for residential
-                homebuilders. Data extraction, centralized warehousing, and
-                interactive applications built around the builder lifecycle.
+                Data infrastructure, operational reporting, and decision
+                tools for residential homebuilders. Extraction, warehousing,
+                KPI logic, dashboards, and internal applications.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">

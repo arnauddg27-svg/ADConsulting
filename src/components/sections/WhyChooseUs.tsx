@@ -9,23 +9,23 @@ import Container from "@/components/ui/Container";
 const reasons = [
   {
     icon: <Building2 size={22} />,
-    title: "Builder reality plus technical depth",
-    body: "Most data consultants do not understand builder operations, and most construction consultants cannot design warehouses or applications. A.D. Homes is built around both skill sets.",
+    title: "Next.js + BigQuery architecture",
+    body: "Every platform is built on a modern cloud stack: Next.js for interactive dashboards, BigQuery or Snowflake for warehousing, and automated pipelines for daily data ingestion.",
   },
   {
     icon: <Wrench size={22} />,
-    title: "Full lifecycle coverage",
-    body: "The platform is designed around land acquisition, permitting, loans, construction, sales, property management, and audits instead of treating each department as a separate reporting problem.",
+    title: "Full lifecycle data coverage",
+    body: "Land acquisition, permitting, loans, construction, sales, and audits — connected in a single warehouse with KPI logic defined once and used everywhere.",
   },
   {
     icon: <GraduationCap size={22} />,
-    title: "Client-owned stack",
-    body: "Clients keep their code, warehouse, and hosting. KPI logic lives in the data model, not inside a vendor-locked dashboard layer.",
+    title: "You own the entire stack",
+    body: "Code, warehouse, hosting, and data — all yours. No vendor lock-in, no proprietary layers. If the engagement ends, the platform stays with you.",
   },
   {
     icon: <MapPin size={22} />,
     title: "Built for 20-500+ homes per year",
-    body: "The offering is sized for builders who have outgrown spreadsheets and disconnected modules, but do not want the cost and overhead of a large enterprise consulting team.",
+    body: "Enterprise-grade data infrastructure without the enterprise price tag. Sized for builders who have outgrown spreadsheets but need more than off-the-shelf BI tools.",
   },
 ];
 
@@ -37,13 +37,13 @@ export default function WhyChooseUs() {
           <div>
             <span className="eyebrow">Why Us</span>
             <h2 className="mt-5 max-w-lg font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-              Built for builders who need <span className="text-gradient">better data infrastructure, not more noise.</span>
+              Built for how <span className="text-gradient">builders actually operate.</span>
             </h2>
             <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
-              A.D. Homes combines operational context, data engineering, cloud
-              architecture, and application delivery in one engagement. The goal
-              is straightforward: give residential builders access to the kind of
-              operating intelligence national players spend far more to build.
+              Cloud warehousing, modern application development, and deep
+              familiarity with builder operations — delivered as one
+              engagement. You get infrastructure that works the way your
+              teams already think about jobs, draws, permits, and closings.
             </p>
           </div>
 

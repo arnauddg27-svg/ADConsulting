@@ -18,7 +18,7 @@ export default function Header() {
                 {SITE_CONFIG.name.toUpperCase()}
               </span>
               <span className="block text-[0.65rem] uppercase tracking-[0.24em] text-slate-400">
-                Custom Data Ecosystems for Residential Homebuilders
+                Custom Data Platforms for Residential Homebuilders
               </span>
             </div>
           </Link>
@@ -53,8 +53,8 @@ export default function Header() {
                   Builder Data Consulting
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Custom operational intelligence platforms for residential
-                  homebuilders across North America.
+                  Custom data platforms for residential homebuilders
+                  across North America.
                 </p>
               </div>
               <nav className="flex flex-col gap-2">

@@ -36,13 +36,13 @@ export default function SocialProof() {
         <div className="reveal text-center">
           <span className="eyebrow">The Problem</span>
           <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-[3.2rem]">
-            You don&apos;t have a software problem. <span className="text-gradient">You have a data structure problem.</span>
+            The data exists. <span className="text-gradient">It just isn&apos;t connected.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-slate-300">
-            Most residential builders already have the data. The breakdown
-            happens between systems, exports, and reporting lag. A.D. Homes fixes
-            the structure underneath so construction, finance, and leadership
-            can work from the same truth.
+            Most builders have the data they need — it&apos;s scattered across
+            ERPs, spreadsheets, loan trackers, and email. We centralize it
+            into one structured warehouse and deliver it as reporting and
+            tools the team can act on.
           </p>
         </div>
 

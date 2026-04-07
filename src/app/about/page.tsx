@@ -20,9 +20,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Your Personal Data Architect | A.D. Homes & Consulting",
+  title: "About | A.D. Homes & Consulting",
   description:
-    "Founded by a real estate developer turned data architect. A.D. Homes & Consulting builds custom cloud data platforms for residential homebuilders — with firsthand construction experience behind every engagement.",
+    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders — data infrastructure, operational reporting, and builder decision tools, backed by direct experience in construction and real estate.",
 };
 
 const credentials = [
@@ -55,8 +55,8 @@ const pillars = [
 const benefits = [
   {
     icon: <Users size={20} />,
-    title: "Your Assigned Consultant",
-    desc: "No account managers, no hand-offs between teams. Your dedicated consultant knows your systems, your data, and your goals — from kickoff through production.",
+    title: "Direct Engagement",
+    desc: "No account managers, no hand-offs between teams. The people who design your warehouse are the same people who build your dashboards and deploy your platform.",
   },
   {
     icon: <Shield size={20} />,
@@ -66,13 +66,13 @@ const benefits = [
   {
     icon: <Zap size={20} />,
     title: "Construction-Native Expertise",
-    desc: "Your consultant doesn't need to learn your industry. They've worked inside the builder lifecycle — from dirt to doors — and understand the data problems firsthand.",
+    desc: "The firm's experience comes from inside residential construction and real estate — not from a generic consulting background. We already understand the data problems because we've seen them firsthand.",
   },
 ];
 
 const compared = [
   { them: "6-month discovery phase", us: "Weeks to first dashboard" },
-  { them: "Consultants who've never been on a job site", us: "Firsthand construction & real estate experience" },
+  { them: "Generalist analysts staffed to your project", us: "Team with direct construction & real estate experience" },
   { them: "Generic BI templates", us: "Custom-built for homebuilder operations" },
   { them: "Platform lock-in", us: "You own the code and data" },
   { them: "$200K+ annual contracts", us: "Project-based, transparent pricing" },
@@ -88,15 +88,15 @@ export default function AboutPage() {
           <div className="mx-auto max-w-5xl">
             <div className="grid items-center gap-10 lg:grid-cols-2">
               <div>
-                <span className="eyebrow">Built for Builders</span>
+                <span className="eyebrow">About the Firm</span>
                 <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
                   Construction-First Data Platform
                 </h1>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  Most data consultants learn your industry on your dime. Our
-                  founder came up through real estate development and residential
-                  construction — then earned a Master&apos;s in data analytics
-                  and built the technical platform to match.
+                  A.D. Homes &amp; Consulting builds data infrastructure,
+                  operational reporting, and decision tools for residential
+                  homebuilders — backed by direct experience in construction
+                  and real estate development.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -121,31 +121,31 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <div className="grid gap-12 lg:grid-cols-2">
               <div>
-                <span className="eyebrow">Our Origin</span>
+                <span className="eyebrow">Our Background</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
                   Rooted in real estate &amp; construction
                 </h2>
                 <p className="mt-6 text-base leading-7 text-slate-400">
-                  A.D. Homes &amp; Consulting was founded by Arnaud Durand — a
-                  consultant whose career started in residential real estate
-                  development and construction operations before moving into data
-                  architecture. The firm exists because Arnaud lived inside the
-                  builder lifecycle first, then built the technology to modernize
-                  it.
+                  The firm was founded out of residential real estate
+                  development and construction operations — not a software
+                  company. That background shapes every platform we build:
+                  the data models, the KPI logic, and the way reporting is
+                  organized all reflect how builders actually run their
+                  operations.
                 </p>
               </div>
               <div>
                 <span className="eyebrow">Technical Foundation</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  Construction meets data science
+                  Construction experience, engineering delivery
                 </h2>
                 <p className="mt-6 text-base leading-7 text-slate-400">
-                  Arnaud holds a Master&apos;s degree with a concentration in
-                  data analytics and technology management. That combination —
-                  hands-on construction and real estate experience plus
-                  graduate-level data training — is what sets the firm apart. We
-                  already understand cost-to-complete variance, absorption rates,
-                  and the metrics that drive a builder&apos;s P&amp;L.
+                  The team combines graduate-level training in data analytics
+                  and technology management with hands-on construction and
+                  real estate experience. We already understand
+                  cost-to-complete variance, absorption rates, draw
+                  processes, and the operational metrics that drive a
+                  builder&apos;s P&amp;L.
                 </p>
               </div>
             </div>
@@ -159,15 +159,14 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow">Industry Experience</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              What the founder brings from the field
+              Direct experience across builder operations
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-              Before founding the firm, Arnaud&apos;s work spanned land
-              acquisition, subdivision development, construction project
-              management, builder financial reporting, and real estate
-              operations — giving him firsthand exposure to the ERP systems,
-              draw processes, permit timelines, and cost structures that
-              define homebuilder workflows.
+              The firm&apos;s experience spans land acquisition, subdivision
+              development, construction management, builder financial
+              reporting, and real estate operations — which means firsthand
+              familiarity with the ERP systems, draw processes, permit
+              timelines, and cost structures every platform is built around.
             </p>
 
             <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -196,9 +195,10 @@ export default function AboutPage() {
               A complete builder data platform
             </h2>
             <p className="mt-4 max-w-2xl text-base text-slate-400">
-              Every platform is structured around how builders actually
-              operate — not how a generic BI tool thinks they should. We cover
-              the full lifecycle from land acquisition to close-out audits.
+              Each engagement delivers three layers: centralized data
+              infrastructure, operational dashboards for every department,
+              and builder-specific tools for financial analysis and daily
+              operations.
             </p>
 
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
@@ -255,9 +255,8 @@ export default function AboutPage() {
                   Big firm vs. dedicated consultant
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
-                  Large consulting firms charge enterprise rates and staff your
-                  project with generalists. Here&apos;s how a dedicated,
-                  construction-experienced consultant compares.
+                  Large firms charge enterprise rates for generalist teams.
+                  Here&apos;s how a construction-focused data firm compares.
                 </p>
               </div>
 
@@ -358,8 +357,8 @@ export default function AboutPage() {
       </section>
 
       <CTABanner
-        headline="Ready to centralize your builder data?"
-        description="The discovery call maps your current construction and real estate systems, identifies what data is available, and outlines what a custom platform looks like for your operation."
+        headline="Start with a discovery call."
+        description="We map your current systems, identify where data breaks down, and outline what a centralized platform looks like for your operation."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

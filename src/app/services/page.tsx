@@ -131,8 +131,8 @@ export default function ServicesPage() {
       </section>
 
       <CTABanner
-        headline="Ready to see what your data can do?"
-        description="The discovery call maps your current systems and outlines what a custom data platform looks like for your operation."
+        headline="Start with a discovery call."
+        description="We map your current systems, identify where data breaks down, and outline what a centralized platform looks like for your operation."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

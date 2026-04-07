@@ -27,10 +27,10 @@ export default function Hero() {
           </h1>
 
           <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-300 md:text-xl md:leading-9">
-            A.D. Homes & Consulting builds custom operational intelligence
-            platforms for residential homebuilders. We connect your ERPs,
-            spreadsheets, and finance systems into a single cloud warehouse —
-            then deliver interactive dashboards your team actually uses.
+            We build custom data platforms for residential homebuilders.
+            Your ERPs, spreadsheets, and finance systems feed into one
+            structured warehouse — powering dashboards, reporting, and
+            operational tools your team runs on every day.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
