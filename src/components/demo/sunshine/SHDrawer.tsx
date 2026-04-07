@@ -425,9 +425,18 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         const key = `${d.getFullYear()} Q${q}`;
         return key === detail.value;
       });
-      /* Fall back to all completed if no cohort match */
-      const isFallback = cohortJobs.length === 0;
-      const result = isFallback ? jobs.filter(j => j.coDate) : cohortJobs;
+      // If a cohort is too thin, expand to same-year completed jobs for a more useful sample.
+      const cohortYear = Number(String(detail.value).split(" ")[0]);
+      const sameYearJobs = jobs.filter(j => j.coDate && new Date(j.startDate).getFullYear() === cohortYear);
+      let result = cohortJobs;
+      let subtitleMode: "cohort" | "year" | "all" = "cohort";
+      if (result.length > 0 && result.length < 5 && sameYearJobs.length >= 5) {
+        result = sameYearJobs;
+        subtitleMode = "year";
+      } else if (result.length === 0) {
+        result = jobs.filter(j => j.coDate);
+        subtitleMode = "all";
+      }
       /* Helper: days between two date strings (null-safe) */
       const daysBetween = (a: string | null, b: string | null) => {
         if (!a || !b) return null;
@@ -435,7 +444,12 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         return Math.round(ms / 86400000);
       };
       title = `${detail.label}`;
-      subtitle = isFallback ? `${result.length} completed jobs (all — cohort empty)` : `${result.length} completed jobs`;
+      subtitle =
+        subtitleMode === "cohort"
+          ? `${result.length} completed jobs`
+          : subtitleMode === "year"
+            ? `${result.length} completed jobs (expanded to ${cohortYear} year sample)`
+            : `${result.length} completed jobs (all — cohort empty)`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
