@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
 import { getCostKPIs, getCostBreakdown, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
@@ -8,21 +9,7 @@ import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
 import SHAreaChart from "../SHAreaChart";
 
-/* Monthly budget vs actual trend data */
-const MONTHLY_TREND = [
-  { label: "Jan", value: 320000, value2: 350000 },
-  { label: "Feb", value: 380000, value2: 370000 },
-  { label: "Mar", value: 410000, value2: 400000 },
-  { label: "Apr", value: 450000, value2: 430000 },
-  { label: "May", value: 420000, value2: 440000 },
-  { label: "Jun", value: 480000, value2: 460000 },
-  { label: "Jul", value: 510000, value2: 490000 },
-  { label: "Aug", value: 470000, value2: 480000 },
-  { label: "Sep", value: 520000, value2: 500000 },
-  { label: "Oct", value: 490000, value2: 510000 },
-  { label: "Nov", value: 540000, value2: 520000 },
-  { label: "Dec", value: 530000, value2: 540000 },
-];
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 interface Props {
   jobs: SHJob[];
@@ -33,6 +20,18 @@ interface Props {
 export default function ConstructionCostTab({ jobs, onDrill }: Props) {
   const kpis = getCostKPIs(jobs);
   const breakdown = getCostBreakdown();
+  const monthlyTrend = useMemo(() => {
+    const buckets = MONTH_LABELS.map((label) => ({ label, value: 0, value2: 0, count: 0 }));
+    for (const job of jobs) {
+      const month = new Date(job.startDate).getMonth();
+      if (month < 0 || month > 11) continue;
+      buckets[month].value += job.actualCostToDate;
+      buckets[month].value2 += job.originalBudget;
+      buckets[month].count += 1;
+    }
+    return buckets;
+  }, [jobs]);
+
   return (
     <>
       <div className="sh-tab-header">
@@ -80,7 +79,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
       <div className="sh-panels-row">
         <SHPanel kicker="Trend" title="Budget vs. Actual Spend">
           <SHAreaChart
-            data={MONTHLY_TREND}
+            data={monthlyTrend}
             color="#14b8a6"
             color2="#3b82f6"
             label1="Actual"
@@ -91,6 +90,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
                 type: "cost-trend-month",
                 value: `month-${monthIndex + 1}`,
                 label: `Budget vs. Actual — ${month}`,
+                scopedJobCodes: jobs.map(j => j.jobCode),
               })
             }
           />

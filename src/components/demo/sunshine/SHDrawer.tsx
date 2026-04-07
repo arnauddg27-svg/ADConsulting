@@ -10,6 +10,7 @@ export interface DrillDetail {
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
+  scopedJobCodes?: string[]; // optional context scope to preserve filtered views
 }
 
 interface SHDrawerProps {
@@ -538,8 +539,10 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       } else {
         monthIdx = monthOrder.findIndex(m => m.toLowerCase() === detail.value.toLowerCase());
       }
+      const scopedSet = detail.scopedJobCodes ? new Set(detail.scopedJobCodes) : null;
+      const scopedJobs = scopedSet ? jobs.filter(j => scopedSet.has(j.jobCode)) : jobs;
       const monthlyJobs = monthIdx >= 0
-        ? jobs.filter(j => new Date(j.startDate).getMonth() === monthIdx)
+        ? scopedJobs.filter(j => new Date(j.startDate).getMonth() === monthIdx)
         : [];
       const result = [...monthlyJobs].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
