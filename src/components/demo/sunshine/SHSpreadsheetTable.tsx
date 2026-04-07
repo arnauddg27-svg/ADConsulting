@@ -34,14 +34,25 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
 
   const frozenColumns = normalizedColumns.filter((c) => c.frozen);
   const scrollColumns = normalizedColumns.filter((c) => !c.frozen);
-  const visibleRows = rows.slice(0, maxRows);
   const frozenWidth = frozenColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
   const scrollMinWidth = scrollColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
 
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const syncSourceRef = useRef<"left" | "right" | null>(null);
+
+  const filteredRows = rows.filter((row) =>
+    normalizedColumns.every((c) => {
+      const query = (columnFilters[c.key] ?? "").trim().toLowerCase();
+      if (!query) return true;
+      const value = row[c.key];
+      if (value === null || value === undefined) return false;
+      return String(value).toLowerCase().includes(query);
+    }),
+  );
+  const visibleRows = filteredRows.slice(0, maxRows);
 
   const syncVertical = (source: "left" | "right") => {
     const sourceEl = source === "left" ? leftRef.current : rightRef.current;
@@ -69,6 +80,32 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
       </div>
     );
   }
+
+  const headerContent = (c: SSColumn) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <span>{c.label}</span>
+      <input
+        value={columnFilters[c.key] ?? ""}
+        onChange={(e) => setColumnFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
+        placeholder="Filter..."
+        aria-label={`Filter ${c.label}`}
+        style={{
+          width: "100%",
+          height: 20,
+          borderRadius: 4,
+          border: "1px solid var(--sh-border)",
+          background: "var(--sh-bg-surface)",
+          color: "var(--sh-text-secondary)",
+          fontSize: 10,
+          fontWeight: 500,
+          padding: "0 6px",
+          textTransform: "none",
+          letterSpacing: "normal",
+          outline: "none",
+        }}
+      />
+    </div>
+  );
 
   return (
     <div
@@ -106,7 +143,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                       <th
                         key={c.key}
                         style={{
-                          padding: "6px 10px",
+                          padding: "5px 8px",
                           fontSize: 10,
                           fontWeight: 600,
                           letterSpacing: "0.06em",
@@ -126,7 +163,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                           boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
                         }}
                       >
-                        {c.label}
+                          {headerContent(c)}
                       </th>
                     );
                   })}
@@ -192,7 +229,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                     <th
                       key={c.key}
                       style={{
-                        padding: "6px 10px",
+                        padding: "5px 8px",
                         fontSize: 10,
                         fontWeight: 600,
                         letterSpacing: "0.06em",
@@ -210,7 +247,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                         borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
                       }}
                     >
-                      {c.label}
+                      {headerContent(c)}
                     </th>
                   ))}
                 </tr>
