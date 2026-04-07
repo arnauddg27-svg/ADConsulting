@@ -50,6 +50,34 @@
   z-index: 10;
 }
 
+.sh-dashboard[data-sh-mode="day"] {
+  --sh-bg-shell: #eef3f8;
+  --sh-bg-surface: #ffffff;
+  --sh-bg-surface-raised: #f6f9fc;
+  --sh-bg-hover: #e8f0f7;
+
+  --sh-text-primary: #0f1c2b;
+  --sh-text-secondary: #466078;
+  --sh-text-muted: #647f99;
+
+  --sh-accent: #0b9870;
+  --sh-accent-dim: rgba(11, 152, 112, 0.14);
+  --sh-warning: #b27a20;
+  --sh-warning-dim: rgba(178, 122, 32, 0.12);
+  --sh-danger: #c53d3d;
+  --sh-danger-dim: rgba(197, 61, 61, 0.1);
+
+  --sh-border: #ccdaea;
+  --sh-border-dim: rgba(32, 62, 94, 0.14);
+
+  --sh-chart-1: #0f766e;
+  --sh-chart-2: #0d9488;
+  --sh-chart-3: #14b8a6;
+  --sh-chart-4: #0891b2;
+  --sh-chart-5: #2563eb;
+  --sh-chart-6: #1d4ed8;
+}
+
 /* ── Shell Grid ── */
 .sh-shell {
   display: grid;
@@ -58,6 +86,18 @@
   min-height: 600px;
   max-height: 80vh;
   border: 1px solid var(--sh-border);
+}
+.sh-shell.sh-shell-fullpage {
+  position: fixed !important;
+  inset: 20px;
+  z-index: 120;
+  max-height: none;
+  min-height: 0;
+  height: calc(100vh - 40px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+.sh-dashboard[data-sh-mode="day"] .sh-shell.sh-shell-fullpage {
+  box-shadow: 0 20px 64px rgba(20, 42, 66, 0.2);
 }
 
 /* ── Top Bar ── */
@@ -87,6 +127,33 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--sh-accent);
+}
+.sh-bar-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.sh-bar-btn {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--sh-border);
+  background: var(--sh-bg-surface-raised);
+  color: var(--sh-text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.sh-bar-btn:hover {
+  color: var(--sh-text-primary);
+  border-color: color-mix(in srgb, var(--sh-accent) 40%, var(--sh-border));
+}
+.sh-bar-btn.active {
+  color: var(--sh-accent);
+  background: var(--sh-accent-dim);
+  border-color: color-mix(in srgb, var(--sh-accent) 50%, var(--sh-border));
 }
 .sh-bar-badge {
   font-size: 9px;
@@ -959,6 +1026,20 @@
 }
 
 @media (max-width: 768px) {
+  .sh-shell.sh-shell-fullpage {
+    inset: 8px;
+    height: calc(100vh - 16px);
+  }
+  .sh-bar {
+    padding: 0 10px;
+  }
+  .sh-bar-controls {
+    gap: 6px;
+  }
+  .sh-bar-btn {
+    padding: 5px 8px;
+    font-size: 9px;
+  }
   .sh-pipeline-board { grid-template-columns: repeat(2, 1fr); }
   .sh-ranked-bar { grid-template-columns: 100px 1fr 40px; }
 }

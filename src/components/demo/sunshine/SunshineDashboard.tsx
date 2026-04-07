@@ -59,11 +59,31 @@ export default function SunshineDashboard() {
   const [activeTab, setActiveTab] = useState<SHTab>("construction-dashboard");
   const [filters, setFilters] = useState<SHDashboardFilters>(EMPTY_FILTERS);
   const [drawerDetail, setDrawerDetail] = useState<DrillDetail | null>(null);
+  const [mode, setMode] = useState<"night" | "day">("night");
+  const [isFullPage, setIsFullPage] = useState(false);
 
   // Backward compatibility: if an old state points to the removed land-subdivisions tab, send users to land pipeline.
   useEffect(() => {
     if (activeTab === "land-subdivisions") setActiveTab("land-pipeline");
   }, [activeTab]);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("sh-mode");
+    if (saved === "day" || saved === "night") setMode(saved);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("sh-mode", mode);
+  }, [mode]);
+
+  useEffect(() => {
+    if (!isFullPage) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsFullPage(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isFullPage]);
 
   /* Filtered data */
   const filteredJobs = useMemo(() => jobs.filter(j => matchFilters(j, filters)), [filters]);
@@ -192,9 +212,14 @@ export default function SunshineDashboard() {
   };
 
   return (
-    <div className="sh-dashboard">
-      <div className="sh-shell" style={{ position: "relative" }}>
-        <ShellBar />
+    <div className="sh-dashboard" data-sh-mode={mode} data-sh-fullpage={isFullPage ? "true" : "false"}>
+      <div className={`sh-shell ${isFullPage ? "sh-shell-fullpage" : ""}`} style={{ position: "relative" }}>
+        <ShellBar
+          mode={mode}
+          isFullPage={isFullPage}
+          onToggleMode={() => setMode(prev => prev === "night" ? "day" : "night")}
+          onToggleFullPage={() => setIsFullPage(prev => !prev)}
+        />
         <FilterBar filters={filters} onChange={setFilters} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
