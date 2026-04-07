@@ -906,11 +906,17 @@ export function getSubdivisionKPIs(filteredSubs: SHSubdivision[]) {
 export function getCostKPIs(filteredJobs: SHJob[]) {
   const totalBudget = filteredJobs.reduce((s, j) => s + j.originalBudget, 0);
   const totalActual = filteredJobs.reduce((s, j) => s + j.actualCostToDate, 0);
-  const variance = totalActual - totalBudget;
+  // Apples-to-apples checkpoints:
+  // 1) To-date variance compares actual spend to earned budget by completion.
+  // 2) Forecast variance compares projected final to total original budget.
+  const budgetToDate = filteredJobs.reduce((s, j) => s + (j.originalBudget * (j.completionPct / 100)), 0);
+  const varianceToDate = totalActual - budgetToDate;
+  const forecastFinal = filteredJobs.reduce((s, j) => s + j.projectedFinalCost, 0);
+  const variance = forecastFinal - totalBudget;
   const avgMargin = filteredJobs.length
     ? filteredJobs.reduce((s, j) => s + j.marginPct, 0) / filteredJobs.length
     : 0;
-  return { totalBudget, totalActual, variance, avgMargin };
+  return { totalBudget, totalActual, budgetToDate, varianceToDate, forecastFinal, variance, avgMargin };
 }
 
 export function getCostBreakdown() {

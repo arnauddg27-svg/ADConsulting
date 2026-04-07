@@ -51,16 +51,17 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
         <SHKpiCard
           label="Total Actual"
           value={fmt$(kpis.totalActual)}
-          progress={Math.round((kpis.totalActual / kpis.totalBudget) * 100)}
-          sub={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% of budget`}
-          delta={`${Math.round((kpis.totalActual / kpis.totalBudget) * 100)}% drawn`}
+          progress={Math.round((kpis.totalActual / Math.max(kpis.budgetToDate, 1)) * 100)}
+          sub={`${Math.round((kpis.totalActual / Math.max(kpis.budgetToDate, 1)) * 100)}% of budget-to-date`}
+          delta={`${Math.round((kpis.totalActual / Math.max(kpis.totalBudget, 1)) * 100)}% of total budget`}
           deltaDir="neutral"
           onClick={() => onDrill({ type: "cost-category", value: "actual", label: "Total Actual — All Jobs" })}
         />
         <SHKpiCard
-          label="Variance"
+          label="Forecast Variance"
           value={fmt$(Math.abs(kpis.variance))}
-          delta={kpis.variance <= 0 ? "Under budget" : "Over budget"}
+          sub={`Projected final: ${fmt$(kpis.forecastFinal)}`}
+          delta={kpis.variance <= 0 ? "Forecast under budget" : "Forecast over budget"}
           deltaDir={kpis.variance <= 0 ? "up" : "down"}
           accent={kpis.variance <= 0 ? "#24c18d" : "#f46a6a"}
           sparkline={[1.2, -0.5, 0.8, -1.0, 0.3, -0.8, 0.5, -0.3, 0.2, Math.abs(kpis.variance / 1000)]}
