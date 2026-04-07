@@ -156,12 +156,17 @@ function generateJobs(): SHJob[] {
   const result: SHJob[] = [];
   let id = 1;
 
-  for (const comm of COMMUNITIES) {
+  // Uneven community volume distribution (total = 160) to avoid flat, identical bars.
+  const communityJobCounts = [24, 18, 22, 19, 17, 21, 23, 16];
+
+  for (let ci = 0; ci < COMMUNITIES.length; ci++) {
+    const comm = COMMUNITIES[ci];
     const meta = COMM_META[comm];
     const lot = LOT_COSTS[comm] ?? 42000;
     const commCode = (COMMUNITIES.indexOf(comm) + 1) * 1000;
+    const jobCount = communityJobCounts[ci] ?? 20;
 
-    for (let j = 0; j < 20; j++) {
+    for (let j = 0; j < jobCount; j++) {
       const jobNum = commCode + j + 1;
       const plan = pick(PLANS);
       const sup = pick(SUPERS);
