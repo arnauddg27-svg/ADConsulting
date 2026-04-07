@@ -10,9 +10,10 @@ interface Phase {
 
 interface SHCycleTimePipelineProps {
   phases: Phase[];
+  onPhaseClick?: (phase: string) => void;
 }
 
-export default function SHCycleTimePipeline({ phases }: SHCycleTimePipelineProps) {
+export default function SHCycleTimePipeline({ phases, onPhaseClick }: SHCycleTimePipelineProps) {
   const [hovered, setHovered] = useState<number | null>(null);
   const total = phases.reduce((s, p) => s + p.days, 0);
   if (total === 0) return null;
@@ -28,7 +29,13 @@ export default function SHCycleTimePipeline({ phases }: SHCycleTimePipelineProps
             <div
               key={p.phase}
               className="sh-cycle-segment"
-              style={{
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={onPhaseClick ? () => onPhaseClick(p.phase) : undefined}
+              role={onPhaseClick ? "button" : undefined}
+              tabIndex={onPhaseClick ? 0 : undefined}
+              onKeyDown={onPhaseClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPhaseClick(p.phase); } } : undefined}
+              style={{ cursor: onPhaseClick ? "pointer" : "default",
                 width: `${pct}%`,
                 background: `linear-gradient(180deg, ${p.color}, ${p.color}88)`,
                 boxShadow: isHovered ? `inset 0 0 20px rgba(255,255,255,0.15), 0 0 12px ${p.color}44` : "none",
@@ -36,8 +43,6 @@ export default function SHCycleTimePipeline({ phases }: SHCycleTimePipelineProps
                 transition: "all 0.2s ease",
                 position: "relative",
               }}
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
               title={`${p.phase}: ${p.days}d`}
             >
               {pct >= 12 ? `${p.days}d` : ""}

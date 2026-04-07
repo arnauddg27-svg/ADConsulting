@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "audit-cost";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -356,6 +356,63 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
       ];
       rows = superJobs as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cycle-metric": {
+      const completed = jobs.filter(j => j.coDate);
+      const inConstruction = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95);
+      let result = completed;
+      title = detail.label;
+      subtitle = `${completed.length} completed jobs`;
+
+      if (detail.value === "in-construction") {
+        result = inConstruction;
+        subtitle = `${inConstruction.length} active jobs`;
+      } else if (detail.value === "completions") {
+        result = completed;
+        subtitle = `${completed.length} CO jobs`;
+      }
+
+      columns = [
+        { key: "jobCode", label: "Job", width: "70px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "stage", label: "Stage", width: "85px", render: r => {
+          const s = String(r.stage);
+          return <SHPill tone={s === "Closing" ? "good" : s === "Permit" ? "watch" : "good"} label={s} />;
+        }},
+        { key: "startDate", label: "Start", width: "75px" },
+        { key: "coDate", label: "CO", width: "75px", render: r => String(r.coDate ?? "\u2014") },
+        { key: "totalCycleDays", label: "Cycle", width: "60px", align: "right", render: r => `${Math.round(Number(r.totalCycleDays))}d` },
+        { key: "completionPct", label: "Comp", width: "55px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+      ];
+      rows = result as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cycle-bucket": {
+      const completed = jobs.filter(j => j.coDate);
+      const inBucket = completed.filter(j => {
+        const d = Number(j.totalCycleDays);
+        if (detail.value === "< 200d") return d < 200;
+        if (detail.value === "200–250d") return d >= 200 && d <= 250;
+        if (detail.value === "250–300d") return d >= 250 && d <= 300;
+        if (detail.value === "300–350d") return d >= 300 && d <= 350;
+        if (detail.value === "> 350d") return d > 350;
+        return true;
+      });
+      title = detail.label;
+      subtitle = `${inBucket.length} completed jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "70px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "city", label: "City", width: "80px" },
+        { key: "startDate", label: "Start", width: "75px" },
+        { key: "coDate", label: "CO", width: "75px", render: r => String(r.coDate ?? "\u2014") },
+        { key: "totalCycleDays", label: "Cycle Days", width: "70px", align: "right", render: r => `${Math.round(Number(r.totalCycleDays))}d` },
+        { key: "marginPct", label: "Margin", width: "60px", align: "right", render: r => fmtPct(Number(r.marginPct)) },
+      ];
+      rows = inBucket as unknown as Record<string, unknown>[];
       break;
     }
 
