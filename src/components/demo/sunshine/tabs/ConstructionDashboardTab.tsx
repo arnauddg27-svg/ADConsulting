@@ -206,7 +206,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
@@ -226,7 +226,11 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             color="#14b8a6"
             label1="WIP ($M)"
             formatY={(v: number) => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "job", value: label, label: `WIP Trend — ${label}` })}
+            onPointClick={label => {
+              const m = label.match(/^Q([1-4])\s*'(\d{2})$/i);
+              const value = m ? `20${m[2]} Q${m[1]}` : label;
+              onDrill({ type: "cycle-time-cohort", value, label: `WIP Trend — ${label}` });
+            }}
           />
         </SHPanel>
         <SHPanel kicker="Mix" title="Jobs by Type">

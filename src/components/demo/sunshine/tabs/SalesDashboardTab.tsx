@@ -132,7 +132,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         <SHPanel kicker="City × Status" title="Sales CrossTab">
           <SHCrossTab
             {...crossTab}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sale-city-status", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sale-city-status", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "sale-status", value: col, label: col }); }}
           />
@@ -157,7 +157,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :

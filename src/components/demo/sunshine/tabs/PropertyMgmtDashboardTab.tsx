@@ -200,7 +200,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "pm-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :

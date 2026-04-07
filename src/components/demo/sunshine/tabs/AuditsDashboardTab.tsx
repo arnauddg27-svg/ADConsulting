@@ -148,7 +148,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
         }>
           <SHCrossTab
             {...communityTimeCross}
-            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "community", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "audits-community-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "community", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :

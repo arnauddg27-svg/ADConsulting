@@ -170,7 +170,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "loans-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :

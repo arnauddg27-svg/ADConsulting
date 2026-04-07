@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "construction-city-time" | "sales-city-time" | "loans-city-time" | "pm-city-time" | "audits-community-time";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -193,6 +193,24 @@ function parsePctRange(value: string): { min: number; max: number } | null {
   const plus = compact.match(/^(\d+(?:\.\d+)?)\%\+$/);
   if (plus) return { min: Number(plus[1]), max: Number.POSITIVE_INFINITY };
   return null;
+}
+
+function matchTimeToken(dateStr: string, token: string): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return false;
+  const t = token.trim();
+  if (/^\d{4}$/.test(t)) return d.getFullYear() === Number(t);
+  const q = t.match(/^Q([1-4])(?:\s*'?(\d{2,4}))?$/i);
+  if (q) {
+    const quarter = Number(q[1]);
+    const year = q[2] ? (Number(q[2]) < 100 ? 2000 + Number(q[2]) : Number(q[2])) : d.getFullYear();
+    const dq = Math.floor(d.getMonth() / 3) + 1;
+    return d.getFullYear() === year && dq === quarter;
+  }
+  if (/^\d{1,2}$/.test(t)) return d.getDate() === Number(t);
+  const shortMonth = d.toLocaleString("en-US", { month: "short" });
+  return shortMonth.toLowerCase() === t.toLowerCase();
 }
 
 /* ── Table renderer ──────────────────────────────────────────────── */
@@ -669,13 +687,30 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "land-city-year": {
-      const [city] = parsePipe(detail.value);
-      const matched = landDeals.filter(d => d.city === city);
+      const [city, token] = parsePipe(detail.value);
+      const matched = landDeals.filter(d => d.city === city && (!token || matchTimeToken(d.contractDate, token)));
       const result = matched.length > 0 ? matched : landDeals;
       title = detail.label;
       subtitle = `${result.length} land deals`;
       columns = landCols;
       rows = result as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "construction-city-time": {
+      const [city, token] = parsePipe(detail.value);
+      const matched = jobs.filter(j => j.city === city && (!token || matchTimeToken(j.startDate, token)));
+      title = detail.label;
+      subtitle = `${matched.length} construction jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "75px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "startDate", label: "Start", width: "80px" },
+        { key: "stage", label: "Stage", width: "95px" },
+        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+      ];
+      rows = matched as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -718,11 +753,11 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "permit-city-year": {
-      const [city, year] = parsePipe(detail.value);
+      const [city, token] = parsePipe(detail.value);
       const matched = permits.filter(p => {
         const cityMatch = p.city === city;
-        const yearMatch = year ? String(p.year) === year : true;
-        return cityMatch && yearMatch;
+        const timeMatch = token ? matchTimeToken(p.submittedDate, token) : true;
+        return cityMatch && timeMatch;
       });
       title = detail.label;
       subtitle = `${matched.length} permits`;
@@ -868,6 +903,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "loans-city-time": {
+      const [city, token] = parsePipe(detail.value);
+      const matched = loans.filter(l => l.city === city && (!token || matchTimeToken(l.startDate, token)));
+      title = detail.label;
+      subtitle = `${matched.length} loans`;
+      columns = loanCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     /* ═══════════════ SALES ═══════════════ */
 
     case "sale": {
@@ -945,6 +990,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         const statusMatch = status ? normStatus(s.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
       });
+      title = detail.label;
+      subtitle = `${matched.length} sales`;
+      columns = saleCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "sales-city-time": {
+      const [city, token] = parsePipe(detail.value);
+      const matched = sales.filter(s => s.city === city && (!token || matchTimeToken(s.contractDate, token)));
       title = detail.label;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
@@ -1062,6 +1117,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "pm-city-time": {
+      const [city, token] = parsePipe(detail.value);
+      const matched = propertyUnits.filter(u => u.city === city && (!token || matchTimeToken(u.leaseStart, token)));
+      title = detail.label;
+      subtitle = `${matched.length} units`;
+      columns = pmCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     /* ═══════════════ AUDITS ═══════════════ */
 
     case "audit-cost": {
@@ -1113,6 +1178,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       });
       title = detail.label;
       subtitle = `${matched.length} jobs`;
+      columns = auditCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "audits-community-time": {
+      const [community, token] = parsePipe(detail.value);
+      const matched = auditJobs.filter(a => a.community === community && (!token || matchTimeToken(a.startDate, token)));
+      title = detail.label;
+      subtitle = `${matched.length} audit jobs`;
       columns = auditCols;
       rows = matched as unknown as Record<string, unknown>[];
       break;

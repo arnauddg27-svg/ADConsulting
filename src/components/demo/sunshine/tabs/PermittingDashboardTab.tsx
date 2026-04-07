@@ -141,7 +141,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-year", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
@@ -154,7 +154,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
         <SHPanel kicker="Status" title="City x Permit Status">
           <SHCrossTab
             {...cityStatusCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-status", value: row, label: `${row} — ${col}` }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-status", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "permit-status", value: col, label: col }); }}
           />
