@@ -58,7 +58,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
                 const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
                 return cityCounty[String(r.city)] ?? "\u2014";
               }},
-              { key: "entity", label: "Entity", width: "150px", render: r => {
+              { key: "entity", label: "Entity", width: "160px", render: r => {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return job?.entity ?? "\u2014";
               }},
@@ -78,7 +78,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return fmt$(job?.wipBalance ?? 0);
               }},
-              { key: "lender", label: "Lender", width: "140px" },
+              { key: "lender", label: "Lender", width: "160px" },
               { key: "loanType", label: "Loan Type", width: "95px", render: r => {
                 const types = ["Construction", "Acquisition", "Bridge"];
                 return types[Number(r.id) % 3];
@@ -113,7 +113,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
                 return d.toISOString().slice(0, 10);
               }},
               { key: "drawRequests", label: "Draw Reqs", width: "70px", align: "right", render: r => 3 + (Number(r.id) % 6) },
-              { key: "lenderContact", label: "Lender Contact", width: "110px", render: r => {
+              { key: "lenderContact", label: "Lender Contact", width: "140px", render: r => {
                 const contacts = ["Tom Harris", "Linda Park", "Rick Stein", "Carol Wu", "Sam Diaz"];
                 return contacts[Number(r.id) % contacts.length];
               }},

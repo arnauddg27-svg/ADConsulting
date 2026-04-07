@@ -48,10 +48,10 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
                 const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
                 return cityCounty[String(r.city)] ?? "\u2014";
               }},
-              { key: "entity", label: "Entity", width: "150px" },
+              { key: "entity", label: "Entity", width: "160px" },
               { key: "plan", label: "Plan", width: "110px" },
-              { key: "buyer", label: "Buyer", width: "130px" },
-              { key: "agent", label: "Agent", width: "120px" },
+              { key: "buyer", label: "Buyer", width: "140px" },
+              { key: "agent", label: "Agent", width: "140px" },
               { key: "salePrice", label: "Price", width: "85px", align: "right", render: r => fmt$(Number(r.salePrice)) },
               { key: "contractDate", label: "Contract", width: "90px" },
               { key: "closingDate", label: "Closing", width: "90px", render: r => String(r.closingDate ?? "\u2014") },

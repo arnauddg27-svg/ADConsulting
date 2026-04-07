@@ -32,10 +32,10 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
                 const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
                 return cityCounty[String(r.city)] ?? "\u2014";
               }},
-              { key: "entity", label: "Entity", width: "150px" },
+              { key: "entity", label: "Entity", width: "160px" },
               { key: "bedsBaths", label: "Beds/Baths", width: "80px" },
               { key: "sqft", label: "SqFt", width: "70px", align: "right", render: r => fmtN(Number(r.sqft)) },
-              { key: "occupancy", label: "Status", width: "90px", render: r => {
+              { key: "occupancy", label: "Status", width: "120px", render: r => {
                 const s = String(r.occupancy);
                 const tone = s === "leased" ? "good" : s === "vacant" ? "watch" : s === "make-ready" ? "watch" : s === "notice-to-vacate" ? "watch" : "alert";
                 return <SHPill tone={tone} label={s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")} />;

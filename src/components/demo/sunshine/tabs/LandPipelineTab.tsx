@@ -61,32 +61,32 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
                 const v = Number(r.id) % 2 === 0;
                 return <SHPill tone={v ? "watch" : "good"} label={v ? "Yes" : "No"} />;
               }},
-              { key: "ddStatus", label: "DD Status", width: "90px", render: r => {
+              { key: "ddStatus", label: "DD Status", width: "105px", render: r => {
                 const statuses = ["Complete", "In Progress", "Pending"];
                 const s = statuses[Number(r.id) % 3];
                 return <SHPill tone={s === "Complete" ? "good" : s === "In Progress" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "soilTesting", label: "Soil Test", width: "85px", render: r => {
+              { key: "soilTesting", label: "Soil Test", width: "105px", render: r => {
                 const statuses = ["Pass", "In Progress", "Pending"];
                 const s = statuses[Number(r.id) % 3];
                 return <SHPill tone={s === "Pass" ? "good" : s === "In Progress" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "surveyStatus", label: "Survey", width: "80px", render: r => {
+              { key: "surveyStatus", label: "Survey", width: "100px", render: r => {
                 const statuses = ["Complete", "Scheduled", "Pending"];
                 const s = statuses[(Number(r.id) + 1) % 3];
                 return <SHPill tone={s === "Complete" ? "good" : s === "Scheduled" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "zoningStatus", label: "Zoning", width: "80px", render: r => {
+              { key: "zoningStatus", label: "Zoning", width: "100px", render: r => {
                 const statuses = ["Approved", "In Review", "Pending"];
                 const s = statuses[(Number(r.id) + 2) % 3];
                 return <SHPill tone={s === "Approved" ? "good" : s === "In Review" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "platStatus", label: "Plat", width: "80px", render: r => {
+              { key: "platStatus", label: "Plat", width: "100px", render: r => {
                 const statuses = ["Recorded", "Submitted", "Pending"];
                 const s = statuses[Number(r.id) % 3];
                 return <SHPill tone={s === "Recorded" ? "good" : s === "Submitted" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "seller", label: "Seller", width: "110px", render: r => {
+              { key: "seller", label: "Seller", width: "130px", render: r => {
                 const sellers = ["J. Morrison", "Lakewood Trust", "FL Land Group", "Carter Family", "Pine Valley LLC"];
                 return sellers[Number(r.id) % sellers.length];
               }},

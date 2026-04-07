@@ -56,21 +56,14 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
       maxHeight: 400,
     }}>
       <table style={{
-        width: "100%",
-        borderCollapse: "collapse",
+        borderCollapse: "separate",
+        borderSpacing: 0,
         fontSize: 11,
         color: "var(--sh-text-primary)",
-        tableLayout: "fixed",
         minWidth: columns.reduce((s, c) => s + widthToPx(c.width), 0),
       }}>
         <thead>
-          <tr style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 10,
-            background: "var(--sh-bg-surface-raised)",
-            borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
-          }}>
+          <tr>
             {columns.map((c, ci) => {
               const isLastFrozen = c.frozen && (ci === columns.length - 1 || !columns[ci + 1]?.frozen);
               return (
@@ -83,12 +76,16 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                   color: "var(--sh-text-muted)",
                   textAlign: c.align ?? "left",
                   whiteSpace: "nowrap",
-                  width: c.width,
-                  position: c.frozen ? "sticky" : undefined,
+                  minWidth: widthToPx(c.width),
+                  width: c.frozen ? c.width : undefined,
+                  position: "sticky",
+                  top: 0,
                   left: c.frozen ? offsets[ci] : undefined,
-                  zIndex: c.frozen ? 5 : undefined,
+                  zIndex: c.frozen ? 20 : 10,
                   background: "var(--sh-bg-surface-raised)",
+                  borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
                   borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
+                  boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
                 }}>
                   {c.label}
                 </th>
@@ -111,6 +108,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
             >
               {columns.map((c, ci) => {
                 const isLastFrozen = c.frozen && (ci === columns.length - 1 || !columns[ci + 1]?.frozen);
+                const rowBg = i % 2 === 0 ? "var(--sh-bg-surface)" : "var(--sh-bg-surface-raised)";
                 return (
                   <td key={c.key} style={{
                     padding: "5px 10px",
@@ -122,9 +120,10 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                     fontSize: c.mono ? 10 : undefined,
                     position: c.frozen ? "sticky" : undefined,
                     left: c.frozen ? offsets[ci] : undefined,
-                    zIndex: c.frozen ? 3 : undefined,
-                    background: c.frozen ? "var(--sh-bg-surface)" : undefined,
+                    zIndex: c.frozen ? 5 : undefined,
+                    background: c.frozen ? rowBg : undefined,
                     borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
+                    boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
                   }}>
                     {c.render ? c.render(row) : String(row[c.key] ?? "—")}
                   </td>

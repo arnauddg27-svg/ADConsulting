@@ -44,7 +44,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
                 const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
                 return cityCounty[String(r.city)] ?? "\u2014";
               }},
-              { key: "entity", label: "Entity", width: "150px", render: r => {
+              { key: "entity", label: "Entity", width: "160px", render: r => {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return job?.entity ?? "\u2014";
               }},
@@ -54,7 +54,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
               { key: "approvedDate", label: "Approved", width: "90px", render: r => String(r.approvedDate ?? "\u2014") },
               { key: "issuedDate", label: "Issued", width: "90px", render: r => String(r.issuedDate ?? "\u2014") },
               { key: "year", label: "Year", width: "60px", align: "right" },
-              { key: "status", label: "Status", width: "95px", render: r => {
+              { key: "status", label: "Status", width: "110px", render: r => {
                 const s = String(r.status);
                 const tone = s === "issued" ? "good" : s === "approved" ? "good" : s === "in-review" ? "watch" : s === "pending" ? "watch" : "alert";
                 return <SHPill tone={tone} label={s.replace("-", " ")} />;
@@ -63,7 +63,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return job?.plan ?? "\u2014";
               }},
-              { key: "superintendent", label: "Super", width: "100px", render: r => {
+              { key: "superintendent", label: "Super", width: "130px", render: r => {
                 const job = jobs.find(j => j.jobCode === String(r.jobCode));
                 return job?.superintendent ?? "\u2014";
               }},
