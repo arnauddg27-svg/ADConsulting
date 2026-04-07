@@ -174,7 +174,8 @@ function generateJobs(): SHJob[] {
       const completionPct = between(completionRanges[stageIdx][0], completionRanges[stageIdx][1]);
 
       const contractValue = between(380000, 620000);
-      const costRatio = 0.80 + rand() * 0.06;
+      // Gross margin band tuned to stay realistic for production builders (~10-18%).
+      const costRatio = 0.82 + rand() * 0.08;
       const estimatedCost = Math.round(contractValue * costRatio);
       const spentRatio = completionPct / 100;
       const actualCost = Math.round(estimatedCost * spentRatio * (0.95 + rand() * 0.1));
@@ -362,11 +363,23 @@ function generateLoans(): SHLoan[] {
   for (let i = 0; i < loanJobs.length; i++) {
     const job = loanJobs[i];
     const lender = pick(EXTRA_LENDERS);
-    const loanAmount = between(220000, 480000);
-    const drawPct = Math.round((rand() * 85 + 10) * 10) / 10; // 10-95%
+    // Loan principal tracks home value and stage profile rather than random flat bands.
+    const loanAmount = Math.round(job.contractValue * (0.52 + rand() * 0.24)); // 52-76% LTC/LTV band
+    // Draw progression follows construction completion with modest variance.
+    const drawTarget = job.completionPct * (0.88 + rand() * 0.16) + (job.stage === "Permit" ? -8 : 0);
+    const drawPct = Math.max(5, Math.min(97, Math.round(drawTarget * 10) / 10));
     const totalDrawn = Math.round(loanAmount * drawPct / 100);
     const interestRate = Math.round((5.50 + rand() * 2.5) * 100) / 100; // 5.50% to 8.00%
-    const daysUntilExpiration = between(-30, 365); // some already expired
+
+    // Expiration runway compresses as jobs move toward close.
+    let daysUntilExpiration: number;
+    if (job.stage === "Permit" || job.stage === "Foundation") daysUntilExpiration = between(220, 420);
+    else if (job.stage === "Framing" || job.stage === "MEP / Drywall") daysUntilExpiration = between(120, 300);
+    else if (job.stage === "Finishes") daysUntilExpiration = between(45, 180);
+    else daysUntilExpiration = between(15, 120); // Closing
+
+    if (job.completionPct >= 95) daysUntilExpiration = between(5, 75);
+
     const expDate = addDays("2026-03-25", daysUntilExpiration);
 
     result.push({
@@ -381,7 +394,7 @@ function generateLoans(): SHLoan[] {
       interestRate,
       startDate: job.startDate,
       expirationDate: expDate,
-      daysUntilExpiration: Math.max(0, daysUntilExpiration),
+      daysUntilExpiration,
       year: new Date(job.startDate).getFullYear(),
     });
   }
@@ -478,11 +491,21 @@ function generatePermits(): SHPermit[] {
     }
     if (rand() > 0.975) status = "rejected";
 
-    const daysInReview = status === "approved" || status === "issued"
+    let daysInReview = status === "approved" || status === "issued"
       ? between(7, 24)
       : status === "rejected"
         ? between(25, 60)
         : between(14, 45);
+
+    // Stage-aware tuning so permit aging aligns with job lifecycle narratives.
+    if (job.stage === "Permit") {
+      if (status === "pending" || status === "in-review") daysInReview = between(20, 52);
+      if (status === "approved" || status === "issued") daysInReview = between(12, 30);
+    } else if (job.stage === "Foundation" || job.stage === "Framing") {
+      if (status === "approved" || status === "issued") daysInReview = between(8, 22);
+    } else {
+      if (status === "issued") daysInReview = between(6, 18);
+    }
     const approvedDate = (status === "approved" || status === "issued") ? addDays(submittedDate, daysInReview) : null;
     const issuedDate = status === "issued" ? addDays(approvedDate!, between(3, 10)) : null;
     const year = new Date(submittedDate).getFullYear();
