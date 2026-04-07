@@ -136,6 +136,65 @@ function parsePipe(value: string): [string, string] {
   return [value.slice(0, idx), value.slice(idx + 1)];
 }
 
+function parseQuarterLabel(value: string): { year: number; quarter: number } | null {
+  const m = value.match(/Q([1-4])\s*'?(\d{2,4})/i);
+  if (!m) return null;
+  const quarter = Number(m[1]);
+  const yy = Number(m[2]);
+  const year = yy < 100 ? 2000 + yy : yy;
+  return { year, quarter };
+}
+
+function inQuarter(dateStr: string, year: number, quarter: number): boolean {
+  const d = new Date(dateStr);
+  const q = Math.floor(d.getMonth() / 3) + 1;
+  return d.getFullYear() === year && q === quarter;
+}
+
+function parseMoneyToken(token: string): number {
+  const clean = token.trim().replace(/\$/g, "").replace(/,/g, "");
+  const m = clean.match(/^(-?\d+(?:\.\d+)?)([kKmM])?$/);
+  if (!m) return Number(clean) || 0;
+  const base = Number(m[1]);
+  const mult = m[2]?.toLowerCase() === "m" ? 1_000_000 : m[2]?.toLowerCase() === "k" ? 1_000 : 1;
+  return base * mult;
+}
+
+function parseMoneyRange(value: string): { min: number; max: number } | null {
+  const compact = value.replace(/\s/g, "");
+  if (compact.includes("–") || compact.includes("-")) {
+    const parts = compact.split(/[–-]/).filter(Boolean);
+    if (parts.length >= 2) {
+      const min = parseMoneyToken(parts[0]);
+      const max = parseMoneyToken(parts[1]);
+      return { min: Math.min(min, max), max: Math.max(min, max) };
+    }
+  }
+  const lt = compact.match(/^<\$?([\d.,]+[kKmM]?)/);
+  if (lt) return { min: Number.NEGATIVE_INFINITY, max: parseMoneyToken(lt[1]) };
+  const gt = compact.match(/^\$?([\d.,]+[kKmM]?)\+$/);
+  if (gt) return { min: parseMoneyToken(gt[1]), max: Number.POSITIVE_INFINITY };
+  return null;
+}
+
+function parseDaysRange(value: string): { min: number; max: number } | null {
+  const compact = value.replace(/\s/g, "");
+  const range = compact.match(/^(\d+)[–-](\d+)d$/i);
+  if (range) return { min: Number(range[1]), max: Number(range[2]) };
+  const plus = compact.match(/^(\d+)d\+$/i);
+  if (plus) return { min: Number(plus[1]), max: Number.POSITIVE_INFINITY };
+  return null;
+}
+
+function parsePctRange(value: string): { min: number; max: number } | null {
+  const compact = value.replace(/\s/g, "");
+  const range = compact.match(/^(\d+(?:\.\d+)?)\%?[–-](\d+(?:\.\d+)?)\%?$/);
+  if (range) return { min: Number(range[1]), max: Number(range[2]) };
+  const plus = compact.match(/^(\d+(?:\.\d+)?)\%\+$/);
+  if (plus) return { min: Number(plus[1]), max: Number.POSITIVE_INFINITY };
+  return null;
+}
+
 /* ── Table renderer ──────────────────────────────────────────────── */
 
 function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
@@ -583,14 +642,29 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "land-metric": {
       title = detail.label;
-      subtitle = `${landDeals.length} land deals`;
+      let result = [...landDeals];
+      if (detail.value === "active-deals") {
+        result = result.filter(d => d.status === "under-contract");
+      } else if (detail.value === "total-lots") {
+        result = result.sort((a, b) => b.lots - a.lots);
+      } else if (detail.value === "invested") {
+        result = result.sort((a, b) => b.acquisitionCost - a.acquisitionCost);
+      } else if (detail.value === "avg-cost") {
+        result = result.sort((a, b) => b.costPerLot - a.costPerLot);
+      } else {
+        const moneyRange = parseMoneyRange(detail.value);
+        const quarter = parseQuarterLabel(detail.value);
+        if (moneyRange) {
+          result = result.filter(d => d.costPerLot >= moneyRange.min && d.costPerLot < moneyRange.max);
+        } else if (quarter) {
+          result = result.filter(d => inQuarter(d.contractDate, quarter.year, quarter.quarter));
+        } else {
+          result = result.sort((a, b) => b.acquisitionCost - a.acquisitionCost);
+        }
+      }
+      subtitle = `${result.length} land deals`;
       columns = landCols;
-      rows = [...landDeals].sort((a, b) => {
-        const key = detail.value as keyof SHLandDeal;
-        const av = typeof a[key] === "number" ? (a[key] as number) : 0;
-        const bv = typeof b[key] === "number" ? (b[key] as number) : 0;
-        return bv - av;
-      }) as unknown as Record<string, unknown>[];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -748,14 +822,29 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "loan-metric": {
       title = detail.label;
-      subtitle = `${loans.length} loans`;
+      let result = [...loans];
+      if (detail.value === "exposure") {
+        result = result.sort((a, b) => b.loanAmount - a.loanAmount);
+      } else if (detail.value === "drawn") {
+        result = result.sort((a, b) => b.totalDrawn - a.totalDrawn);
+      } else if (detail.value === "lenders") {
+        result = result.sort((a, b) => a.lender.localeCompare(b.lender));
+      } else if (detail.value === "expiring") {
+        result = result.filter(l => l.daysUntilExpiration <= 60).sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
+      } else {
+        const dayRange = parseDaysRange(detail.value);
+        const quarter = parseQuarterLabel(detail.value);
+        if (dayRange) {
+          result = result.filter(l => l.daysUntilExpiration >= dayRange.min && l.daysUntilExpiration <= dayRange.max);
+        } else if (quarter) {
+          result = result.filter(l => inQuarter(l.startDate, quarter.year, quarter.quarter));
+        } else {
+          result = result.sort((a, b) => b.loanAmount - a.loanAmount);
+        }
+      }
+      subtitle = `${result.length} loans`;
       columns = loanCols;
-      rows = [...loans].sort((a, b) => {
-        const key = detail.value as keyof SHLoan;
-        const av = typeof a[key] === "number" ? (a[key] as number) : 0;
-        const bv = typeof b[key] === "number" ? (b[key] as number) : 0;
-        return bv - av;
-      }) as unknown as Record<string, unknown>[];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -825,14 +914,27 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sale-metric": {
       title = detail.label;
-      subtitle = `${sales.length} sales`;
+      let result = [...sales];
+      if (detail.value === "total-sales") {
+        result = result.sort((a, b) => b.salePrice - a.salePrice);
+      } else if (detail.value === "total-value" || detail.value === "avg-price") {
+        result = result.sort((a, b) => b.salePrice - a.salePrice);
+      } else if (detail.value === "pending-close") {
+        result = result.filter(s => s.status === "pending" || s.status === "active");
+      } else {
+        const moneyRange = parseMoneyRange(detail.value);
+        const quarter = parseQuarterLabel(detail.value);
+        if (moneyRange) {
+          result = result.filter(s => s.salePrice >= moneyRange.min && s.salePrice < moneyRange.max);
+        } else if (quarter) {
+          result = result.filter(s => inQuarter(s.contractDate, quarter.year, quarter.quarter));
+        } else {
+          result = result.sort((a, b) => b.salePrice - a.salePrice);
+        }
+      }
+      subtitle = `${result.length} sales`;
       columns = saleCols;
-      rows = [...sales].sort((a, b) => {
-        const key = detail.value as keyof SHSale;
-        const av = typeof a[key] === "number" ? (a[key] as number) : 0;
-        const bv = typeof b[key] === "number" ? (b[key] as number) : 0;
-        return bv - av;
-      }) as unknown as Record<string, unknown>[];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -918,14 +1020,33 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "pm-metric": {
       title = detail.label;
-      subtitle = `${propertyUnits.length} units`;
+      let result = [...propertyUnits];
+      if (detail.value === "total-units") {
+        result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
+      } else if (detail.value === "occupancy") {
+        result = result.filter(u => u.occupancy === "leased");
+      } else if (detail.value === "revenue") {
+        result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
+      } else if (detail.value === "delinquent") {
+        result = result.filter(u => u.delinquentAmount > 0).sort((a, b) => b.delinquentAmount - a.delinquentAmount);
+      } else if (/^class\s+[abc]$/i.test(detail.value)) {
+        const cls = detail.value.trim().toUpperCase().slice(-1);
+        const classIndex = cls === "A" ? 1 : cls === "B" ? 2 : 0;
+        result = result.filter(u => Number(u.id) % 3 === classIndex);
+      } else {
+        const moneyRange = parseMoneyRange(detail.value);
+        const quarter = parseQuarterLabel(detail.value);
+        if (moneyRange) {
+          result = result.filter(u => u.monthlyRent >= moneyRange.min && u.monthlyRent < moneyRange.max);
+        } else if (quarter) {
+          result = result.filter(u => inQuarter(u.leaseStart, quarter.year, quarter.quarter));
+        } else {
+          result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
+        }
+      }
+      subtitle = `${result.length} units`;
       columns = pmCols;
-      rows = [...propertyUnits].sort((a, b) => {
-        const key = detail.value as keyof SHPropertyUnit;
-        const av = typeof a[key] === "number" ? (a[key] as number) : 0;
-        const bv = typeof b[key] === "number" ? (b[key] as number) : 0;
-        return bv - av;
-      }) as unknown as Record<string, unknown>[];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -945,9 +1066,37 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "audit-cost": {
       title = detail.label;
-      subtitle = `${auditJobs.length} jobs`;
+      let result = [...auditJobs];
+      if (detail.value === "audited-jobs") {
+        result = result.sort((a, b) => b.salePrice - a.salePrice);
+      } else if (detail.value === "total-revenue") {
+        result = result.sort((a, b) => b.salePrice - a.salePrice);
+      } else if (detail.value === "total-profit") {
+        result = result.sort((a, b) => b.netProfit - a.netProfit);
+      } else if (detail.value === "Vertical") {
+        result = result.sort((a, b) => b.vertical - a.vertical);
+      } else if (detail.value === "Lot / Land") {
+        result = result.sort((a, b) => b.lotLand - a.lotLand);
+      } else if (detail.value === "Site Work") {
+        result = result.sort((a, b) => b.siteWork - a.siteWork);
+      } else if (detail.value === "Permitting & Fees") {
+        result = result.sort((a, b) => (b.permitting + b.financing) - (a.permitting + a.financing));
+      } else if (detail.value === "Utilities & Infrastructure") {
+        result = result.sort((a, b) => (b.dirtPad + b.dumpsters + b.well + b.septic + b.waterFiltration) - (a.dirtPad + a.dumpsters + a.well + a.septic + a.waterFiltration));
+      } else if (detail.value === "Other") {
+        result = result.sort((a, b) => (b.insurance + b.closingCost + b.options + b.gopherTortoise + b.treeSurvey) - (a.insurance + a.closingCost + a.options + a.gopherTortoise + a.treeSurvey));
+      } else {
+        const pctRange = parsePctRange(detail.value);
+        const quarter = parseQuarterLabel(detail.value);
+        if (pctRange) {
+          result = result.filter(a => a.builderFeePct >= pctRange.min && a.builderFeePct <= pctRange.max);
+        } else if (quarter) {
+          result = result.filter(a => inQuarter(a.startDate, quarter.year, quarter.quarter));
+        }
+      }
+      subtitle = `${result.length} jobs`;
       columns = auditCols;
-      rows = auditJobs as unknown as Record<string, unknown>[];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -956,9 +1105,10 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         const m = a.netMargin;
         if (detail.value === "< 0%") return m < 0;
         if (detail.value === "0\u201310%") return m >= 0 && m < 10;
-        if (detail.value === "10\u201320%") return m >= 10 && m < 20;
-        if (detail.value === "20\u201330%") return m >= 20 && m < 30;
-        if (detail.value === "30%+") return m >= 30;
+        if (detail.value === "10\u201315%") return m >= 10 && m < 15;
+        if (detail.value === "15\u201320%") return m >= 15 && m < 20;
+        if (detail.value === "20%+") return m >= 20;
+        if (detail.value === "avg-margin") return true;
         return true;
       });
       title = detail.label;
