@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, Suspense, lazy } from "react";
+import { useState, useMemo, useCallback, Suspense, lazy, useEffect } from "react";
 import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
@@ -59,6 +59,11 @@ export default function SunshineDashboard() {
   const [activeTab, setActiveTab] = useState<SHTab>("construction-dashboard");
   const [filters, setFilters] = useState<SHDashboardFilters>(EMPTY_FILTERS);
   const [drawerDetail, setDrawerDetail] = useState<DrillDetail | null>(null);
+
+  // Backward compatibility: if an old state points to the removed land-subdivisions tab, send users to land pipeline.
+  useEffect(() => {
+    if (activeTab === "land-subdivisions") setActiveTab("land-pipeline");
+  }, [activeTab]);
 
   /* Filtered data */
   const filteredJobs = useMemo(() => jobs.filter(j => matchFilters(j, filters)), [filters]);
@@ -121,7 +126,7 @@ export default function SunshineDashboard() {
 
   const contextMeta = useMemo(() => {
     if (activeTab.startsWith("construction") && activeTab !== "construction-subdivisions") return { scopeLabel: "Construction Jobs", rows: filteredJobs.length };
-    if (activeTab === "construction-subdivisions" || activeTab === "land-subdivisions") return { scopeLabel: "Subdivision Portfolio", rows: filteredSubs.length };
+    if (activeTab === "construction-subdivisions") return { scopeLabel: "Subdivision Portfolio", rows: filteredSubs.length };
     if (activeTab.startsWith("sales")) return { scopeLabel: "Sales Contracts", rows: filteredSales.length };
     if (activeTab.startsWith("loans")) return { scopeLabel: "Construction Loans", rows: filteredLoans.length };
     if (activeTab.startsWith("land")) return { scopeLabel: "Land Deals", rows: filteredLand.length };
@@ -162,8 +167,6 @@ export default function SunshineDashboard() {
         return <LandDashboardTab deals={filteredLand} onCommunityClick={setCommunity} onCityClick={setCity} onTabChange={setActiveTab} onStatusClick={setStatus} onDrill={onDrill} drillYear={filters.drillYear} drillQuarter={filters.drillQuarter} drillMonth={filters.drillMonth} onYearClick={setDrillYear} onQuarterClick={setDrillQuarter} onMonthClick={setDrillMonth} />;
       case "land-pipeline":
         return <LandPipelineTab deals={filteredLand} onDrill={onDrill} />;
-      case "land-subdivisions":
-        return <SubdivisionPipelineTab subdivisions={filteredSubs} onDrill={onDrill} />;
 
       /* Permitting */
       case "permitting-dashboard":

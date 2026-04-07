@@ -34,7 +34,6 @@ export const SECTIONS: SHSectionDef[] = [
   { id: "land", label: "LAND", tabs: [
     { id: "land-dashboard",    label: "Dashboard" },
     { id: "land-pipeline",     label: "Pipeline" },
-    { id: "land-subdivisions", label: "Subdivisions" },
   ]},
   { id: "permitting", label: "PERMITTING", tabs: [
     { id: "permitting-dashboard", label: "Dashboard" },
