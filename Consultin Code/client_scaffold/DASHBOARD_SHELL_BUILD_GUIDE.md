@@ -456,7 +456,7 @@ Tabs in the lifecycle-based nav are **wrapper components** that compose one or m
 **Hard rule — applies to ALL sections (Land, Permitting, Loans, Construction, Sales, Property Mgmt, Audits):**
 
 - **Dashboard tabs** contain ONLY charts, KPI cards, and visual summaries (DonutChart, RankedBars, AreaChart, MultiLineChart, Histogram, StackedCycleBar, SparklineCards, CycleTimePipeline, CrossTab). **Never put CompactTable or SpreadsheetTable on a Dashboard tab.**
-- **Pipeline tabs** contain SpreadsheetTable (spreadsheet-style with fixed rows, frozen columns, sticky headers, per-column filters) for easy data navigation.
+- **Pipeline tabs** contain SpreadsheetTable (spreadsheet-style with fixed header row + frozen left columns) for easy data navigation.
 - **Exception:** Construction Pipeline uses a kanban board (PipelineBoard) — this is the only pipeline tab that is not spreadsheet-style.
 
 Cross-filtering on dashboard tabs:
@@ -490,12 +490,19 @@ Column definition format:
 ```
 
 Features:
-- Frozen first N columns (horizontal scroll doesn't affect them)
+- Frozen first N columns (horizontal scroll does not affect them)
 - Sticky header row
-- Per-column filter dropdowns (auto-generated from distinct values)
+- Safari-safe frozen panes via split layout (left frozen pane + right scroll pane, synced vertically)
 - Single-row formatting (conditional styling per row)
 - "Show all" toggle for rows beyond maxRows
 - Row alert highlighting (via `_alert` flag on row data)
+
+Implementation standard for frozen panes:
+- Prefer a two-pane structure for production reliability: one pane for frozen columns and one pane for scrollable columns.
+- Keep vertical scroll positions synchronized between panes.
+- Keep header cells sticky in both panes.
+- Apply explicit pixel widths to header and body cells (`minWidth`, `width`, `maxWidth`) to avoid Safari sticky width drift.
+- Use this pattern as the default when supporting Safari; only use single-table sticky columns if cross-browser behavior is verified.
 
 ### Pro Forma Settings
 
@@ -533,7 +540,7 @@ localStorage-based configurable defaults for audit P&L cards. Shared between Sal
 | Histogram | Custom histogram bars (inline JSX) | Dashboard tabs |
 | Phase bar chart | Custom vertical bars (inline JSX) | Dashboard tabs |
 | Gauge | `<KpiCard>` with a percentage value | Dashboard tabs |
-| Table / Roster | `SpreadsheetTable` (frozen cols, sticky headers) | **Pipeline tabs only** |
+| Table / Roster | `SpreadsheetTable` (frozen cols, sticky headers, split-pane freeze for Safari) | **Pipeline tabs only** |
 | Alert table | `compact-table` with danger styling | **Pipeline tabs only** |
 
 ### 3d: Build the DrillDownTable
@@ -893,7 +900,7 @@ The Audits and Sales Dashboard tabs share configurable defaults (contingency, co
 [ ] dashboard-shell.js rewritten with client-specific tabs
 [ ] Collapsible sidebar navigation working (expand/collapse sections)
 [ ] Global filters wired up (City, Job Type, Entity, Community)
-[ ] SpreadsheetTable configured for pipeline tabs only (frozen cols, sticky headers, column filters)
+[ ] SpreadsheetTable configured for pipeline tabs only (frozen cols + sticky headers)
 [ ] Dashboard tabs verified: charts and KPIs only — NO CompactTable or SpreadsheetTable
 [ ] Pro forma settings configured (if audit data available) -- plan x market pricing + cost defaults
 [ ] .env.local updated with client credentials and dataset names
@@ -903,7 +910,7 @@ The Audits and Sales Dashboard tabs share configurable defaults (contingency, co
 [ ] Error logging confirmed in catch block
 [ ] Drill-down drawer works on Construction Dashboard tab
 [ ] Clickable chart bars set global filters correctly
-[ ] SpreadsheetTable: frozen cols, sticky headers, column filters all work
+[ ] SpreadsheetTable: frozen cols + sticky headers verified in Safari and Chrome
 [ ] Rail stats show meaningful headline numbers
 [ ] Shell bar shows correct client name
 [ ] Dark and light themes both work
