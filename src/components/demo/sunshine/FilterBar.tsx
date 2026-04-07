@@ -18,6 +18,26 @@ const TIME_PERIODS: { value: SHTimePeriod; label: string }[] = [
 export default function FilterBar({ filters, onChange }: FilterBarProps) {
   const set = (key: keyof SHDashboardFilters, value: string | null) =>
     onChange({ ...filters, [key]: value });
+  const years = [2021, 2022, 2023, 2024, 2025, 2026];
+  const months = [
+    { value: 1, label: "Jan" }, { value: 2, label: "Feb" }, { value: 3, label: "Mar" },
+    { value: 4, label: "Apr" }, { value: 5, label: "May" }, { value: 6, label: "Jun" },
+    { value: 7, label: "Jul" }, { value: 8, label: "Aug" }, { value: 9, label: "Sep" },
+    { value: 10, label: "Oct" }, { value: 11, label: "Nov" }, { value: 12, label: "Dec" },
+  ];
+
+  const setYear = (value: string) => {
+    const year = value ? Number(value) : null;
+    onChange({ ...filters, drillYear: year, drillQuarter: null, drillMonth: null });
+  };
+  const setQuarter = (value: string) => {
+    const quarter = value ? Number(value) : null;
+    onChange({ ...filters, drillQuarter: quarter, drillMonth: null });
+  };
+  const setMonth = (value: string) => {
+    const month = value ? Number(value) : null;
+    onChange({ ...filters, drillMonth: month });
+  };
 
   const hasAny = filters.city || filters.entity || filters.community || filters.stage || filters.status || filters.drillYear || filters.drillQuarter || filters.drillMonth || filters.timePeriod !== "all";
 
@@ -57,6 +77,40 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
         <option value="">All Entities</option>
         {ENTITIES.map(e => (
           <option key={e} value={e}>{e}</option>
+        ))}
+      </select>
+
+      <select
+        className={`sh-filter-select ${filters.drillYear ? "active" : ""}`}
+        value={filters.drillYear ?? ""}
+        onChange={e => setYear(e.target.value)}
+      >
+        <option value="">All Years</option>
+        {years.map((year) => (
+          <option key={year} value={year}>{year}</option>
+        ))}
+      </select>
+
+      <select
+        className={`sh-filter-select ${filters.drillQuarter ? "active" : ""}`}
+        value={filters.drillQuarter ?? ""}
+        onChange={e => setQuarter(e.target.value)}
+      >
+        <option value="">All Quarters</option>
+        <option value="1">Q1</option>
+        <option value="2">Q2</option>
+        <option value="3">Q3</option>
+        <option value="4">Q4</option>
+      </select>
+
+      <select
+        className={`sh-filter-select ${filters.drillMonth ? "active" : ""}`}
+        value={filters.drillMonth ?? ""}
+        onChange={e => setMonth(e.target.value)}
+      >
+        <option value="">All Months</option>
+        {months.map((month) => (
+          <option key={month.value} value={month.value}>{month.label}</option>
         ))}
       </select>
 
