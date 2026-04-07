@@ -85,49 +85,83 @@ export default function AboutPage() {
       {/* ─── Hero ─── */}
       <section className="page-hero">
         <Container>
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Built for Builders</span>
-            <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              Construction-First Data Platform
-            </h1>
-            <p className="mt-6 text-lg leading-8 text-slate-300">
-              Most data consultants learn your industry on your dime. Our
-              founder came up through real estate development and residential
-              construction — then earned a Master&apos;s in data analytics
-              and built the technical platform to match.
-            </p>
+          <div className="mx-auto max-w-5xl">
+            <div className="grid items-center gap-10 lg:grid-cols-2">
+              <div>
+                <span className="eyebrow">Built for Builders</span>
+                <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
+                  Construction-First Data Platform
+                </h1>
+                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+                  Most data consultants learn your industry on your dime. Our
+                  founder came up through real estate development and residential
+                  construction — then earned a Master&apos;s in data analytics
+                  and built the technical platform to match.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {credentials.map((c) => (
+                  <div
+                    key={c.label}
+                    className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  >
+                    <div className="mt-0.5 shrink-0 text-accent-300">{c.icon}</div>
+                    <span className="text-sm leading-5 text-slate-300">{c.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* ─── Founder Origin ─── */}
+      {/* ─── Founder Origin — left/right split ─── */}
       <section className="section-space pt-0">
         <Container>
-          <div className="reveal mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Our Origin</span>
-            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Rooted in real estate &amp; construction
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
-              A.D. Homes &amp; Consulting was founded by Arnaud Durand — a
-              consultant whose career started in residential real estate
-              development and construction operations before moving into data
-              architecture. The firm exists because Arnaud lived inside the
-              builder lifecycle first, then built the technology to modernize it.
-            </p>
+          <div className="reveal mx-auto max-w-5xl">
+            <div className="grid gap-12 lg:grid-cols-2">
+              <div>
+                <span className="eyebrow">Our Origin</span>
+                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+                  Rooted in real estate &amp; construction
+                </h2>
+                <p className="mt-6 text-base leading-7 text-slate-400">
+                  A.D. Homes &amp; Consulting was founded by Arnaud Durand — a
+                  consultant whose career started in residential real estate
+                  development and construction operations before moving into data
+                  architecture. The firm exists because Arnaud lived inside the
+                  builder lifecycle first, then built the technology to modernize
+                  it.
+                </p>
+              </div>
+              <div>
+                <span className="eyebrow">Technical Foundation</span>
+                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+                  Construction meets data science
+                </h2>
+                <p className="mt-6 text-base leading-7 text-slate-400">
+                  Arnaud holds a Master&apos;s degree with a concentration in
+                  data analytics and technology management. That combination —
+                  hands-on construction and real estate experience plus
+                  graduate-level data training — is what sets the firm apart. We
+                  already understand cost-to-complete variance, absorption rates,
+                  and the metrics that drive a builder&apos;s P&amp;L.
+                </p>
+              </div>
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* ─── Founder Credentials ─── */}
+      {/* ─── Industry Experience — full-width badges ─── */}
       <section className="section-space">
         <Container>
-          <div className="reveal mx-auto max-w-3xl text-center">
+          <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow">Industry Experience</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Real estate &amp; construction background
+              What the founder brings from the field
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
               Before founding the firm, Arnaud&apos;s work spanned land
               acquisition, subdivision development, construction project
               management, builder financial reporting, and real estate
@@ -136,14 +170,16 @@ export default function AboutPage() {
               define homebuilder workflows.
             </p>
 
-            <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {credentials.map((c) => (
                 <div
                   key={c.label}
-                  className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  className="flex flex-col items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-5 text-center"
                 >
-                  <div className="mt-0.5 shrink-0 text-accent-300">{c.icon}</div>
-                  <span className="text-sm leading-5 text-slate-300">{c.label}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent-400/20 bg-accent-500/10 text-accent-300">
+                    {c.icon}
+                  </div>
+                  <span className="text-xs font-medium leading-4 text-slate-300">{c.label}</span>
                 </div>
               ))}
             </div>
@@ -151,47 +187,24 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Technical Training ─── */}
+      {/* ─── What You Get — full-width cards ─── */}
       <section className="section-space">
         <Container>
-          <div className="reveal mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Technical Foundation</span>
+          <div className="reveal mx-auto max-w-5xl">
+            <span className="eyebrow">What You Get</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Construction experience meets data science
+              A complete builder data platform
             </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
-              Arnaud holds a Master&apos;s degree with a concentration in data
-              analytics and technology management. That combination — hands-on
-              construction and real estate experience plus graduate-level data
-              training — is what sets the firm apart. We already understand
-              cost-to-complete variance, absorption rates, subdivision phasing,
-              and the metrics that drive a builder&apos;s P&amp;L.
+            <p className="mt-4 max-w-2xl text-base text-slate-400">
+              Every platform is structured around how builders actually
+              operate — not how a generic BI tool thinks they should. We cover
+              the full lifecycle from land acquisition to close-out audits.
             </p>
-          </div>
-        </Container>
-      </section>
 
-      {/* ─── What You Get ─── */}
-      <section className="section-space">
-        <Container>
-          <div className="reveal mx-auto max-w-4xl">
-            <div className="text-center">
-              <span className="eyebrow">What You Get</span>
-              <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                A complete builder data platform
-              </h2>
-              <p className="mx-auto mt-6 max-w-2xl text-base text-slate-400">
-                Every platform is structured around how builders actually
-                operate — not how a generic BI tool thinks they should. We
-                cover the full lifecycle from land acquisition to close-out
-                audits.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {pillars.map((p) => (
-                <div key={p.title} className="glow-card p-6 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
+                <div key={p.title} className="glow-card p-6">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
                     {p.icon}
                   </div>
                   <h3 className="mt-4 font-heading text-lg tracking-[-0.01em] text-slate-50">
@@ -205,18 +218,16 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Why Builders Choose Us ─── */}
+      {/* ─── Why Builders Choose Us — full-width cards ─── */}
       <section className="section-space">
         <Container>
-          <div className="reveal mx-auto max-w-4xl">
-            <div className="text-center">
-              <span className="eyebrow">The Advantage</span>
-              <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                Why builders choose us
-              </h2>
-            </div>
+          <div className="reveal mx-auto max-w-5xl">
+            <span className="eyebrow">The Advantage</span>
+            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+              Why builders choose us
+            </h2>
 
-            <div className="mt-12 grid gap-8 sm:grid-cols-3">
+            <div className="mt-10 grid gap-8 sm:grid-cols-3">
               {benefits.map((b) => (
                 <div key={b.title} className="flex flex-col">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent-400/20 bg-accent-500/10 text-accent-200">
@@ -233,101 +244,114 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Compared ─── */}
+      {/* ─── Compared — left heading, right table ─── */}
       <section className="section-space">
         <Container>
-          <div className="reveal mx-auto max-w-3xl">
-            <div className="text-center">
-              <span className="eyebrow">Comparison</span>
-              <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                Big firm vs. dedicated consultant
-              </h2>
-            </div>
-
-            <div className="mt-10 overflow-hidden rounded-2xl border border-white/[0.06]">
-              <div className="grid grid-cols-2 border-b border-white/[0.06] bg-white/[0.02]">
-                <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Typical Consulting Firm
-                </div>
-                <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
-                  A.D. Homes &amp; Consulting
-                </div>
+          <div className="reveal mx-auto max-w-5xl">
+            <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
+              <div>
+                <span className="eyebrow">Comparison</span>
+                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+                  Big firm vs. dedicated consultant
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-slate-400">
+                  Large consulting firms charge enterprise rates and staff your
+                  project with generalists. Here&apos;s how a dedicated,
+                  construction-experienced consultant compares.
+                </p>
               </div>
-              {compared.map((row, i) => (
-                <div
-                  key={i}
-                  className={`grid grid-cols-2 border-b border-white/[0.04] ${
-                    i % 2 === 0 ? "" : "bg-white/[0.015]"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-500">
-                    <span className="text-slate-600">&times;</span> {row.them}
+
+              <div className="overflow-hidden rounded-2xl border border-white/[0.06]">
+                <div className="grid grid-cols-2 border-b border-white/[0.06] bg-white/[0.02]">
+                  <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Typical Firm
                   </div>
-                  <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-200">
-                    <CheckCircle2 size={14} className="shrink-0 text-accent-400" /> {row.us}
+                  <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
+                    A.D. Homes &amp; Consulting
                   </div>
                 </div>
-              ))}
+                {compared.map((row, i) => (
+                  <div
+                    key={i}
+                    className={`grid grid-cols-2 border-b border-white/[0.04] ${
+                      i % 2 === 0 ? "" : "bg-white/[0.015]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-500">
+                      <span className="text-slate-600">&times;</span> {row.them}
+                    </div>
+                    <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-200">
+                      <CheckCircle2 size={14} className="shrink-0 text-accent-400" /> {row.us}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* ─── How It Works ─── */}
+      {/* ─── How It Works — left heading, right steps ─── */}
       <section className="section-space">
         <Container>
-          <div className="reveal mx-auto max-w-3xl">
-            <div className="text-center">
-              <span className="eyebrow">Process</span>
-              <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                From discovery call to production
-              </h2>
-            </div>
-
-            <div className="mt-12 space-y-8">
-              {[
-                {
-                  step: "01",
-                  title: "Discovery Call",
-                  desc: "We map your current systems — ERP, spreadsheets, accounting — and identify what construction and real estate data is available across your operation.",
-                },
-                {
-                  step: "02",
-                  title: "Architecture & Scope",
-                  desc: "You get a clear proposal scoped to your builder workflow: what gets built, what it costs, and when it ships.",
-                },
-                {
-                  step: "03",
-                  title: "Build & Deploy",
-                  desc: "Cloud warehouse, ETL pipelines, and interactive dashboards — structured around the builder lifecycle with weekly demos.",
-                },
-                {
-                  step: "04",
-                  title: "Handoff & Support",
-                  desc: "Everything deploys to your accounts. You own it all. Ongoing support is available but never required.",
-                },
-              ].map((s) => (
-                <div key={s.step} className="flex gap-6">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent-400/20 bg-accent-500/10 font-heading text-sm text-accent-300">
-                    {s.step}
-                  </div>
-                  <div>
-                    <h3 className="font-heading text-base tracking-[-0.01em] text-slate-50">
-                      {s.title}
-                    </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">{s.desc}</p>
-                  </div>
+          <div className="reveal mx-auto max-w-5xl">
+            <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
+              <div>
+                <span className="eyebrow">Process</span>
+                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+                  From discovery call to production
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-slate-400">
+                  Every engagement follows the same proven path — scoped to
+                  your operation, delivered incrementally, and fully owned by
+                  you at the end.
+                </p>
+                <div className="mt-8">
+                  <Link
+                    href="/contact/"
+                    className="btn-primary inline-flex items-center gap-2"
+                  >
+                    Book a Discovery Call <ArrowRight size={16} />
+                  </Link>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="mt-12 text-center">
-              <Link
-                href="/contact/"
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                Book a Discovery Call <ArrowRight size={16} />
-              </Link>
+              <div className="space-y-8">
+                {[
+                  {
+                    step: "01",
+                    title: "Discovery Call",
+                    desc: "We map your current systems — ERP, spreadsheets, accounting — and identify what construction and real estate data is available across your operation.",
+                  },
+                  {
+                    step: "02",
+                    title: "Architecture & Scope",
+                    desc: "You get a clear proposal scoped to your builder workflow: what gets built, what it costs, and when it ships.",
+                  },
+                  {
+                    step: "03",
+                    title: "Build & Deploy",
+                    desc: "Cloud warehouse, ETL pipelines, and interactive dashboards — structured around the builder lifecycle with weekly demos.",
+                  },
+                  {
+                    step: "04",
+                    title: "Handoff & Support",
+                    desc: "Everything deploys to your accounts. You own it all. Ongoing support is available but never required.",
+                  },
+                ].map((s) => (
+                  <div key={s.step} className="flex gap-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent-400/20 bg-accent-500/10 font-heading text-sm text-accent-300">
+                      {s.step}
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base tracking-[-0.01em] text-slate-50">
+                        {s.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-400">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Container>
