@@ -6,6 +6,7 @@ import { fmt$, fmtPct, jobs } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 function CompletionBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? "#14b8a6" : pct >= 50 ? "#22d3ee" : pct >= 25 ? "#3b82f6" : "#5a6b7e";
@@ -28,6 +29,9 @@ interface Props {
 
 export default function SalesPipelineTab({ sales, onDrill }: Props) {
   const sortedSales = [...sales].sort((a, b) => b.contractDate.localeCompare(a.contractDate));
+  const cancelled = sales.filter(s => s.status === "cancelled").length;
+  const agingPending = sales.filter(s => s.status === "pending" && Math.round((new Date("2026-03-25").getTime() - new Date(s.contractDate).getTime()) / 86400000) > 120).length;
+  const staleActive = sales.filter(s => s.status === "active" && Math.round((new Date("2026-03-25").getTime() - new Date(s.contractDate).getTime()) / 86400000) > 180).length;
 
   return (
     <>
@@ -36,6 +40,14 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
         <h2 className="sh-tab-title">Pipeline</h2>
         <p className="sh-tab-desc">Full sales roster with contract details, financing, and closing status. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "Pending > 120d", value: String(agingPending), tone: agingPending >= 8 ? "alert" : agingPending >= 4 ? "watch" : "good" },
+          { label: "Cancelled Contracts", value: String(cancelled), tone: cancelled >= 6 ? "alert" : cancelled >= 3 ? "watch" : "good" },
+          { label: "Active > 180d", value: String(staleActive), tone: staleActive >= 10 ? "alert" : staleActive >= 5 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Full Sales Roster">

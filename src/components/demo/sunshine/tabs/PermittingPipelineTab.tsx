@@ -6,6 +6,7 @@ import { jobs } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 function CompletionBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? "#14b8a6" : pct >= 50 ? "#22d3ee" : pct >= 25 ? "#3b82f6" : "#5a6b7e";
@@ -25,6 +26,10 @@ interface Props {
 }
 
 export default function PermittingPipelineTab({ permits, onDrill }: Props) {
+  const longReview = permits.filter(p => (p.status === "in-review" || p.status === "pending") && p.daysInReview > 30).length;
+  const rejected = permits.filter(p => p.status === "rejected").length;
+  const pending = permits.filter(p => p.status === "pending").length;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -32,6 +37,14 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
         <h2 className="sh-tab-title">Pipeline</h2>
         <p className="sh-tab-desc">Full permit roster with status, cycle times, and environmental flags. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "In Review > 30d", value: String(longReview), tone: longReview >= 12 ? "alert" : longReview >= 6 ? "watch" : "good" },
+          { label: "Rejected Permits", value: String(rejected), tone: rejected >= 6 ? "alert" : rejected >= 3 ? "watch" : "good" },
+          { label: "Pending Queue", value: String(pending), tone: pending >= 18 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Full Permit Roster">

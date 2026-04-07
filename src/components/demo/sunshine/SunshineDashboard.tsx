@@ -7,6 +7,7 @@ import RailNav from "./RailNav";
 import FilterBar from "./FilterBar";
 import SHBreadcrumb from "./SHBreadcrumb";
 import SHDrawer from "./SHDrawer";
+import SHDataContextStrip from "./SHDataContextStrip";
 import type { DrillDetail } from "./SHDrawer";
 import {
   jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs,
@@ -103,6 +104,33 @@ export default function SunshineDashboard() {
   const onDrill = useCallback((detail: DrillDetail) => setDrawerDetail(detail), []);
   const closeDrawer = useCallback(() => setDrawerDetail(null), []);
 
+  const filterCount = useMemo(() => {
+    let n = 0;
+    if (filters.city) n++;
+    if (filters.jobType) n++;
+    if (filters.entity) n++;
+    if (filters.community) n++;
+    if (filters.stage) n++;
+    if (filters.status) n++;
+    if (filters.drillYear) n++;
+    if (filters.drillQuarter) n++;
+    if (filters.drillMonth) n++;
+    if (filters.timePeriod !== "all") n++;
+    return n;
+  }, [filters]);
+
+  const contextMeta = useMemo(() => {
+    if (activeTab.startsWith("construction") && activeTab !== "construction-subdivisions") return { scopeLabel: "Construction Jobs", rows: filteredJobs.length };
+    if (activeTab === "construction-subdivisions" || activeTab === "land-subdivisions") return { scopeLabel: "Subdivision Portfolio", rows: filteredSubs.length };
+    if (activeTab.startsWith("sales")) return { scopeLabel: "Sales Contracts", rows: filteredSales.length };
+    if (activeTab.startsWith("loans")) return { scopeLabel: "Construction Loans", rows: filteredLoans.length };
+    if (activeTab.startsWith("land")) return { scopeLabel: "Land Deals", rows: filteredLand.length };
+    if (activeTab.startsWith("permitting")) return { scopeLabel: "Permit Records", rows: filteredPermits.length };
+    if (activeTab.startsWith("pm")) return { scopeLabel: "Property Units", rows: filteredUnits.length };
+    if (activeTab.startsWith("audits")) return { scopeLabel: "Audit Jobs", rows: filteredAudits.length };
+    return { scopeLabel: "Dashboard Data", rows: 0 };
+  }, [activeTab, filteredAudits.length, filteredJobs.length, filteredLand.length, filteredLoans.length, filteredPermits.length, filteredSales.length, filteredSubs.length, filteredUnits.length]);
+
   const tabContent = () => {
     switch (activeTab) {
       /* Construction */
@@ -168,6 +196,7 @@ export default function SunshineDashboard() {
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
           <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
+          <SHDataContextStrip scopeLabel={contextMeta.scopeLabel} rows={contextMeta.rows} filterCount={filterCount} />
           <Suspense fallback={<TabLoader />}>
             {tabContent()}
           </Suspense>

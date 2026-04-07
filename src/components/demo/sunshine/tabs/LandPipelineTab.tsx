@@ -6,6 +6,7 @@ import { fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 interface Props {
   deals: SHLandDeal[];
@@ -13,6 +14,14 @@ interface Props {
 }
 
 export default function LandPipelineTab({ deals, onDrill }: Props) {
+  const cancelled = deals.filter(d => d.status === "cancelled").length;
+  const agingUnderContract = deals.filter(d => d.status === "under-contract" && Math.round((new Date("2026-03-25").getTime() - new Date(d.contractDate).getTime()) / 86400000) > 120).length;
+  const lowYield = deals.filter(d => {
+    const rev = d.lots * 480000;
+    const roi = d.acquisitionCost > 0 ? ((rev - d.acquisitionCost) / d.acquisitionCost) * 100 : 0;
+    return roi < 900;
+  }).length;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -20,6 +29,14 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
         <h2 className="sh-tab-title">Pipeline</h2>
         <p className="sh-tab-desc">Full deal roster with acquisition details, due diligence status, and financials. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "Under Contract > 120d", value: String(agingUnderContract), tone: agingUnderContract >= 4 ? "alert" : agingUnderContract >= 2 ? "watch" : "good" },
+          { label: "Cancelled Deals", value: String(cancelled), tone: cancelled >= 3 ? "alert" : cancelled >= 1 ? "watch" : "good" },
+          { label: "Low Yield Parcels", value: String(lowYield), tone: lowYield >= 6 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Full Deal Roster">

@@ -6,6 +6,7 @@ import { fmt$, fmtPct, jobs, sales } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 function CompletionBar({ pct }: { pct: number }) {
   const color = pct >= 80 ? "#14b8a6" : pct >= 50 ? "#22d3ee" : pct >= 25 ? "#3b82f6" : "#5a6b7e";
@@ -38,6 +39,9 @@ interface Props {
 
 export default function LoansPipelineTab({ loans, onDrill }: Props) {
   const sortedLoans = [...loans].sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
+  const expiring60 = loans.filter(l => l.daysUntilExpiration <= 60).length;
+  const highRate = loans.filter(l => l.interestRate >= 7.25).length;
+  const drawOver85 = loans.filter(l => l.drawPct >= 85).length;
 
   return (
     <>
@@ -46,6 +50,14 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
         <h2 className="sh-tab-title">Pipeline</h2>
         <p className="sh-tab-desc">Full loan roster with draw progress, rates, and expiration tracking. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "Expiring < 60d", value: String(expiring60), tone: expiring60 >= 12 ? "alert" : expiring60 >= 6 ? "watch" : "good" },
+          { label: "Rate >= 7.25%", value: String(highRate), tone: highRate >= 20 ? "alert" : highRate >= 10 ? "watch" : "good" },
+          { label: "Draw >= 85%", value: String(drawOver85), tone: drawOver85 >= 24 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Full Loan Roster">

@@ -6,6 +6,7 @@ import { fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 interface Props {
   audits: SHAuditJob[];
@@ -13,6 +14,10 @@ interface Props {
 }
 
 export default function AuditsPipelineTab({ audits, onDrill }: Props) {
+  const negativeMargin = audits.filter(a => a.netMargin < 0).length;
+  const lowMargin = audits.filter(a => a.netMargin >= 0 && a.netMargin < 10).length;
+  const highContingency = audits.filter(a => a.contingency > 3500).length;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -20,6 +25,14 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
         <h2 className="sh-tab-title">Per-Job P&L Audits</h2>
         <p className="sh-tab-desc">Detailed cost breakdown for every audited job. Click any row for full pro forma detail.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "Negative Margin Jobs", value: String(negativeMargin), tone: negativeMargin >= 5 ? "alert" : negativeMargin >= 2 ? "watch" : "good" },
+          { label: "Low Margin (<10%)", value: String(lowMargin), tone: lowMargin >= 12 ? "watch" : "good" },
+          { label: "High Contingency", value: String(highContingency), tone: highContingency >= 14 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="PL-02" title="Per-Job Pro Forma P&L">

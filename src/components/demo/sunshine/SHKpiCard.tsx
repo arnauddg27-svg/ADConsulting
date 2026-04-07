@@ -12,6 +12,8 @@ interface SHKpiCardProps {
   progress?: number;
   /** Array of 8-12 numbers for mini sparkline */
   sparkline?: number[];
+  /** Standard guardrail tone for consistent KPI coloring */
+  tone?: "good" | "watch" | "alert";
 }
 
 /** Mini SVG sparkline */
@@ -40,8 +42,9 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, onClick, progress, sparkline }: SHKpiCardProps) {
-  const accentColor = accent ?? "var(--sh-accent)";
+export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, onClick, progress, sparkline, tone }: SHKpiCardProps) {
+  const toneColor = tone === "alert" ? "#f46a6a" : tone === "watch" ? "#efb562" : tone === "good" ? "#14b8a6" : undefined;
+  const accentColor = accent ?? toneColor ?? "var(--sh-accent)";
   return (
     <div
       className={`sh-kpi-card ${onClick ? "clickable" : ""}`}

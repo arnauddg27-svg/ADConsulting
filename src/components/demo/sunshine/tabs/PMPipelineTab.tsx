@@ -6,6 +6,7 @@ import { fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 interface Props {
   units: SHPropertyUnit[];
@@ -13,6 +14,10 @@ interface Props {
 }
 
 export default function PMPipelineTab({ units, onDrill }: Props) {
+  const delinquent = units.filter(u => u.delinquentAmount > 0).length;
+  const vacantOrTurn = units.filter(u => u.occupancy === "vacant" || u.occupancy === "make-ready").length;
+  const seriousLate = units.filter(u => u.daysPastDue >= 30).length;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -20,6 +25,14 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
         <h2 className="sh-tab-title">Pipeline</h2>
         <p className="sh-tab-desc">Full property roster with occupancy, financials, and maintenance details. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "Delinquent Units", value: String(delinquent), tone: delinquent >= 10 ? "alert" : delinquent >= 5 ? "watch" : "good" },
+          { label: "Vacant / Turn Units", value: String(vacantOrTurn), tone: vacantOrTurn >= 12 ? "watch" : "good" },
+          { label: "30+ Days Late", value: String(seriousLate), tone: seriousLate >= 6 ? "alert" : seriousLate >= 3 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Full Property Roster">
