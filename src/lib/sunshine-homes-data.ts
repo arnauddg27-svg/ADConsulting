@@ -1231,7 +1231,7 @@ function generateAuditJobs(): SHAuditJob[] {
     const lotLand = job.lotCost;
     const permitting = rng.between(12000, 22000);
     const siteWork = rng.between(14000, 28000);
-    const vertical = rng.between(155000, 195000);
+    let vertical = rng.between(190000, 250000);
     const options = rng.between(2000, 12000);
     const dirtPad = rng.between(2500, 8000);
     const dumpsters = rng.between(3000, 5500);
@@ -1243,13 +1243,29 @@ function generateAuditJobs(): SHAuditJob[] {
     const waterFiltration = rng.between(1395, 3500);
     const gopherTortoise = rng.between(0, 300);
     const treeSurvey = rng.between(200, 350);
-    const builderFeePct = rng.between(5, 8) / 100;
-
-    const totalDirect = lotLand + permitting + siteWork + vertical + options + dirtPad + dumpsters + well + septic + waterFiltration + gopherTortoise + treeSurvey;
-    const totalIndirect = financing + insurance + closingCost;
-    const totalCost = totalDirect + totalIndirect;
+    const builderFeePct = rng.between(4, 6) / 100;
     const contingency = rng.between(1000, 5000);
     const builderFee = Math.round(salePrice * builderFeePct);
+
+    // Target realistic residential builder net margin band with occasional outliers.
+    const marginRoll = rng.rand();
+    const targetNetMarginPct =
+      marginRoll < 0.08 ? rng.between(-2, 3) / 100 :   // a few weak/breakeven jobs
+      marginRoll < 0.25 ? rng.between(4, 8) / 100 :    // lower-margin jobs
+      marginRoll < 0.90 ? rng.between(9, 16) / 100 :   // typical operating band
+      rng.between(17, 20) / 100;                       // a few stronger jobs
+
+    const nonVerticalDirect = lotLand + permitting + siteWork + options + dirtPad + dumpsters + well + septic + waterFiltration + gopherTortoise + treeSurvey;
+    const totalIndirect = financing + insurance + closingCost;
+
+    const desiredNetProfit = Math.round(salePrice * targetNetMarginPct);
+    const desiredTotalCost = Math.round(salePrice - contingency - builderFee - desiredNetProfit);
+    const solvedVertical = desiredTotalCost - (nonVerticalDirect + totalIndirect);
+    // Keep vertical cost in realistic bounds, but close to the solved target.
+    vertical = Math.max(170000, Math.min(320000, solvedVertical));
+
+    const totalDirect = nonVerticalDirect + vertical;
+    const totalCost = totalDirect + totalIndirect;
     const commissionPct = 0.05;
     const commission = Math.round(salePrice * commissionPct);
     const closingFee = 1500;
