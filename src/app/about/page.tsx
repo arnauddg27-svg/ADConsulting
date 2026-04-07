@@ -25,6 +25,15 @@ export const metadata: Metadata = {
     "Founded by a real estate developer turned data architect. A.D. Homes & Consulting builds custom cloud data platforms for residential homebuilders — with firsthand construction experience behind every engagement.",
 };
 
+const credentials = [
+  { icon: <HardHat size={18} />, label: "Residential construction operations" },
+  { icon: <Home size={18} />, label: "Real estate development lifecycle" },
+  { icon: <MapPin size={18} />, label: "Land acquisition & entitlement" },
+  { icon: <Landmark size={18} />, label: "Construction lending & draws" },
+  { icon: <Building2 size={18} />, label: "Subdivision development & lot delivery" },
+  { icon: <TrendingUp size={18} />, label: "Builder financial reporting & audits" },
+];
+
 const pillars = [
   {
     icon: <Database size={22} />,
@@ -40,33 +49,6 @@ const pillars = [
     icon: <BarChart3 size={22} />,
     title: "Builder Operations Analytics",
     desc: "KPI modeling, cost-to-complete tracking, cycle-time analysis, and pro forma tools that span land acquisition through close-out.",
-  },
-];
-
-const credentials = [
-  {
-    icon: <HardHat size={18} />,
-    label: "Residential construction operations",
-  },
-  {
-    icon: <Home size={18} />,
-    label: "Real estate development lifecycle",
-  },
-  {
-    icon: <MapPin size={18} />,
-    label: "Land acquisition & entitlement",
-  },
-  {
-    icon: <Landmark size={18} />,
-    label: "Construction lending & draw management",
-  },
-  {
-    icon: <Building2 size={18} />,
-    label: "Subdivision development & lot delivery",
-  },
-  {
-    icon: <TrendingUp size={18} />,
-    label: "Builder financial reporting & audits",
   },
 ];
 
@@ -106,56 +88,53 @@ export default function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">Built for Builders</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              Data Infrastructure by Someone Who Knows Construction
+              Construction-First Data Platform
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
               Most data consultants learn your industry on your dime. Our
               founder came up through real estate development and residential
-              construction — then earned a Master&apos;s in data analytics and
-              built the technical platform to match. You get a consultant who
-              already speaks builder.
+              construction — then earned a Master&apos;s in data analytics
+              and built the technical platform to match.
             </p>
           </div>
         </Container>
       </section>
 
-      {/* ─── Founder Background ─── */}
+      {/* ─── Founder Origin ─── */}
       <section className="section-space pt-0">
         <Container>
-          <div className="reveal mx-auto max-w-3xl">
-            <div className="text-center">
-              <span className="eyebrow">Our Background</span>
-              <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                Rooted in real estate &amp; construction
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                A.D. Homes &amp; Consulting was founded by Arnaud Durand — a
-                consultant whose career started in residential real estate
-                development and construction operations before moving into
-                data architecture. That trajectory matters: the firm exists
-                because Arnaud lived inside the builder lifecycle first, then
-                built the technology to modernize it.
-              </p>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                Arnaud holds a Master&apos;s degree with a concentration in
-                data analytics and technology management. Before founding the
-                firm, his work spanned land acquisition, subdivision
-                development, construction project management, builder
-                financial reporting, and real estate operations — giving him
-                firsthand exposure to the ERP systems, draw processes, permit
-                timelines, and cost structures that define homebuilder
-                workflows.
-              </p>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                That combination — hands-on construction and real estate
-                experience plus graduate-level data and technology
-                training — is what makes the firm different. We don&apos;t
-                start from a blank whiteboard. We already understand
-                cost-to-complete variance, absorption rates, subdivision
-                phasing, and the dozens of operational metrics that drive a
-                builder&apos;s P&amp;L.
-              </p>
-            </div>
+          <div className="reveal mx-auto max-w-3xl text-center">
+            <span className="eyebrow">Our Origin</span>
+            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+              Rooted in real estate &amp; construction
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
+              A.D. Homes &amp; Consulting was founded by Arnaud Durand — a
+              consultant whose career started in residential real estate
+              development and construction operations before moving into data
+              architecture. The firm exists because Arnaud lived inside the
+              builder lifecycle first, then built the technology to modernize it.
+            </p>
+          </div>
+        </Container>
+      </section>
+
+      {/* ─── Founder Credentials ─── */}
+      <section className="section-space">
+        <Container>
+          <div className="reveal mx-auto max-w-3xl text-center">
+            <span className="eyebrow">Industry Experience</span>
+            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+              Real estate &amp; construction background
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
+              Before founding the firm, Arnaud&apos;s work spanned land
+              acquisition, subdivision development, construction project
+              management, builder financial reporting, and real estate
+              operations — giving him firsthand exposure to the ERP systems,
+              draw processes, permit timelines, and cost structures that
+              define homebuilder workflows.
+            </p>
 
             <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-3">
               {credentials.map((c) => (
@@ -172,6 +151,26 @@ export default function AboutPage() {
         </Container>
       </section>
 
+      {/* ─── Technical Training ─── */}
+      <section className="section-space">
+        <Container>
+          <div className="reveal mx-auto max-w-3xl text-center">
+            <span className="eyebrow">Technical Foundation</span>
+            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
+              Construction experience meets data science
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400">
+              Arnaud holds a Master&apos;s degree with a concentration in data
+              analytics and technology management. That combination — hands-on
+              construction and real estate experience plus graduate-level data
+              training — is what sets the firm apart. We already understand
+              cost-to-complete variance, absorption rates, subdivision phasing,
+              and the metrics that drive a builder&apos;s P&amp;L.
+            </p>
+          </div>
+        </Container>
+      </section>
+
       {/* ─── What You Get ─── */}
       <section className="section-space">
         <Container>
@@ -179,14 +178,13 @@ export default function AboutPage() {
             <div className="text-center">
               <span className="eyebrow">What You Get</span>
               <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                A complete data platform — one dedicated consultant
+                A complete builder data platform
               </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-base text-slate-400">
-                Because the founder&apos;s career started in construction and
-                real estate, every platform we build is structured around how
-                builders actually operate — not how a generic BI tool thinks
-                they should. We cover the full lifecycle from land acquisition
-                to close-out audits.
+              <p className="mx-auto mt-6 max-w-2xl text-base text-slate-400">
+                Every platform is structured around how builders actually
+                operate — not how a generic BI tool thinks they should. We
+                cover the full lifecycle from land acquisition to close-out
+                audits.
               </p>
             </div>
 
@@ -207,7 +205,7 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ─── Why a Personal Consultant ─── */}
+      {/* ─── Why Builders Choose Us ─── */}
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-4xl">
@@ -296,12 +294,12 @@ export default function AboutPage() {
                 {
                   step: "02",
                   title: "Architecture & Scope",
-                  desc: "You get a clear proposal scoped to your builder workflow: what gets built, what it costs, and when it ships. No ambiguity, no scope creep.",
+                  desc: "You get a clear proposal scoped to your builder workflow: what gets built, what it costs, and when it ships.",
                 },
                 {
                   step: "03",
                   title: "Build & Deploy",
-                  desc: "Cloud warehouse, ETL pipelines, and interactive dashboards — structured around the builder lifecycle with weekly demos so you see progress.",
+                  desc: "Cloud warehouse, ETL pipelines, and interactive dashboards — structured around the builder lifecycle with weekly demos.",
                 },
                 {
                   step: "04",
