@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export interface SSColumn {
   key: string;
@@ -43,13 +43,34 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const rightRef = useRef<HTMLDivElement>(null);
   const syncSourceRef = useRef<"left" | "right" | null>(null);
 
+  const columnOptions = useMemo(() => {
+    const options: Record<string, string[]> = {};
+
+    const sortValues = (values: string[]) => {
+      const numeric = values.every((v) => /^-?\d+(\.\d+)?$/.test(v));
+      if (numeric) return values.sort((a, b) => Number(a) - Number(b));
+      return values.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base", numeric: true }));
+    };
+
+    for (const c of normalizedColumns) {
+      const vals = new Set<string>();
+      for (const row of rows) {
+        const value = row[c.key];
+        if (value === null || value === undefined || value === "") continue;
+        vals.add(String(value));
+      }
+      options[c.key] = sortValues(Array.from(vals));
+    }
+    return options;
+  }, [normalizedColumns, rows]);
+
   const filteredRows = rows.filter((row) =>
     normalizedColumns.every((c) => {
       const query = (columnFilters[c.key] ?? "").trim().toLowerCase();
       if (!query) return true;
       const value = row[c.key];
       if (value === null || value === undefined) return false;
-      return String(value).toLowerCase().includes(query);
+      return String(value).toLowerCase() === query;
     }),
   );
   const visibleRows = filteredRows.slice(0, maxRows);
@@ -84,10 +105,9 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const headerContent = (c: SSColumn) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <span>{c.label}</span>
-      <input
+      <select
         value={columnFilters[c.key] ?? ""}
         onChange={(e) => setColumnFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
-        placeholder="Filter..."
         aria-label={`Filter ${c.label}`}
         style={{
           width: "100%",
@@ -102,8 +122,21 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
           textTransform: "none",
           letterSpacing: "normal",
           outline: "none",
+          appearance: "none",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6b7e'/%3E%3C/svg%3E\")",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right 6px center",
+          paddingRight: 20,
         }}
-      />
+      >
+        <option value="">All</option>
+        {columnOptions[c.key].map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
     </div>
   );
 
