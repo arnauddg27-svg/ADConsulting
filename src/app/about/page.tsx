@@ -16,7 +16,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Your Personal Data Architect | A.D. Homes & Consulting",
   description:
-    "Skip the big-firm overhead. Get a dedicated consultant who builds, owns, and supports your entire data ecosystem — from ERP extraction to production dashboards.",
+    "Skip the big-firm overhead. Get a dedicated consultant assigned to your account who architects, delivers, and supports your entire data ecosystem.",
 };
 
 const pillars = [
@@ -40,8 +40,8 @@ const pillars = [
 const benefits = [
   {
     icon: <Users size={20} />,
-    title: "One Person, Full Stack",
-    desc: "No account managers, no hand-offs between teams. The person who designs your warehouse is the same person who builds your dashboards and deploys your platform.",
+    title: "Your Assigned Consultant",
+    desc: "No account managers, no hand-offs between teams. Your dedicated consultant knows your systems, your data, and your goals — from kickoff through production.",
   },
   {
     icon: <Shield size={20} />,
@@ -51,17 +51,17 @@ const benefits = [
   {
     icon: <Zap size={20} />,
     title: "Builder-Specific Expertise",
-    desc: "Construction ERP systems, draw schedules, permit workflows, cost-to-complete — your consultant already speaks the language.",
+    desc: "Construction ERP systems, draw schedules, permit workflows, cost-to-complete — your consultant has hands-on experience in residential construction and real estate operations.",
   },
 ];
 
 const compared = [
   { them: "6-month discovery phase", us: "Weeks to first dashboard" },
-  { them: "Junior analysts doing the work", us: "Senior architect on every call" },
+  { them: "Junior analysts doing the work", us: "Your dedicated senior architect" },
   { them: "Generic BI templates", us: "Custom-built for your operation" },
   { them: "Platform lock-in", us: "You own the code and data" },
   { them: "$200K+ annual contracts", us: "Project-based, transparent pricing" },
-  { them: "Quarterly business reviews", us: "Direct Slack/call access anytime" },
+  { them: "Quarterly business reviews", us: "Direct access to your consultant anytime" },
 ];
 
 export default function AboutPage() {
@@ -76,9 +76,9 @@ export default function AboutPage() {
               Your Dedicated Data Architect
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
-              Big firms sell you a team. You get junior analysts, slow timelines,
-              and a platform you don&apos;t own. Here, you get one senior
-              consultant who builds the entire ecosystem — and hands you the keys.
+              Big firms sell you a team — then rotate the people who actually
+              know your business. Here, you get a dedicated senior consultant
+              assigned to your account from day one through go-live and beyond.
             </p>
           </div>
         </Container>
@@ -91,12 +91,14 @@ export default function AboutPage() {
             <div className="text-center">
               <span className="eyebrow">What You Get</span>
               <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                A complete data platform — built by one person
+                A complete data platform — one dedicated consultant
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-slate-400">
-                Every engagement covers the full lifecycle: extracting data from
-                your ERP, modeling it in a cloud warehouse, and delivering
-                interactive dashboards your team actually uses.
+                Your consultant brings direct experience in residential
+                construction and real estate — combined with deep technical
+                expertise in cloud architecture and data engineering. Every
+                engagement covers the full lifecycle from ERP extraction to
+                production dashboards.
               </p>
             </div>
 
@@ -152,7 +154,7 @@ export default function AboutPage() {
             <div className="text-center">
               <span className="eyebrow">Comparison</span>
               <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                Big firm vs. personal consultant
+                Big firm vs. dedicated consultant
               </h2>
             </div>
 
