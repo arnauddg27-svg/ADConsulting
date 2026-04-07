@@ -291,39 +291,42 @@ const BUYER_FAMILIES = [
 
 function generateSales(): SHSale[] {
   const rng = createRng(137);
-  const { rand, pick, between } = rng;
+  const { rand, pick, between, shuffle } = rng;
 
   const result: SHSale[] = [];
-  /* Target: ~50 active, 15 closed, 10 pending, 5 cancelled */
-  const statusPool: SHSale["status"][] = [
-    ...Array(50).fill("active" as const),
-    ...Array(15).fill("closed" as const),
-    ...Array(10).fill("pending" as const),
-    ...Array(5).fill("cancelled" as const),
-  ];
+  /* Build sales from real jobs so cross-table joins stay complete and logical. */
+  const selectedJobs = shuffle([...jobs]).slice(0, Math.min(80, jobs.length));
 
-  for (let i = 0; i < 80; i++) {
-    const comm = pick(COMMUNITIES);
+  for (let i = 0; i < selectedJobs.length; i++) {
+    const job = selectedJobs[i];
+    const comm = job.community;
     const meta = COMM_META[comm];
-    const plan = pick(PLANS);
+    const plan = job.plan;
     const buyer = `${pick(BUYER_FAMILIES)} Family`;
     const agent = pick(AGENTS);
-    const salePrice = between(380000, 620000);
-    const monthOff = between(0, 20);
-    const cy = 2024 + Math.floor(monthOff / 12);
-    const cm = (monthOff % 12) + 1;
-    const contractDate = dateToStr(cy, cm, between(1, 28));
-    const status = statusPool[i] ?? pick(["active", "pending"] as const);
-    const closingDate = status === "closed" ? addDays(contractDate, between(180, 360)) :
-      status === "pending" ? addDays(contractDate, between(300, 400)) :
-        null;
+    const salePrice = Math.round(job.contractValue * (0.97 + rand() * 0.08));
+    const contractDate = addDays(job.startDate, between(20, 150));
+    let status: SHSale["status"];
+    if (job.stage === "Closing" || job.completionPct >= 94) {
+      status = rand() > 0.12 ? "closed" : "pending";
+    } else if (job.completionPct >= 75 || job.stage === "Finishes") {
+      status = rand() > 0.2 ? "pending" : "active";
+    } else {
+      status = rand() > 0.92 ? "cancelled" : "active";
+    }
+    const closingDate = status === "closed"
+      ? (job.closingDate ?? job.coDate ?? addDays(contractDate, between(170, 320)))
+      : status === "pending"
+        ? addDays(contractDate, between(60, 220))
+        : null;
+    const cy = new Date(contractDate).getFullYear();
 
     result.push({
       id: i + 1,
-      jobCode: `SH-${between(1000, 8020)}`,
+      jobCode: job.jobCode,
       community: comm,
       city: meta.city,
-      entity: meta.entity,
+      entity: job.entity,
       plan,
       buyer,
       agent,
@@ -443,7 +446,7 @@ export const landDeals: SHLandDeal[] = generateLandDeals();
    ═══════════════════════════════════════════════════════════ */
 function generatePermits(): SHPermit[] {
   const rng = createRng(401);
-  const { rand, pick, between } = rng;
+  const { rand, pick, between, shuffle } = rng;
   const result: SHPermit[] = [];
 
   const permitTypes = ["Building", "Electrical", "Plumbing", "Mechanical"] as const;
@@ -453,28 +456,40 @@ function generatePermits(): SHPermit[] {
   ] as const;
 
   const TOTAL = 120;
+  const selectedJobs = shuffle([...jobs]).slice(0, Math.min(TOTAL, jobs.length));
 
-  for (let i = 0; i < TOTAL; i++) {
-    const comm = pick(COMMUNITIES);
+  for (let i = 0; i < selectedJobs.length; i++) {
+    const job = selectedJobs[i];
+    const comm = job.community;
     const meta = COMM_META[comm];
     const permitType = pick(permitTypes);
     const permitSubType = pick(permitSubTypes);
-    // Spread across 2021-2026 — ~20 per year
-    const year = 2021 + (i % 6);
-    const subMonth = between(1, 12);
-    const submittedDate = dateToStr(year, subMonth, between(1, 28));
-    // 40% approved, 15% issued, 20% in-review, 18% pending, 7% rejected
-    const roll = rand();
-    const status: SHPermit["status"] = roll < 0.40 ? "approved" : roll < 0.55 ? "issued" : roll < 0.75 ? "in-review" : roll < 0.93 ? "pending" : "rejected";
-    const daysInReview = status === "approved" || status === "issued" ? between(7, 18) :
-      status === "rejected" ? between(30, 60) :
-        between(14, 45);
+    const submittedDate = job.permitDate
+      ? addDays(job.permitDate, between(-45, -5))
+      : addDays(job.startDate, between(5, 35));
+
+    let status: SHPermit["status"];
+    if (job.stage === "Permit") {
+      status = rand() > 0.45 ? "in-review" : "pending";
+    } else if (job.stage === "Foundation" || job.stage === "Framing") {
+      status = rand() > 0.22 ? "approved" : "in-review";
+    } else {
+      status = rand() > 0.18 ? "issued" : "approved";
+    }
+    if (rand() > 0.975) status = "rejected";
+
+    const daysInReview = status === "approved" || status === "issued"
+      ? between(7, 24)
+      : status === "rejected"
+        ? between(25, 60)
+        : between(14, 45);
     const approvedDate = (status === "approved" || status === "issued") ? addDays(submittedDate, daysInReview) : null;
     const issuedDate = status === "issued" ? addDays(approvedDate!, between(3, 10)) : null;
+    const year = new Date(submittedDate).getFullYear();
 
     result.push({
       id: i + 1,
-      jobCode: `SH-${between(1001, 8020)}`,
+      jobCode: job.jobCode,
       community: comm,
       city: meta.city,
       permitType,
