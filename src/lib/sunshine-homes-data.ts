@@ -758,11 +758,12 @@ export function getCommunityBreakdown(filteredJobs: SHJob[]) {
 }
 
 export function getSalesKPIs(filteredSales: SHSale[]) {
-  const activeSales = filteredSales.filter(s => s.status !== "cancelled");
-  const totalValue = activeSales.reduce((s, r) => s + r.salePrice, 0);
-  const avgPrice = activeSales.length ? totalValue / activeSales.length : 0;
+  // Pipeline KPIs should track open contracts, not already-closed sales.
+  const openSales = filteredSales.filter(s => s.status === "active" || s.status === "pending");
+  const totalValue = openSales.reduce((s, r) => s + r.salePrice, 0);
+  const avgPrice = openSales.length ? totalValue / openSales.length : 0;
   const pending = filteredSales.filter(s => s.status === "pending").length;
-  return { totalSales: activeSales.length, totalValue, avgPrice, pendingClosings: pending };
+  return { totalSales: openSales.length, totalValue, avgPrice, pendingClosings: pending };
 }
 
 export function getSalesByCommunity(filteredSales: SHSale[]) {
@@ -836,9 +837,11 @@ export function getPermitKPIs(filteredPermits: SHPermit[]) {
 }
 
 export function getPMKPIs(filteredUnits: SHPropertyUnit[]) {
-  const leased = filteredUnits.filter(u => u.occupancy === "leased").length;
+  const occupied = filteredUnits.filter(u =>
+    u.occupancy === "leased" || u.occupancy === "eviction" || u.occupancy === "notice-to-vacate",
+  ).length;
   const total = filteredUnits.length;
-  const occupancyRate = total ? (leased / total) * 100 : 0;
+  const occupancyRate = total ? (occupied / total) * 100 : 0;
   const totalRent = filteredUnits.reduce((s, u) => s + u.monthlyRent, 0);
   const delinquent = filteredUnits.filter(u => u.delinquentAmount > 0).length;
   return { totalUnits: total, occupancyRate, monthlyRent: totalRent, delinquentUnits: delinquent };
