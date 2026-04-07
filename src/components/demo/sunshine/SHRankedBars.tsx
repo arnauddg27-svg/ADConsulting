@@ -20,7 +20,23 @@ const STATUS_GRADIENTS = {
   alert: "linear-gradient(90deg, #991b1b, #dc2626, #f87171)",
 };
 
-const DEFAULT_GRADIENT = "linear-gradient(90deg, #0f766e, #14b8a6, #22d3ee)";
+const DEFAULT_GRADIENTS = [
+  "linear-gradient(90deg, #0f766e, #14b8a6, #22d3ee)",
+  "linear-gradient(90deg, #115e59, #0d9488, #38bdf8)",
+  "linear-gradient(90deg, #0f766e, #2dd4bf, #60a5fa)",
+  "linear-gradient(90deg, #134e4a, #14b8a6, #67e8f9)",
+  "linear-gradient(90deg, #0f766e, #22d3ee, #3b82f6)",
+  "linear-gradient(90deg, #0b6b63, #2dd4bf, #7dd3fc)",
+];
+
+const DEFAULT_GLOWS = [
+  "rgba(20, 184, 166, 0.35)",
+  "rgba(56, 189, 248, 0.35)",
+  "rgba(96, 165, 250, 0.35)",
+  "rgba(45, 212, 191, 0.35)",
+  "rgba(103, 232, 249, 0.35)",
+  "rgba(34, 211, 238, 0.35)",
+];
 
 export default function SHRankedBars({ items, formatValue, onBarClick, showRank }: SHRankedBarsProps) {
   if (items.length === 0) {
@@ -37,7 +53,11 @@ export default function SHRankedBars({ items, formatValue, onBarClick, showRank 
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {items.map((item, i) => {
         const pct = (item.value / max) * 100;
-        const gradient = item.status ? STATUS_GRADIENTS[item.status] : DEFAULT_GRADIENT;
+        const paletteIdx = i % DEFAULT_GRADIENTS.length;
+        const gradient = item.status ? STATUS_GRADIENTS[item.status] : DEFAULT_GRADIENTS[paletteIdx];
+        const glow = item.status
+          ? (item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : "rgba(20, 184, 166, 0.3)")
+          : DEFAULT_GLOWS[paletteIdx];
         return (
           <div
             key={item.label}
@@ -72,7 +92,7 @@ export default function SHRankedBars({ items, formatValue, onBarClick, showRank 
               <div style={{
                 width: `${pct}%`, height: "100%", borderRadius: 3,
                 background: gradient,
-                boxShadow: `0 0 10px ${item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : "rgba(20, 184, 166, 0.3)"}`,
+                boxShadow: `0 0 12px ${glow}`,
                 transition: "width 0.4s ease",
               }} />
             </div>
