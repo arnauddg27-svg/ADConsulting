@@ -26,6 +26,9 @@ function widthToPx(w: string): number {
 }
 
 export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowClick }: SHSpreadsheetTableProps) {
+  const HEADER_ROW_HEIGHT = 50;
+  const DATA_ROW_HEIGHT = 30;
+
   const normalizedColumns = columns.map((c, idx) => ({
     ...c,
     // Default Excel-like freeze panes: keep first two columns visible.
@@ -110,7 +113,17 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
 
   const headerContent = (c: SSColumn) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <span>{c.label}</span>
+      <span
+        style={{
+          display: "block",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        title={c.label}
+      >
+        {c.label}
+      </span>
       <select
         value={columnFilters[c.key] ?? ""}
         onChange={(e) => setColumnFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
@@ -201,6 +214,10 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                           borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
                           borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
                           boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
+                          height: HEADER_ROW_HEIGHT,
+                          minHeight: HEADER_ROW_HEIGHT,
+                          maxHeight: HEADER_ROW_HEIGHT,
+                          verticalAlign: "top",
                         }}
                       >
                           {headerContent(c)}
@@ -238,9 +255,13 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                             borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
                             boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
                             background: rowBg(i),
+                            height: DATA_ROW_HEIGHT,
+                            minHeight: DATA_ROW_HEIGHT,
+                            maxHeight: DATA_ROW_HEIGHT,
+                            verticalAlign: "middle",
                           }}
                         >
-                          <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
                             {c.render ? c.render(row) : rawText(row, c.key)}
                           </span>
                         </td>
@@ -287,6 +308,10 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                         zIndex: 30,
                         background: "var(--sh-bg-surface-raised)",
                         borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
+                        height: HEADER_ROW_HEIGHT,
+                        minHeight: HEADER_ROW_HEIGHT,
+                        maxHeight: HEADER_ROW_HEIGHT,
+                        verticalAlign: "top",
                       }}
                     >
                       {headerContent(c)}
@@ -319,9 +344,13 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                           maxWidth: widthToPx(c.width),
                           borderBottom: "1px solid var(--sh-border-dim)",
                           background: rowBg(i),
+                          height: DATA_ROW_HEIGHT,
+                          minHeight: DATA_ROW_HEIGHT,
+                          maxHeight: DATA_ROW_HEIGHT,
+                          verticalAlign: "middle",
                         }}
                       >
-                        <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
                           {c.render ? c.render(row) : rawText(row, c.key)}
                         </span>
                       </td>
