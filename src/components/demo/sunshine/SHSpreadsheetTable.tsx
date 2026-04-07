@@ -35,8 +35,13 @@ function frozenOffsets(columns: SSColumn[]): number[] {
 }
 
 export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowClick }: SHSpreadsheetTableProps) {
+  const normalizedColumns = columns.map((c, idx) => ({
+    ...c,
+    // Default to Excel-like freeze panes: keep first two columns visible.
+    frozen: c.frozen ?? idx < 2,
+  }));
   const visibleRows = rows.slice(0, maxRows);
-  const offsets = frozenOffsets(columns);
+  const offsets = frozenOffsets(normalizedColumns);
 
   if (rows.length === 0) {
     return (
@@ -60,12 +65,12 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
         borderSpacing: 0,
         fontSize: 11,
         color: "var(--sh-text-primary)",
-        minWidth: columns.reduce((s, c) => s + widthToPx(c.width), 0),
+        minWidth: normalizedColumns.reduce((s, c) => s + widthToPx(c.width), 0),
       }}>
         <thead>
           <tr>
-            {columns.map((c, ci) => {
-              const isLastFrozen = c.frozen && (ci === columns.length - 1 || !columns[ci + 1]?.frozen);
+            {normalizedColumns.map((c, ci) => {
+              const isLastFrozen = c.frozen && (ci === normalizedColumns.length - 1 || !normalizedColumns[ci + 1]?.frozen);
               return (
                 <th key={c.key} style={{
                   padding: "6px 10px",
@@ -81,7 +86,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                   position: "sticky",
                   top: 0,
                   left: c.frozen ? offsets[ci] : undefined,
-                  zIndex: c.frozen ? 20 : 10,
+                  zIndex: c.frozen ? 40 : 30,
                   background: "var(--sh-bg-surface-raised)",
                   borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
                   borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
@@ -106,8 +111,8 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(20,184,166,0.04)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"; }}
             >
-              {columns.map((c, ci) => {
-                const isLastFrozen = c.frozen && (ci === columns.length - 1 || !columns[ci + 1]?.frozen);
+              {normalizedColumns.map((c, ci) => {
+                const isLastFrozen = c.frozen && (ci === normalizedColumns.length - 1 || !normalizedColumns[ci + 1]?.frozen);
                 const rowBg = i % 2 === 0 ? "var(--sh-bg-surface)" : "var(--sh-bg-surface-raised)";
                 return (
                   <td key={c.key} style={{
@@ -120,8 +125,8 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                     fontSize: c.mono ? 10 : undefined,
                     position: c.frozen ? "sticky" : undefined,
                     left: c.frozen ? offsets[ci] : undefined,
-                    zIndex: c.frozen ? 5 : undefined,
-                    background: c.frozen ? rowBg : undefined,
+                    zIndex: c.frozen ? 20 : undefined,
+                    background: rowBg,
                     borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
                     boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
                   }}>
