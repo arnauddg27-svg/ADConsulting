@@ -129,11 +129,12 @@
 /* ── Filter Bar ── */
 .sh-filter-bar {
   grid-row: 2;
-  grid-column: 1 / -1;
+  grid-column: 2;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 0 20px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--sh-border);
   background: var(--sh-bg-surface);
   overflow-x: auto;
