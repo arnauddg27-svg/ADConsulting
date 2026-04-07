@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -506,6 +506,33 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         }},
       ];
       rows = costCodeRows as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "cost-trend-month": {
+      const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const monthIdx = monthOrder.findIndex(m => m.toLowerCase() === detail.value.toLowerCase());
+      const monthlyJobs = jobs.filter(j => new Date(j.startDate).getMonth() === monthIdx);
+      const result = monthlyJobs.length > 0 ? monthlyJobs : jobs;
+
+      title = detail.label;
+      subtitle = monthlyJobs.length > 0
+        ? `${monthlyJobs.length} jobs started in ${detail.value}`
+        : `${result.length} jobs (month had no starts, showing all)`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "70px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "startDate", label: "Start", width: "75px" },
+        { key: "contractValue", label: "Revenue", width: "80px", align: "right", render: r => fmt$(Number(r.contractValue)) },
+        { key: "originalBudget", label: "Budget", width: "75px", align: "right", render: r => fmt$(Number(r.originalBudget)) },
+        { key: "actualCostToDate", label: "Actual", width: "75px", align: "right", render: r => fmt$(Number(r.actualCostToDate)) },
+        { key: "variance", label: "Variance", width: "75px", align: "right", render: r => {
+          const v = Number(r.actualCostToDate) - Number(r.originalBudget);
+          return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
+        }},
+        { key: "marginPct", label: "Margin", width: "60px", align: "right", render: r => fmtPct(Number(r.marginPct)) },
+      ];
+      rows = result as unknown as Record<string, unknown>[];
       break;
     }
 

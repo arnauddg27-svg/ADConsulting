@@ -114,6 +114,25 @@ export default function SHAreaChart({
           />
         ))}
 
+        {/* Click zones per month (easier interaction than tiny points) */}
+        {data.map((d, i) => {
+          const prevX = i === 0 ? padX : (toX(i - 1) + toX(i)) / 2;
+          const nextX = i === data.length - 1 ? w : (toX(i) + toX(i + 1)) / 2;
+          return (
+            <rect
+              key={`zone-${d.label}`}
+              x={prevX}
+              y={padT}
+              width={Math.max(0, nextX - prevX)}
+              height={h - padT - padB}
+              fill="transparent"
+              style={{ cursor: onPointClick ? "pointer" : "default" }}
+              onMouseEnter={() => setHovered(i)}
+              onClick={onPointClick ? () => onPointClick(d.label) : undefined}
+            />
+          );
+        })}
+
         {/* Hover line */}
         {hovered !== null && (
           <line
@@ -128,6 +147,8 @@ export default function SHAreaChart({
             key={i}
             x={toX(i)} y={h - 6}
             textAnchor="middle" fill="var(--sh-text-muted)" fontSize="8" fontWeight="500"
+            style={{ cursor: onPointClick ? "pointer" : "default" }}
+            onClick={onPointClick ? () => onPointClick(d.label) : undefined}
           >
             {d.label}
           </text>
