@@ -21,7 +21,7 @@ interface SHSpreadsheetTableProps {
 
 /** Parse a CSS width like "80px", "1.2fr", "100px" into a pixel estimate. */
 function widthToPx(w: string): number {
-  if (w.endsWith("fr")) return Math.round(parseFloat(w) * 120);
+  if (w.endsWith("fr")) return Math.round(parseFloat(w) * 160);
   return parseInt(w, 10) || 100;
 }
 
@@ -92,6 +92,12 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
     return i % 2 === 0 ? "var(--sh-bg-surface)" : "var(--sh-bg-surface-raised)";
   };
 
+  const rawText = (row: Record<string, unknown>, key: string) => {
+    const value = row[key];
+    if (value === null || value === undefined || value === "") return "—";
+    return String(value);
+  };
+
   if (rows.length === 0) {
     return (
       <div className="sh-ss-table">
@@ -109,6 +115,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
         value={columnFilters[c.key] ?? ""}
         onChange={(e) => setColumnFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
         aria-label={`Filter ${c.label}`}
+        title={`Filter ${c.label}`}
         style={{
           width: "100%",
           height: 20,
@@ -233,7 +240,9 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                             background: rowBg(i),
                           }}
                         >
-                          {c.render ? c.render(row) : String(row[c.key] ?? "—")}
+                          <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {c.render ? c.render(row) : rawText(row, c.key)}
+                          </span>
                         </td>
                       );
                     })}
@@ -312,7 +321,9 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                           background: rowBg(i),
                         }}
                       >
-                        {c.render ? c.render(row) : String(row[c.key] ?? "—")}
+                        <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {c.render ? c.render(row) : rawText(row, c.key)}
+                        </span>
                       </td>
                     ))}
                   </tr>

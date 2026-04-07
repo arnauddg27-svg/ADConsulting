@@ -141,22 +141,29 @@ function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
   const grid = columns.map(c => c.width).join(" ");
   /* Compute min-width so the grid can scroll horizontally when content overflows */
   const minW = columns.reduce((s, c) => {
-    if (c.width.endsWith("fr")) return s + Math.round(parseFloat(c.width) * 120);
+    if (c.width.endsWith("fr")) return s + Math.round(parseFloat(c.width) * 180);
     return s + (parseInt(c.width) || 80);
   }, 0);
+
+  const rawText = (row: Record<string, unknown>, key: string) => {
+    const value = row[key];
+    if (value === null || value === undefined || value === "") return "\u2014";
+    return String(value);
+  };
+
   return (
-    <div style={{ flex: 1, overflow: "auto" }}>
+    <div style={{ flex: 1, overflowX: "auto", overflowY: "auto" }}>
       <div style={{ minWidth: minW }}>
         <div style={{ display: "grid", gridTemplateColumns: grid, padding: "6px 0", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
           {columns.map(c => (
-            <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align }}>{c.label}</span>
+            <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.label}>{c.label}</span>
           ))}
         </div>
         {rows.map((r, i) => (
           <div key={i} style={{ display: "grid", gridTemplateColumns: grid, padding: "5px 0", borderBottom: "1px solid var(--sh-border-dim)", fontSize: 11, color: "var(--sh-text-primary)" }}>
             {columns.map(c => (
-              <span key={c.key} style={{ padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {c.render ? c.render(r) : String(r[c.key] ?? "\u2014")}
+              <span key={c.key} style={{ padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={rawText(r, c.key)}>
+                {c.render ? c.render(r) : rawText(r, c.key)}
               </span>
             ))}
           </div>
@@ -979,7 +986,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         onClick={e => e.stopPropagation()}
         style={{
           position: "absolute", top: 0, right: 0, bottom: 0,
-          width: "min(520px, 85%)",
+          width: "clamp(620px, 66vw, 980px)",
+          maxWidth: "calc(100% - 12px)",
           background: "var(--sh-bg-surface-raised)",
           borderLeft: "1px solid var(--sh-border)",
           boxShadow: "-8px 0 32px rgba(0,0,0,0.5)",
