@@ -46,7 +46,6 @@
   color: var(--sh-text-primary);
   background: var(--sh-bg-shell);
   border-radius: 12px;
-  overflow: clip;
   position: relative;
   z-index: 10;
 }
