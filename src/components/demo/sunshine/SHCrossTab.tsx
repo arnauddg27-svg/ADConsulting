@@ -48,6 +48,26 @@ export default function SHCrossTab({
     return `rgba(20, 184, 166, ${alpha})`;
   };
 
+  if (rows.length === 0 || cols.length === 0) {
+    return (
+      <div className="sh-crosstab">
+        {title && <div className="sh-crosstab-title">{title}</div>}
+        <div
+          style={{
+            padding: "14px 12px",
+            fontSize: 11,
+            color: "var(--sh-text-muted)",
+            fontStyle: "italic",
+            borderTop: "1px solid var(--sh-border)",
+            background: "var(--sh-bg-surface)",
+          }}
+        >
+          No records for current filters.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sh-crosstab">
       {title && <div className="sh-crosstab-title">{title}</div>}

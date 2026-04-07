@@ -858,7 +858,8 @@
 .sh-crosstab {
   border: 1px solid var(--sh-border);
   border-radius: 6px;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 340px;
 }
 .sh-crosstab-title {
   padding: 8px 12px;
