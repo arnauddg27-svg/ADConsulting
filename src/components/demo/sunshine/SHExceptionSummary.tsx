@@ -4,6 +4,7 @@ interface ExceptionItem {
   label: string;
   value: string;
   tone: "good" | "watch" | "alert";
+  onClick?: () => void;
 }
 
 interface SHExceptionSummaryProps {
@@ -55,7 +56,17 @@ export default function SHExceptionSummary({ items }: SHExceptionSummaryProps) {
               padding: "10px 12px",
               minHeight: 64,
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.25)",
+              cursor: item.onClick ? "pointer" : "default",
             }}
+            onClick={item.onClick}
+            role={item.onClick ? "button" : undefined}
+            tabIndex={item.onClick ? 0 : undefined}
+            onKeyDown={item.onClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                item.onClick?.();
+              }
+            } : undefined}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
               <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)" }}>{item.label}</div>

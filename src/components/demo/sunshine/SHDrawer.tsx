@@ -189,10 +189,23 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "job": {
       /* Aggregate KPI values → show full job list */
-      if (detail.value === "all" || detail.value === "active" || detail.value === "completion") {
+      if (
+        detail.value === "all" ||
+        detail.value === "active" ||
+        detail.value === "completion" ||
+        detail.value === "on-schedule" ||
+        detail.value === "within-budget" ||
+        detail.value === "healthy-progress"
+      ) {
         const filtered = detail.value === "active"
           ? jobs.filter(j => j.stage !== "Closing" && j.stage !== "Complete")
-          : jobs;
+          : detail.value === "on-schedule"
+            ? jobs.filter(j => j.stage === "Closing" || j.daysInCurrentPhase <= 35)
+            : detail.value === "within-budget"
+              ? jobs.filter(j => j.projectedFinalCost <= j.originalBudget * 1.08)
+              : detail.value === "healthy-progress"
+                ? jobs.filter(j => j.stage === "Permit" || j.completionPct >= 55)
+                : jobs;
         title = detail.label;
         subtitle = `${filtered.length} jobs`;
         columns = [

@@ -31,7 +31,10 @@ export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipel
           <div key={stage} style={{ display: "flex", alignItems: "center" }}>
             <div
               style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 80, cursor: onDrill ? "pointer" : "default" }}
-              onClick={onStageClick ? () => onStageClick(stage) : onDrill ? () => onDrill({ type: "stage", value: stage, label: stage }) : undefined}
+              onClick={onDrill ? () => {
+                onStageClick?.(stage);
+                onDrill({ type: "stage", value: stage, label: stage });
+              } : onStageClick ? () => onStageClick(stage) : undefined}
             >
               <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${STAGE_COLORS[i]}33, ${STAGE_COLORS[i]}11)`, border: `1px solid ${STAGE_COLORS[i]}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, boxShadow: `0 0 12px ${STAGE_COLORS[i]}22` }}>
                 {STAGE_ICONS[i]}
@@ -61,7 +64,7 @@ export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipel
               </div>
               <div className="sh-pipeline-col-cards">
                 {stageJobs.map(job => {
-                  const status = job.daysInCurrentPhase > 30 ? "behind" : job.daysInCurrentPhase > 20 ? "at-risk" : "";
+                  const status = job.daysInCurrentPhase > 45 ? "behind" : job.daysInCurrentPhase > 32 ? "at-risk" : "";
                   return (
                     <div
                       key={job.id}
@@ -77,8 +80,8 @@ export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipel
                       <div className="sh-pipeline-card-detail">{job.plan}</div>
                       <div className="sh-pipeline-card-detail">
                         {job.superintendent}
-                        {job.daysInCurrentPhase > 14 && (
-                          <span style={{ color: job.daysInCurrentPhase > 30 ? "var(--sh-danger)" : job.daysInCurrentPhase > 20 ? "var(--sh-warning)" : "var(--sh-text-muted)", fontWeight: 600 }}> · {job.daysInCurrentPhase}d</span>
+                        {job.daysInCurrentPhase > 20 && (
+                          <span style={{ color: job.daysInCurrentPhase > 45 ? "var(--sh-danger)" : job.daysInCurrentPhase > 32 ? "var(--sh-warning)" : "var(--sh-text-muted)", fontWeight: 600 }}> · {job.daysInCurrentPhase}d</span>
                         )}
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "var(--sh-text-muted)", marginTop: 3 }}>

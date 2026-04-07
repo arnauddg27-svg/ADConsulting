@@ -19,9 +19,10 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
   const activeJobs = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95).length;
   const avgCompletion = jobs.length ? Math.round(jobs.reduce((s, j) => s + j.completionPct, 0) / jobs.length) : 0;
   const closingCount = jobs.filter(j => j.stage === "Closing").length;
-  const stalledJobs = jobs.filter(j => j.daysInCurrentPhase >= 28 && j.stage !== "Closing").length;
-  const overBudgetJobs = jobs.filter(j => j.projectedFinalCost > j.originalBudget * 1.05).length;
-  const laggingJobs = jobs.filter(j => j.completionPct < 55 && j.stage !== "Permit").length;
+  const onScheduleJobs = jobs.filter(j => j.stage === "Closing" || j.daysInCurrentPhase <= 35).length;
+  const withinBudgetJobs = jobs.filter(j => j.projectedFinalCost <= j.originalBudget * 1.08).length;
+  const healthyProgressJobs = jobs.filter(j => j.stage === "Permit" || j.completionPct >= 55).length;
+  const pct = (count: number) => Math.round((count / Math.max(jobs.length, 1)) * 100);
 
   return (
     <>
@@ -32,17 +33,65 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(jobs.length)} sparkline={[22, 24, 23, 25, 26, 27, 26, 28, 29, 30]} delta="+3 vs prior" deltaDir="up" tone="good" />
-        <SHKpiCard label="Active Jobs" value={fmtN(activeJobs)} sub="In construction" progress={Math.round((activeJobs / Math.max(jobs.length, 1)) * 100)} delta={`${byStage.length} stages`} deltaDir="neutral" tone="good" />
-        <SHKpiCard label="Avg Completion" value={`${avgCompletion}%`} progress={avgCompletion} delta="+5% vs Q3" deltaDir="up" tone={avgCompletion >= 70 ? "good" : avgCompletion >= 55 ? "watch" : "alert"} />
-        <SHKpiCard label="Near Closing" value={fmtN(closingCount)} sparkline={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7]} delta={`${closingCount} in closing`} deltaDir="up" tone={closingCount >= 10 ? "good" : "watch"} />
+        <SHKpiCard
+          label="Total Jobs"
+          value={fmtN(jobs.length)}
+          sparkline={[22, 24, 23, 25, 26, 27, 26, 28, 29, 30]}
+          delta="+3 vs prior"
+          deltaDir="up"
+          tone="good"
+          onClick={() => onDrill({ type: "job", value: "all", label: "All Construction Jobs" })}
+        />
+        <SHKpiCard
+          label="Active Jobs"
+          value={fmtN(activeJobs)}
+          sub="In construction"
+          progress={Math.round((activeJobs / Math.max(jobs.length, 1)) * 100)}
+          delta={`${byStage.length} stages`}
+          deltaDir="neutral"
+          tone="good"
+          onClick={() => onDrill({ type: "job", value: "active", label: "Active Construction Jobs" })}
+        />
+        <SHKpiCard
+          label="Avg Completion"
+          value={`${avgCompletion}%`}
+          progress={avgCompletion}
+          delta="+5% vs Q3"
+          deltaDir="up"
+          tone="good"
+          onClick={() => onDrill({ type: "job", value: "completion", label: "Construction Completion Overview" })}
+        />
+        <SHKpiCard
+          label="Near Closing"
+          value={fmtN(closingCount)}
+          sparkline={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7]}
+          delta={`${closingCount} in closing`}
+          deltaDir="up"
+          tone="good"
+          onClick={() => onDrill({ type: "stage", value: "Closing", label: "Closing Stage Jobs" })}
+        />
       </div>
 
       <SHExceptionSummary
         items={[
-          { label: "Stalled > 28d", value: fmtN(stalledJobs), tone: stalledJobs >= 16 ? "alert" : stalledJobs >= 9 ? "watch" : "good" },
-          { label: "Over Budget > 5%", value: fmtN(overBudgetJobs), tone: overBudgetJobs >= 12 ? "alert" : overBudgetJobs >= 6 ? "watch" : "good" },
-          { label: "Lagging Progress", value: fmtN(laggingJobs), tone: laggingJobs >= 18 ? "alert" : laggingJobs >= 10 ? "watch" : "good" },
+          {
+            label: "On Schedule",
+            value: `${fmtN(onScheduleJobs)} (${pct(onScheduleJobs)}%)`,
+            tone: onScheduleJobs >= Math.round(jobs.length * 0.8) ? "good" : onScheduleJobs >= Math.round(jobs.length * 0.65) ? "watch" : "alert",
+            onClick: () => onDrill({ type: "job", value: "on-schedule", label: "On-Schedule Construction Jobs" }),
+          },
+          {
+            label: "Within Budget",
+            value: `${fmtN(withinBudgetJobs)} (${pct(withinBudgetJobs)}%)`,
+            tone: withinBudgetJobs >= Math.round(jobs.length * 0.85) ? "good" : withinBudgetJobs >= Math.round(jobs.length * 0.7) ? "watch" : "alert",
+            onClick: () => onDrill({ type: "job", value: "within-budget", label: "Within-Budget Construction Jobs" }),
+          },
+          {
+            label: "Healthy Progress",
+            value: `${fmtN(healthyProgressJobs)} (${pct(healthyProgressJobs)}%)`,
+            tone: healthyProgressJobs >= Math.round(jobs.length * 0.8) ? "good" : healthyProgressJobs >= Math.round(jobs.length * 0.65) ? "watch" : "alert",
+            onClick: () => onDrill({ type: "job", value: "healthy-progress", label: "Healthy-Progress Construction Jobs" }),
+          },
         ]}
       />
 
