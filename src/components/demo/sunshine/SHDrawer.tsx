@@ -6,7 +6,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$,
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "construction-city-time" | "sales-city-time" | "loans-city-time" | "pm-city-time" | "audits-community-time";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "construction-city-time" | "sales-city-time" | "loans-city-time" | "pm-city-time" | "audits-community-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -514,6 +514,29 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "construction-completion-bucket": {
+      const range = parsePctRange(detail.value);
+      const matched = range
+        ? jobs.filter(j => {
+            const lowOk = j.completionPct >= range.min;
+            const highOk = range.max >= 100 ? j.completionPct <= range.max : j.completionPct < range.max;
+            return lowOk && highOk;
+          })
+        : jobs;
+      title = detail.label;
+      subtitle = `${matched.length} jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "75px" },
+        { key: "community", label: "Community", width: "120px" },
+        { key: "city", label: "City", width: "80px" },
+        { key: "stage", label: "Stage", width: "95px" },
+        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+      ];
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     case "cycle-time-cohort": {
       /* Drill-down for cycle time trendline clicks — filter by quarter cohort */
       const cohortJobs = jobs.filter(j => {
@@ -752,6 +775,18 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "permit-cycle-bucket": {
+      const range = parseDaysRange(detail.value);
+      const matched = range
+        ? permits.filter(p => p.daysInReview >= range.min && p.daysInReview <= range.max)
+        : permits;
+      title = detail.label;
+      subtitle = `${matched.length} permits`;
+      columns = permitCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     case "permit-city-year": {
       const [city, token] = parsePipe(detail.value);
       const matched = permits.filter(p => {
@@ -773,6 +808,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         const statusMatch = status ? normStatus(p.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
       });
+      title = detail.label;
+      subtitle = `${matched.length} permits`;
+      columns = permitCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "permits-community": {
+      const matched = permits.filter(p => p.community === detail.value);
       title = detail.label;
       subtitle = `${matched.length} permits`;
       columns = permitCols;
@@ -913,6 +957,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "loans-community": {
+      const matched = loans.filter(l => l.community === detail.value);
+      title = detail.label;
+      subtitle = `${matched.length} loans`;
+      columns = loanCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     /* ═══════════════ SALES ═══════════════ */
 
     case "sale": {
@@ -951,6 +1004,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "sale-status": {
       const matched = sales.filter(s => normStatus(s.status) === normStatus(detail.value));
       title = `${detail.value} Sales`;
+      subtitle = `${matched.length} sales`;
+      columns = saleCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "sales-community": {
+      const matched = sales.filter(s => s.community === detail.value);
+      title = detail.label;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
       rows = matched as unknown as Record<string, unknown>[];
@@ -1120,6 +1182,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "pm-city-time": {
       const [city, token] = parsePipe(detail.value);
       const matched = propertyUnits.filter(u => u.city === city && (!token || matchTimeToken(u.leaseStart, token)));
+      title = detail.label;
+      subtitle = `${matched.length} units`;
+      columns = pmCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "pm-community": {
+      const matched = propertyUnits.filter(u => u.community === detail.value);
       title = detail.label;
       subtitle = `${matched.length} units`;
       columns = pmCols;

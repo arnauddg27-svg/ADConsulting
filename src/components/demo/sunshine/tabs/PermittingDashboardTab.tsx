@@ -128,7 +128,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           }} />
         </SHPanel>
         <SHPanel kicker="Communities" title="Permits by Community">
-          <SHRankedBars items={byCommunity} onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }} showRank />
+          <SHRankedBars items={byCommunity} onBarClick={label => { onCommunityClick(label); onDrill({ type: "permits-community", value: label, label }); }} showRank />
         </SHPanel>
       </div>
 
@@ -142,7 +142,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -155,7 +155,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
           <SHCrossTab
             {...cityStatusCross}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "permit-city-status", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|`, label: row }); }}
             onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "permit-status", value: col, label: col }); }}
           />
         </SHPanel>
@@ -163,13 +163,13 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
 
       <div className="sh-panels-row">
         <SHPanel kicker="Distribution" title="Cycle Time Distribution">
-          <SHHistogram buckets={cycleTimeBuckets} onBucketClick={bucket => onDrill({ type: "permit-status", value: bucket, label: `Cycle Time ${bucket}` })} />
+          <SHHistogram buckets={cycleTimeBuckets} onBucketClick={bucket => onDrill({ type: "permit-cycle-bucket", value: bucket, label: `Cycle Time ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Performance" title="Avg Cycle Time by City (days)">
           <SHRankedBars
             items={avgCycleByCity}
             formatValue={v => `${v}d`}
-            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "permit-city-year", value: `${label}|`, label }); }}
             showRank
           />
         </SHPanel>

@@ -114,7 +114,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         <SHPanel kicker="By Community" title="Sales Volume">
           <SHRankedBars
             items={byCommunity}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "sales-community", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -131,7 +131,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
           <SHCrossTab
             {...crossTab}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sale-city-status", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={(col) => { onStatusClick(col); onDrill({ type: "sale-status", value: col, label: col }); }}
           />
         </SHPanel>
@@ -156,7 +156,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
@@ -172,7 +172,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
           <SHRankedBars
             items={avgPriceByCity}
             formatValue={v => fmt$(v)}
-            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "sales-city-time", value: `${label}|`, label }); }}
             showRank
           />
         </SHPanel>

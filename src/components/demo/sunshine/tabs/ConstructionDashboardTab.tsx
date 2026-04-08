@@ -165,7 +165,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       {/* Row 2: Completion Distribution (Histogram) + WIP by Superintendent */}
       <div className="sh-panels-row">
         <SHPanel kicker="Distribution" title="Completion Distribution">
-          <SHHistogram buckets={completionBuckets} onBucketClick={bucket => onDrill({ type: "margin-bucket", value: bucket, label: `Completion ${bucket}` })} />
+          <SHHistogram buckets={completionBuckets} onBucketClick={bucket => onDrill({ type: "construction-completion-bucket", value: bucket, label: `Completion ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Workload" title="WIP by Superintendent">
           <SHRankedBars
@@ -204,7 +204,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :

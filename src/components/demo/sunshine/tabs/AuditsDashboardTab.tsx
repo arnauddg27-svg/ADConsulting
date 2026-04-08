@@ -131,7 +131,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
           <SHRankedBars
             items={byCommunity}
             formatValue={v => `${v}%`}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "audits-community-time", value: `${label}|`, label }); }}
             showRank
           />
         </SHPanel>
@@ -147,7 +147,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
           <SHCrossTab
             {...communityTimeCross}
             onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "audits-community-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "community", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "audits-community-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :

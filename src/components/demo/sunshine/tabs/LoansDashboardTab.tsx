@@ -137,7 +137,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
                 .sort((a, b) => b.value - a.value);
             })()}
             formatValue={v => `${v}%`}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "loans-community", value: label, label }); }}
           />
         </SHPanel>
       </div>
@@ -153,7 +153,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
           <SHRankedBars
             items={exposureByCity}
             formatValue={v => `$${v}M`}
-            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "loans-city-time", value: `${label}|`, label }); }}
             showRank
           />
         </SHPanel>
@@ -169,7 +169,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "loans-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "loans-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :

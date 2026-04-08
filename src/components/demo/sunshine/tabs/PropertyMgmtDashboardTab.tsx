@@ -175,7 +175,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHRankedBars
             items={revenueByCity}
             formatValue={v => fmt$(v)}
-            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
+            onBarClick={label => { onCityClick(label); onDrill({ type: "pm-city-time", value: `${label}|`, label }); }}
             showRank
           />
         </SHPanel>
@@ -183,7 +183,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHRankedBars
             items={delinquentByCommunity.length > 0 ? delinquentByCommunity : [{ label: "No delinquencies", value: 0 }]}
             formatValue={v => fmt$(v)}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "pm-community", value: label, label }); }}
             showRank
           />
         </SHPanel>
@@ -199,7 +199,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHCrossTab
             {...cityTimeCross}
             onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "pm-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "pm-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
