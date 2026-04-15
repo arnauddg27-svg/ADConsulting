@@ -27,8 +27,9 @@ export default function SHAreaChart({
   const [hovered, setHovered] = useState<number | null>(null);
 
   const allValues = data.flatMap(d => [d.value, d.value2 ?? 0]);
-  const maxV = Math.max(...allValues);
-  const minV = Math.min(...allValues.filter(v => v > 0));
+  const positiveValues = allValues.filter(v => v > 0);
+  const maxV = allValues.length ? Math.max(...allValues) : 1;
+  const minV = positiveValues.length ? Math.min(...positiveValues) : 0;
   const range = maxV - minV || 1;
 
   const padX = 40, padT = 10, padB = 24;
@@ -159,7 +160,7 @@ export default function SHAreaChart({
       {hovered !== null && (
         <div style={{
           position: "absolute",
-          left: `${(hovered / (data.length - 1)) * 100}%`,
+          left: `${(hovered / Math.max(data.length - 1, 1)) * 100}%`,
           top: 0,
           transform: "translateX(-50%)",
           background: "var(--sh-bg-surface-raised)",

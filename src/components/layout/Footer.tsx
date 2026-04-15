@@ -57,7 +57,7 @@ export default function Footer() {
               <ul className="mt-5 space-y-4 text-sm text-slate-200">
                 <li className="flex items-start gap-3">
                   <Phone size={17} className="mt-0.5 text-accent-300" />
-                  <a href={`tel:${SITE_CONFIG.phone}`} className="hover:text-accent-200">
+                  <a href={SITE_CONFIG.phoneHref} className="hover:text-accent-200">
                     {SITE_CONFIG.phone}
                   </a>
                 </li>

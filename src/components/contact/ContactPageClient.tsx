@@ -32,6 +32,7 @@ type SubmissionState = "idle" | "submitting" | "submitted" | "error";
 export default function ContactPageClient() {
   const [status, setStatus] = useState<SubmissionState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,12 +41,20 @@ export default function ContactPageClient() {
       return;
     }
 
+    const now = Date.now();
+    if (now - lastSubmitTime < 30_000) {
+      setStatus("error");
+      setErrorMessage("Please wait 30 seconds before submitting again.");
+      return;
+    }
+    setLastSubmitTime(now);
+
     const form = e.currentTarget;
     const formData = new FormData(form);
 
     formData.append("_subject", "New consultation request from website");
     formData.append("_template", "table");
-    formData.append("_captcha", "false");
+    formData.append("_captcha", "true");
 
     setStatus("submitting");
     setErrorMessage("");
@@ -70,7 +79,7 @@ export default function ContactPageClient() {
     } catch {
       setStatus("error");
       setErrorMessage(
-        "The form couldn’t be sent right now. Please try again, or email arnauddg27@gmail.com directly."
+        `The form couldn’t be sent right now. Please try again, or email ${SITE_CONFIG.email} directly.`
       );
     }
   };
@@ -201,7 +210,7 @@ export default function ContactPageClient() {
 
                   <div>
                     <label className="field-label" htmlFor="contact-message">
-                      How can I help?
+                      Project goals and reporting needs
                     </label>
                     <textarea
                       id="contact-message"
@@ -209,7 +218,7 @@ export default function ContactPageClient() {
                       required
                       rows={6}
                       className="field resize-none"
-                      placeholder="Tell me your core systems of record, where the team is exporting data manually, and which numbers stop matching between departments."
+                      placeholder="Tell us your core systems of record, where reporting is still manual, and which decisions need better visibility."
                     />
                   </div>
 
@@ -237,7 +246,7 @@ export default function ContactPageClient() {
                 <div className="mt-6 space-y-4 text-sm text-slate-200">
                   <div className="flex items-start gap-3">
                     <Phone size={18} className="mt-0.5 text-accent-300" />
-                    <a href={`tel:${SITE_CONFIG.phone}`} className="hover:text-accent-100">
+                    <a href={SITE_CONFIG.phoneHref} className="hover:text-accent-100">
                       {SITE_CONFIG.phone}
                     </a>
                   </div>
@@ -277,7 +286,7 @@ export default function ContactPageClient() {
                     className="inline-flex items-center gap-2 rounded-xl border border-accent-400/30 bg-accent-500/15 px-5 py-3 text-sm font-semibold text-accent-200 transition-all duration-300 hover:bg-accent-500/25 hover:border-accent-400/50"
                   >
                     <Clock size={16} />
-                    Pick a Time on My Calendar
+                    Pick a Time
                   </a>
                 </div>
               </Card>
