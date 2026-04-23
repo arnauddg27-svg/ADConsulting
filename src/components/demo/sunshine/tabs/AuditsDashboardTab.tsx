@@ -145,7 +145,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       </div>
 
       <div className="sh-panels-row">
-        <SHPanel kicker="By Community" title="Average Net Margin">
+        <SHPanel kicker="By Community" title="Avg Net Margin by Community">
           <SHRankedBars
             items={byCommunity}
             formatValue={v => `${v}%`}
@@ -153,7 +153,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
             showRank
           />
         </SHPanel>
-        <SHPanel kicker="By Plan" title="Average Net Margin">
+        <SHPanel kicker="By Plan" title="Avg Net Margin by Plan">
           <SHRankedBars
             items={byPlan}
             formatValue={v => `${v}%`}

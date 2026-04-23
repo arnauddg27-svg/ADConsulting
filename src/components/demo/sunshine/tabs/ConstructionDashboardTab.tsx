@@ -130,6 +130,25 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       return { label: s, value: Math.round(e.total / e.count) };
     });
 
+  // --- Ranked Bars: Avg Completion % by Community ---
+  const commCompletionMap = new Map<string, { total: number; count: number }>();
+  for (const job of jobs) {
+    const e = commCompletionMap.get(job.community) ?? { total: 0, count: 0 };
+    e.total += job.completionPct;
+    e.count++;
+    commCompletionMap.set(job.community, e);
+  }
+  const avgCompletionByCommunity = Array.from(commCompletionMap.entries())
+    .map(([label, e]) => {
+      const v = Math.round(e.total / e.count);
+      return {
+        label,
+        value: v,
+        status: v >= 75 ? "good" as const : v >= 40 ? "watch" as const : "alert" as const,
+      };
+    })
+    .sort((a, b) => b.value - a.value);
+
   return (
     <>
       <div className="sh-tab-header">
@@ -238,7 +257,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         </SHPanel>
       </div>
 
-      {/* Row 5: Avg Days in Phase by Stage */}
+      {/* Row 6: Avg Days in Phase by Stage + Avg Completion by Community */}
       <div className="sh-panels-row">
         <SHPanel kicker="Cycle Time" title="Avg Days in Phase by Stage">
           <SHRankedBars
@@ -246,6 +265,14 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             showRank
             formatValue={(v: number) => `${v}d`}
             onBarClick={label => { onStageClick(label); onDrill({ type: "stage", value: label, label: `Avg Days — ${label}` }); }}
+          />
+        </SHPanel>
+        <SHPanel kicker="Progress" title="Avg Completion by Community">
+          <SHRankedBars
+            items={avgCompletionByCommunity}
+            showRank
+            formatValue={(v: number) => `${v}%`}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
           />
         </SHPanel>
       </div>
