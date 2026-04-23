@@ -31,31 +31,50 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="section-space">
+    <section className="section-space relative overflow-hidden">
+      {/* subtle accent glow behind section */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-[10%] top-[20%] h-[400px] w-[400px] rounded-full bg-accent-500/[0.06] blur-[120px]"
+      />
       <Container>
-        <div className="reveal grid gap-10 lg:grid-cols-[0.4fr_0.6fr] lg:items-center">
+        <div className="reveal grid gap-12 lg:grid-cols-[0.42fr_0.58fr] lg:items-center lg:gap-16">
           <div>
-            <span className="eyebrow">Why Us</span>
-            <h2 className="mt-5 max-w-lg font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-              Why homebuilders <span className="text-gradient">choose this model.</span>
+            <span className="eyebrow eyebrow-dot">Why Us</span>
+            <h2 className="mt-6 max-w-lg font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
+              Why homebuilders{" "}
+              <span className="text-gradient">choose this model.</span>
             </h2>
-            <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
+            <p className="mt-6 text-base leading-7 text-slate-300 md:text-[1.05rem] md:leading-8">
               The approach is focused on clarity and ownership: one centralized
               data foundation, reporting built for builder workflows, and tools
               teams can use to run operations with better visibility.
             </p>
+
+            <div className="mt-8 flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.2em] text-slate-500">
+              <span className="divider-glow flex-1" />
+              <span>Delivery in 4–8 weeks</span>
+            </div>
           </div>
 
           <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
-            {reasons.map((item) => (
-              <div key={item.title} className="reveal glow-card p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
-                  {item.icon}
+            {reasons.map((item, idx) => (
+              <div
+                key={item.title}
+                className="reveal glow-card relative flex flex-col p-6"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/25 bg-gradient-to-br from-accent-500/15 to-accent-500/[0.02] text-accent-200">
+                    {item.icon}
+                  </div>
+                  <span className="font-space-grotesk text-[0.62rem] uppercase tracking-[0.24em] text-slate-500">
+                    0{idx + 1}
+                  </span>
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-100">
+                <h3 className="mt-5 text-[1.02rem] font-semibold leading-tight text-slate-100">
                   {item.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-400">
+                <p className="mt-2.5 text-[0.88rem] leading-6 text-slate-400">
                   {item.body}
                 </p>
               </div>
