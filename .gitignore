@@ -27,6 +27,7 @@
 .playwright-cli/
 .local/
 docs/
+!Consultin Code/docs/
 firebase-debug.log
 
 # debug
