@@ -205,16 +205,35 @@ function generateJobs(): SHJob[] {
   // Uneven community volume distribution (total = 160) to avoid flat, identical bars.
   const communityJobCounts = [24, 18, 22, 19, 17, 21, 23, 16];
 
+  // Per-community cost profile modifiers so communities don't look identical in aggregate.
+  // baseRatioAdj shifts the cost-ratio band, spendShapeBias biases how jobs spend vs. completion.
+  const communityProfile: Record<number, { baseRatioAdj: number; planBias: number }> = {
+    0: { baseRatioAdj: -0.01, planBias: 0 },   // Sunshine Ridge — slightly better margins
+    1: { baseRatioAdj: 0.015, planBias: 0 },   // Palm Coast — tighter margins (new market, overrun prone)
+    2: { baseRatioAdj: -0.02, planBias: 1 },   // Emerald Bay — best margins, premium plans
+    3: { baseRatioAdj: 0, planBias: 0 },       // Coral Springs
+    4: { baseRatioAdj: 0.01, planBias: -1 },   // Magnolia Park — entry-level plan mix
+    5: { baseRatioAdj: 0.005, planBias: 0 },   // Cypress Landing
+    6: { baseRatioAdj: -0.005, planBias: 1 },  // Lake Nona Shores — premium
+    7: { baseRatioAdj: 0.02, planBias: -1 },   // Riverview Heights — lower margin, secondary market
+  };
+
   for (let ci = 0; ci < COMMUNITIES.length; ci++) {
     const comm = COMMUNITIES[ci];
     const meta = COMM_META[comm];
     const lot = LOT_COSTS[comm] ?? 42000;
     const commCode = (COMMUNITIES.indexOf(comm) + 1) * 1000;
     const jobCount = communityJobCounts[ci] ?? 20;
+    const profile = communityProfile[ci] ?? { baseRatioAdj: 0, planBias: 0 };
 
     for (let j = 0; j < jobCount; j++) {
       const jobNum = commCode + j + 1;
-      const plan = pick(PLANS);
+      // Plan selection biased by community tier (premium/entry/mid).
+      const planRand = rand();
+      const plan =
+        profile.planBias > 0 && planRand > 0.55 ? PLANS[Math.min(PLANS.length - 1, 3 + (rand() < 0.5 ? 0 : 1))] :
+        profile.planBias < 0 && planRand > 0.55 ? PLANS[rand() < 0.5 ? 0 : 1] :
+        pick(PLANS);
       const sup = pick(SUPERS);
       const stageIdx = pickWeightedStageIdx();
       const stage = STAGES[stageIdx];
@@ -226,12 +245,28 @@ function generateJobs(): SHJob[] {
 
       const contractValue = between(380000, 620000);
       // Gross margin band tuned to stay realistic for production builders (~10-18%).
-      const costRatio = 0.82 + rand() * 0.08;
+      const costRatio = 0.82 + rand() * 0.08 + profile.baseRatioAdj;
       const estimatedCost = Math.round(contractValue * costRatio);
+
+      // Spend shape: some jobs spend front-loaded (materials early), some back-loaded (finishes heavy).
+      // 20% front-heavy, 20% back-heavy, 60% balanced.
+      const spendRoll = rand();
+      const spendShape: "front" | "balanced" | "back" =
+        spendRoll < 0.2 ? "front" : spendRoll > 0.8 ? "back" : "balanced";
       const spentRatio = completionPct / 100;
-      const actualCost = Math.round(estimatedCost * spentRatio * (0.95 + rand() * 0.1));
+      const spendCurveFactor =
+        spendShape === "front" ? (0.7 + 0.45 * spentRatio) :   // early jobs over-spent, tapers late
+        spendShape === "back" ? (0.55 + 0.55 * spentRatio) :   // early jobs under-spent, accelerates late
+        (0.92 + 0.12 * spentRatio);                             // balanced — near-linear
+      const actualCost = Math.round(estimatedCost * spentRatio * spendCurveFactor);
+
       const budget = Math.round(estimatedCost * (1.01 + rand() * 0.03));
-      const projectedFinalCost = Math.round(budget * (0.97 + rand() * 0.05));
+      // Projected final cost reflects spend trajectory: over-budget for front-heavy, on/under for back-heavy.
+      const finalCostBias =
+        spendShape === "front" ? 1.04 :
+        spendShape === "back" ? 0.97 :
+        1.00;
+      const projectedFinalCost = Math.round(budget * (finalCostBias - 0.02 + rand() * 0.05));
 
       /* Cost category breakdowns — realistic splits of total budget/actual */
       const permittingBudget = Math.round(budget * (0.03 + rand() * 0.02));  // 3-5% of budget
@@ -261,15 +296,24 @@ function generateJobs(): SHJob[] {
       const totalCycleDays = Math.max(1, daysBetween(startDate, refDate));
       const daysInPhase = between(3, 38);
 
-      /* Milestone dates based on stage progress */
-      const permitDate = stageIdx >= 0 ? addDays(startDate, between(10, 20)) : null;
-      const foundationDate = stageIdx >= 1 ? addDays(startDate, between(35, 60)) : null;
-      const framingDate = stageIdx >= 2 ? addDays(startDate, between(70, 110)) : null;
-      const mepDate = stageIdx >= 3 ? addDays(startDate, between(120, 170)) : null;
-      const drywallDate = stageIdx >= 3 && rand() > 0.25 ? addDays(startDate, between(150, 200)) : null;
-      const finishesDate = stageIdx >= 4 ? addDays(startDate, between(210, 280)) : null;
-      const coDate = stageIdx >= 5 ? addDays(startDate, between(290, 360)) : null;
-      const closingDate = stageIdx >= 5 && rand() > 0.6 ? addDays(startDate, between(340, 390)) : null;
+      /* Milestone dates — generate as monotonically increasing day offsets */
+      const permitOffset = between(10, 20);
+      const foundationOffset = Math.max(permitOffset + 15, between(35, 60));
+      const framingOffset = Math.max(foundationOffset + 20, between(70, 110));
+      const mepOffset = Math.max(framingOffset + 20, between(120, 170));
+      const drywallOffset = Math.max(mepOffset + 15, between(150, 200));
+      const finishesOffset = Math.max(drywallOffset + 20, between(210, 280));
+      const coOffset = Math.max(finishesOffset + 20, between(290, 360));
+      const closingOffset = Math.max(coOffset + 10, between(340, 390));
+
+      const permitDate = stageIdx >= 0 ? addDays(startDate, permitOffset) : null;
+      const foundationDate = stageIdx >= 1 ? addDays(startDate, foundationOffset) : null;
+      const framingDate = stageIdx >= 2 ? addDays(startDate, framingOffset) : null;
+      const mepDate = stageIdx >= 3 ? addDays(startDate, mepOffset) : null;
+      const drywallDate = stageIdx >= 3 && rand() > 0.25 ? addDays(startDate, drywallOffset) : null;
+      const finishesDate = stageIdx >= 4 ? addDays(startDate, finishesOffset) : null;
+      const coDate = stageIdx >= 5 ? addDays(startDate, coOffset) : null;
+      const closingDate = stageIdx >= 5 && rand() > 0.6 ? addDays(startDate, closingOffset) : null;
 
       const jobType = deriveJobType(stage, coDate);
 
@@ -426,7 +470,9 @@ function generateLoans(): SHLoan[] {
     const stageFloor = Math.max(0.48, stageCap - 0.12);
     const loanAmount = Math.round(job.contractValue * (stageFloor + rand() * (stageCap - stageFloor)));
     // Draw progression follows construction completion with modest variance.
-    const drawTarget = job.completionPct * (0.88 + rand() * 0.16) + (job.stage === "Permit" ? -8 : 0);
+    // Permit-stage jobs draw less aggressively (lenders release funds slowly early on).
+    const stageFactor = job.stage === "Permit" ? 0.55 : job.stage === "Foundation" ? 0.85 : 1.0;
+    const drawTarget = job.completionPct * (0.88 + rand() * 0.16) * stageFactor;
     const drawPct = Math.max(5, Math.min(97, Math.round(drawTarget * 10) / 10));
     const totalDrawn = Math.round(loanAmount * drawPct / 100);
     const interestRate = Math.round((5.50 + rand() * 2.5) * 100) / 100; // 5.50% to 8.00%
