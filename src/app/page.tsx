@@ -1,4 +1,5 @@
 import Hero from "@/components/sections/Hero";
+import StatsBand from "@/components/sections/StatsBand";
 import SocialProof from "@/components/sections/SocialProof";
 import ServicesOverview from "@/components/sections/ServicesOverview";
 import DashboardPreview from "@/components/sections/DashboardPreview";
@@ -9,6 +10,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <StatsBand />
       <ServicesOverview />
       <SocialProof />
       <WhyChooseUs />
