@@ -22,8 +22,8 @@ const demoHighlights = [
   "Permitting",
   "Loans & draws",
   "Construction",
-  "Sales analytics",
-  "Property management",
+  "Sales",
+  "Property mgmt",
   "P&L audits",
 ];
 
@@ -48,12 +48,23 @@ export default function DemoPageClient() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2.5 lg:justify-end">
-              {demoHighlights.map((highlight) => (
-                <span key={highlight} className="badge-dash">
-                  {highlight}
-                </span>
-              ))}
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 backdrop-blur-sm">
+              <div className="mb-3 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Coverage
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {demoHighlights.map((highlight, i) => (
+                  <span
+                    key={highlight}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:border-accent-400/30 hover:text-accent-200"
+                  >
+                    <span className="font-space-grotesk text-[0.58rem] text-slate-500">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    {highlight}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </Container>

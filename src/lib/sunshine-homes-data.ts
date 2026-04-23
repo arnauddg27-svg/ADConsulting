@@ -1370,7 +1370,9 @@ function generateAuditJobs(): SHAuditJob[] {
     const waterFiltration = rng.between(1395, 3500);
     const gopherTortoise = rng.between(0, 300);
     const treeSurvey = rng.between(200, 350);
-    const builderFeePct = rng.between(4, 6) / 100;
+    // Continuous 4.0-6.0% so the fee histogram spreads evenly across all 5
+    // buckets instead of clumping at 4/5/6% discrete values.
+    const builderFeePct = (4 + rng.rand() * 2) / 100;
     const contingency = rng.between(1000, 5000);
     const builderFee = Math.round(salePrice * builderFeePct);
 

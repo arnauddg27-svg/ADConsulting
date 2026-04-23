@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, Suspense, lazy, useEffect } from "react";
+import { createPortal } from "react-dom";
 import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
@@ -83,6 +84,15 @@ export default function SunshineDashboard() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [isFullPage]);
+
+  useEffect(() => {
+    if (!isFullPage) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [isFullPage]);
 
   /* Filtered data */
@@ -211,8 +221,30 @@ export default function SunshineDashboard() {
     }
   };
 
-  return (
+  /* Shell + its siblings (backdrop + exit FAB) — rendered inline when not
+   * fullpage, portaled to document.body when fullpage.
+   * Portaling escapes ANY ancestor stacking context, fixed-containing-block,
+   * overflow clip, or transform that would otherwise trap the z-120 shell
+   * below the site header (z-50). This is the only reliable cross-browser
+   * way to guarantee the fullpage shell covers the whole viewport. */
+  const shellMarkup = (
     <div className="sh-dashboard" data-sh-mode={mode} data-sh-fullpage={isFullPage ? "true" : "false"}>
+      {isFullPage && (
+        <>
+          <div
+            className="sh-fullpage-backdrop"
+            aria-hidden
+            onClick={() => setIsFullPage(false)}
+          />
+          <button
+            type="button"
+            className="sh-fullpage-exit-fab"
+            onClick={() => setIsFullPage(false)}
+          >
+            Exit Full Page
+          </button>
+        </>
+      )}
       <div className={`sh-shell ${isFullPage ? "sh-shell-fullpage" : ""}`} style={{ position: "relative" }}>
         <ShellBar
           mode={mode}
@@ -233,4 +265,9 @@ export default function SunshineDashboard() {
       </div>
     </div>
   );
+
+  if (isFullPage && typeof document !== "undefined") {
+    return createPortal(shellMarkup, document.body);
+  }
+  return shellMarkup;
 }

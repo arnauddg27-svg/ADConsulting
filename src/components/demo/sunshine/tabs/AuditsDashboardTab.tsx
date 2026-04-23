@@ -85,6 +85,24 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       .sort((a, b) => b.value - a.value);
   })();
 
+  /* By plan avg margin */
+  const byPlan = (() => {
+    const map = new Map<string, { count: number; totalMargin: number }>();
+    for (const a of audits) {
+      const e = map.get(a.plan) || { count: 0, totalMargin: 0 };
+      e.count++;
+      e.totalMargin += a.netMargin;
+      map.set(a.plan, e);
+    }
+    return Array.from(map.entries())
+      .map(([label, d]) => ({
+        label,
+        value: Math.round(d.totalMargin / d.count * 10) / 10,
+        status: (d.totalMargin / d.count) >= 15 ? "good" as const : (d.totalMargin / d.count) >= 5 ? "watch" as const : "alert" as const,
+      }))
+      .sort((a, b) => b.value - a.value);
+  })();
+
   /* CrossTab: Community x Time — drill-aware (Year → Quarter → Month → Day) */
   const communityTimeCross = (() => {
     if (drillMonth) {
@@ -132,6 +150,14 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
             items={byCommunity}
             formatValue={v => `${v}%`}
             onBarClick={label => { onCommunityClick(label); onDrill({ type: "audits-community-time", value: `${label}|`, label }); }}
+            showRank
+          />
+        </SHPanel>
+        <SHPanel kicker="By Plan" title="Average Net Margin">
+          <SHRankedBars
+            items={byPlan}
+            formatValue={v => `${v}%`}
+            onBarClick={label => onDrill({ type: "plan", value: label, label: `${label} — Jobs` })}
             showRank
           />
         </SHPanel>

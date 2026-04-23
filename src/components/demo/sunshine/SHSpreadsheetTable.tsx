@@ -25,15 +25,31 @@ function widthToPx(w: string): number {
   return parseInt(w, 10) || 100;
 }
 
+/** Minimum width required to render an uppercase 10px header label with
+ *  0.06em letter-spacing plus padding. Ensures column never truncates its
+ *  own header. ~7.2px per uppercase char + 24px padding (8+16). */
+function estimateHeaderWidth(label: string): number {
+  return Math.ceil(label.length * 7.2) + 24;
+}
+
 export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowClick }: SHSpreadsheetTableProps) {
   const HEADER_ROW_HEIGHT = 50;
   const DATA_ROW_HEIGHT = 30;
 
-  const normalizedColumns = columns.map((c, idx) => ({
-    ...c,
-    // Default Excel-like freeze panes: keep first two columns visible.
-    frozen: c.frozen ?? idx < 2,
-  }));
+  const normalizedColumns = columns.map((c, idx) => {
+    const specifiedPx = widthToPx(c.width);
+    const headerMinPx = estimateHeaderWidth(c.label);
+    // Effective width = max(specified, header-fit). Keeps consumer widths for
+    // columns whose data is wider than the label, and auto-grows narrow columns
+    // whose label would truncate otherwise.
+    const effectivePx = Math.max(specifiedPx, headerMinPx);
+    return {
+      ...c,
+      width: `${effectivePx}px`,
+      // Default Excel-like freeze panes: keep first two columns visible.
+      frozen: c.frozen ?? idx < 2,
+    };
+  });
 
   const frozenColumns = normalizedColumns.filter((c) => c.frozen);
   const scrollColumns = normalizedColumns.filter((c) => !c.frozen);

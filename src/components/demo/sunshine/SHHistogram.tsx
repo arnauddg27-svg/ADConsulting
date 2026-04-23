@@ -15,12 +15,19 @@ interface SHHistogramProps {
 
 export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const max = Math.max(...buckets.map(b => b.count), 1);
+  const counts = buckets.map(b => b.count);
+  const max = Math.max(...counts, 1);
+  // Amplify visual contrast: rescale non-zero buckets to a 25-100% range
+  // relative to (min non-zero .. max). Empty buckets show a 3% sliver so
+  // they stay clickable without distorting the scale.
+  const nonZero = counts.filter(c => c > 0);
+  const min = nonZero.length > 0 ? Math.min(...nonZero) : 0;
+  const range = max - min || 1;
 
   return (
     <div className="sh-histogram">
       {buckets.map((b, i) => {
-        const pct = (b.count / max) * 100;
+        const pct = b.count === 0 ? 3 : 25 + ((b.count - min) / range) * 75;
         const isHovered = hovered === i;
         return (
           <div

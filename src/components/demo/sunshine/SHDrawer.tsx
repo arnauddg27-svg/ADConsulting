@@ -215,13 +215,30 @@ function matchTimeToken(dateStr: string, token: string): boolean {
 
 /* ── Table renderer ──────────────────────────────────────────────── */
 
+/** Minimum width to render an uppercase 9px header label with 0.08em tracking
+ *  + 16px horizontal padding (8 each side). Keeps column from ever truncating
+ *  its own label. */
+function estimateHeaderWidth(label: string): number {
+  return Math.ceil(label.length * 6.8) + 16;
+}
+
 function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
-  const grid = columns.map(c => c.width).join(" ");
+  /* Auto-grow each column so the header label is never truncated.
+     Consumer-specified width wins when data is wider than the label. */
+  const effectiveColumns = columns.map(c => {
+    if (c.width.endsWith("fr")) return c; // proportional cols don't need adjustment
+    const specifiedPx = parseInt(c.width) || 80;
+    const headerPx = estimateHeaderWidth(c.label);
+    const effective = Math.max(specifiedPx, headerPx);
+    return { ...c, width: `${effective}px` };
+  });
+  const grid = effectiveColumns.map(c => c.width).join(" ");
   /* Compute min-width so the grid can scroll horizontally when content overflows */
-  const minW = columns.reduce((s, c) => {
+  const minW = effectiveColumns.reduce((s, c) => {
     if (c.width.endsWith("fr")) return s + Math.round(parseFloat(c.width) * 180);
     return s + (parseInt(c.width) || 80);
   }, 0);
+  columns = effectiveColumns;
 
   const rawText = (row: Record<string, unknown>, key: string) => {
     const value = row[key];
@@ -252,6 +269,134 @@ function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
   );
 }
 
+/* ── Pro Forma compact card renderer ─────────────────────────────── */
+
+function renderProForma(audit: SHAuditJob) {
+  const Row = ({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) => (
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      padding: "4px 0",
+      borderBottom: "1px solid var(--sh-border-dim)",
+      fontSize: 11,
+      fontWeight: emphasis ? 700 : 400,
+      color: emphasis ? "var(--sh-text-primary)" : "var(--sh-text-secondary)",
+    }}>
+      <span>{label}</span>
+      <span style={{ fontVariantNumeric: "tabular-nums" }}>{value}</span>
+    </div>
+  );
+
+  const Section = ({
+    title, children, accent,
+  }: { title: string; children: React.ReactNode; accent?: string }) => (
+    <div style={{
+      border: "1px solid var(--sh-border)",
+      borderRadius: 8,
+      padding: "10px 12px",
+      background: "var(--sh-bg-surface)",
+    }}>
+      <div style={{
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: accent ?? "var(--sh-accent)",
+        marginBottom: 6,
+        paddingBottom: 6,
+        borderBottom: `1px solid ${accent ?? "rgba(20,184,166,0.25)"}`,
+      }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+
+  const netMarginTone =
+    audit.netMargin >= 15 ? "var(--sh-accent)" :
+    audit.netMargin >= 5 ? "var(--sh-warning)" :
+    "var(--sh-danger)";
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 10,
+        marginBottom: 10,
+      }}>
+        {/* Revenue */}
+        <Section title="Revenue">
+          <Row label="Sale Price" value={fmt$(audit.salePrice)} />
+          <Row label="Proceeds" value={fmt$(audit.proceeds)} />
+          <Row label="Seller Credit" value={fmt$(audit.sellerCredit)} />
+        </Section>
+
+        {/* Direct Costs */}
+        <Section title="Direct Costs">
+          <Row label="Lot / Land" value={fmt$(audit.lotLand)} />
+          <Row label="Permitting" value={fmt$(audit.permitting)} />
+          <Row label="Site Work" value={fmt$(audit.siteWork)} />
+          <Row label="Vertical" value={fmt$(audit.vertical)} />
+          <Row label="Options" value={fmt$(audit.options)} />
+          <Row label="Dirt / Pad" value={fmt$(audit.dirtPad)} />
+          <Row label="Dumpsters" value={fmt$(audit.dumpsters)} />
+          <Row label="Total Direct" value={fmt$(audit.totalDirectCost)} emphasis />
+        </Section>
+
+        {/* Indirect Costs */}
+        <Section title="Indirect Costs">
+          <Row label="Financing" value={fmt$(audit.financing)} />
+          <Row label="Insurance" value={fmt$(audit.insurance)} />
+          <Row label="Closing Cost" value={fmt$(audit.closingCost)} />
+          <Row label="Total Indirect" value={fmt$(audit.totalIndirectCost)} emphasis />
+        </Section>
+      </div>
+
+      {/* Bottom line summary — full width */}
+      <div style={{
+        border: `1px solid ${netMarginTone}66`,
+        borderRadius: 8,
+        padding: "12px 14px",
+        background: `linear-gradient(135deg, ${netMarginTone}14, transparent)`,
+        display: "grid",
+        gridTemplateColumns: "repeat(6, 1fr)",
+        gap: 12,
+      }}>
+        {[
+          { label: "Revenue", value: fmt$(audit.salePrice), tone: "var(--sh-text-secondary)" },
+          { label: "Total Cost", value: fmt$(audit.totalCost), tone: "var(--sh-text-secondary)" },
+          { label: "Builder Fee", value: `${fmt$(audit.builderFee)} (${audit.builderFeePct}%)`, tone: "var(--sh-text-secondary)" },
+          { label: "Contingency", value: fmt$(audit.contingency), tone: "var(--sh-text-secondary)" },
+          { label: "Net Profit", value: fmt$(audit.netProfit), tone: netMarginTone },
+          { label: "Net Margin", value: fmtPct(audit.netMargin), tone: netMarginTone },
+        ].map(kpi => (
+          <div key={kpi.label}>
+            <div style={{
+              fontSize: 8,
+              fontWeight: 600,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--sh-text-muted)",
+            }}>
+              {kpi.label}
+            </div>
+            <div style={{
+              marginTop: 4,
+              fontSize: 13,
+              fontWeight: 700,
+              color: kpi.tone,
+              fontVariantNumeric: "tabular-nums",
+            }}>
+              {kpi.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main component ──────────────────────────────────────────────── */
 
 export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
@@ -262,6 +407,9 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
   }, [onClose]);
 
   if (!detail) return null;
+
+  // Pro Forma mode — track separately from rows to render custom compact layout.
+  let proFormaAudit: SHAuditJob | null = null;
 
   let title = detail.label;
   let subtitle = "";
@@ -323,38 +471,11 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       ];
 
       if (audit) {
-        /* Pro Forma P&L Card — like the export.pdf */
-        rows = [
-          { field: "══ REVENUE ══", value: "" },
-          { field: "Sale Price", value: fmt$(audit.salePrice) },
-          { field: "Proceeds", value: fmt$(audit.proceeds) },
-          { field: "Seller Credit", value: fmt$(audit.sellerCredit) },
-          { field: "", value: "" },
-          { field: "══ DIRECT COSTS ══", value: "" },
-          { field: "Lot / Land", value: fmt$(audit.lotLand) },
-          { field: "Permitting", value: fmt$(audit.permitting) },
-          { field: "Site Work", value: fmt$(audit.siteWork) },
-          { field: "Vertical", value: fmt$(audit.vertical) },
-          { field: "Options", value: fmt$(audit.options) },
-          { field: "Dirt / Pad Build", value: fmt$(audit.dirtPad) },
-          { field: "Dumpsters / Toilets", value: fmt$(audit.dumpsters) },
-          { field: "Total Direct", value: fmt$(audit.totalDirectCost) },
-          { field: "", value: "" },
-          { field: "══ INDIRECT COSTS ══", value: "" },
-          { field: "Financing", value: fmt$(audit.financing) },
-          { field: "Insurance / Builder's Risk", value: fmt$(audit.insurance) },
-          { field: "Closing Cost", value: fmt$(audit.closingCost) },
-          { field: "Total Indirect", value: fmt$(audit.totalIndirectCost) },
-          { field: "", value: "" },
-          { field: "══ TOTALS ══", value: "" },
-          { field: "Total Cost", value: fmt$(audit.totalCost) },
-          { field: "Builder Fee", value: `${fmt$(audit.builderFee)} (${audit.builderFeePct}%)` },
-          { field: "Contingency", value: fmt$(audit.contingency) },
-          { field: "", value: "" },
-          { field: "══ BOTTOM LINE ══", value: "" },
-          { field: "Net Profit", value: fmt$(audit.netProfit) },
-          { field: "Net Margin", value: fmtPct(audit.netMargin) },
-        ];
+        /* Pro Forma P&L — rendered as a compact 3-column card grid instead
+         * of a tall sparse rows table. Row count is reported as the logical
+         * number of P&L line items visible in the pro forma. */
+        proFormaAudit = audit;
+        rows = new Array(14).fill({}); // count-only, not rendered
       } else {
         /* Standard job detail + related sales/loans */
         rows = [
@@ -1331,9 +1452,9 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Body — Pro Forma card-grid OR standard table */}
         <div style={{ flex: 1, overflow: "hidden", padding: "0 4px", display: "flex", flexDirection: "column" }}>
-          {renderTable(columns, rows)}
+          {proFormaAudit ? renderProForma(proFormaAudit) : renderTable(columns, rows)}
         </div>
       </div>
     </>
