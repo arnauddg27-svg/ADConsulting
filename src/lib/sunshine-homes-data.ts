@@ -415,7 +415,16 @@ function generateLoans(): SHLoan[] {
     const job = loanJobs[i];
     const lender = pick(EXTRA_LENDERS);
     // Loan principal tracks home value and stage profile rather than random flat bands.
-    const loanAmount = Math.round(job.contractValue * (0.52 + rand() * 0.24)); // 52-76% LTC/LTV band
+    // Lenders cap early-stage commitment and ramp up for later-stage builds.
+    const stageCap =
+      job.stage === "Permit" ? 0.60 :
+      job.stage === "Foundation" ? 0.66 :
+      job.stage === "Framing" ? 0.72 :
+      job.stage === "MEP / Drywall" ? 0.74 :
+      job.stage === "Finishes" ? 0.76 :
+      0.78; // Closing — loan near fully committed
+    const stageFloor = Math.max(0.48, stageCap - 0.12);
+    const loanAmount = Math.round(job.contractValue * (stageFloor + rand() * (stageCap - stageFloor)));
     // Draw progression follows construction completion with modest variance.
     const drawTarget = job.completionPct * (0.88 + rand() * 0.16) + (job.stage === "Permit" ? -8 : 0);
     const drawPct = Math.max(5, Math.min(97, Math.round(drawTarget * 10) / 10));
@@ -644,13 +653,23 @@ function generatePMUnits(): SHPropertyUnit[] {
       const info = planBedsBaths[plan];
       const occupancy = occupancyPool[id - 1] ?? "leased";
       const isOccupied = occupancy === "leased" || occupancy === "eviction" || occupancy === "notice-to-vacate";
-      const marketRent = between(1800, 3600);
-      const monthlyRent = isOccupied ? marketRent - between(0, 150) : 0;
+      // Market rent scales with sqft — realistic Florida (Orlando/Tampa/Jacksonville) 2024-2026
+      const baseRentPerSqft = 1.15 + rand() * 0.35; // $1.15-$1.50/sqft
+      const marketRent = Math.round(info.sqft * baseRentPerSqft / 25) * 25; // snap to $25
+      const monthlyRent = isOccupied ? marketRent - between(0, 120) : 0;
       const tenant = isOccupied ? `${pick(tenantFamilies)} Family` : null;
       const leaseStartYear = 2022 + (id % 5); // spread across 2022-2026
       const leaseStartMonth = between(1, 12);
-      const leaseStart = dateToStr(leaseStartYear, leaseStartMonth, between(1, 28));
-      const leaseEnd = isOccupied ? dateToStr(2026 + (rand() > 0.5 ? 1 : 0), between(1, 12), between(1, 28)) : null;
+      const leaseStartDay = between(1, 28);
+      const leaseStart = dateToStr(leaseStartYear, leaseStartMonth, leaseStartDay);
+      // Lease end = leaseStart + 12 months (standard 1-year lease), with small variance
+      const leaseEnd = isOccupied
+        ? (() => {
+            const endMonth = leaseStartMonth;
+            const endYear = leaseStartYear + 1 + (rand() > 0.7 ? 1 : 0); // ~30% are 2-year leases
+            return dateToStr(endYear, endMonth, leaseStartDay);
+          })()
+        : null;
       const isDelinquent = isOccupied && rand() > 0.80;
       const delinquentAmount = isDelinquent ? monthlyRent : 0;
       const daysPastDue = isDelinquent ? between(3, 27) : 0; // stay under 28
@@ -689,16 +708,17 @@ export const propertyUnits: SHPropertyUnit[] = generatePMUnits();
    SUBDIVISIONS (10 total) — hand-crafted
    ═══════════════════════════════════════════════════════════ */
 export const subdivisions: SHSubdivision[] = [
-  { id: 1, projectName: "Sunshine Ridge Phase 3", community: "Sunshine Ridge", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 45, lotsSold: 32, lotsUnderConstruction: 8, lotsCompleted: 22, lotsRemaining: 13, totalAcres: 28, landCost: 2250000, developmentCost: 1800000, totalInvestment: 4050000, projectedRevenue: 22500000, projectedProfit: 5625000, profitMarginPct: 25.0, status: "active", startDate: "2024-08-15", estCompletionDate: "2027-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 50000, avgHomePrice: 515000, absorptionRate: 2.8, monthsOfInventory: 4.6 },
-  { id: 2, projectName: "Palm Coast Estates Phase 2", community: "Palm Coast Estates", city: "Jacksonville", entity: "Sunshine Homes East LLC", totalLots: 38, lotsSold: 22, lotsUnderConstruction: 8, lotsCompleted: 12, lotsRemaining: 16, totalAcres: 22, landCost: 1520000, developmentCost: 1140000, totalInvestment: 2660000, projectedRevenue: 17100000, projectedProfit: 3990000, profitMarginPct: 23.3, status: "active", startDate: "2024-10-01", estCompletionDate: "2027-09-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 40000, avgHomePrice: 450000, absorptionRate: 2.2, monthsOfInventory: 7.3 },
-  { id: 3, projectName: "Emerald Bay Phase 2", community: "Emerald Bay", city: "Tampa", entity: "Sunshine Homes LLC", totalLots: 52, lotsSold: 38, lotsUnderConstruction: 8, lotsCompleted: 28, lotsRemaining: 14, totalAcres: 35, landCost: 2600000, developmentCost: 2080000, totalInvestment: 4680000, projectedRevenue: 27040000, projectedProfit: 7020000, profitMarginPct: 26.0, status: "active", startDate: "2024-06-10", estCompletionDate: "2027-03-31", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 50000, avgHomePrice: 520000, absorptionRate: 3.2, monthsOfInventory: 4.4 },
+  // Margins span 14.5% - 28.5% to reflect real Sun Belt variance (underperforming infill, strong greenfield).
+  { id: 1, projectName: "Sunshine Ridge Phase 3", community: "Sunshine Ridge", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 45, lotsSold: 32, lotsUnderConstruction: 8, lotsCompleted: 22, lotsRemaining: 13, totalAcres: 28, landCost: 2250000, developmentCost: 1800000, totalInvestment: 4050000, projectedRevenue: 22500000, projectedProfit: 5175000, profitMarginPct: 23.0, status: "active", startDate: "2024-08-15", estCompletionDate: "2027-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 50000, avgHomePrice: 515000, absorptionRate: 2.8, monthsOfInventory: 4.6 },
+  { id: 2, projectName: "Palm Coast Estates Phase 2", community: "Palm Coast Estates", city: "Jacksonville", entity: "Sunshine Homes East LLC", totalLots: 38, lotsSold: 22, lotsUnderConstruction: 8, lotsCompleted: 12, lotsRemaining: 16, totalAcres: 22, landCost: 1520000, developmentCost: 1140000, totalInvestment: 2660000, projectedRevenue: 17100000, projectedProfit: 2650000, profitMarginPct: 15.5, status: "active", startDate: "2024-10-01", estCompletionDate: "2027-09-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 40000, avgHomePrice: 450000, absorptionRate: 2.2, monthsOfInventory: 7.3 },
+  { id: 3, projectName: "Emerald Bay Phase 2", community: "Emerald Bay", city: "Tampa", entity: "Sunshine Homes LLC", totalLots: 52, lotsSold: 38, lotsUnderConstruction: 8, lotsCompleted: 28, lotsRemaining: 14, totalAcres: 35, landCost: 2600000, developmentCost: 2080000, totalInvestment: 4680000, projectedRevenue: 27040000, projectedProfit: 7705000, profitMarginPct: 28.5, status: "active", startDate: "2024-06-10", estCompletionDate: "2027-03-31", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 50000, avgHomePrice: 520000, absorptionRate: 3.2, monthsOfInventory: 4.4 },
   { id: 4, projectName: "Coral Springs Village Ph 1", community: "Coral Springs Village", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 30, lotsSold: 28, lotsUnderConstruction: 8, lotsCompleted: 18, lotsRemaining: 2, totalAcres: 18, landCost: 1350000, developmentCost: 1080000, totalInvestment: 2430000, projectedRevenue: 15600000, projectedProfit: 3900000, profitMarginPct: 25.0, status: "active", startDate: "2024-04-20", estCompletionDate: "2026-12-31", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 45000, avgHomePrice: 520000, absorptionRate: 2.5, monthsOfInventory: 0.8 },
-  { id: 5, projectName: "Lake Nona Shores Parcel A", community: "Lake Nona Shores", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 65, lotsSold: 28, lotsUnderConstruction: 10, lotsCompleted: 8, lotsRemaining: 37, totalAcres: 40, landCost: 3900000, developmentCost: 3250000, totalInvestment: 7150000, projectedRevenue: 36400000, projectedProfit: 9100000, profitMarginPct: 25.0, status: "pre-development", startDate: "2025-03-01", estCompletionDate: "2028-09-30", infraComplete: false, zoningApproved: true, platRecorded: true, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 60000, avgHomePrice: 560000, absorptionRate: 2.0, monthsOfInventory: 18.5 },
-  { id: 6, projectName: "Riverview Heights Phase 1", community: "Riverview Heights", city: "Lakeland", entity: "Sunshine Homes East LLC", totalLots: 32, lotsSold: 14, lotsUnderConstruction: 6, lotsCompleted: 5, lotsRemaining: 18, totalAcres: 18, landCost: 1120000, developmentCost: 896000, totalInvestment: 2016000, projectedRevenue: 14720000, projectedProfit: 3312000, profitMarginPct: 22.5, status: "pre-development", startDate: "2025-01-15", estCompletionDate: "2028-03-31", infraComplete: false, zoningApproved: true, platRecorded: false, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 35000, avgHomePrice: 460000, absorptionRate: 1.8, monthsOfInventory: 10.0 },
-  { id: 7, projectName: "Magnolia Park Phase 1", community: "Magnolia Park", city: "Tampa", entity: "Sunshine Homes East LLC", totalLots: 40, lotsSold: 40, lotsUnderConstruction: 0, lotsCompleted: 40, lotsRemaining: 0, totalAcres: 24, landCost: 1680000, developmentCost: 1344000, totalInvestment: 3024000, projectedRevenue: 19600000, projectedProfit: 4900000, profitMarginPct: 25.0, status: "sold-out", startDate: "2023-06-01", estCompletionDate: "2026-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 42000, avgHomePrice: 490000, absorptionRate: 4.0, monthsOfInventory: 0.0 },
-  { id: 8, projectName: "Cypress Landing Phase 2", community: "Cypress Landing", city: "Jacksonville", entity: "Sunshine Homes East LLC", totalLots: 35, lotsSold: 5, lotsUnderConstruction: 0, lotsCompleted: 0, lotsRemaining: 30, totalAcres: 20, landCost: 1400000, developmentCost: 1050000, totalInvestment: 2450000, projectedRevenue: 16800000, projectedProfit: 3780000, profitMarginPct: 22.5, status: "planning", startDate: "2026-01-01", estCompletionDate: "2029-01-31", infraComplete: false, zoningApproved: false, platRecorded: false, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 40000, avgHomePrice: 480000, absorptionRate: 1.5, monthsOfInventory: 20.0 },
-  { id: 9, projectName: "Magnolia Park Phase 2", community: "Magnolia Park", city: "Tampa", entity: "Sunshine Homes East LLC", totalLots: 40, lotsSold: 12, lotsUnderConstruction: 5, lotsCompleted: 4, lotsRemaining: 28, totalAcres: 24, landCost: 1680000, developmentCost: 1400000, totalInvestment: 3080000, projectedRevenue: 20000000, projectedProfit: 5200000, profitMarginPct: 26.0, status: "active", startDate: "2025-06-01", estCompletionDate: "2028-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: false, retentionPonds: true, avgLotPrice: 42000, avgHomePrice: 500000, absorptionRate: 2.0, monthsOfInventory: 14.0 },
-  { id: 10, projectName: "Lake Nona Shores Parcel B", community: "Lake Nona Shores", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 42, lotsSold: 8, lotsUnderConstruction: 3, lotsCompleted: 2, lotsRemaining: 34, totalAcres: 25, landCost: 2520000, developmentCost: 2100000, totalInvestment: 4620000, projectedRevenue: 23940000, projectedProfit: 5880000, profitMarginPct: 24.6, status: "pre-development", startDate: "2025-09-01", estCompletionDate: "2029-03-31", infraComplete: false, zoningApproved: true, platRecorded: true, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 60000, avgHomePrice: 570000, absorptionRate: 1.6, monthsOfInventory: 21.3 },
+  { id: 5, projectName: "Lake Nona Shores Parcel A", community: "Lake Nona Shores", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 65, lotsSold: 28, lotsUnderConstruction: 10, lotsCompleted: 8, lotsRemaining: 37, totalAcres: 40, landCost: 3900000, developmentCost: 3250000, totalInvestment: 7150000, projectedRevenue: 36400000, projectedProfit: 7280000, profitMarginPct: 20.0, status: "pre-development", startDate: "2025-03-01", estCompletionDate: "2028-09-30", infraComplete: false, zoningApproved: true, platRecorded: true, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 60000, avgHomePrice: 560000, absorptionRate: 2.0, monthsOfInventory: 18.5 },
+  { id: 6, projectName: "Riverview Heights Phase 1", community: "Riverview Heights", city: "Lakeland", entity: "Sunshine Homes East LLC", totalLots: 32, lotsSold: 14, lotsUnderConstruction: 6, lotsCompleted: 5, lotsRemaining: 18, totalAcres: 18, landCost: 1120000, developmentCost: 896000, totalInvestment: 2016000, projectedRevenue: 14720000, projectedProfit: 2135000, profitMarginPct: 14.5, status: "pre-development", startDate: "2025-01-15", estCompletionDate: "2028-03-31", infraComplete: false, zoningApproved: true, platRecorded: false, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 35000, avgHomePrice: 460000, absorptionRate: 1.8, monthsOfInventory: 10.0 },
+  { id: 7, projectName: "Magnolia Park Phase 1", community: "Magnolia Park", city: "Tampa", entity: "Sunshine Homes East LLC", totalLots: 40, lotsSold: 40, lotsUnderConstruction: 0, lotsCompleted: 40, lotsRemaining: 0, totalAcres: 24, landCost: 1680000, developmentCost: 1344000, totalInvestment: 3024000, projectedRevenue: 19600000, projectedProfit: 5390000, profitMarginPct: 27.5, status: "sold-out", startDate: "2023-06-01", estCompletionDate: "2026-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: true, retentionPonds: true, avgLotPrice: 42000, avgHomePrice: 490000, absorptionRate: 4.0, monthsOfInventory: 0.0 },
+  { id: 8, projectName: "Cypress Landing Phase 2", community: "Cypress Landing", city: "Jacksonville", entity: "Sunshine Homes East LLC", totalLots: 35, lotsSold: 5, lotsUnderConstruction: 0, lotsCompleted: 0, lotsRemaining: 30, totalAcres: 20, landCost: 1400000, developmentCost: 1050000, totalInvestment: 2450000, projectedRevenue: 16800000, projectedProfit: 2940000, profitMarginPct: 17.5, status: "planning", startDate: "2026-01-01", estCompletionDate: "2029-01-31", infraComplete: false, zoningApproved: false, platRecorded: false, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 40000, avgHomePrice: 480000, absorptionRate: 1.5, monthsOfInventory: 20.0 },
+  { id: 9, projectName: "Magnolia Park Phase 2", community: "Magnolia Park", city: "Tampa", entity: "Sunshine Homes East LLC", totalLots: 40, lotsSold: 12, lotsUnderConstruction: 5, lotsCompleted: 4, lotsRemaining: 28, totalAcres: 24, landCost: 1680000, developmentCost: 1400000, totalInvestment: 3080000, projectedRevenue: 20000000, projectedProfit: 4400000, profitMarginPct: 22.0, status: "active", startDate: "2025-06-01", estCompletionDate: "2028-06-30", infraComplete: true, zoningApproved: true, platRecorded: true, utilityStubs: true, roadsComplete: false, retentionPonds: true, avgLotPrice: 42000, avgHomePrice: 500000, absorptionRate: 2.0, monthsOfInventory: 14.0 },
+  { id: 10, projectName: "Lake Nona Shores Parcel B", community: "Lake Nona Shores", city: "Orlando", entity: "Sunshine Homes LLC", totalLots: 42, lotsSold: 8, lotsUnderConstruction: 3, lotsCompleted: 2, lotsRemaining: 34, totalAcres: 25, landCost: 2520000, developmentCost: 2100000, totalInvestment: 4620000, projectedRevenue: 23940000, projectedProfit: 4405000, profitMarginPct: 18.4, status: "pre-development", startDate: "2025-09-01", estCompletionDate: "2029-03-31", infraComplete: false, zoningApproved: true, platRecorded: true, utilityStubs: false, roadsComplete: false, retentionPonds: false, avgLotPrice: 60000, avgHomePrice: 570000, absorptionRate: 1.6, monthsOfInventory: 21.3 },
 ];
 
 /* ═══════════════════════════════════════════════════════════
@@ -740,7 +760,7 @@ function isInTimePeriod(dateStr: string | null | undefined, period: import("@/ty
   return true;
 }
 
-export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseStart?: string; leaseEnd?: string | null }>(
+export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; status?: string; occupancy?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseStart?: string; leaseEnd?: string | null }>(
   item: T,
   filters: SHDashboardFilters,
 ): boolean {
@@ -749,13 +769,11 @@ export function matchFilters<T extends { community?: string; city?: string; enti
   if (filters.community && item.community !== filters.community) return false;
   if (filters.stage && item.stage && item.stage !== filters.stage) return false;
   if (filters.status) {
-    // Check 'status' property (most types) or 'occupancy' (PropertyUnit)
-    const itemStatus = (item as any).status ?? (item as any).occupancy ?? null;
+    const itemStatus = item.status ?? item.occupancy ?? null;
     if (itemStatus && String(itemStatus).toLowerCase() !== filters.status.toLowerCase()) return false;
   }
   if (filters.drillYear || filters.drillQuarter || filters.drillMonth) {
-    // Find the primary date field
-    const dateStr: string | null = (item as any).startDate ?? (item as any).contractDate ?? (item as any).submittedDate ?? (item as any).closeDate ?? (item as any).expirationDate ?? (item as any).leaseStart ?? (item as any).leaseEnd ?? null;
+    const dateStr: string | null = item.startDate ?? item.contractDate ?? item.submittedDate ?? item.closeDate ?? item.expirationDate ?? item.leaseStart ?? item.leaseEnd ?? null;
     if (dateStr) {
       const d = new Date(dateStr);
       if (filters.drillYear && d.getFullYear() !== filters.drillYear) return false;
@@ -1307,8 +1325,9 @@ function generateAuditJobs(): SHAuditJob[] {
     const desiredNetProfit = Math.round(salePrice * targetNetMarginPct);
     const desiredTotalCost = Math.round(salePrice - contingency - builderFee - desiredNetProfit);
     const solvedVertical = desiredTotalCost - (nonVerticalDirect + totalIndirect);
-    // Keep vertical cost in realistic bounds, but close to the solved target.
-    vertical = Math.max(170000, Math.min(320000, solvedVertical));
+    // Widened clamp (140k-380k) covers price range $380k-$720k without silently breaking P&L.
+    // When clamping does hit, we re-solve netProfit to keep the audit reconciliation intact.
+    vertical = Math.max(140000, Math.min(380000, solvedVertical));
 
     const totalDirect = nonVerticalDirect + vertical;
     const totalCost = totalDirect + totalIndirect;
