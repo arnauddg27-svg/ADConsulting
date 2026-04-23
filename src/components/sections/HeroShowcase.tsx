@@ -1,9 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Database, FileSpreadsheet, Cloud, BarChart3, Bell, LayoutGrid, Activity, TrendingUp } from "lucide-react";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import TiltCard from "@/components/ui/TiltCard";
+
+/** Reads the user's prefers-reduced-motion preference. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
 
 /**
  * The Hero "showcase" block:
@@ -34,6 +48,7 @@ export default function HeroShowcase() {
    ════════════════════════════════════════════════════════════ */
 
 function PipelineDiagram() {
+  const reduceMotion = usePrefersReducedMotion();
   // Node positions (viewBox 600 x 280)
   const sources = [
     { x: 40, y: 50, label: "ERP", icon: Database },
@@ -108,9 +123,11 @@ function PipelineDiagram() {
           return (
             <g key={`src-path-${i}`}>
               <path d={d} stroke="url(#pathGrad)" strokeWidth="1.5" fill="none" />
-              <circle r="3" fill="url(#dotGrad)">
-                <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6}s`} path={d} />
-              </circle>
+              {!reduceMotion && (
+                <circle r="3" fill="url(#dotGrad)">
+                  <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6}s`} path={d} />
+                </circle>
+              )}
             </g>
           );
         })}
@@ -121,9 +138,11 @@ function PipelineDiagram() {
           return (
             <g key={`app-path-${i}`}>
               <path d={d} stroke="url(#pathGrad)" strokeWidth="1.5" fill="none" />
-              <circle r="3" fill="url(#dotGrad)">
-                <animateMotion dur={`${3.2 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.8 + 1.5}s`} path={d} />
-              </circle>
+              {!reduceMotion && (
+                <circle r="3" fill="url(#dotGrad)">
+                  <animateMotion dur={`${3.2 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.8 + 1.5}s`} path={d} />
+                </circle>
+              )}
             </g>
           );
         })}
@@ -146,18 +165,20 @@ function PipelineDiagram() {
             stroke="rgba(52,211,153,0.4)"
             strokeWidth="1.5"
           />
-          {/* pulse ring */}
-          <circle
-            cx={warehouse.x}
-            cy={warehouse.y}
-            r="56"
-            fill="none"
-            stroke="rgba(52,211,153,0.5)"
-            strokeWidth="1"
-          >
-            <animate attributeName="r" from="56" to="78" dur="3s" repeatCount="indefinite" />
-            <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
-          </circle>
+          {/* pulse ring (skipped under reduced-motion) */}
+          {!reduceMotion && (
+            <circle
+              cx={warehouse.x}
+              cy={warehouse.y}
+              r="56"
+              fill="none"
+              stroke="rgba(52,211,153,0.5)"
+              strokeWidth="1"
+            >
+              <animate attributeName="r" from="56" to="78" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
+            </circle>
+          )}
 
           <g transform={`translate(${warehouse.x - 9} ${warehouse.y - 18})`}>
             <Database size={18} className="text-accent-300" />

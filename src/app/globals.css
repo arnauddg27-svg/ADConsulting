@@ -453,3 +453,25 @@
     will-change: transform, opacity;
   }
 }
+
+/* Accessibility: honor reduced-motion preference globally
+   — stops animateMotion, keyframe animations, and transitions for users
+   who opted out at the OS level. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* SVG SMIL animations (animateMotion, animate, etc.) */
+  animateMotion,
+  animate,
+  animateTransform {
+    animation: none;
+    fill: freeze;
+  }
+}

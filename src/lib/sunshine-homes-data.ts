@@ -121,6 +121,17 @@ function dateToStr(y: number, m: number, d: number): string {
   return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
+/** Return the number of days in a given month (handles leap years). */
+function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+/** Build a date string, clamping day to the last valid day of that month. */
+function dateToStrSafe(y: number, m: number, d: number): string {
+  const maxDay = daysInMonth(y, m);
+  return dateToStr(y, m, Math.min(d, maxDay));
+}
+
 function quarterKey(dateStr: string): string | null {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return null;
@@ -248,17 +259,21 @@ function generateJobs(): SHJob[] {
       const costRatio = 0.82 + rand() * 0.08 + profile.baseRatioAdj;
       const estimatedCost = Math.round(contractValue * costRatio);
 
-      // Spend shape: some jobs spend front-loaded (materials early), some back-loaded (finishes heavy).
-      // 20% front-heavy, 20% back-heavy, 60% balanced.
+      // Spend shape: some jobs spend front-loaded (materials/land early), others back-loaded
+      // (finishes heavy). 20% front-heavy, 20% back-heavy, 60% balanced. Uses a power curve
+      // so actual/estimatedCost converges to ~1.0 at completion regardless of shape:
+      //   f(c) = c^exp  where exp<1 is front-heavy, exp>1 is back-heavy
       const spendRoll = rand();
       const spendShape: "front" | "balanced" | "back" =
         spendRoll < 0.2 ? "front" : spendRoll > 0.8 ? "back" : "balanced";
       const spentRatio = completionPct / 100;
-      const spendCurveFactor =
-        spendShape === "front" ? (0.7 + 0.45 * spentRatio) :   // early jobs over-spent, tapers late
-        spendShape === "back" ? (0.55 + 0.55 * spentRatio) :   // early jobs under-spent, accelerates late
-        (0.92 + 0.12 * spentRatio);                             // balanced — near-linear
-      const actualCost = Math.round(estimatedCost * spentRatio * spendCurveFactor);
+      const shapeExponent =
+        spendShape === "front" ? 0.75 :   // spent more than linear early, plateaus late
+        spendShape === "back" ? 1.35 :    // spent less than linear early, accelerates late
+        1.0;                              // near-linear
+      const spendProgress = Math.pow(spentRatio, shapeExponent);
+      // Small variance around the curve; at completion this band is 0.97-1.03x estimatedCost.
+      const actualCost = Math.round(estimatedCost * spendProgress * (0.97 + rand() * 0.06));
 
       const budget = Math.round(estimatedCost * (1.01 + rand() * 0.03));
       // Projected final cost reflects spend trajectory: over-budget for front-heavy, on/under for back-heavy.
@@ -708,12 +723,13 @@ function generatePMUnits(): SHPropertyUnit[] {
       const leaseStartMonth = between(1, 12);
       const leaseStartDay = between(1, 28);
       const leaseStart = dateToStr(leaseStartYear, leaseStartMonth, leaseStartDay);
-      // Lease end = leaseStart + 12 months (standard 1-year lease), with small variance
+      // Lease end = leaseStart + 12 months (standard 1-year lease), with small variance.
+      // Clamp the day to the valid last day of the end month (handles Feb 29 → non-leap).
       const leaseEnd = isOccupied
         ? (() => {
             const endMonth = leaseStartMonth;
             const endYear = leaseStartYear + 1 + (rand() > 0.7 ? 1 : 0); // ~30% are 2-year leases
-            return dateToStr(endYear, endMonth, leaseStartDay);
+            return dateToStrSafe(endYear, endMonth, leaseStartDay);
           })()
         : null;
       const isDelinquent = isOccupied && rand() > 0.80;
