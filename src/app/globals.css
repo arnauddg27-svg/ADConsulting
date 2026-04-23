@@ -202,7 +202,10 @@
 
   main:not(.sh-main) {
     position: relative;
-    isolation: isolate;
+    /* NOTE: do NOT add `isolation: isolate` here — it creates a stacking
+       context that traps the fullpage dashboard (z-120) below the site
+       Header (z-50) in root stacking. The mix-blend-mode noise layer
+       (body::after) sits at z-index: -1 and is unaffected. */
   }
 
   a {
