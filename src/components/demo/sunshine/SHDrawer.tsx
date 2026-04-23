@@ -216,10 +216,11 @@ function matchTimeToken(dateStr: string, token: string): boolean {
 /* ── Table renderer ──────────────────────────────────────────────── */
 
 /** Minimum width to render an uppercase 9px header label with 0.08em tracking
- *  + 16px horizontal padding (8 each side). Keeps column from ever truncating
- *  its own label. */
+ *  + 16px horizontal padding (8 each side) + small defensive margin for
+ *  wider characters (M/W) and fonts that render slightly heavier than the
+ *  mean. Keeps column from ever truncating its own label. */
 function estimateHeaderWidth(label: string): number {
-  return Math.ceil(label.length * 6.8) + 16;
+  return Math.ceil(label.length * 7.2) + 20;
 }
 
 function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
@@ -324,6 +325,7 @@ function renderProForma(audit: SHAuditJob) {
         gridTemplateColumns: "repeat(3, 1fr)",
         gap: 10,
         marginBottom: 10,
+        alignItems: "start",
       }}>
         {/* Revenue */}
         <Section title="Revenue">
@@ -353,14 +355,15 @@ function renderProForma(audit: SHAuditJob) {
         </Section>
       </div>
 
-      {/* Bottom line summary — full width */}
+      {/* Bottom line summary — full width. Builder Fee is given a wider
+       *  column because its value is longer ($29K (5%)) than the others. */}
       <div style={{
         border: `1px solid ${netMarginTone}66`,
         borderRadius: 8,
         padding: "12px 14px",
         background: `linear-gradient(135deg, ${netMarginTone}14, transparent)`,
         display: "grid",
-        gridTemplateColumns: "repeat(6, 1fr)",
+        gridTemplateColumns: "1fr 1fr 1.4fr 1fr 1fr 1fr",
         gap: 12,
       }}>
         {[
@@ -371,13 +374,16 @@ function renderProForma(audit: SHAuditJob) {
           { label: "Net Profit", value: fmt$(audit.netProfit), tone: netMarginTone },
           { label: "Net Margin", value: fmtPct(audit.netMargin), tone: netMarginTone },
         ].map(kpi => (
-          <div key={kpi.label}>
+          <div key={kpi.label} style={{ minWidth: 0 }}>
             <div style={{
               fontSize: 8,
               fontWeight: 600,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "var(--sh-text-muted)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}>
               {kpi.label}
             </div>
@@ -387,7 +393,10 @@ function renderProForma(audit: SHAuditJob) {
               fontWeight: 700,
               color: kpi.tone,
               fontVariantNumeric: "tabular-nums",
-            }}>
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }} title={kpi.value}>
               {kpi.value}
             </div>
           </div>
