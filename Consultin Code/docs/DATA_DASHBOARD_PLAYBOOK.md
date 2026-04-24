@@ -50,25 +50,56 @@ The framework is designed so that a new client can be onboarded in 10 business d
 
 ### 1.2 Technology Stack
 
-**One stack for every client.** No decision trees. The client's source systems (BuilderTrend, Hyphen, Sage, whatever) don't matter — Fivetran extracts from the ERP into BigQuery, dbt transforms raw → staging → marts, and the Next.js dashboard reads from BigQuery. The rest is identical every time.
+**One stack for every client.** No decision trees. The client's source systems (NewStar, Hyphen, BuilderTrend, QuickBooks, OneDrive xlsx, whatever) don't matter — a hybrid ingestion layer lands every source in BigQuery, SQL views transform raw → staging → marts, and the Next.js dashboard reads from BigQuery. The rest is identical every time.
 
-| Layer | Technology | Role | Typical Cost |
-|-------|-----------|------|-------------|
-| **Ingestion** | Fivetran or custom Node.js/Python scripts | Source-to-warehouse extraction | Fivetran: $500-2K/mo; Scripts: $0 |
-| **Warehouse** | Google BigQuery | Storage, querying, scheduled marts | Free tier (1 TB scans/mo, 10 GB storage) |
-| **Modeling** | SQL mart scripts (BigQuery Scheduled Queries) | Raw → staging → mart transformations | Included with BigQuery |
-| **Application** | Next.js (React 19) | Server-rendered dashboard with ISR | $0 (Vercel free tier) |
+#### Hybrid ingestion pattern
+
+| Source type | Tool | Why |
+|---|---|---|
+| **SQL Server ERPs** (NewStar, Hyphen, BuilderMT) | **Fivetran** (database connector) | Native incremental reads. Mature schema handling. Free tier covers typical volumes. |
+| **Cloud SaaS** (QuickBooks Online, Salesforce, HubSpot, Stripe) | **Fivetran** (managed connector) | OAuth + schema management handled. Free tier covers typical volumes. |
+| **OneDrive / SharePoint xlsx files** | **Cloud Function** (custom Node) | Fivetran has no Excel-from-OneDrive connector. Use Microsoft Graph API + existing `import_xlsx_to_bq.js` pattern. |
+| **Google Sheets** (clean) | **BigQuery External Table** OR **Fivetran** | External Tables are free + real-time. Either works. |
+| **Google Sheets** (messy / requires cleanup) | **Cloud Function** (custom Node) | Header rewriting, type coercion, dedup all done in code. |
+| **County permit portals, MLS feeds, lender draw portals** | **Cloud Function** (custom Node) | Bespoke per source. No managed connector exists. |
+
+#### Cost picture per client
+
+| Layer | Technology | Role | Typical Cost / Client / Month |
+|---|---|---|---|
+| **Ingestion — Fivetran** | Fivetran free tier (one tenant per client) | API/ERP/CRM extraction. 500K MAR/month free, 700+ connectors, 15-min syncs. | **$0** for typical builder (~10–35K MAR usage); paid plans only if client exceeds 500K MAR or needs HVR-grade CDC |
+| **Ingestion — Cloud Function** | Node 20 on Cloud Functions (gen 2) | Excel/Sheets/scraper extraction. Triggered by Cloud Scheduler. Reads OneDrive via Microsoft Graph API. Loads BQ via `WRITE_TRUNCATE` NDJSON. | **~$5–15** (compute + GCS + Scheduler) |
+| **Warehouse** | Google BigQuery | Raw / staging / marts datasets. ISR-friendly via scheduled queries. | **~$20–50** (10–100 GB storage + 1–10 TB queries) |
+| **Modeling** | SQL views or scheduled queries | Raw → staging → mart transforms | Included with BigQuery |
+| **Application** | Next.js 15 (React 19) | Server-rendered dashboard with `revalidate = 86400` ISR | **$0** (Vercel Hobby) or **$20** (Vercel Pro for password-protect / custom domain) |
 | **Hosting** | Vercel | Static + SSR deployment | Free tier covers most dashboards |
-| **Source Control** | Git | Version control per client | Free |
-| **Authentication** | Google Cloud IAM | Service account per client project | Included with BigQuery |
+| **Source Control** | Git (GitHub or Bitbucket per client) | Version control per client | Free |
+| **Authentication** | Google Cloud IAM (BQ) + Microsoft Graph (OneDrive) | Service account per GCP project; Azure AD app per Microsoft tenant | Included |
+| **Secret storage** | Google Secret Manager | OAuth tokens, DB passwords, third-party API keys | **~$0.06** (under free tier) |
+| | | **Total monthly per client** | **~$45–85/mo** |
 
 **Client handoff model:**
-1. GCP project → transferred to their account → BigQuery
-2. Vercel project → transferred to their account → Next.js dashboard
-3. Custom domain pointed at Vercel
-4. You walk away with a support retainer
+1. **GCP project** → transferred to their account → BigQuery + Cloud Functions + Secret Manager
+2. **Vercel project** → transferred to their account → Next.js dashboard
+3. **Fivetran tenant** → registered in their name from day one (not yours) → free tier under their account
+4. **Azure AD app** → registered in their Microsoft tenant by their IT (their OneDrive, their app)
+5. **Custom domain** pointed at Vercel
+6. You walk away with a support retainer
 
-Two accounts for the client to own (GCP + Vercel), both potentially free. Clean, simple, no ongoing hosting burden on the consultant.
+Three accounts for the client to own (GCP + Vercel + Fivetran), all on free or near-free tiers for typical builder volumes. No ongoing hosting burden on the consultant. No vendor lock-in: every line of code, schema definition, and credential lives in their accounts.
+
+#### Why the hybrid (vs all-Fivetran or all-custom)
+
+- **Pure Fivetran** can't ingest Excel from OneDrive — the most common source type for builders. Forces a CSV/Sheets conversion step which adds infrastructure without removing work.
+- **Pure custom** burns 60–120 hours of build time per client on connectors that Fivetran solves for free. Not a good use of senior consultant hours when the alternative is $0/mo on the free tier.
+- **Hybrid** matches each source to the right tool: Fivetran for stable APIs/databases (where managed > custom), Cloud Functions for messy file sources (where custom > "convert it first").
+
+#### Operational watch-outs
+
+- **MAR monitoring.** Set a Cloud Monitoring alert at 400K MAR/month per Fivetran tenant. The free tier freezes connections at 500K with one grace period.
+- **Azure AD client secrets expire** at 24 months. Calendar reminder at 22 months to rotate.
+- **Cloud Function cold starts** are ~1–3 sec; irrelevant for daily 3am batches.
+- **Fivetran free-tier-graduation risk.** Fivetran has a history of tightening free tier limits. Architect with an Airbyte-on-VM ($40/mo) fallback so you can swap in 2 weeks if needed.
 
 ### 1.3 Supported ERP Systems
 
@@ -88,16 +119,19 @@ Production home builders typically use one of these ERP systems. Data extraction
 ### 1.4 Data Extraction Approach Per Source Type
 
 ```
-ERP/Source → [Export Method] → Staging (Google Sheets / XLSX / API) → [ETL Script] → Warehouse Raw → [Mart Queries] → Warehouse Marts → Dashboard
+Source ─▶ [Fivetran OR Cloud Function] ─▶ {client}_raw ─▶ [SQL views] ─▶ {client}_marts ─▶ Dashboard
 ```
 
-| Source Type | Extraction Method | Ingestion Script | Notes |
-|-------------|-------------------|-----------------|-------|
-| **Google Sheets** | Direct external table link OR scheduled XLSX export | `import_sheets_to_bq.js` | External tables refresh automatically but can be fragile; periodic export is more reliable |
-| **REST API** | Node.js extraction script fetches JSON, transforms, loads | `import_api_to_bq.js` | Store raw API responses in JSON for debugging; transform to flat table on load |
-| **XLSX files** | Manual or automated export from ERP, then script import | `import_xlsx_to_bq.js` | Use WRITE_TRUNCATE for full refresh on each import |
-| **SQL/ODBC** | Scheduled query export from ERP database to CSV | `import_csv_to_bq.js` | Client IT or controller typically schedules the export |
-| **CSV files** | Manual export from ERP or third-party system | `import_csv_to_bq.js` | Validate headers before import; CSV encoding varies |
+| Source Type | Tool | Trigger | Notes |
+|-------------|------|---------|-------|
+| **SQL Server ERP** (NewStar, Hyphen, BuilderMT) | Fivetran SQL Server connector (free tier) | Fivetran-managed (15min) | Read-only DB user + SSH tunnel or IP allowlist. Read replica preferred over production. |
+| **QuickBooks / Salesforce / HubSpot / Stripe** | Fivetran managed connector (free tier) | Fivetran-managed (15min) | OAuth handled by Fivetran. Client owns the Fivetran tenant. |
+| **OneDrive / SharePoint xlsx** | Cloud Function — `import_xlsx_to_bq.js` pattern | Cloud Scheduler (daily, 3am) | Microsoft Graph API for download. Azure AD app reg in client's tenant. `WRITE_TRUNCATE` per file. |
+| **Google Sheets — clean** | BigQuery External Table OR Fivetran Sheets connector | Real-time (External Table) or Fivetran-managed | External Table simplest if sheet is well-formed and team keeps editing. |
+| **Google Sheets — messy** | Cloud Function — `import_sheets_to_bq.js` | Cloud Scheduler | Header rewrite, type coercion, drop noise columns done in code. |
+| **REST API** (county permits, MLS, custom) | Cloud Function — `import_api_to_bq.js` pattern | Cloud Scheduler | Store raw JSON in GCS first (audit trail) then load to BQ. |
+| **CSV files** (manual export, FTP drop, email) | Cloud Function — `import_csv_to_bq.js` | Cloud Scheduler watching GCS bucket | Builder uploads to GCS bucket; function fires on upload event. |
+| **SQL/ODBC** (no native Fivetran connector) | Cloud Function with JDBC + VPN | Cloud Scheduler | Same pattern as Fivetran but custom; only used when Fivetran connector doesn't exist for that DB engine. |
 
 ### 1.5 Client Isolation Principle
 

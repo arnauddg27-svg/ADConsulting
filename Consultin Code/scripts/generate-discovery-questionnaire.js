@@ -29,10 +29,11 @@ const SECTIONS = [
   {
     title: "2. Source systems (ERP + adjacent)",
     items: [
-      { type: "checkbox", label: "Primary ERP", options: ["Sage 100 Contractor", "Sage 300 CRE", "Viewpoint Spectrum", "Viewpoint Vista", "Procore", "CMiC", "BuilderTrend", "Hyphen Solutions BRIX", "NEWSTAR", "ComputerEase", "QuickBooks Desktop", "QuickBooks Online", "Other"] },
+      { type: "checkbox", label: "Primary construction / job-management ERP", options: ["NewStar (Constellation)", "Hyphen HomeFront / BRIX", "BuilderMT / Mark Systems", "BuilderTrend", "CoConstruct", "Procore", "BuildPro", "Sage 300 CRE", "Viewpoint Spectrum / Vista", "CMiC", "ComputerEase", "Custom / homegrown", "Other"] },
       { type: "text", label: "If 'Other' — ERP name & version" },
-      { type: "text", label: "ERP hosting — on-prem, private cloud, or vendor SaaS?" },
-      { type: "checkbox", label: "Does the ERP have a direct SQL/API export?", options: ["Yes, SQL access", "Yes, REST API", "Yes, scheduled CSV", "No — manual export only", "Unsure"] },
+      { type: "checkbox", label: "ERP hosting", options: ["Vendor-hosted SaaS", "On our server (office or colocation)", "Our cloud (Azure / AWS / GCP)", "Unsure — IT can confirm"] },
+      { type: "checkbox", label: "ERP database engine (if server-hosted)", options: ["SQL Server", "Oracle", "PostgreSQL", "MySQL", "Other / N/A"] },
+      { type: "checkbox", label: "ERP data access we can provide", options: ["Read-only DB user + VPN/SSH/IP allowlist", "REST API / OAuth", "Scheduled CSV export from IT", "Manual XLSX export only", "Unsure"] },
       { type: "text", label: "Who owns the ERP data and runs custom reports today?" },
       { type: "text", label: "Any ERP modules NOT currently in use (job cost, payroll, accounts payable, etc.)?", lines: 3 },
     ],
@@ -93,8 +94,10 @@ const SECTIONS = [
       { type: "text", label: "What are your most important monthly reports?", lines: 4 },
       { type: "text", label: "How many hours/week are spent manually assembling reports? (estimate)" },
       { type: "text", label: "Who owns this work today?" },
-      { type: "text", label: "Which spreadsheets are mission-critical right now? (link names, not files)", lines: 4 },
-      { type: "checkbox", label: "Where do those spreadsheets live?", options: ["Google Drive / Sheets", "Microsoft OneDrive / Excel", "SharePoint", "Dropbox / Box", "Local drives / email"] },
+      { type: "text", label: "Which spreadsheets are mission-critical right now? List file names + which department owns each (5–15 typical)", lines: 6 },
+      { type: "checkbox", label: "Where do those spreadsheets live?", options: ["Google Drive / Sheets", "Microsoft OneDrive (M365)", "SharePoint document library", "Dropbox / Box", "Local drives / email attachments"] },
+      { type: "checkbox", label: "If on Microsoft 365 — can your IT register an Azure AD app with Files.Read.All for our ingestion?", options: ["Yes — IT confirmed", "Yes — needs to be requested", "No / unsure", "N/A — not on Microsoft 365"] },
+      { type: "checkbox", label: "Schema-stability of these spreadsheets", options: ["Stable — same columns every week", "Mostly stable — occasional new columns", "Volatile — columns rename / move regularly"] },
     ],
   },
   {
@@ -117,7 +120,8 @@ const SECTIONS = [
   {
     title: "11. Integrations & data flow",
     items: [
-      { type: "text", label: "Any existing data pipelines (Fivetran, Stitch, Airbyte, custom, n8n, Zapier)?" },
+      { type: "checkbox", label: "Any existing data pipelines in place?", options: ["Fivetran", "Stitch", "Airbyte", "n8n / Zapier / Make", "Custom scripts", "None"] },
+      { type: "text", label: "If yes, who maintains them and what do they sync?", lines: 3 },
       { type: "text", label: "Systems that already integrate with each other today — describe briefly", lines: 4 },
       { type: "text", label: "Integrations you wish existed but don't", lines: 4 },
     ],
@@ -141,10 +145,12 @@ const SECTIONS = [
     ],
   },
   {
-    title: "14. Constraints & timeline",
+    title: "14. Constraints, timeline, & engagement preference",
     items: [
       { type: "text", label: "Target go-live date" },
-      { type: "text", label: "Budget range for this initiative (if determined)" },
+      { type: "text", label: "Hard deadline (if any) — and reason" },
+      { type: "checkbox", label: "Engagement tier preference", options: ["Minimal — Construction + Sales + Audits, 4 weeks, $25K–$45K", "Typical — 8–9 tabs across 5 sections, 6 weeks, $50K–$85K", "Full — All 12 tabs incl. Land + Property Mgmt, 8 weeks, $90K–$140K", "Custom — discuss in kickoff call"] },
+      { type: "checkbox", label: "Ongoing monthly retainer interest ($3K–$6K/mo for KPI tuning, schema-drift fixes, alerts)", options: ["Yes — quote me", "Maybe — revisit at delivery", "No — we'll handle ongoing maintenance ourselves"] },
       { type: "text", label: "Anything else we should know — prior failed attempts, internal politics, competing tools under evaluation", lines: 5 },
     ],
   },
