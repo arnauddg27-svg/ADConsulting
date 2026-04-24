@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import dynamic from "next/dynamic";
+import { ArrowLeft } from "lucide-react";
 import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
@@ -30,6 +32,15 @@ const demoHighlights = [
 export default function DemoPageClient() {
   return (
     <>
+      {/* Floating back-to-site link (since site header is hidden on /demo) */}
+      <Link
+        href="/"
+        className="fixed left-5 top-5 z-40 inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-black/45 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-200 backdrop-blur-xl transition-all hover:border-accent-400/40 hover:bg-black/65 hover:text-accent-200"
+      >
+        <ArrowLeft size={12} />
+        A.D. Homes
+      </Link>
+
       <section className="page-hero">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1fr_0.8fr] lg:items-end">

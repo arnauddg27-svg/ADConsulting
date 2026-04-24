@@ -19,12 +19,21 @@ export default function Header() {
   const pathname = usePathname() ?? "/";
   const [scrolled, setScrolled] = useState(false);
 
+  // /demo is a full product showcase with its own top bar (Sunshine Homes
+  // ShellBar). Hide the site header entirely there so the two chromes
+  // don't stack. Fullpage mode also benefits (dashboard is never partly
+  // covered by the fixed site header).
+  const hideOnRoute =
+    pathname === "/demo" || pathname.startsWith("/demo/");
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (hideOnRoute) return null;
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 transition-all duration-500">
