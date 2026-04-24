@@ -406,6 +406,479 @@ function renderProForma(audit: SHAuditJob) {
   );
 }
 
+/* ── Construction milestone timeline renderer ────────────────────── */
+
+function renderMilestoneTimeline(
+  job: SHJob,
+  jobSales: SHSale[],
+  jobLoans: SHLoan[],
+) {
+  /* Ordered milestones. Each has a date (or null if not yet reached) and
+   * the stage it corresponds to. */
+  const milestones: { label: string; date: string | null | undefined; stage: string }[] = [
+    { label: "Permit Issued",    date: job.permitDate,     stage: "Permit" },
+    { label: "Foundation Poured", date: job.foundationDate, stage: "Foundation" },
+    { label: "Framing Complete", date: job.framingDate,    stage: "Framing" },
+    { label: "MEP Rough-In",     date: job.mepDate,        stage: "MEP / Drywall" },
+    { label: "Drywall Complete", date: job.drywallDate,    stage: "MEP / Drywall" },
+    { label: "Finishes Done",    date: job.finishesDate,   stage: "Finishes" },
+    { label: "Certificate of Occupancy", date: job.coDate, stage: "Closing" },
+    { label: "Closing",          date: job.closingDate,    stage: "Closing" },
+  ];
+
+  const budgetVariance = job.projectedFinalCost - job.originalBudget;
+  const variancePct = job.originalBudget > 0 ? (budgetVariance / job.originalBudget) * 100 : 0;
+  const varianceTone =
+    variancePct <= 2 ? "var(--sh-accent)" :
+    variancePct <= 8 ? "var(--sh-warning)" :
+    "var(--sh-danger)";
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+      {/* Top KPI row — compact */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)",
+        gap: 8,
+        marginBottom: 12,
+      }}>
+        {[
+          { label: "Stage", value: job.stage, tone: "var(--sh-text-primary)" },
+          { label: "Completion", value: fmtPct(job.completionPct), tone: "var(--sh-accent)" },
+          { label: "Days in Phase", value: `${job.daysInCurrentPhase}d`, tone: job.daysInCurrentPhase > 30 ? "var(--sh-danger)" : job.daysInCurrentPhase > 20 ? "var(--sh-warning)" : "var(--sh-text-primary)" },
+          { label: "Total Cycle", value: `${job.totalCycleDays}d`, tone: "var(--sh-text-primary)" },
+          { label: "Contract", value: fmt$(job.contractValue), tone: "var(--sh-text-primary)" },
+        ].map(k => (
+          <div key={k.label} style={{
+            border: "1px solid var(--sh-border)",
+            borderRadius: 6,
+            padding: "8px 10px",
+            background: "var(--sh-bg-surface)",
+            minWidth: 0,
+          }}>
+            <div style={{
+              fontSize: 8,
+              fontWeight: 600,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "var(--sh-text-muted)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>{k.label}</div>
+            <div style={{
+              marginTop: 3,
+              fontSize: 13,
+              fontWeight: 700,
+              color: k.tone,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }} title={k.value}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Milestone timeline */}
+      <div style={{
+        border: "1px solid var(--sh-border)",
+        borderRadius: 8,
+        padding: "12px 14px",
+        background: "var(--sh-bg-surface)",
+        marginBottom: 12,
+      }}>
+        <div style={{
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: "var(--sh-accent)",
+          marginBottom: 10,
+          paddingBottom: 6,
+          borderBottom: "1px solid rgba(20,184,166,0.25)",
+        }}>
+          Construction Milestones
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {milestones.map((m, i) => {
+            const complete = !!m.date;
+            return (
+              <div key={m.label} style={{
+                display: "grid",
+                gridTemplateColumns: "24px 1fr 100px",
+                gap: 10,
+                alignItems: "center",
+                padding: "7px 0",
+                borderBottom: i < milestones.length - 1 ? "1px solid var(--sh-border-dim)" : "none",
+              }}>
+                {/* Status dot */}
+                <div style={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}>
+                  <span style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: complete ? "var(--sh-accent)" : "transparent",
+                    border: `1.5px solid ${complete ? "var(--sh-accent)" : "var(--sh-border)"}`,
+                    boxShadow: complete ? "0 0 8px rgba(20,184,166,0.5)" : "none",
+                  }} />
+                </div>
+                {/* Label + stage */}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: complete ? "var(--sh-text-primary)" : "var(--sh-text-muted)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}>
+                    {m.label}
+                  </div>
+                  <div style={{
+                    fontSize: 9,
+                    color: "var(--sh-text-muted)",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    marginTop: 1,
+                  }}>
+                    {m.stage}
+                  </div>
+                </div>
+                {/* Date */}
+                <div style={{
+                  fontSize: 11,
+                  textAlign: "right",
+                  color: complete ? "var(--sh-text-primary)" : "var(--sh-text-muted)",
+                  fontVariantNumeric: "tabular-nums",
+                }}>
+                  {complete ? m.date : "—"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Financial snapshot */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 10,
+        marginBottom: 12,
+      }}>
+        <div style={{
+          border: "1px solid var(--sh-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          background: "var(--sh-bg-surface)",
+        }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 8, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)" }}>
+            Budget & Cost
+          </div>
+          {[
+            { label: "Original Budget", value: fmt$(job.originalBudget) },
+            { label: "Actual to Date", value: fmt$(job.actualCostToDate) },
+            { label: "WIP Balance", value: fmt$(job.wipBalance) },
+            { label: "Projected Final", value: fmt$(job.projectedFinalCost) },
+            { label: "Variance", value: `${fmt$(budgetVariance)} (${variancePct >= 0 ? "+" : ""}${variancePct.toFixed(1)}%)`, tone: varianceTone },
+            { label: "Lot Cost", value: fmt$(job.lotCost) },
+          ].map(row => (
+            <div key={row.label} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "4px 0",
+              borderBottom: "1px solid var(--sh-border-dim)",
+              fontSize: 11,
+              color: "var(--sh-text-secondary)",
+            }}>
+              <span>{row.label}</span>
+              <span style={{ fontVariantNumeric: "tabular-nums", color: row.tone ?? "var(--sh-text-primary)", fontWeight: row.tone ? 700 : 400 }}>
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          border: "1px solid var(--sh-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          background: "var(--sh-bg-surface)",
+        }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 8, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)" }}>
+            Job Profile
+          </div>
+          {[
+            { label: "Plan", value: job.plan },
+            { label: "Lot", value: job.lot },
+            { label: "Community", value: job.community },
+            { label: "City", value: job.city },
+            { label: "Entity", value: job.entity },
+            { label: "Superintendent", value: job.superintendent },
+            { label: "Start Date", value: job.startDate },
+            { label: "Est. Completion", value: job.estCompletion },
+          ].map(row => (
+            <div key={row.label} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "4px 0",
+              borderBottom: "1px solid var(--sh-border-dim)",
+              fontSize: 11,
+              color: "var(--sh-text-secondary)",
+            }}>
+              <span>{row.label}</span>
+              <span style={{ color: "var(--sh-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "60%" }} title={String(row.value)}>
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Related sales / loans */}
+      {(jobSales.length > 0 || jobLoans.length > 0) && (
+        <div style={{
+          border: "1px solid var(--sh-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          background: "var(--sh-bg-surface)",
+        }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 8, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)" }}>
+            Related Records
+          </div>
+          {jobSales.map(s => (
+            <div key={`s-${s.id}`} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "4px 0",
+              borderBottom: "1px solid var(--sh-border-dim)",
+              fontSize: 11,
+              color: "var(--sh-text-secondary)",
+            }}>
+              <span>Sale · {s.buyer}</span>
+              <span style={{ color: "var(--sh-text-primary)" }}>{fmt$(s.salePrice)} ({s.status})</span>
+            </div>
+          ))}
+          {jobLoans.map(l => (
+            <div key={`l-${l.id}`} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "4px 0",
+              borderBottom: "1px solid var(--sh-border-dim)",
+              fontSize: 11,
+              color: "var(--sh-text-secondary)",
+            }}>
+              <span>Loan · {l.lender}</span>
+              <span style={{ color: "var(--sh-text-primary)" }}>{fmt$(l.loanAmount)} ({fmtPct(l.drawPct)} drawn)</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Cost breakdown renderer ─────────────────────────────────────── */
+
+function renderCostBreakdown(
+  filteredJobs: SHJob[],
+  mode: "budget" | "actual" | "variance" | "margin",
+) {
+  /* Category aggregates */
+  const categories = [
+    {
+      key: "permitting",
+      label: "Permitting",
+      budget: filteredJobs.reduce((s, j) => s + j.permittingBudget, 0),
+      actual: filteredJobs.reduce((s, j) => s + j.permittingActual, 0),
+    },
+    {
+      key: "sidewalk",
+      label: "Sidewalk / Site",
+      budget: filteredJobs.reduce((s, j) => s + j.sidewalkBudget, 0),
+      actual: filteredJobs.reduce((s, j) => s + j.sidewalkActual, 0),
+    },
+    {
+      key: "vertical",
+      label: "Vertical Construction",
+      budget: filteredJobs.reduce((s, j) => s + j.verticalBudget, 0),
+      actual: filteredJobs.reduce((s, j) => s + j.verticalActual, 0),
+    },
+  ].map(c => ({
+    ...c,
+    variance: c.actual - c.budget,
+    variancePct: c.budget > 0 ? ((c.actual - c.budget) / c.budget) * 100 : 0,
+    progressPct: c.budget > 0 ? Math.min(120, (c.actual / c.budget) * 100) : 0,
+  }));
+
+  const grandBudget = categories.reduce((s, c) => s + c.budget, 0);
+  const grandActual = categories.reduce((s, c) => s + c.actual, 0);
+  const grandVariance = grandActual - grandBudget;
+  const grandVariancePct = grandBudget > 0 ? (grandVariance / grandBudget) * 100 : 0;
+
+  return (
+    <div style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+      {/* Headline strip — totals */}
+      <div style={{
+        border: `1px solid ${grandVariance > 0 ? "rgba(244,106,106,0.35)" : "rgba(20,184,166,0.35)"}`,
+        borderRadius: 8,
+        padding: "12px 14px",
+        marginBottom: 12,
+        background: `linear-gradient(135deg, ${grandVariance > 0 ? "rgba(244,106,106,0.08)" : "rgba(20,184,166,0.08)"}, transparent)`,
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)",
+        gap: 12,
+      }}>
+        {[
+          { label: "Total Budget", value: fmt$(grandBudget), tone: "var(--sh-text-primary)" },
+          { label: "Total Actual", value: fmt$(grandActual), tone: "var(--sh-text-primary)" },
+          { label: "Variance $", value: `${grandVariance >= 0 ? "+" : ""}${fmt$(grandVariance)}`, tone: grandVariance > 0 ? "var(--sh-danger)" : "var(--sh-accent)" },
+          { label: "Variance %", value: `${grandVariancePct >= 0 ? "+" : ""}${grandVariancePct.toFixed(1)}%`, tone: grandVariance > 0 ? "var(--sh-danger)" : "var(--sh-accent)" },
+        ].map(k => (
+          <div key={k.label} style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 8, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--sh-text-muted)" }}>{k.label}</div>
+            <div style={{ marginTop: 4, fontSize: 14, fontWeight: 700, color: k.tone, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={k.value}>
+              {k.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Per-category budget vs actual bars */}
+      <div style={{
+        border: "1px solid var(--sh-border)",
+        borderRadius: 8,
+        padding: "12px 14px",
+        background: "var(--sh-bg-surface)",
+        marginBottom: 12,
+      }}>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 10, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)" }}>
+          Budget vs Actual by Category
+        </div>
+        {categories.map(c => {
+          const over = c.variance > 0;
+          return (
+            <div key={c.key} style={{ padding: "8px 0", borderBottom: "1px solid var(--sh-border-dim)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--sh-text-primary)" }}>{c.label}</div>
+                <div style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: over ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 700 }}>
+                  {over ? "+" : ""}{c.variancePct.toFixed(1)}%
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, fontSize: 10, color: "var(--sh-text-muted)", marginBottom: 4 }}>
+                <span>Budget: <strong style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmt$(c.budget)}</strong></span>
+                <span>Actual: <strong style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmt$(c.actual)}</strong></span>
+                <span>Variance: <strong style={{ color: over ? "var(--sh-danger)" : "var(--sh-accent)", fontVariantNumeric: "tabular-nums" }}>{over ? "+" : ""}{fmt$(c.variance)}</strong></span>
+              </div>
+              {/* Twin bars: actual over budget */}
+              <div style={{ position: "relative", height: 12, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
+                {/* Budget bar (full width baseline) */}
+                <div style={{
+                  position: "absolute", left: 0, top: 0, bottom: 0,
+                  width: "100%",
+                  background: "rgba(59,130,246,0.25)",
+                }} />
+                {/* Actual bar on top */}
+                <div style={{
+                  position: "absolute", left: 0, top: 0, bottom: 0,
+                  width: `${Math.min(100, c.progressPct)}%`,
+                  background: `linear-gradient(90deg, ${over ? "#f46a6a" : "var(--sh-accent)"}, ${over ? "#ef4444" : "#22d3ee"})`,
+                  boxShadow: `0 0 10px ${over ? "rgba(244,106,106,0.4)" : "rgba(20,184,166,0.4)"}`,
+                }} />
+                {/* Overrun marker if actual > budget */}
+                {c.progressPct > 100 && (
+                  <div style={{
+                    position: "absolute", right: 0, top: 0, bottom: 0,
+                    width: 2,
+                    background: "var(--sh-danger)",
+                  }} />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Per-house cost breakdown table */}
+      <div style={{
+        border: "1px solid var(--sh-border)",
+        borderRadius: 8,
+        padding: "12px 14px",
+        background: "var(--sh-bg-surface)",
+      }}>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 10, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)", display: "flex", justifyContent: "space-between" }}>
+          <span>Cost per Category per House</span>
+          <span style={{ color: "var(--sh-text-muted)", fontWeight: 400, letterSpacing: "0.08em" }}>{filteredJobs.length} jobs</span>
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{
+            width: "100%",
+            borderCollapse: "separate",
+            borderSpacing: 0,
+            fontSize: 11,
+            fontVariantNumeric: "tabular-nums",
+          }}>
+            <thead>
+              <tr style={{ color: "var(--sh-text-muted)", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", textAlign: "left" }}>
+                <th style={{ padding: "6px 8px 6px 0", fontWeight: 600 }}>Job</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600 }}>Community</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Permit B/A</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Sidewalk B/A</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Vertical B/A</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Total Actual</th>
+                <th style={{ padding: "6px 0 6px 8px", fontWeight: 600, textAlign: "right" }}>Variance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredJobs.slice(0, 60).map((j, i) => {
+                const totalB = j.permittingBudget + j.sidewalkBudget + j.verticalBudget;
+                const totalA = j.permittingActual + j.sidewalkActual + j.verticalActual;
+                const v = totalA - totalB;
+                const renderBA = (b: number, a: number) => (
+                  <span>
+                    <span style={{ color: "var(--sh-text-muted)" }}>{fmt$(b)}</span>
+                    <span style={{ color: "var(--sh-text-muted)" }}> / </span>
+                    <span style={{ color: a > b ? "var(--sh-danger)" : "var(--sh-accent)" }}>{fmt$(a)}</span>
+                  </span>
+                );
+                return (
+                  <tr key={j.jobCode} style={{
+                    background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.02)",
+                  }}>
+                    <td style={{ padding: "5px 8px 5px 0", color: "var(--sh-text-primary)", fontWeight: 600 }}>{j.jobCode}</td>
+                    <td style={{ padding: "5px 8px", color: "var(--sh-text-secondary)" }}>{j.community}</td>
+                    <td style={{ padding: "5px 8px", textAlign: "right" }}>{renderBA(j.permittingBudget, j.permittingActual)}</td>
+                    <td style={{ padding: "5px 8px", textAlign: "right" }}>{renderBA(j.sidewalkBudget, j.sidewalkActual)}</td>
+                    <td style={{ padding: "5px 8px", textAlign: "right" }}>{renderBA(j.verticalBudget, j.verticalActual)}</td>
+                    <td style={{ padding: "5px 8px", textAlign: "right", color: "var(--sh-text-primary)", fontWeight: 600 }}>{fmt$(totalA)}</td>
+                    <td style={{ padding: "5px 0 5px 8px", textAlign: "right", color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>
+                      {v >= 0 ? "+" : ""}{fmt$(v)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {filteredJobs.length > 60 && (
+            <div style={{ padding: "10px 0 0", fontSize: 10, color: "var(--sh-text-muted)", fontStyle: "italic" }}>
+              Showing first 60 of {filteredJobs.length} jobs. Apply a filter to narrow.
+            </div>
+          )}
+        </div>
+        {/* Use mode to highlight which column is emphasized */}
+        {mode && (
+          <div style={{ fontSize: 9, color: "var(--sh-text-muted)", marginTop: 8, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            Focused on: {mode}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main component ──────────────────────────────────────────────── */
 
 export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
@@ -417,8 +890,10 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
   if (!detail) return null;
 
-  // Pro Forma mode — track separately from rows to render custom compact layout.
+  // Custom-render modes — each replaces the default table with a tailored view.
   let proFormaAudit: SHAuditJob | null = null;
+  let milestoneJob: { job: SHJob; jobSales: SHSale[]; jobLoans: SHLoan[] } | null = null;
+  let costBreakdown: { jobs: SHJob[]; mode: "budget" | "actual" | "variance" | "margin" } | null = null;
 
   let title = detail.label;
   let subtitle = "";
@@ -486,26 +961,10 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         proFormaAudit = audit;
         rows = new Array(14).fill({}); // count-only, not rendered
       } else {
-        /* Standard job detail + related sales/loans */
-        rows = [
-          { field: "Stage", value: job.stage },
-          { field: "Completion", value: fmtPct(job.completionPct) },
-          { field: "Days in Phase", value: `${job.daysInCurrentPhase}d` },
-          { field: "Total Cycle Days", value: `${job.totalCycleDays}d` },
-          { field: "Contract Value", value: fmt$(job.contractValue) },
-          { field: "Original Budget", value: fmt$(job.originalBudget) },
-          { field: "Actual Cost", value: fmt$(job.actualCostToDate) },
-          { field: "WIP Balance", value: fmt$(job.wipBalance) },
-          { field: "Projected Final", value: fmt$(job.projectedFinalCost) },
-          { field: "Margin", value: `${fmt$(job.margin)} (${fmtPct(job.marginPct)})` },
-          { field: "Lot Cost", value: fmt$(job.lotCost) },
-          { field: "Start Date", value: job.startDate },
-          { field: "Est. Completion", value: job.estCompletion },
-          ...(jobSales.length > 0 ? [{ field: "—— Sales ——", value: "" }] : []),
-          ...jobSales.map(s => ({ field: `Sale → ${s.buyer}`, value: `${fmt$(s.salePrice)} (${s.status})` })),
-          ...(jobLoans.length > 0 ? [{ field: "—— Loans ——", value: "" }] : []),
-          ...jobLoans.map(l => ({ field: `Loan → ${l.lender}`, value: `${fmt$(l.loanAmount)} (${fmtPct(l.drawPct)} drawn)` })),
-        ];
+        /* Construction job detail — milestone timeline + budget/profile + related
+         * records. Custom renderer instead of sparse two-column table. */
+        milestoneJob = { job, jobSales, jobLoans };
+        rows = new Array(8 + jobSales.length + jobLoans.length).fill({});
       }
       break;
     }
@@ -733,30 +1192,25 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "cost-category": {
-      /* Drill-down for cost metric KPI clicks — per-cost-code rows with optional community filter */
+      /* Drill-down for Cost Metrics KPI clicks — renders category totals +
+       * per-house pivot table (Permitting / Sidewalk / Vertical B/A) via
+       * custom renderCostBreakdown. */
       const filtered = detail.community
         ? jobs.filter(j => j.community === detail.community)
         : jobs;
-      /* Flatten each job into 3 cost-code rows: Permitting, Sidewalk, Vertical */
-      const costCodeRows = filtered.flatMap(j => [
-        { jobCode: j.jobCode, community: j.community, costCode: "Permitting", budget: j.permittingBudget, actual: j.permittingActual, variance: j.permittingActual - j.permittingBudget },
-        { jobCode: j.jobCode, community: j.community, costCode: "Sidewalk", budget: j.sidewalkBudget, actual: j.sidewalkActual, variance: j.sidewalkActual - j.sidewalkBudget },
-        { jobCode: j.jobCode, community: j.community, costCode: "Vertical", budget: j.verticalBudget, actual: j.verticalActual, variance: j.verticalActual - j.verticalBudget },
-      ]).sort((a, b) => a.variance - b.variance);
+      // Interpret the KPI clicked: budget / actual / variance / margin — or a
+      // donut segment (Labor, Materials, Subcontractors, etc.) — fall back to
+      // "budget" mode which shows everything side by side.
+      const modeValue = detail.value.toLowerCase();
+      const mode: "budget" | "actual" | "variance" | "margin" =
+        modeValue === "actual" ? "actual" :
+        modeValue === "variance" ? "variance" :
+        modeValue === "margin" ? "margin" :
+        "budget";
       title = detail.label;
-      subtitle = `${filtered.length} jobs · ${costCodeRows.length} line items`;
-      columns = [
-        { key: "jobCode", label: "Job", width: "70px" },
-        { key: "community", label: "Community", width: "110px" },
-        { key: "costCode", label: "Cost Code", width: "80px" },
-        { key: "budget", label: "Budget", width: "70px", align: "right", render: r => fmt$(Number(r.budget)) },
-        { key: "actual", label: "Actual", width: "70px", align: "right", render: r => fmt$(Number(r.actual)) },
-        { key: "variance", label: "Variance", width: "75px", align: "right", render: r => {
-          const v = Number(r.variance);
-          return <span style={{ color: v > 0 ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 600 }}>{fmt$(v)}</span>;
-        }},
-      ];
-      rows = costCodeRows as unknown as Record<string, unknown>[];
+      subtitle = `${filtered.length} jobs · 3 cost categories`;
+      costBreakdown = { jobs: filtered, mode };
+      rows = new Array(3 + filtered.length).fill({}); // count-only, custom-rendered
       break;
     }
 
@@ -1461,9 +1915,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           </div>
         </div>
 
-        {/* Body — Pro Forma card-grid OR standard table */}
+        {/* Body — Pro Forma OR Milestone Timeline OR Cost Breakdown OR standard table */}
         <div style={{ flex: 1, overflow: "hidden", padding: "0 4px", display: "flex", flexDirection: "column" }}>
-          {proFormaAudit ? renderProForma(proFormaAudit) : renderTable(columns, rows)}
+          {proFormaAudit
+            ? renderProForma(proFormaAudit)
+            : milestoneJob
+              ? renderMilestoneTimeline(milestoneJob.job, milestoneJob.jobSales, milestoneJob.jobLoans)
+              : costBreakdown
+                ? renderCostBreakdown(costBreakdown.jobs, costBreakdown.mode)
+                : renderTable(columns, rows)}
         </div>
       </div>
     </>
