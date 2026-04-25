@@ -25,8 +25,8 @@ const reasons = [
   },
   {
     icon: <MapPin size={22} />,
-    title: "No layers between you and the build",
-    body: "You work directly with the person designing and building the system. Phased delivery, fixed scope per phase.",
+    title: "Practical delivery model",
+    body: "Direct senior involvement, phased delivery, and a faster path from discovery to working reporting.",
   },
 ];
 
@@ -43,13 +43,13 @@ export default function WhyChooseUs() {
           <div>
             <span className="eyebrow eyebrow-dot">Why Us</span>
             <h2 className="mt-6 max-w-lg font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
-              Built for builders.{" "}
-              <span className="text-gradient">Owned by your team.</span>
+              Why homebuilders{" "}
+              <span className="text-gradient">choose this model.</span>
             </h2>
             <p className="mt-6 text-base leading-7 text-slate-300 md:text-[1.05rem] md:leading-8">
-              One warehouse, reporting designed around how your team actually
-              runs the business, and full ownership of the code, data, and
-              hosting when we hand it over.
+              The approach is focused on clarity and ownership: one centralized
+              data foundation, reporting built for builder workflows, and tools
+              teams can use to run operations with better visibility.
             </p>
 
             <div className="mt-8 flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.2em] text-slate-500">

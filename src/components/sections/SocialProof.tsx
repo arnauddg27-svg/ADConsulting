@@ -38,8 +38,8 @@ export default function SocialProof() {
         <div className="reveal text-center">
           <span className="eyebrow eyebrow-dot">Why It Matters</span>
           <h2 className="mx-auto mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 sm:text-[3.2rem] md:text-[3.4rem]">
-            You have the data.{" "}
-            <span className="text-gradient">Nothing agrees on it.</span>
+            The data exists.{" "}
+            <span className="text-gradient">It just needs to be connected.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">
             Numbers land differently in finance, construction, and sales because
