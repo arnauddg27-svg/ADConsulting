@@ -1,15 +1,13 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import MouseSpotlight from "@/components/ui/MouseSpotlight";
 import HeroShowcase from "@/components/sections/HeroShowcase";
 import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
 
 export default function Hero() {
   return (
     <section className="page-hero relative pb-12 md:pb-16">
-      {/* Mouse-following spotlight (client component) */}
-      <MouseSpotlight color="rgba(52, 211, 153, 0.18)" size={620} />
+      {/* Mouse spotlight is handled globally by <PageAmbient> in layout. */}
 
       {/* Aurora mesh background */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">

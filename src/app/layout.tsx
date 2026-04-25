@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PageAmbient from "@/components/ui/PageAmbient";
 
 
 const siteUrl = "https://consulting.aderpsystems.com";
@@ -70,6 +71,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
 {/* Google Analytics — add real ID when ready */}
         <div className="relative min-h-screen overflow-x-hidden">
+          <PageAmbient />
           <Header />
           <main>{children}</main>
           <Footer />
