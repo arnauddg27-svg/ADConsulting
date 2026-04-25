@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { ButtonColorful } from "@/components/ui/ButtonColorful";
 import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
 
 export default function Hero() {
@@ -38,9 +39,11 @@ export default function Hero() {
               Book a Discovery Call
               <ArrowRight size={16} />
             </Button>
-            <Button href="/demo/" variant="secondary" size="lg">
-              See a Sample Dashboard
-            </Button>
+            <ButtonColorful
+              href="/demo/"
+              label="See a Sample Dashboard"
+              size="lg"
+            />
           </div>
         </div>
 
