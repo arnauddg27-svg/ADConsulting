@@ -1,6 +1,6 @@
-import { ArrowRight, DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
+import { DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import { ButtonColorful } from "@/components/ui/ButtonColorful";
 
 const previewModules = [
   {
@@ -77,10 +77,12 @@ export default function DashboardPreview() {
                 ))}
               </div>
 
-              <Button href="/demo/" size="lg" className="mt-10 self-start">
-                Explore the Example
-                <ArrowRight size={16} />
-              </Button>
+              <ButtonColorful
+                href="/demo/"
+                label="Explore the Example"
+                size="lg"
+                className="mt-10 self-start"
+              />
             </div>
 
             <div className="border-t border-white/[0.08] bg-[#0a0f1a] p-6 md:p-8 lg:border-l lg:border-t-0">

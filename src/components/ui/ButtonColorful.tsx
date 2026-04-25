@@ -36,13 +36,22 @@ export function ButtonColorful({
 }: ButtonColorfulProps) {
   const inner = (
     <>
-      {/* Gradient halo */}
+      {/* Outer gradient halo - bleeds beyond pill so colors show through */}
       <div
         className={cn(
-          "absolute inset-0",
+          "pointer-events-none absolute -inset-1",
           "bg-gradient-to-r from-accent-500 via-cyan-400 to-accent-500",
-          "opacity-50 group-hover:opacity-90",
-          "blur-md transition-opacity duration-500"
+          "opacity-80 group-hover:opacity-100",
+          "blur-lg transition-opacity duration-500"
+        )}
+      />
+
+      {/* Inner gradient sheen visible inside the pill */}
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 rounded-full",
+          "bg-gradient-to-r from-accent-500/30 via-cyan-400/20 to-accent-500/30",
+          "opacity-100"
         )}
       />
 
@@ -50,18 +59,19 @@ export function ButtonColorful({
       <div className="relative flex items-center justify-center gap-2">
         <span className="text-white">{label}</span>
         {showIcon && (
-          <ArrowUpRight className="h-3.5 w-3.5 text-white/90 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          <ArrowUpRight className="h-3.5 w-3.5 text-white/95 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         )}
       </div>
     </>
   );
 
   const classes = cn(
-    "group relative inline-flex items-center justify-center overflow-hidden rounded-full",
-    "bg-zinc-950 font-semibold uppercase",
+    "group relative inline-flex items-center justify-center rounded-full",
+    "border border-accent-400/40 bg-slate-900",
+    "font-semibold uppercase",
     sizeClasses[size],
     "shadow-[0_18px_40px_-18px_rgba(16,185,129,0.55)] transition-all duration-300",
-    "hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.7)]",
+    "hover:-translate-y-0.5 hover:border-accent-400/70 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.7)]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50",
     className
   );
