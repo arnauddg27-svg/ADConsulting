@@ -697,7 +697,7 @@ function renderCostBreakdown(
     },
     {
       key: "sidewalk",
-      label: "Sidewalk / Site",
+      label: "Site Work",
       budget: filteredJobs.reduce((s, j) => s + j.sidewalkBudget, 0),
       actual: filteredJobs.reduce((s, j) => s + j.sidewalkActual, 0),
     },
@@ -826,7 +826,7 @@ function renderCostBreakdown(
                 <th style={{ padding: "6px 8px 6px 0", fontWeight: 600 }}>Job</th>
                 <th style={{ padding: "6px 8px", fontWeight: 600 }}>Community</th>
                 <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Permit B/A</th>
-                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Sidewalk B/A</th>
+                <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Site Work B/A</th>
                 <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Vertical B/A</th>
                 <th style={{ padding: "6px 8px", fontWeight: 600, textAlign: "right" }}>Total Actual</th>
                 <th style={{ padding: "6px 0 6px 8px", fontWeight: 600, textAlign: "right" }}>Variance</th>
@@ -1193,7 +1193,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "cost-category": {
       /* Drill-down for Cost Metrics KPI clicks — renders category totals +
-       * per-house pivot table (Permitting / Sidewalk / Vertical B/A) via
+       * per-house pivot table (Permitting / Site Work / Vertical B/A) via
        * custom renderCostBreakdown. */
       const filtered = detail.community
         ? jobs.filter(j => j.community === detail.community)
