@@ -24,27 +24,42 @@ export default function CTABanner({
       <Container>
         <div
           className={clsx(
-            "reveal panel relative overflow-hidden px-6 py-8 md:px-8 md:py-10",
-            variant === "accent"
-              ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.15),rgba(255,255,255,0.04)_55%,rgba(255,255,255,0.02))]"
-              : "bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03)_55%,rgba(16,185,129,0.08))]"
+            "reveal premium-panel relative overflow-hidden px-7 py-10 md:px-10 md:py-12",
           )}
           style={{ pointerEvents: "auto" }}
         >
-          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          {/* accent glow overlays */}
+          <div
+            aria-hidden
+            className={clsx(
+              "pointer-events-none absolute -right-20 -top-20 h-[360px] w-[360px] rounded-full blur-[120px]",
+              variant === "accent"
+                ? "bg-accent-500/30"
+                : "bg-accent-500/15"
+            )}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-16 -left-16 h-[280px] w-[280px] rounded-full bg-cyan-400/10 blur-[110px]"
+          />
+
+          <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <span className="eyebrow">Next Step</span>
-              <h2 className="mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
+              <span className="eyebrow eyebrow-dot">Next Step</span>
+              <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
                 {headline}
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 md:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 md:text-lg md:leading-8">
                 {description}
               </p>
-              <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-300">
-                <span className="badge-dash">
+              <div className="mt-7 flex flex-wrap items-center gap-3 text-sm text-slate-300">
+                <a
+                  href={SITE_CONFIG.phoneHref}
+                  className="badge-dash transition-colors hover:border-accent-400/40 hover:text-accent-200"
+                >
                   <PhoneCall size={14} />
                   {SITE_CONFIG.phone}
-                </span>
+                </a>
                 <span className="badge-dash">Response within 24 hours</span>
               </div>
             </div>

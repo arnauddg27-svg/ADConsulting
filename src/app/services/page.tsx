@@ -7,6 +7,7 @@ import {
   TrendingUp,
   Wrench,
   ArrowRight,
+  Check,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
@@ -88,7 +89,9 @@ export default function ServicesPage() {
                         key={deliverable}
                         className="flex items-start gap-3 rounded-[1rem] border border-white/[0.06] bg-black/20 px-4 py-3.5"
                       >
-                        <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent-300" />
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent-400/25 bg-accent-500/10 text-accent-300">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
                         <span className="text-sm leading-6 text-slate-200">
                           {deliverable}
                         </span>
