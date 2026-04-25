@@ -93,11 +93,10 @@ export default function AboutPage() {
                   Custom data platforms for residential homebuilders
                 </h1>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  We help residential homebuilders centralize data from ERPs,
-                  spreadsheets, APIs, and other operating systems; move it into
-                  a structured warehouse; apply builder KPI logic; and deliver
-                  reporting systems, dashboards, and internal tools that support
-                  operational decision-making.
+                  We pull data from the systems you already use — ERPs,
+                  spreadsheets, APIs, file exports — into one warehouse,
+                  define each KPI once, and ship dashboards and tools your
+                  team uses every day.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -132,10 +131,9 @@ export default function AboutPage() {
                 development, and leadership teams.
               </p>
               <p className="text-base leading-7 text-slate-400">
-                The focus is practical system delivery: reliable extraction,
-                clean warehouse structure, builder workflows, and reporting
-                tools teams can use every week. The result is clearer visibility
-                and better decisions across the business.
+                The work is concrete: extraction that doesn't break, warehouse
+                structure that holds up under audit, and reporting tools your
+                team opens every week instead of going back to a spreadsheet.
               </p>
             </div>
           </div>

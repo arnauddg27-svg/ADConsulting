@@ -203,7 +203,7 @@ function PipelineDiagram() {
             fontSize="8"
             letterSpacing="0.16em"
           >
-            BIGQUERY · SNOWFLAKE
+            CLIENT-OWNED
           </text>
         </g>
 

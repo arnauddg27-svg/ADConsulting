@@ -17,7 +17,7 @@ export default function Home() {
       <DashboardPreview />
       <CTABanner
         headline="Start with a 30-minute discovery call."
-        description="We will walk through your current systems, identify where data breaks down, and outline the path to a centralized platform your team can run on."
+        description="Thirty minutes on what you're running today, where the reporting breaks, and what a usable platform actually looks like for your team."
         primaryCTA={{ label: "Book a Discovery Call", href: "/contact/" }}
       />
     </>

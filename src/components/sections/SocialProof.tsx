@@ -11,23 +11,23 @@ import { TiltCard } from "@/components/ui/TiltCard";
 const painPoints = [
   {
     icon: <FileSpreadsheet size={22} />,
-    problem: "Data is spread across ERP systems, spreadsheets, CRM tools, and draw trackers",
-    solution: "One centralized warehouse brings sources together into a shared operating view",
+    problem: "The data lives in ten different places — ERP, sheets, CRM, draw trackers — and none of them agree",
+    solution: "One warehouse, one set of definitions, one number per question",
   },
   {
     icon: <TrendingDown size={22} />,
-    problem: "Margin visibility often arrives too late to prevent overruns",
-    solution: "Builder KPI logic and exception flags refresh daily so teams can act earlier",
+    problem: "Margin trouble shows up in the closing report, after the damage is done",
+    solution: "Builder KPIs and exception flags refresh nightly — issues surface before the morning huddle",
   },
   {
     icon: <Clock size={22} />,
-    problem: "Finance teams spend time rebuilding exports and pivot reports",
-    solution: "Automated ingestion and pre-computed metrics reduce manual report assembly",
+    problem: "Finance burns hours every week rebuilding exports and pivot tables",
+    solution: "Ingestion runs on a schedule, KPIs are computed once, reports are already there in the morning",
   },
   {
     icon: <AlertTriangle size={22} />,
-    problem: "Generic dashboards often miss builder workflows end to end",
-    solution: "Client-owned reporting systems are tailored to your operating model",
+    problem: "Off-the-shelf dashboards weren't designed for how a builder actually runs",
+    solution: "Reporting built around your operating model — and yours to keep",
   },
 ];
 
@@ -38,14 +38,14 @@ export default function SocialProof() {
         <div className="reveal text-center">
           <span className="eyebrow eyebrow-dot">Why It Matters</span>
           <h2 className="mx-auto mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 sm:text-[3.2rem] md:text-[3.4rem]">
-            The data exists.{" "}
-            <span className="text-gradient">It just needs to be connected.</span>
+            You have the data.{" "}
+            <span className="text-gradient">Nothing agrees on it.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">
-            Most builders have the data they need — it&apos;s scattered across
-            ERPs, spreadsheets, finance systems, and exports. We centralize it
-            into one structured warehouse, apply KPI logic once, and deliver
-            reporting systems teams can act on.
+            Numbers land differently in finance, construction, and sales because
+            every team pulls from a different export. We pull every source into
+            one warehouse, define each KPI once, and put the answer in front of
+            whoever needs it.
           </p>
         </div>
 

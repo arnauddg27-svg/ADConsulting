@@ -44,13 +44,13 @@ export const SERVICES: Service[] = [
     shortTitle: "Warehouse",
     headline: "One cloud data foundation for KPI logic, filters, reporting, and auditability",
     description:
-      "We centralize the builder's data in BigQuery, Snowflake, or Microsoft Fabric with separate raw and mart layers. KPI logic lives in the warehouse so the numbers stay consistent across finance, construction, sales, and leadership.",
+      "Your data lands in a cloud warehouse you own, organized into raw and analytics layers. KPI logic lives in the warehouse so finance, construction, sales, and leadership all read the same numbers.",
     icon: "Layers",
     deliverables: [
-      "Raw and mart datasets organized for speed and auditability",
+      "Raw and analytics layers organized for speed and auditability",
       "Pre-computed KPI and filter tables",
-      "Warehouse SQL or dbt-style modeling",
-      "Daily refresh scripts and validation checks",
+      "Modular SQL transformations under version control",
+      "Scheduled refreshes and validation checks",
       "Cost-conscious infrastructure design",
       "Client-owned architecture and documentation",
     ],
@@ -64,12 +64,12 @@ export const SERVICES: Service[] = [
       "We build reporting systems teams can use daily. Instead of static BI tabs, you get drill-downs, operating views, and workflow-oriented tools that support operational decisions.",
     icon: "TrendingUp",
     deliverables: [
-      "Interactive Next.js dashboards and operating views",
+      "Interactive web dashboards and operating views",
       "Drill-downs by city, community, job, or superintendent",
       "Spreadsheet-grade pipeline tables",
       "Executive and department-level visibility",
       "Responsive layouts for desktop review and field use",
-      "Production-ready deployment and walkthroughs",
+      "Production deployment and team walkthroughs",
     ],
   },
   {

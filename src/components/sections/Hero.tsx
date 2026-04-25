@@ -56,9 +56,9 @@ export default function Hero() {
           </h1>
 
           <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
-            ERP systems, spreadsheets, finance tools, APIs, and exports feed one
-            structured warehouse that powers dashboards, reporting systems, and
-            operational tools built around builder workflows.
+            ERPs, spreadsheets, finance tools, APIs, and file exports feed
+            one warehouse — turned into dashboards and tools your team
+            actually uses.
           </p>
 
           <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
