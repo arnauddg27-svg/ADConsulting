@@ -1,6 +1,7 @@
 import { ArrowRight, PhoneCall } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { AuroraGloss } from "@/components/ui/AuroraBackground";
 import { SITE_CONFIG } from "@/lib/constants";
 import { clsx } from "clsx";
 
@@ -28,6 +29,9 @@ export default function CTABanner({
           )}
           style={{ pointerEvents: "auto" }}
         >
+          {/* Subtle aurora gloss behind the panel content */}
+          <AuroraGloss />
+
           {/* accent glow overlays */}
           <div
             aria-hidden

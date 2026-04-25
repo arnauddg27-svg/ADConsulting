@@ -147,6 +147,13 @@
   100% { transform: scale(0.95); opacity: 0; }
 }
 
+/* Aceternity-style aurora: cycles background-position so the layered
+   gradient sheets drift slowly. Used by AuroraBackground / AuroraGloss. */
+@keyframes aurora-shift {
+  from { background-position: 50% 50%, 50% 50%; }
+  to   { background-position: 350% 50%, 350% 50%; }
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
