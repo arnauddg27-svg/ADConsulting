@@ -6,6 +6,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 const painPoints = [
   {
@@ -50,28 +51,33 @@ export default function SocialProof() {
 
         <div className="reveal-stagger mt-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {painPoints.map((item) => (
-            <div
+            <TiltCard
               key={item.problem}
-              className="reveal glow-card group flex flex-col p-6"
+              tiltLimit={6}
+              scale={1.02}
+              spotlight={false}
+              className="reveal h-full rounded-2xl"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/25 bg-gradient-to-br from-accent-500/15 to-accent-500/[0.02] text-accent-300 transition-all duration-500 group-hover:border-accent-400/50 group-hover:shadow-[0_0_20px_-6px_rgba(52,211,153,0.45)]">
-                {item.icon}
-              </div>
+              <div className="glow-card group flex h-full flex-col p-6">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/25 bg-gradient-to-br from-accent-500/15 to-accent-500/[0.02] text-accent-300 transition-all duration-500 group-hover:border-accent-400/50 group-hover:shadow-[0_0_20px_-6px_rgba(52,211,153,0.45)]">
+                  {item.icon}
+                </div>
 
-              <div className="mt-5 text-[0.88rem] leading-6 text-slate-400 line-through decoration-slate-600/70 decoration-1">
-                {item.problem}
-              </div>
+                <div className="mt-5 text-[0.88rem] leading-6 text-slate-400 line-through decoration-slate-600/70 decoration-1">
+                  {item.problem}
+                </div>
 
-              <div className="mt-3 flex items-start gap-2 text-accent-300">
-                <ArrowRight
-                  size={14}
-                  className="mt-1 shrink-0 transition-transform duration-500 group-hover:translate-x-0.5"
-                />
-                <div className="text-[0.95rem] font-medium leading-6 text-slate-100">
-                  {item.solution}
+                <div className="mt-3 flex items-start gap-2 text-accent-300">
+                  <ArrowRight
+                    size={14}
+                    className="mt-1 shrink-0 transition-transform duration-500 group-hover:translate-x-0.5"
+                  />
+                  <div className="text-[0.95rem] font-medium leading-6 text-slate-100">
+                    {item.solution}
+                  </div>
                 </div>
               </div>
-            </div>
+            </TiltCard>
           ))}
         </div>
       </Container>

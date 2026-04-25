@@ -5,6 +5,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 const reasons = [
   {
@@ -59,25 +60,30 @@ export default function WhyChooseUs() {
 
           <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
             {reasons.map((item, idx) => (
-              <div
+              <TiltCard
                 key={item.title}
-                className="reveal glow-card relative flex flex-col p-6"
+                tiltLimit={6}
+                scale={1.02}
+                spotlight={false}
+                className="reveal h-full rounded-2xl"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/25 bg-gradient-to-br from-accent-500/15 to-accent-500/[0.02] text-accent-200">
-                    {item.icon}
+                <div className="glow-card relative flex h-full flex-col p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/25 bg-gradient-to-br from-accent-500/15 to-accent-500/[0.02] text-accent-200">
+                      {item.icon}
+                    </div>
+                    <span className="font-space-grotesk text-[0.62rem] uppercase tracking-[0.24em] text-slate-500">
+                      0{idx + 1}
+                    </span>
                   </div>
-                  <span className="font-space-grotesk text-[0.62rem] uppercase tracking-[0.24em] text-slate-500">
-                    0{idx + 1}
-                  </span>
+                  <h3 className="mt-5 text-[1.02rem] font-semibold leading-tight text-slate-100">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2.5 text-[0.88rem] leading-6 text-slate-400">
+                    {item.body}
+                  </p>
                 </div>
-                <h3 className="mt-5 text-[1.02rem] font-semibold leading-tight text-slate-100">
-                  {item.title}
-                </h3>
-                <p className="mt-2.5 text-[0.88rem] leading-6 text-slate-400">
-                  {item.body}
-                </p>
-              </div>
+              </TiltCard>
             ))}
           </div>
         </div>
