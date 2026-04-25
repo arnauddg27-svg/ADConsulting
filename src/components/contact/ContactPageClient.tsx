@@ -290,32 +290,6 @@ export default function ContactPageClient() {
                   </a>
                 </div>
               </Card>
-
-              <Card
-                padding="lg"
-                className="bg-[linear-gradient(135deg,rgba(52,211,153,0.12),rgba(255,255,255,0.04)_60%,rgba(34,211,238,0.08))]"
-              >
-                <h3 className="font-heading text-2xl tracking-[0.04em] text-slate-50">
-                  Discovery Questionnaire
-                </h3>
-                <p className="mt-4 text-sm leading-7 text-slate-200">
-                  A fillable PDF covering ERP, finance, sales, construction ops, reporting,
-                  and cloud posture. Takes 25-40 minutes to complete and compresses the
-                  first two discovery calls into one. Return it before the call.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <a
-                    href="/downloads/AD-Homes-Discovery-Questionnaire.pdf"
-                    download
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-5 py-3 text-sm font-semibold text-slate-100 transition-all duration-300 hover:border-accent-400/40 hover:bg-white/[0.1] hover:text-accent-100"
-                  >
-                    Download PDF
-                    <span className="text-[0.62rem] font-normal uppercase tracking-[0.18em] text-slate-400">
-                      9 pp · 127 fields
-                    </span>
-                  </a>
-                </div>
-              </Card>
             </div>
           </div>
         </Container>
