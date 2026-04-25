@@ -98,6 +98,55 @@ export interface SHSale {
   closingDate: string | null;
   status: "active" | "pending" | "closed" | "cancelled";
   year: number;
+  /* ── Sales-sheet contract fields (Centralized Data 2.0) ──
+     All optional for back-compat with any older data sources. */
+  /* Buyer detail */
+  coBuyer?: string | null;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  buyerCity?: string;
+  buyerState?: string;
+  /* Sale-event dates */
+  writtenDate?: string | null;
+  soldDate?: string | null;
+  acceptedDate?: string | null;
+  cancelDate?: string | null;
+  cancelReason?: string | null;
+  /* Pricing */
+  basePrice?: number;
+  lotPremium?: number;
+  changeOrders?: number;
+  salesIncentive?: number;
+  solarPackage?: number;
+  totalPrice?: number;        // Base + Lot Premium + Change Orders + Discretionary
+  /* Money flow */
+  totalDeposits?: number;
+  closingCost?: number;
+  /* Closing schedule */
+  promisedDate?: string | null;
+  projectedCloseDate?: string | null;
+  scheduledCloseDate?: string | null;
+  /* Margins */
+  netProfitEst?: number;
+  netMarginEst?: number;       // percentage
+  /* Sales team / channel */
+  realtorCompany?: string;
+  realtor?: string;
+  saleSource?: "Walk-in" | "MLS" | "Referral" | "Website" | "Repeat Buyer" | "Builder Show" | "Other";
+  /* Financing */
+  mortgageCompany?: string;
+  mortgageContact?: string;
+  loanType?: "Conventional" | "FHA" | "VA" | "USDA" | "Cash" | "Builder Financing";
+  loanApplicationDate?: string | null;
+  loanApprovedDate?: string | null;
+  /* Title */
+  titleCompany?: string;
+  titleContact?: string;
+  /* Contingency */
+  contingentSale?: boolean;
+  contingentAddress?: string;
+  contingentDeliveryDate?: string | null;
+  contingencyRemovedDate?: string | null;
 }
 
 export interface SHLoan {

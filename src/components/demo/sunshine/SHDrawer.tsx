@@ -83,13 +83,52 @@ const saleStatusPill = (r: Record<string, unknown>) => {
   return <SHPill tone={s === "closed" ? "good" : s === "active" || s === "pending" ? "watch" : "alert"} label={s} />;
 };
 
+/* Sales drilldown — enriched with the Centralized Data 2.0 / Sales sheet
+   contract fields (pricing breakdown, deposits, closing schedule, financing,
+   realtor + title counterparties, contingency). All optional fields fall
+   back to em-dash when missing. */
 const saleCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
-  { key: "buyer", label: "Buyer", width: "100px" },
-  { key: "salePrice", label: "Price", width: "80px", align: "right", render: r => fmt$(Number(r.salePrice)) },
-  { key: "contractDate", label: "Contract", width: "85px" },
-  { key: "status", label: "Status", width: "80px", render: saleStatusPill },
+  { key: "plan", label: "Plan", width: "100px" },
+  { key: "buyer", label: "Buyer", width: "120px" },
+  { key: "agent", label: "Sales Agent", width: "110px" },
+  { key: "saleSource", label: "Source", width: "85px", render: r => String(r.saleSource ?? "\u2014") },
+  { key: "totalPrice", label: "Total Price", width: "95px", align: "right", render: r => fmt$(Number(r.totalPrice ?? r.salePrice)) },
+  { key: "lotPremium", label: "Lot Prem", width: "75px", align: "right", render: r => {
+    const v = Number(r.lotPremium ?? 0);
+    return v > 0 ? fmt$(v) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+  }},
+  { key: "changeOrders", label: "C/O", width: "65px", align: "right", render: r => {
+    const v = Number(r.changeOrders ?? 0);
+    return v > 0 ? fmt$(v) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+  }},
+  { key: "totalDeposits", label: "Deposits", width: "80px", align: "right", render: r => {
+    const v = Number(r.totalDeposits ?? 0);
+    return v > 0 ? fmt$(v) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+  }},
+  { key: "closingCost", label: "Close Cost", width: "85px", align: "right", render: r => {
+    const v = Number(r.closingCost ?? 0);
+    return v > 0 ? fmt$(v) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+  }},
+  { key: "netMarginEst", label: "Margin Est", width: "85px", align: "right", render: r => {
+    const v = Number(r.netMarginEst ?? 0);
+    if (!v) return <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+    return <span style={{ color: v >= 18 ? "var(--sh-accent)" : v >= 12 ? "inherit" : "var(--sh-warning)", fontWeight: 600 }}>{fmtPct(v)}</span>;
+  }},
+  { key: "loanType", label: "Loan", width: "90px", render: r => String(r.loanType ?? "\u2014") },
+  { key: "mortgageCompany", label: "Mortgage", width: "140px", render: r => String(r.mortgageCompany ?? "\u2014") },
+  { key: "realtor", label: "Realtor", width: "110px", render: r => String(r.realtor ?? "\u2014") },
+  { key: "realtorCompany", label: "Realtor Co", width: "130px", render: r => String(r.realtorCompany ?? "\u2014") },
+  { key: "titleCompany", label: "Title", width: "130px", render: r => String(r.titleCompany ?? "\u2014") },
+  { key: "writtenDate", label: "Written", width: "85px", render: r => r.writtenDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.writtenDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "contractDate", label: "Sold", width: "85px", render: r => <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.contractDate)}</span> },
+  { key: "scheduledCloseDate", label: "Sched Close", width: "95px", render: r => r.scheduledCloseDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.scheduledCloseDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "closingDate", label: "Closed", width: "85px", render: r => r.closingDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.closingDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "contingentSale", label: "Conting", width: "75px", render: r => r.contingentSale
+    ? <SHPill tone="watch" label="Yes" />
+    : <span style={{ color: "var(--sh-text-muted)" }}>No</span> },
+  { key: "status", label: "Status", width: "85px", render: saleStatusPill },
 ];
 
 const pmOccPill = (r: Record<string, unknown>) => {

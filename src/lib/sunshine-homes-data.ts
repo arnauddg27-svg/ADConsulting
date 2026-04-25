@@ -77,6 +77,16 @@ const STAGES = ["Permit", "Foundation", "Framing", "MEP / Drywall", "Finishes", 
 const LENDERS = ["First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank"] as const;
 const AGENTS = ["Alex Rivera", "Jessica Chen", "Mark Thompson", "Sarah Patel", "David Kim"] as const;
 
+/* Sales-side counterparty pools (for SHSale enrichment) */
+const REALTOR_COMPANIES = ["Coldwell Banker", "Keller Williams", "Re/Max Coastal", "Compass Florida", "Watson Realty", "Berkshire Hathaway"] as const;
+const REALTORS = ["Diane Foster", "Marcus Hill", "Priya Shah", "Tom Ramsey", "Olivia Park", "Ben Garcia", "Helen Wu", "Carlos Mendez"] as const;
+const MORTGAGE_COMPANIES = ["Chase Home Lending", "Wells Fargo Home Mortgage", "Rocket Mortgage", "Movement Mortgage", "Fairway Independent", "loanDepot"] as const;
+const MORTGAGE_CONTACTS = ["Erin Bishop", "Aaron Cole", "Lena Park", "Greg Holt", "Maya Soto", "Devon Bryant"] as const;
+const TITLE_COMPANIES = ["Old Republic Title", "First American Title", "Stewart Title", "Florida Land Title", "Chicago Title"] as const;
+const TITLE_CONTACTS = ["Tara Mills", "Joel Carney", "Leah Pace", "Andre Booth", "Sasha Reed"] as const;
+const SALE_SOURCES = ["Walk-in", "MLS", "Referral", "Website", "Repeat Buyer", "Builder Show"] as const;
+const LOAN_TYPES = ["Conventional", "FHA", "VA", "USDA", "Cash", "Builder Financing"] as const;
+
 /* City → county mapping */
 const CITY_COUNTY: Record<string, string> = {
   Orlando: "Orange",
@@ -524,7 +534,8 @@ function generateSales(): SHSale[] {
     const comm = job.community;
     const meta = COMM_META[comm];
     const plan = job.plan;
-    const buyer = `${pick(BUYER_FAMILIES)} Family`;
+    const buyerLast = pick(BUYER_FAMILIES);
+    const buyer = `${buyerLast} Family`;
     const agent = pick(AGENTS);
     const salePrice = Math.round(job.contractValue * (0.97 + rand() * 0.08));
     const contractDate = addDays(job.startDate, between(20, 150));
@@ -543,6 +554,79 @@ function generateSales(): SHSale[] {
         : null;
     const cy = new Date(contractDate).getFullYear();
 
+    /* ── Contract enrichment (Centralized Data 2.0 / Sales sheet) ── */
+
+    /* Pricing breakdown — base + premiums + change orders + incentives */
+    const lotPremium = rand() < 0.45 ? Math.round(between(2, 25) * 1000) : 0;
+    const changeOrders = rand() < 0.6 ? Math.round(between(3, 22) * 1000) : 0;
+    const salesIncentive = rand() < 0.35 ? Math.round(between(2, 15) * 1000) : 0;
+    const solarPackage = rand() < 0.18 ? Math.round(between(8, 18) * 1000) : 0;
+    const basePrice = Math.max(0, salePrice - lotPremium - changeOrders + salesIncentive - solarPackage);
+    const totalPrice = basePrice + lotPremium + changeOrders + solarPackage - salesIncentive;
+
+    /* Deposits (2-12% of total, varies by status) */
+    const depositPctRaw = between(2, 12) + (status === "closed" ? 4 : 0);
+    const depositPct = Math.min(15, depositPctRaw);
+    const totalDeposits = Math.round(totalPrice * (depositPct / 100));
+
+    /* Closing cost — typically 2.5-3.5% */
+    const closingCost = Math.round(totalPrice * (0.025 + rand() * 0.012));
+
+    /* Sales-event dates: written before contract, sold around contract,
+       accepted shortly after */
+    const writtenDate = addDays(contractDate, -between(2, 18));
+    const soldDate = contractDate;
+    const acceptedDate = addDays(contractDate, between(1, 5));
+    const cancelDate = status === "cancelled" ? addDays(contractDate, between(15, 90)) : null;
+    const cancelReason = status === "cancelled"
+      ? pick(["Financing fell through", "Buyer remorse", "Inspection issues", "Job relocation", "Appraisal gap"] as const)
+      : null;
+
+    /* Closing schedule (only meaningful if not cancelled) */
+    const promisedDate = status !== "cancelled" ? addDays(contractDate, between(150, 300)) : null;
+    const projectedCloseDate = closingDate ?? (status !== "cancelled" ? addDays(contractDate, between(160, 310)) : null);
+    const scheduledCloseDate = projectedCloseDate ? addDays(projectedCloseDate, between(-7, 5)) : null;
+
+    /* Margins — net profit estimate ~12-22% of price */
+    const netMarginEst = Math.round((11 + rand() * 12) * 10) / 10;
+    const netProfitEst = Math.round(totalPrice * (netMarginEst / 100));
+
+    /* Sales channel + counterparties */
+    const saleSource = pick(SALE_SOURCES) as SHSale["saleSource"];
+    const usesRealtor = saleSource !== "Walk-in" && saleSource !== "Repeat Buyer" && rand() > 0.1;
+    const realtorCompany = usesRealtor ? pick(REALTOR_COMPANIES) : "Direct";
+    const realtor = usesRealtor ? pick(REALTORS) : "—";
+
+    /* Financing — most are financed, some cash */
+    const loanType = pick(LOAN_TYPES) as SHSale["loanType"];
+    const isFinanced = loanType !== "Cash";
+    const mortgageCompany = isFinanced ? pick(MORTGAGE_COMPANIES) : "Cash deal";
+    const mortgageContact = isFinanced ? pick(MORTGAGE_CONTACTS) : "—";
+    const loanApplicationDate = isFinanced ? addDays(contractDate, between(2, 15)) : null;
+    const loanApprovedDate = isFinanced && rand() > 0.15
+      ? addDays(loanApplicationDate ?? contractDate, between(20, 55))
+      : null;
+
+    /* Title */
+    const titleCompany = pick(TITLE_COMPANIES);
+    const titleContact = pick(TITLE_CONTACTS);
+
+    /* Contingency (~22% of sales) */
+    const contingentSale = rand() < 0.22;
+    const contingentAddress = contingentSale
+      ? `${between(100, 9999)} ${pick(["Maple", "Oak", "Pine", "Cedar", "Magnolia", "Palm"])} ${pick(["St", "Ave", "Ln", "Dr"])}, ${meta.city}`
+      : "";
+    const contingentDeliveryDate = contingentSale ? addDays(contractDate, between(30, 120)) : null;
+    const contingencyRemovedDate = contingentSale && rand() > 0.3 ? addDays(contractDate, between(20, 70)) : null;
+
+    /* Buyer detail */
+    const coBuyer = rand() < 0.55 ? `${pick(["Robert", "Maria", "James", "Linda", "Daniel", "Patricia", "Sofia", "Mark"])} ${buyerLast}` : null;
+    const buyerFirst = pick(["John", "Sarah", "Michael", "Jessica", "David", "Emily", "Chris", "Amanda", "Brian", "Nicole"]);
+    const buyerEmail = `${buyerFirst.toLowerCase()}.${buyerLast.toLowerCase()}@${pick(["gmail.com", "yahoo.com", "outlook.com", "icloud.com"])}`;
+    const buyerPhone = `(${between(305, 954)}) ${between(200, 999)}-${String(between(1000, 9999)).padStart(4, "0")}`;
+    const buyerCity = pick([meta.city, "Miami", "Tampa", "Orlando", "Jacksonville", "Naples", "Sarasota"]);
+    const buyerState = "FL";
+
     result.push({
       id: i + 1,
       jobCode: job.jobCode,
@@ -557,6 +641,44 @@ function generateSales(): SHSale[] {
       closingDate,
       status,
       year: cy,
+      /* enriched contract fields */
+      coBuyer,
+      buyerEmail,
+      buyerPhone,
+      buyerCity,
+      buyerState,
+      writtenDate,
+      soldDate,
+      acceptedDate,
+      cancelDate,
+      cancelReason,
+      basePrice,
+      lotPremium,
+      changeOrders,
+      salesIncentive,
+      solarPackage,
+      totalPrice,
+      totalDeposits,
+      closingCost,
+      promisedDate,
+      projectedCloseDate,
+      scheduledCloseDate,
+      netProfitEst,
+      netMarginEst,
+      realtorCompany,
+      realtor,
+      saleSource,
+      mortgageCompany,
+      mortgageContact,
+      loanType,
+      loanApplicationDate,
+      loanApprovedDate,
+      titleCompany,
+      titleContact,
+      contingentSale,
+      contingentAddress,
+      contingentDeliveryDate,
+      contingencyRemovedDate,
     });
   }
   return result;
