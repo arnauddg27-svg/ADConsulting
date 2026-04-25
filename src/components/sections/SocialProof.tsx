@@ -5,6 +5,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 const painPoints = [
   {
@@ -48,17 +49,25 @@ export default function SocialProof() {
 
         <div className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {painPoints.map((item) => (
-            <div key={item.problem} className="reveal glow-card p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-500">
-                {item.icon}
+            <TiltCard
+              key={item.problem}
+              tiltLimit={6}
+              scale={1.02}
+              spotlight={false}
+              className="reveal h-full rounded-2xl"
+            >
+              <div className="glow-card h-full p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-500">
+                  {item.icon}
+                </div>
+                <div className="mt-4 text-[0.95rem] font-medium leading-6 text-red-500/80 line-through decoration-red-500/30">
+                  {item.problem}
+                </div>
+                <div className="mt-3 text-[0.95rem] font-medium leading-7 text-slate-100">
+                  {item.solution}
+                </div>
               </div>
-              <div className="mt-4 text-[0.95rem] font-medium leading-6 text-red-500/80 line-through decoration-red-500/30">
-                {item.problem}
-              </div>
-              <div className="mt-3 text-[0.95rem] font-medium leading-7 text-slate-100">
-                {item.solution}
-              </div>
-            </div>
+            </TiltCard>
           ))}
         </div>
       </Container>

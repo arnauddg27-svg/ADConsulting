@@ -5,6 +5,7 @@ import {
   MapPin,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 const reasons = [
   {
@@ -48,17 +49,25 @@ export default function WhyChooseUs() {
 
           <div className="reveal-stagger grid gap-4 sm:grid-cols-2">
             {reasons.map((item) => (
-              <div key={item.title} className="reveal glow-card p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
-                  {item.icon}
+              <TiltCard
+                key={item.title}
+                tiltLimit={6}
+                scale={1.02}
+                spotlight={false}
+                className="reveal h-full rounded-2xl"
+              >
+                <div className="glow-card h-full p-6">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
+                    {item.icon}
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-slate-100">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    {item.body}
+                  </p>
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-slate-100">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-400">
-                  {item.body}
-                </p>
-              </div>
+              </TiltCard>
             ))}
           </div>
         </div>

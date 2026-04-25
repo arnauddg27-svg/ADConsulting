@@ -9,6 +9,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 import { SERVICES } from "@/lib/constants";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -38,25 +39,32 @@ export default function ServicesOverview() {
 
         <div className="reveal-stagger mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((service) => (
-            <Link
+            <TiltCard
               key={service.id}
-              href="/services/"
-              className="reveal glow-card group flex flex-col p-6"
+              tiltLimit={6}
+              scale={1.02}
+              spotlight={false}
+              className="reveal h-full rounded-2xl"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-400/20 bg-accent-500/10 text-accent-200 transition-all duration-300 group-hover:border-accent-400/40 group-hover:shadow-[0_0_20px_-4px_rgba(52,211,153,0.3)]">
-                {iconMap[service.icon]}
-              </div>
-              <h3 className="mt-5 font-heading text-xl tracking-[-0.01em] text-slate-50">
-                {service.shortTitle}
-              </h3>
-              <p className="mt-3 flex-1 text-sm leading-6 text-slate-400">
-                {service.headline}
-              </p>
-              <div className="mt-5 inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-accent-200 transition-colors group-hover:text-accent-100">
-                Learn More
-                <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-              </div>
-            </Link>
+              <Link
+                href="/services/"
+                className="glow-card group flex h-full flex-col p-6"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-400/20 bg-accent-500/10 text-accent-200 transition-all duration-300 group-hover:border-accent-400/40 group-hover:shadow-[0_0_20px_-4px_rgba(52,211,153,0.3)]">
+                  {iconMap[service.icon]}
+                </div>
+                <h3 className="mt-5 font-heading text-xl tracking-[-0.01em] text-slate-50">
+                  {service.shortTitle}
+                </h3>
+                <p className="mt-3 flex-1 text-sm leading-6 text-slate-400">
+                  {service.headline}
+                </p>
+                <div className="mt-5 inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-accent-200 transition-colors group-hover:text-accent-100">
+                  Learn More
+                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                </div>
+              </Link>
+            </TiltCard>
           ))}
         </div>
       </Container>

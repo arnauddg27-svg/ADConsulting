@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Container from "@/components/ui/Container";
+import { TiltCard } from "@/components/ui/TiltCard";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
@@ -156,15 +157,23 @@ export default function AboutPage() {
 
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {pillars.map((p) => (
-                <div key={p.title} className="glow-card p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
-                    {p.icon}
+                <TiltCard
+                  key={p.title}
+                  tiltLimit={6}
+                  scale={1.02}
+                  spotlight={false}
+                  className="h-full rounded-2xl"
+                >
+                  <div className="glow-card h-full p-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
+                      {p.icon}
+                    </div>
+                    <h3 className="mt-4 font-heading text-lg tracking-[-0.01em] text-slate-50">
+                      {p.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">{p.desc}</p>
                   </div>
-                  <h3 className="mt-4 font-heading text-lg tracking-[-0.01em] text-slate-50">
-                    {p.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{p.desc}</p>
-                </div>
+                </TiltCard>
               ))}
             </div>
           </div>
