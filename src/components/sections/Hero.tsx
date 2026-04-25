@@ -78,9 +78,9 @@ export default function Hero() {
               Client-owned infrastructure
             </span>
             <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>BigQuery · Snowflake · Postgres</span>
+            <span>Data warehouse handoff</span>
             <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>Sun Belt builders</span>
+            <span>Dashboard hosting handoff</span>
           </div>
         </div>
 
