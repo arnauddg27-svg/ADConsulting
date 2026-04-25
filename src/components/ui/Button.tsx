@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { clsx } from "clsx";
 
+/* Subtle gradient halo behind the pill, baked in via a `before:` pseudo so
+   every primary CTA on the site picks it up automatically. Tuned way down
+   from the prior ButtonColorful (opacity 25%, blur-md, only 2px bleed) so
+   it reads as a soft glossy accent rather than a glow. */
 const variants = {
   primary:
-    "border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)]",
+    "relative isolate border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] before:absolute before:-inset-[2px] before:-z-10 before:rounded-full before:bg-[linear-gradient(90deg,#10b981,#22d3ee,#10b981)] before:opacity-25 before:blur-md before:transition-opacity before:duration-500 hover:before:opacity-50",
   secondary:
     "border-white/[0.1] bg-white/[0.06] text-slate-50 hover:-translate-y-0.5 hover:border-white/[0.2] hover:bg-white/[0.09]",
   outline:
