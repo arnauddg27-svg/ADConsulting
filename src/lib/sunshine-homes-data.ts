@@ -332,6 +332,83 @@ function generateJobs(): SHJob[] {
 
       const jobType = deriveJobType(stage, coDate);
 
+      /* ── 22 granular milestone dates (Centralized Data 2.0 / Construction sheet) ──
+         Spread between startDate and coOffset based on the percentage marker.
+         Only fill dates up to current completionPct so the data reflects where
+         each job actually is in its lifecycle. */
+      const granularMilestones: { pct: number; key: string; label: string }[] = [
+        { pct: 1,  key: "msJobStart",            label: "1%. Job Start" },
+        { pct: 5,  key: "msClearLot",            label: "5%. Clear Lot" },
+        { pct: 10, key: "msBuildPad",            label: "10%. Build Pad" },
+        { pct: 15, key: "msUndergroundPlumbing", label: "15%. Underground Plumbing" },
+        { pct: 20, key: "msPourSlab",            label: "20%. Pour Slab" },
+        { pct: 25, key: "msBlockHouse",          label: "25%. Block House" },
+        { pct: 30, key: "msFrameHouse",          label: "30%. Frame House" },
+        { pct: 35, key: "msDryInRoof",           label: "35%. Dry-in Roof" },
+        { pct: 40, key: "msElectricalRoughIn",   label: "40%. Electrical Rough in" },
+        { pct: 45, key: "msInsulateHouse",       label: "45%. Insulate House" },
+        { pct: 50, key: "msDrywallHouse",        label: "50%. Drywall House" },
+        { pct: 55, key: "msFirstTrim",           label: "55%. Install 1st Trim" },
+        { pct: 60, key: "msFirstInteriorPaint",  label: "60%. 1st Interior Paint" },
+        { pct: 65, key: "msFlooringInstall",     label: "65%. Flooring Install" },
+        { pct: 70, key: "msCabinetInstall",      label: "70%. Cabinet Install" },
+        { pct: 75, key: "msElectricalTrimout",   label: "75%. Electrical Trimout" },
+        { pct: 80, key: "msHotCheck",            label: "80%. Hot Check" },
+        { pct: 85, key: "msAcStartup",           label: "85%. AC Startup" },
+        { pct: 90, key: "msFinalExteriorPaint",  label: "90%. Final Exterior Paint" },
+        { pct: 95, key: "msFinalSurvey",         label: "95%. Final Survey" },
+        { pct: 98, key: "msFinalSiteCleanup",    label: "98%. Final site clean up" },
+        { pct: 100,key: "msReceiveCO",           label: "100%. Receive CO" },
+      ];
+
+      // Cycle goal: pad with 5% slop around totalCycleDays as the target build window.
+      const goalCycleDays = Math.round(totalCycleDays * (rand() > 0.5 ? 0.95 : 1.05));
+      // Map percent to day-offset across the goal cycle.
+      const dayForPct = (pct: number) => Math.round((pct / 100) * goalCycleDays);
+
+      const granularDates: Record<string, string | null> = {};
+      let lastFilledMS: { label: string; date: string } | null = null;
+      for (const m of granularMilestones) {
+        const reached = completionPct >= m.pct;
+        const noise = between(-3, 3); // small per-milestone variance
+        const offset = Math.max(0, dayForPct(m.pct) + noise);
+        if (reached) {
+          const dt = addDays(startDate, offset);
+          granularDates[m.key] = dt;
+          lastFilledMS = { label: m.label, date: dt };
+        } else {
+          granularDates[m.key] = null;
+        }
+      }
+
+      // Aggregate milestone tracking
+      const lastMilestoneCompleted = lastFilledMS?.label ?? null;
+      const dateLastMilestoneCompleted = lastFilledMS?.date ?? null;
+      const daysSinceLastMilestone = dateLastMilestoneCompleted
+        ? Math.max(0, daysBetween(dateLastMilestoneCompleted, refDate))
+        : daysInPhase;
+      const furthestMilestoneCompleted = lastMilestoneCompleted; // monotonic in this generator
+      const dateFurthestMilestoneCompleted = dateLastMilestoneCompleted;
+
+      // Next stage date — pick the first not-yet-filled milestone and place it
+      // a reasonable interval out (~7-21 days)
+      const nextMilestone = granularMilestones.find(m => completionPct < m.pct);
+      const nextStageDate = nextMilestone ? addDays(refDate, between(7, 21)) : null;
+
+      // On/off track vs goal — compare actual elapsed % vs expected % for elapsed days
+      const expectedPct = goalCycleDays > 0
+        ? Math.min(100, (totalCycleDays / goalCycleDays) * 100)
+        : completionPct;
+      const pctDelta = completionPct - expectedPct; // positive = ahead, negative = behind
+      const offTrack: "on" | "ahead" | "behind" = pctDelta > 5 ? "ahead" : pctDelta < -5 ? "behind" : "on";
+      const daysOnOffTrack = Math.round((pctDelta / 100) * goalCycleDays);
+
+      // Average days between completed milestones
+      const filledCount = granularMilestones.filter(m => completionPct >= m.pct).length;
+      const ctBetweenMilestones = filledCount > 1
+        ? Math.round(daysBetween(startDate, dateLastMilestoneCompleted ?? refDate) / Math.max(1, filledCount - 1))
+        : 0;
+
       result.push({
         id,
         jobCode: `SH-${jobNum}`,
@@ -373,6 +450,40 @@ function generateJobs(): SHJob[] {
         finishesDate,
         coDate,
         closingDate,
+        /* aggregate milestone tracking */
+        lastMilestoneCompleted,
+        dateLastMilestoneCompleted,
+        daysSinceLastMilestone,
+        furthestMilestoneCompleted,
+        dateFurthestMilestoneCompleted,
+        nextStageDate,
+        offTrack,
+        daysOnOffTrack,
+        ctBetweenMilestones,
+        goalCycleDays,
+        /* 22 granular milestone dates */
+        msJobStart: granularDates.msJobStart,
+        msClearLot: granularDates.msClearLot,
+        msBuildPad: granularDates.msBuildPad,
+        msUndergroundPlumbing: granularDates.msUndergroundPlumbing,
+        msPourSlab: granularDates.msPourSlab,
+        msBlockHouse: granularDates.msBlockHouse,
+        msFrameHouse: granularDates.msFrameHouse,
+        msDryInRoof: granularDates.msDryInRoof,
+        msElectricalRoughIn: granularDates.msElectricalRoughIn,
+        msInsulateHouse: granularDates.msInsulateHouse,
+        msDrywallHouse: granularDates.msDrywallHouse,
+        msFirstTrim: granularDates.msFirstTrim,
+        msFirstInteriorPaint: granularDates.msFirstInteriorPaint,
+        msFlooringInstall: granularDates.msFlooringInstall,
+        msCabinetInstall: granularDates.msCabinetInstall,
+        msElectricalTrimout: granularDates.msElectricalTrimout,
+        msHotCheck: granularDates.msHotCheck,
+        msAcStartup: granularDates.msAcStartup,
+        msFinalExteriorPaint: granularDates.msFinalExteriorPaint,
+        msFinalSurvey: granularDates.msFinalSurvey,
+        msFinalSiteCleanup: granularDates.msFinalSiteCleanup,
+        msReceiveCO: granularDates.msReceiveCO,
       });
       id++;
     }

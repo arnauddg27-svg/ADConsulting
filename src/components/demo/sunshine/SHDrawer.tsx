@@ -1000,14 +1000,33 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       columns = [
         { key: "jobCode", label: "Job", width: "80px" },
         { key: "community", label: "Community", width: "130px" },
-        { key: "lot", label: "Lot", width: "70px" },
+        { key: "lot", label: "Lot", width: "60px" },
         { key: "plan", label: "Plan", width: "100px" },
         { key: "superintendent", label: "Super", width: "100px" },
-        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "completionPct", label: "Comp", width: "55px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
-        { key: "daysInCurrentPhase", label: "Since Last Milestone", width: "140px", align: "right", render: r => {
-          const d = Number(r.daysInCurrentPhase);
+        { key: "lastMilestoneCompleted", label: "Last Milestone", width: "165px", render: r => {
+          const v = r.lastMilestoneCompleted as string | null | undefined;
+          return v ? <span style={{ color: "var(--sh-text-primary)" }}>{v}</span> : <span style={{ color: "var(--sh-text-muted)" }}>—</span>;
+        }},
+        { key: "dateLastMilestoneCompleted", label: "MS Date", width: "85px", render: r => {
+          const v = r.dateLastMilestoneCompleted as string | null | undefined;
+          return v ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{v}</span> : <span style={{ color: "var(--sh-text-muted)" }}>—</span>;
+        }},
+        { key: "daysSinceLastMilestone", label: "Since Last MS", width: "100px", align: "right", render: r => {
+          const d = Number(r.daysSinceLastMilestone ?? r.daysInCurrentPhase);
           return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "inherit", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
+        }},
+        { key: "offTrack", label: "Track", width: "90px", render: r => {
+          const t = (r.offTrack as "on"|"ahead"|"behind"|undefined) ?? "on";
+          const days = Number(r.daysOnOffTrack ?? 0);
+          const tone = t === "behind" ? "watch" : t === "ahead" ? "good" : "good";
+          const label = t === "on" ? "On track" : t === "ahead" ? `+${days}d ahead` : `${days}d behind`;
+          return <SHPill tone={tone} label={label} />;
+        }},
+        { key: "nextStageDate", label: "Next MS", width: "85px", render: r => {
+          const v = r.nextStageDate as string | null | undefined;
+          return v ? <span style={{ fontVariantNumeric: "tabular-nums", color: "var(--sh-text-muted)" }}>{v}</span> : <span style={{ color: "var(--sh-text-muted)" }}>—</span>;
         }},
       ];
       rows = stageJobs as unknown as Record<string, unknown>[];

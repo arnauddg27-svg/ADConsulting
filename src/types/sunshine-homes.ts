@@ -36,7 +36,7 @@ export interface SHJob {
   sidewalkActual: number;
   verticalBudget: number;
   verticalActual: number;
-  /* milestone dates */
+  /* high-level phase dates (kept for back-compat with existing drilldowns) */
   permitDate: string | null;
   foundationDate: string | null;
   framingDate: string | null;
@@ -45,6 +45,43 @@ export interface SHJob {
   finishesDate: string | null;
   coDate: string | null;
   closingDate: string | null;
+  /* ── Milestone fields aligned with Centralized Data 2.0 / Construction sheet ──
+     Marked optional so other SHJob[] datasets (Brite Homes etc.) that
+     pre-date the schema can compile without backfilling 30+ fields. The
+     Sunshine generator populates them in full. */
+  lastMilestoneCompleted?: string | null;
+  dateLastMilestoneCompleted?: string | null;
+  daysSinceLastMilestone?: number;
+  furthestMilestoneCompleted?: string | null;
+  dateFurthestMilestoneCompleted?: string | null;
+  nextStageDate?: string | null;
+  offTrack?: "on" | "ahead" | "behind";
+  daysOnOffTrack?: number;
+  ctBetweenMilestones?: number;
+  goalCycleDays?: number;
+  /* 22 granular milestone dates (cols 77-98 of Construction sheet) */
+  msJobStart?: string | null;          // 1%
+  msClearLot?: string | null;          // 5%
+  msBuildPad?: string | null;          // 10%
+  msUndergroundPlumbing?: string | null; // 15%
+  msPourSlab?: string | null;          // 20%
+  msBlockHouse?: string | null;        // 25%
+  msFrameHouse?: string | null;        // 30%
+  msDryInRoof?: string | null;         // 35%
+  msElectricalRoughIn?: string | null; // 40%
+  msInsulateHouse?: string | null;     // 45%
+  msDrywallHouse?: string | null;      // 50%
+  msFirstTrim?: string | null;         // 55%
+  msFirstInteriorPaint?: string | null;// 60%
+  msFlooringInstall?: string | null;   // 65%
+  msCabinetInstall?: string | null;    // 70%
+  msElectricalTrimout?: string | null; // 75%
+  msHotCheck?: string | null;          // 80%
+  msAcStartup?: string | null;         // 85%
+  msFinalExteriorPaint?: string | null;// 90%
+  msFinalSurvey?: string | null;       // 95%
+  msFinalSiteCleanup?: string | null;  // 98%
+  msReceiveCO?: string | null;         // 100%
 }
 
 export interface SHSale {
