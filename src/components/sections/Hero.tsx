@@ -78,9 +78,7 @@ export default function Hero() {
               Client-owned infrastructure
             </span>
             <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>Data warehouse handoff</span>
-            <span className="h-1 w-1 rounded-full bg-slate-600" />
-            <span>Dashboard hosting handoff</span>
+            <span>Data warehouse + dashboard hosting handoff</span>
           </div>
         </div>
 
