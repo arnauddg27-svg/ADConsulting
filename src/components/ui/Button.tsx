@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { clsx } from "clsx";
 
-/* Subtle gradient halo behind the pill, baked in via a `before:` pseudo so
-   every primary CTA on the site picks it up automatically. Tuned way down
-   from the prior ButtonColorful (opacity 25%, blur-md, only 2px bleed) so
-   it reads as a soft glossy accent rather than a glow. */
+/* "Cool" treatment from the 21st.dev button bundle, adapted to the brand:
+   vertical gradient (top brighter), thicker dark bottom border for a raised
+   feel, inset white ring for a subtle highlight, soft accent-tinted shadow,
+   brightness shift on hover/press. Reads as a polished raised pill rather
+   than a glowing halo. */
 const variants = {
   primary:
-    "relative isolate border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] before:absolute before:-inset-[2px] before:-z-10 before:rounded-full before:bg-[linear-gradient(90deg,#10b981,#22d3ee,#10b981)] before:opacity-25 before:blur-md before:transition-opacity before:duration-500 hover:before:opacity-50",
+    "border border-b-2 border-zinc-950/40 bg-gradient-to-t from-accent-600 to-accent-400 text-white shadow-md shadow-accent-500/30 ring-1 ring-inset ring-white/25 transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-lg hover:shadow-accent-500/40 active:brightness-95 active:translate-y-0",
   secondary:
-    "border-white/[0.1] bg-white/[0.06] text-slate-50 hover:-translate-y-0.5 hover:border-white/[0.2] hover:bg-white/[0.09]",
+    "border border-b-2 border-zinc-950/40 bg-gradient-to-t from-white/[0.04] to-white/[0.1] text-slate-50 ring-1 ring-inset ring-white/10 transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-110 active:brightness-95 active:translate-y-0",
   outline:
     "border-white/[0.16] bg-transparent text-slate-100 hover:border-accent-400 hover:bg-accent-500/10",
   ghost: "border-transparent text-slate-200 hover:bg-white/[0.05]",
