@@ -984,7 +984,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
         { key: "superintendent", label: "Super", width: "90px" },
-        { key: "daysInCurrentPhase", label: "Days", width: "50px", align: "right", render: r => {
+        { key: "daysInCurrentPhase", label: "Since Last Milestone", width: "140px", align: "right", render: r => {
           const d = Number(r.daysInCurrentPhase);
           return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "inherit", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
         }},
@@ -1005,7 +1005,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "superintendent", label: "Super", width: "100px" },
         { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
-        { key: "daysInCurrentPhase", label: "Days", width: "50px", align: "right", render: r => {
+        { key: "daysInCurrentPhase", label: "Since Last Milestone", width: "140px", align: "right", render: r => {
           const d = Number(r.daysInCurrentPhase);
           return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "inherit", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
         }},
@@ -1039,7 +1039,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "community", label: "Community", width: "130px" },
         { key: "stage", label: "Stage", width: "90px" },
         { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
-        { key: "daysInCurrentPhase", label: "Days", width: "50px", align: "right" },
+        { key: "daysInCurrentPhase", label: "Since Last Milestone", width: "140px", align: "right" },
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
       ];
       rows = superJobs as unknown as Record<string, unknown>[];
