@@ -10,8 +10,8 @@ import { TiltCard } from "@/components/ui/TiltCard";
 const reasons = [
   {
     icon: <Building2 size={22} />,
-    title: "Builder-specific data scope",
-    body: "We design around residential builder workflows, not generic reporting templates.",
+    title: "Real estate + homebuilding experience",
+    body: "The team comes from residential development and homebuilding operations. We know which KPIs matter to land, construction, sales, and finance — without you having to spell it out.",
   },
   {
     icon: <Wrench size={22} />,
