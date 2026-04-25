@@ -1,6 +1,6 @@
-import { DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
+import { ArrowRight, DollarSign, Layers, AlertTriangle, TrendingUp } from "lucide-react";
 import Container from "@/components/ui/Container";
-import { ButtonColorful } from "@/components/ui/ButtonColorful";
+import Button from "@/components/ui/Button";
 
 const previewModules = [
   {
@@ -51,7 +51,7 @@ export default function DashboardPreview() {
           />
           <div className="grid lg:grid-cols-[0.45fr_0.55fr]">
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
-              <span className="eyebrow">Illustrative Example</span>
+              <span className="eyebrow eyebrow-dot">Illustrative Example</span>
               <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
                 Next.js dashboards built on your data.
               </h2>
@@ -77,12 +77,10 @@ export default function DashboardPreview() {
                 ))}
               </div>
 
-              <ButtonColorful
-                href="/demo/"
-                label="Explore the Example"
-                size="lg"
-                className="mt-10 self-start"
-              />
+              <Button href="/demo/" size="lg" className="mt-10 self-start">
+                Explore the Example
+                <ArrowRight size={16} />
+              </Button>
             </div>
 
             <div className="border-t border-white/[0.08] bg-[#0a0f1a] p-6 md:p-8 lg:border-l lg:border-t-0">

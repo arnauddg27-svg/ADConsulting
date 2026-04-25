@@ -36,7 +36,7 @@ export default function ServicesPage() {
       <section className="page-hero">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">What We Build</span>
+            <span className="eyebrow eyebrow-dot">What We Build</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
               Custom data platforms for residential homebuilders
             </h1>
@@ -108,7 +108,7 @@ export default function ServicesPage() {
       <section className="section-space">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">Process</span>
+            <span className="eyebrow eyebrow-dot">Process</span>
             <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 sm:text-5xl">
               From discovery call to production handoff.
             </h2>

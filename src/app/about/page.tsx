@@ -88,7 +88,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-5xl">
             <div className="grid items-center gap-10 lg:grid-cols-2">
               <div>
-                <span className="eyebrow">About the Firm</span>
+                <span className="eyebrow eyebrow-dot">About the Firm</span>
                 <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
                   Custom data platforms for residential homebuilders
                 </h1>
@@ -119,7 +119,7 @@ export default function AboutPage() {
       <section className="section-space pt-0">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">Industry Context</span>
+            <span className="eyebrow eyebrow-dot">Industry Context</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
               Built around residential builder operations
             </h2>
@@ -145,7 +145,7 @@ export default function AboutPage() {
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">What We Build</span>
+            <span className="eyebrow eyebrow-dot">What We Build</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
               Three connected solution categories
             </h2>
@@ -183,7 +183,7 @@ export default function AboutPage() {
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">Why Clients Choose Us</span>
+            <span className="eyebrow eyebrow-dot">Why Clients Choose Us</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
               Ownership, directness, and practical delivery
             </h2>
@@ -209,7 +209,7 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
               <div>
-                <span className="eyebrow">Comparison</span>
+                <span className="eyebrow eyebrow-dot">Comparison</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
                   Delivery model differences
                 </h2>
@@ -254,7 +254,7 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
               <div>
-                <span className="eyebrow">Process</span>
+                <span className="eyebrow eyebrow-dot">Process</span>
                 <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
                   How engagements work
                 </h2>

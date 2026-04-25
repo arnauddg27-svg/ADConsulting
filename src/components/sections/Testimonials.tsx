@@ -11,7 +11,7 @@ export default function Testimonials() {
     <section className="section-space">
       <Container>
         <div className="text-center">
-          <span className="eyebrow">Results</span>
+          <span className="eyebrow eyebrow-dot">Results</span>
           <h2 className="mx-auto mt-5 max-w-3xl font-heading text-4xl leading-[0.95] tracking-[0.04em] text-slate-50 sm:text-5xl">
             What clients say once the numbers get easier to trust.
           </h2>
