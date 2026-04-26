@@ -264,9 +264,12 @@ function generateJobs(): SHJob[] {
       ];
       const completionPct = between(completionRanges[stageIdx][0], completionRanges[stageIdx][1]);
 
-      const contractValue = between(380000, 620000);
-      // Gross margin band tuned to stay realistic for production builders (~10-18%).
-      const costRatio = 0.82 + rand() * 0.08 + profile.baseRatioAdj;
+      // Contract value tightened to the actual range we see in the source data
+      // ($310-440K p10-p90, with healthy builders pricing slightly higher).
+      const contractValue = between(350000, 540000);
+      // Cost ratio band 0.78-0.85 → gross margin 15-22% (healthy builder zone,
+      // matches what the user asked for: "pretty good and reasonable").
+      const costRatio = 0.78 + rand() * 0.07 + profile.baseRatioAdj;
       const estimatedCost = Math.round(contractValue * costRatio);
 
       // Spend shape: some jobs spend front-loaded (materials/land early), others back-loaded
@@ -319,7 +322,10 @@ function generateJobs(): SHJob[] {
       /* Compute total cycle days from start to now (or completion) */
       const refDate = "2026-03-25";
       const totalCycleDays = Math.max(1, daysBetween(startDate, refDate));
-      const daysInPhase = between(3, 38);
+      // Realistic distribution from the source data: median 16d, p90 ~50d
+      // (the long-tail 100d+ outliers represent stalled jobs we surface
+      // separately via the offTrack flag).
+      const daysInPhase = between(2, 50);
 
       /* Milestone dates — generate as monotonically increasing day offsets */
       const permitOffset = between(10, 20);
@@ -556,21 +562,25 @@ function generateSales(): SHSale[] {
 
     /* ── Contract enrichment (Centralized Data 2.0 / Sales sheet) ── */
 
-    /* Pricing breakdown — base + premiums + change orders + incentives */
-    const lotPremium = rand() < 0.45 ? Math.round(between(2, 25) * 1000) : 0;
-    const changeOrders = rand() < 0.6 ? Math.round(between(3, 22) * 1000) : 0;
-    const salesIncentive = rand() < 0.35 ? Math.round(between(2, 15) * 1000) : 0;
-    const solarPackage = rand() < 0.18 ? Math.round(between(8, 18) * 1000) : 0;
+    /* Pricing breakdown — base + premiums + change orders + incentives.
+       Frequencies tuned down to match the source data (most sales have $0
+       lot premium / change orders, only ~30% see real adjustments). */
+    const lotPremium = rand() < 0.32 ? Math.round(between(3, 18) * 1000) : 0;
+    const changeOrders = rand() < 0.40 ? Math.round(between(2, 14) * 1000) : 0;
+    const salesIncentive = rand() < 0.25 ? Math.round(between(2, 10) * 1000) : 0;
+    const solarPackage = rand() < 0.15 ? Math.round(between(8, 16) * 1000) : 0;
     const basePrice = Math.max(0, salePrice - lotPremium - changeOrders + salesIncentive - solarPackage);
     const totalPrice = basePrice + lotPremium + changeOrders + solarPackage - salesIncentive;
 
-    /* Deposits (2-12% of total, varies by status) */
-    const depositPctRaw = between(2, 12) + (status === "closed" ? 4 : 0);
-    const depositPct = Math.min(15, depositPctRaw);
-    const totalDeposits = Math.round(totalPrice * (depositPct / 100));
+    /* Deposits — flat range matching the source data (med $5K, p90 $10K).
+       Closed deals tend higher (additional builder deposits collected). */
+    const baseDeposit = between(3000, 10000);
+    const totalDeposits = status === "closed" ? baseDeposit + between(2000, 6000) : baseDeposit;
 
-    /* Closing cost — typically 2.5-3.5% */
-    const closingCost = Math.round(totalPrice * (0.025 + rand() * 0.012));
+    /* Closing cost — small flat range; median in the source is near 0 because
+       most closing costs are absorbed by lender or rolled into total. We
+       still surface a $1.5-3.5K range so the column reads as a real charge. */
+    const closingCost = between(1500, 3500);
 
     /* Sales-event dates: written before contract, sold around contract,
        accepted shortly after */
@@ -587,8 +597,10 @@ function generateSales(): SHSale[] {
     const projectedCloseDate = closingDate ?? (status !== "cancelled" ? addDays(contractDate, between(160, 310)) : null);
     const scheduledCloseDate = projectedCloseDate ? addDays(projectedCloseDate, between(-7, 5)) : null;
 
-    /* Margins — net profit estimate ~12-22% of price */
-    const netMarginEst = Math.round((11 + rand() * 12) * 10) / 10;
+    /* Margins — healthy builder zone (15-22%). Was 11-23%. Aligned with
+       SHJob cost-ratio band so sales pipeline margins line up with what
+       audits will eventually report. */
+    const netMarginEst = Math.round((15 + rand() * 7) * 10) / 10;
     const netProfitEst = Math.round(totalPrice * (netMarginEst / 100));
 
     /* Sales channel + counterparties */
@@ -723,7 +735,8 @@ function generateLoans(): SHLoan[] {
     const drawTarget = job.completionPct * (0.88 + rand() * 0.16) * stageFactor;
     const drawPct = Math.max(5, Math.min(97, Math.round(drawTarget * 10) / 10));
     const totalDrawn = Math.round(loanAmount * drawPct / 100);
-    const interestRate = Math.round((5.50 + rand() * 2.5) * 100) / 100; // 5.50% to 8.00%
+    // Interest rate aligned with actual loan tracker data (p10 8.99%, p90 10.75%).
+    const interestRate = Math.round((8.5 + rand() * 2.25) * 100) / 100;
 
     // Expiration runway compresses as jobs move toward close.
     let daysUntilExpiration: number;
@@ -1753,9 +1766,12 @@ function generateAuditJobs(): SHAuditJob[] {
     const addr = `${rng.between(100, 999)} ${rng.pick(addresses)}`;
     const salePrice = job.contractValue;
     const lotLand = job.lotCost;
-    const permitting = rng.between(12000, 22000);
-    const siteWork = rng.between(14000, 28000);
-    let vertical = rng.between(190000, 250000);
+    /* Cost ranges aligned with the actual Audits sheet (p10/median/p90):
+       Permitting med $18K p90 $26K, Site Work med $32K p90 $63K,
+       Vertical med $221K p90 $250K, Builder Fee % flat 11% in source data. */
+    const permitting = rng.between(14000, 24000);
+    const siteWork = rng.between(20000, 50000);
+    let vertical = rng.between(195000, 260000);
     const options = rng.between(2000, 12000);
     const dirtPad = rng.between(2500, 8000);
     const dumpsters = rng.between(3000, 5500);
@@ -1767,18 +1783,19 @@ function generateAuditJobs(): SHAuditJob[] {
     const waterFiltration = rng.between(1395, 3500);
     const gopherTortoise = rng.between(0, 300);
     const treeSurvey = rng.between(200, 350);
-    // Continuous 4.0-6.0% so the fee histogram spreads evenly across all 5
-    // buckets instead of clumping at 4/5/6% discrete values.
-    const builderFeePct = (4 + rng.rand() * 2) / 100;
+    // Builder fee % aligned with source (consistent ~11%, with small
+    // 10-12% spread so the fee histogram still has multiple buckets).
+    const builderFeePct = (10 + rng.rand() * 2) / 100;
     const contingency = rng.between(1000, 5000);
     const builderFee = Math.round(salePrice * builderFeePct);
 
-    // Target realistic residential builder net margin band with occasional outliers.
+    // Healthy net margin band 14-22% (was 4-20% with negative outliers).
+    // Demo should look "pretty good and reasonable" per user direction.
     const marginRoll = rng.rand();
     const targetNetMarginPct =
-      marginRoll < 0.20 ? rng.between(4, 8) / 100 :    // lower-margin but positive jobs
-      marginRoll < 0.90 ? rng.between(9, 16) / 100 :   // typical operating band
-      rng.between(17, 20) / 100;                       // a few stronger jobs
+      marginRoll < 0.30 ? rng.between(14, 17) / 100 :  // strong baseline
+      marginRoll < 0.85 ? rng.between(17, 20) / 100 :  // typical strong band
+      rng.between(20, 22) / 100;                       // best-of jobs
 
     const nonVerticalDirect = lotLand + permitting + siteWork + options + dirtPad + dumpsters + well + septic + waterFiltration + gopherTortoise + treeSurvey;
     const totalIndirect = financing + insurance + closingCost;
@@ -1801,8 +1818,10 @@ function generateAuditJobs(): SHAuditJob[] {
     const netMargin = salePrice > 0 ? Math.round((netProfit / salePrice) * 1000) / 10 : 0;
 
     /* ── Audits-sheet enrichment ── */
-    /* BGH = builder gross profit, typically pre-financing pre-options */
-    const bghTotal = Math.round(salePrice - totalDirect - permitting + financing); // proxy formula
+    /* BGH (Builder Gross Hold) = gross profit before builder fee + financing
+       are deducted. Net Profit + Builder Fee + Financing gives the gross
+       profit the builder "held" before those overhead items consumed it. */
+    const bghTotal = netProfit + builderFee + financing;
     const bghMargin = salePrice > 0 ? Math.round((bghTotal / salePrice) * 1000) / 10 : 0;
     /* Financing position */
     const loanAmount = Math.round(totalCost * (0.65 + rng.rand() * 0.18));
@@ -1921,14 +1940,19 @@ function generateWarrantyTickets(): SHWarrantyTicket[] {
   for (const job of eligibleJobs) {
     const ticketCount = rng.between(1, 3);
     for (let t = 0; t < ticketCount; t++) {
-      const dateCreated = addDays("2026-03-25", -rng.between(2, 220));
+      // Cap created-at within the standard 365-day warranty window so
+      // aging stays inside the operating range. (Was up to 220d, fine,
+      // but explicit cap protects future range bumps.)
+      const dateCreated = addDays("2026-03-25", -Math.min(365, rng.between(2, 220)));
       const aging = Math.max(0, daysBetween(dateCreated, "2026-03-25"));
-      /* Status distribution favors resolution as tickets age */
+      /* Status distribution favors resolution as tickets age. Tightened
+         escalated rate (was 15% of >90d) to a healthier 8% — most aged
+         tickets resolve eventually. */
       const statusRoll = rng.rand();
       const status: SHWarrantyTicket["status"] =
-        aging > 90 ? (statusRoll < 0.85 ? "Closed" : "Escalated")
-        : aging > 30 ? (statusRoll < 0.55 ? "Closed" : statusRoll < 0.80 ? "In Progress" : "Awaiting Parts")
-        : (statusRoll < 0.15 ? "Closed" : statusRoll < 0.55 ? "In Progress" : statusRoll < 0.85 ? "Open" : "Awaiting Parts");
+        aging > 90 ? (statusRoll < 0.92 ? "Closed" : "Escalated")
+        : aging > 30 ? (statusRoll < 0.65 ? "Closed" : statusRoll < 0.85 ? "In Progress" : "Awaiting Parts")
+        : (statusRoll < 0.20 ? "Closed" : statusRoll < 0.60 ? "In Progress" : statusRoll < 0.88 ? "Open" : "Awaiting Parts");
       const itemStatus: SHWarrantyTicket["itemStatus"] =
         status === "Closed" ? "Fulfilled"
         : status === "Escalated" ? (rng.rand() < 0.5 ? "Approved" : "Rejected")
