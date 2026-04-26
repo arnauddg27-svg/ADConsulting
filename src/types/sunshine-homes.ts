@@ -370,6 +370,37 @@ export interface SHAuditJob {
   builderFeePct: number;
   netProfit: number;
   netMargin: number;
+  /* ── Audits-sheet enrichment (Centralized Data 2.0) — all optional ── */
+  /* BGH (Builder Gross Profit / Builder's Hold) — variant of net margin
+     that excludes financing & some indirect items. */
+  bghTotal?: number;
+  bghMargin?: number;
+  /* Financing detail */
+  loanAmount?: number;
+  lender?: string;
+  loanClosingDate?: string | null;
+  lastInterestPayment?: string | null;
+  amountDrawn?: number;
+  totalFinancing?: number;
+  financingLeft?: number;
+  /* Vertical detail */
+  currentVerticalBudget?: number;
+  verticalCostLeft?: number;
+  totalVertical?: number;
+  /* Permitting detail */
+  budgetedPermitting?: number;
+  permittingLeft?: number;
+  permittingTotal?: number;
+  /* Site work detail */
+  dirtBooked?: number;
+  extraDirt?: number;
+  dirtTotal?: number;
+  /* Cycle */
+  cycleTimeFromStart?: number;
+  /* Variance */
+  variance?: number;
+  /* Total Direct + Financing (commonly viewed together) */
+  totalDirectPlusFinancing?: number;
 }
 
 export type SHSection =

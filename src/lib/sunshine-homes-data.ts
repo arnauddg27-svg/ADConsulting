@@ -1800,6 +1800,39 @@ function generateAuditJobs(): SHAuditJob[] {
     const netProfit = salePrice - totalCost - contingency - builderFee;
     const netMargin = salePrice > 0 ? Math.round((netProfit / salePrice) * 1000) / 10 : 0;
 
+    /* ── Audits-sheet enrichment ── */
+    /* BGH = builder gross profit, typically pre-financing pre-options */
+    const bghTotal = Math.round(salePrice - totalDirect - permitting + financing); // proxy formula
+    const bghMargin = salePrice > 0 ? Math.round((bghTotal / salePrice) * 1000) / 10 : 0;
+    /* Financing position */
+    const loanAmount = Math.round(totalCost * (0.65 + rng.rand() * 0.18));
+    const lender = rng.pick(EXTRA_LENDERS);
+    const loanClosingDate = job.completionPct >= 99 && job.closingDate
+      ? job.closingDate
+      : null;
+    const lastInterestPayment = addDays("2026-03-25", -rng.between(2, 28));
+    const amountDrawn = Math.round(loanAmount * (job.completionPct / 100) * (0.92 + rng.rand() * 0.1));
+    const totalFinancing = financing + Math.round(loanAmount * 0.012); // financing + a small fee
+    const financingLeft = Math.max(0, totalFinancing - financing);
+    /* Vertical breakdown */
+    const currentVerticalBudget = Math.round(vertical * (0.96 + rng.rand() * 0.08));
+    const verticalCostLeft = Math.max(0, currentVerticalBudget - vertical);
+    const totalVertical = vertical + Math.round(vertical * 0.02); // include change orders bump
+    /* Permitting breakdown */
+    const budgetedPermitting = Math.round(permitting * (0.95 + rng.rand() * 0.10));
+    const permittingLeft = Math.max(0, budgetedPermitting - permitting);
+    const permittingTotal = permitting + permittingLeft;
+    /* Site work breakdown */
+    const dirtBooked = Math.round(siteWork * 0.45);
+    const extraDirt = Math.round(siteWork * 0.08);
+    const dirtTotal = dirtBooked + extraDirt;
+    /* Cycle */
+    const cycleTimeFromStart = job.totalCycleDays;
+    /* Variance vs budget */
+    const variance = totalCost - Math.round(salePrice * 0.78); // expected ~78% cost ratio
+    /* Total direct + financing (often viewed together by AP/finance) */
+    const totalDirectPlusFinancing = totalDirect + financing;
+
     audits.push({
       id: i + 1,
       jobCode: job.jobCode,
@@ -1839,6 +1872,27 @@ function generateAuditJobs(): SHAuditJob[] {
       builderFeePct: Math.round(builderFeePct * 1000) / 10,
       netProfit,
       netMargin,
+      bghTotal,
+      bghMargin,
+      loanAmount,
+      lender,
+      loanClosingDate,
+      lastInterestPayment,
+      amountDrawn,
+      totalFinancing,
+      financingLeft,
+      currentVerticalBudget,
+      verticalCostLeft,
+      totalVertical,
+      budgetedPermitting,
+      permittingLeft,
+      permittingTotal,
+      dirtBooked,
+      extraDirt,
+      dirtTotal,
+      cycleTimeFromStart,
+      variance,
+      totalDirectPlusFinancing,
     });
   }
   return audits;

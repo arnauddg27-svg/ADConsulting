@@ -216,12 +216,48 @@ const auditMarginPill = (r: Record<string, unknown>) => {
   return <SHPill tone={m >= 15 ? "good" : m >= 5 ? "watch" : "alert"} label={fmtPct(m)} />;
 };
 
+/* Audit drilldown — enriched with Centralized Data 2.0 / Audits sheet:
+   BGH gross-profit view, financing position (loan, drawn, left), vertical
+   + permitting + dirt sub-budgets, indirect cost detail, builder fee,
+   contingency, variance vs target. */
 const auditCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
-  { key: "salePrice", label: "Sale", width: "75px", align: "right", render: r => fmt$(Number(r.salePrice)) },
-  { key: "totalCost", label: "Cost", width: "75px", align: "right", render: r => fmt$(Number(r.totalCost)) },
-  { key: "netMargin", label: "Margin", width: "60px", align: "right", render: auditMarginPill },
+  { key: "plan", label: "Plan", width: "100px" },
+  { key: "salePrice", label: "Sale", width: "85px", align: "right", render: r => fmt$(Number(r.salePrice)) },
+  { key: "proceeds", label: "Proceeds", width: "85px", align: "right", render: r => fmt$(Number(r.proceeds)) },
+  { key: "lotLand", label: "Lot/Land", width: "80px", align: "right", render: r => fmt$(Number(r.lotLand)) },
+  { key: "permitting", label: "Permits", width: "80px", align: "right", render: r => fmt$(Number(r.permitting)) },
+  { key: "siteWork", label: "Site Work", width: "85px", align: "right", render: r => fmt$(Number(r.siteWork)) },
+  { key: "vertical", label: "Vertical", width: "85px", align: "right", render: r => fmt$(Number(r.vertical)) },
+  { key: "options", label: "Options", width: "75px", align: "right", render: r => fmt$(Number(r.options)) },
+  { key: "totalDirectCost", label: "Tot Direct", width: "90px", align: "right", render: r => fmt$(Number(r.totalDirectCost)) },
+  { key: "financing", label: "Financing", width: "85px", align: "right", render: r => fmt$(Number(r.financing)) },
+  { key: "totalDirectPlusFinancing", label: "Direct+Fin", width: "95px", align: "right", render: r => r.totalDirectPlusFinancing !== undefined ? fmt$(Number(r.totalDirectPlusFinancing)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "totalIndirectCost", label: "Tot Indirect", width: "95px", align: "right", render: r => fmt$(Number(r.totalIndirectCost)) },
+  { key: "contingency", label: "Conting", width: "75px", align: "right", render: r => fmt$(Number(r.contingency)) },
+  { key: "builderFee", label: "Builder Fee", width: "95px", align: "right", render: r => {
+    const fee = Number(r.builderFee);
+    const pct = Number(r.builderFeePct ?? 0);
+    return <span>{fmt$(fee)} <span style={{ color: "var(--sh-text-muted)", fontSize: 10 }}>({pct.toFixed(1)}%)</span></span>;
+  }},
+  { key: "totalCost", label: "Total Cost", width: "90px", align: "right", render: r => fmt$(Number(r.totalCost)) },
+  { key: "loanAmount", label: "Loan", width: "85px", align: "right", render: r => r.loanAmount !== undefined ? fmt$(Number(r.loanAmount)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "amountDrawn", label: "Drawn", width: "85px", align: "right", render: r => r.amountDrawn !== undefined ? fmt$(Number(r.amountDrawn)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "financingLeft", label: "Fin Left", width: "80px", align: "right", render: r => r.financingLeft !== undefined ? fmt$(Number(r.financingLeft)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "lender", label: "Lender", width: "120px", render: r => String(r.lender ?? "\u2014") },
+  { key: "verticalCostLeft", label: "Vert Left", width: "85px", align: "right", render: r => r.verticalCostLeft !== undefined ? fmt$(Number(r.verticalCostLeft)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "permittingLeft", label: "Permit Left", width: "90px", align: "right", render: r => r.permittingLeft !== undefined ? fmt$(Number(r.permittingLeft)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "bghTotal", label: "BGH $", width: "85px", align: "right", render: r => r.bghTotal !== undefined ? fmt$(Number(r.bghTotal)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "bghMargin", label: "BGH %", width: "70px", align: "right", render: r => r.bghMargin !== undefined ? fmtPct(Number(r.bghMargin)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "netProfit", label: "Net Profit", width: "90px", align: "right", render: r => fmt$(Number(r.netProfit)) },
+  { key: "netMargin", label: "Net Margin", width: "85px", align: "right", render: auditMarginPill },
+  { key: "variance", label: "Variance", width: "85px", align: "right", render: r => {
+    if (r.variance === undefined) return <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+    const v = Number(r.variance);
+    return <span style={{ color: v > 0 ? "var(--sh-danger)" : v < 0 ? "var(--sh-accent)" : "inherit", fontWeight: 600 }}>{v >= 0 ? "+" : ""}{fmt$(v)}</span>;
+  }},
+  { key: "cycleTimeFromStart", label: "Cycle (d)", width: "80px", align: "right", render: r => r.cycleTimeFromStart !== undefined ? `${Number(r.cycleTimeFromStart)}d` : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
 ];
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
