@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHAuditJob } from "@/types/sunshine-homes";
-import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, warrantyTickets, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
@@ -215,6 +215,48 @@ const auditMarginPill = (r: Record<string, unknown>) => {
   const m = Number(r.netMargin);
   return <SHPill tone={m >= 15 ? "good" : m >= 5 ? "watch" : "alert"} label={fmtPct(m)} />;
 };
+
+/* Warranty drilldown — Centralized Data 2.0 / Warranty sheet. Used by the
+   Property Mgmt > Warranty drilldown handler ("warranty-overview" / -tickets). */
+const warrantyStatusPill = (r: Record<string, unknown>) => {
+  const s = String(r.status);
+  const tone = s === "Closed" ? "good"
+    : s === "Escalated" ? "alert"
+    : s === "Awaiting Parts" ? "watch"
+    : s === "In Progress" ? "watch"
+    : "alert";
+  return <SHPill tone={tone} label={s} />;
+};
+const warrantyAgingPill = (r: Record<string, unknown>) => {
+  const d = Number(r.agingDays);
+  return <SHPill tone={d > 90 ? "alert" : d > 30 ? "watch" : "good"} label={`${d}d`} />;
+};
+const warrantyCols: Col[] = [
+  { key: "ticketNumber", label: "Ticket #", width: "95px" },
+  { key: "jobCode", label: "Job", width: "80px" },
+  { key: "community", label: "Community", width: "120px" },
+  { key: "category", label: "Category", width: "100px" },
+  { key: "location", label: "Location", width: "110px" },
+  { key: "description", label: "Description", width: "320px", render: r => String(r.description ?? "\u2014") },
+  { key: "rootCause", label: "Root Cause", width: "100px" },
+  { key: "supplier", label: "Supplier", width: "150px" },
+  { key: "workOrders", label: "WO #", width: "55px", align: "right" },
+  { key: "workOrderStatus", label: "WO Status", width: "100px" },
+  { key: "workOrderSupplier", label: "WO Supplier", width: "150px", render: r => String(r.workOrderSupplier ?? "\u2014") },
+  { key: "itemStatus", label: "Item Status", width: "95px" },
+  { key: "requestValid", label: "Valid", width: "65px", render: r => r.requestValid ? <SHPill tone="good" label="Yes" /> : <SHPill tone="alert" label="No" /> },
+  { key: "dateCreated", label: "Created", width: "85px" },
+  { key: "requestedStartDate", label: "Req'd Start", width: "95px", render: r => r.requestedStartDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.requestedStartDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "agingDays", label: "Aging", width: "70px", align: "right", render: warrantyAgingPill },
+  { key: "status", label: "Status", width: "100px", render: warrantyStatusPill },
+];
+
+// Reference warrantyCols + warrantyTickets so the unused-binding lint stays
+// quiet until the warranty drilldown handler is wired in. The data + columns
+// are deliberately exposed here so future PMPipelineTab / dashboard surfaces
+// can render the warranty queue without re-defining them.
+void warrantyCols;
+void warrantyTickets;
 
 /* Audit drilldown — enriched with Centralized Data 2.0 / Audits sheet:
    BGH gross-profit view, financing position (loan, drawn, left), vertical

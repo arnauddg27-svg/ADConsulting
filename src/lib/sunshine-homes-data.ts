@@ -4,7 +4,7 @@
    Uses seeded pseudo-random for deterministic output across renders. */
 
 import type {
-  SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHSubdivision, SHAuditJob,
+  SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHSubdivision, SHAuditJob, SHWarrantyTicket,
   SHDashboardFilters, SHSectionDef, SHCycleTimeByCity, SHCycleTimeTrendPoint, SHMilestoneSparkline,
 } from "@/types/sunshine-homes";
 
@@ -1899,6 +1899,84 @@ function generateAuditJobs(): SHAuditJob[] {
 }
 
 export const auditJobs: SHAuditJob[] = generateAuditJobs();
+
+/* ═══════════════════════════════════════════════════════════
+   WARRANTY TICKETS — generated from completed-stage jobs
+   Mirrors Centralized Data 2.0 / Warranty sheet (22 cols)
+   ═══════════════════════════════════════════════════════════ */
+function generateWarrantyTickets(): SHWarrantyTicket[] {
+  const rng = createRng(919);
+  const result: SHWarrantyTicket[] = [];
+
+  const categories = ["Plumbing", "Electrical", "HVAC", "Drywall", "Cabinets", "Flooring", "Paint", "Roofing", "Garage Door", "Appliance", "Landscaping", "Concrete"] as const;
+  const locations = ["Master Bath", "Master Bedroom", "Kitchen", "Living Room", "Garage", "Guest Bath", "Front Yard", "Backyard", "Roof", "Driveway", "Laundry", "Hallway", "Bonus Room"] as const;
+  const rootCauses = ["Workmanship", "Product defect", "Wear and tear", "Installation error", "Material failure", "Design issue", "Owner usage"] as const;
+  const suppliers = ["Acme Plumbing", "Bright Electric", "ColdAir HVAC", "Smooth Drywall Co.", "Coastal Cabinets", "Premier Flooring", "Sunshine Paint Crew", "TopRoof Inc.", "GarageWorks", "AllBrands Appliance", "GreenScape", "ProConcrete"] as const;
+
+  let id = 1;
+  let ticketCounter = 50000;
+  /* Generate 1-3 tickets per closed/near-closed job */
+  const eligibleJobs = jobs.filter(j => j.completionPct >= 92);
+
+  for (const job of eligibleJobs) {
+    const ticketCount = rng.between(1, 3);
+    for (let t = 0; t < ticketCount; t++) {
+      const dateCreated = addDays("2026-03-25", -rng.between(2, 220));
+      const aging = Math.max(0, daysBetween(dateCreated, "2026-03-25"));
+      /* Status distribution favors resolution as tickets age */
+      const statusRoll = rng.rand();
+      const status: SHWarrantyTicket["status"] =
+        aging > 90 ? (statusRoll < 0.85 ? "Closed" : "Escalated")
+        : aging > 30 ? (statusRoll < 0.55 ? "Closed" : statusRoll < 0.80 ? "In Progress" : "Awaiting Parts")
+        : (statusRoll < 0.15 ? "Closed" : statusRoll < 0.55 ? "In Progress" : statusRoll < 0.85 ? "Open" : "Awaiting Parts");
+      const itemStatus: SHWarrantyTicket["itemStatus"] =
+        status === "Closed" ? "Fulfilled"
+        : status === "Escalated" ? (rng.rand() < 0.5 ? "Approved" : "Rejected")
+        : (rng.rand() < 0.7 ? "Approved" : "Pending");
+      const workOrderStatus: SHWarrantyTicket["workOrderStatus"] =
+        status === "Closed" ? "Completed"
+        : status === "Escalated" ? "On Hold"
+        : status === "Awaiting Parts" ? "Issued"
+        : status === "In Progress" ? (rng.rand() < 0.6 ? "Scheduled" : "Issued")
+        : "Not Issued";
+      const category = rng.pick(categories);
+      const location = rng.pick(locations);
+      const rootCause = rng.pick(rootCauses);
+      const supplier = rng.pick(suppliers);
+      const workOrders = workOrderStatus === "Not Issued" ? 0 : rng.between(1, 3);
+      const requestedStartDate = workOrderStatus === "Not Issued"
+        ? null
+        : addDays(dateCreated, rng.between(2, 21));
+
+      result.push({
+        id: id++,
+        ticketNumber: `WT-${ticketCounter++}`,
+        itemNumber: t + 1,
+        jobCode: job.jobCode,
+        community: job.community,
+        ticketAgedDays: aging,
+        agingDays: aging,
+        status,
+        description: `${category} \u2014 ${rootCause.toLowerCase()} reported by homeowner in ${location.toLowerCase()}`,
+        supplier,
+        itemStatus,
+        workOrders,
+        location,
+        category,
+        rootCause,
+        requestValid: rng.rand() > 0.08, // ~92% of tickets are valid
+        workOrderStatus,
+        workOrderSupplier: workOrders > 0 ? supplier : "—",
+        requestedStartDate,
+        dateCreated,
+        year: new Date(dateCreated).getFullYear(),
+      });
+    }
+  }
+  return result;
+}
+
+export const warrantyTickets: SHWarrantyTicket[] = generateWarrantyTickets();
 
 export function getAuditKPIs(filteredAudits: SHAuditJob[]) {
   const count = filteredAudits.length;

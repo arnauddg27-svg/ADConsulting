@@ -310,6 +310,31 @@ export interface SHSubdivision {
   monthsOfInventory: number;
 }
 
+/* ── Warranty (Centralized Data 2.0 / Warranty sheet) ── */
+export interface SHWarrantyTicket {
+  id: number;
+  ticketNumber: string;
+  itemNumber: number;
+  jobCode: string;
+  community: string;
+  ticketAgedDays: number;
+  agingDays: number;
+  status: "Open" | "In Progress" | "Awaiting Parts" | "Closed" | "Escalated";
+  description: string;
+  supplier: string;
+  itemStatus: "Pending" | "Approved" | "Rejected" | "Fulfilled";
+  workOrders: number;
+  location: string;          // e.g. "Master Bath", "Kitchen", "Garage"
+  category: string;          // e.g. "Plumbing", "Electrical", "Drywall", "HVAC"
+  rootCause: string;         // e.g. "Workmanship", "Product defect", "Wear"
+  requestValid: boolean;
+  workOrderStatus: "Not Issued" | "Issued" | "Scheduled" | "Completed" | "On Hold";
+  workOrderSupplier: string;
+  requestedStartDate: string | null;
+  dateCreated: string;
+  year: number;
+}
+
 export type SHTimePeriod = "all" | "month" | "quarter" | "year";
 
 export interface SHDashboardFilters {
