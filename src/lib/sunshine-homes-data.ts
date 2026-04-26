@@ -306,21 +306,28 @@ function generateJobs(): SHJob[] {
       const margin = contractValue - estimatedCost;
       const marginPct = Math.round((margin / contractValue) * 1000) / 10;
 
-      /* Start dates spread 2024-01-01 to 2026-03-01 */
-      const totalMonths = 26; // Jan 2024 through Mar 2026
-      const monthOffset = between(0, totalMonths - 1);
-      const startYear = 2024 + Math.floor(monthOffset / 12);
-      const startMonth = (monthOffset % 12) + 1;
-      const startDay = between(1, 28);
-      const startDate = dateToStr(startYear, startMonth, startDay);
+      /* ── Start date tied to completion ──
+         Audit feedback: when startDate was picked independently of
+         completionPct, jobs at low completion that "started" 2 years
+         ago appeared chronically stalled (totalCycleDays p90 = 738d,
+         86% offTrack). Now we anchor startDate so the elapsed-days-
+         since-start matches the expected days-for-this-completion-%
+         within a realistic ±20% noise band. */
+      const refDate = "2026-03-25";
+      // Expected total build cycle: 240-330d (matches xlsx "Cycle time
+      // from start" med 281d, p90 472d allowing for outliers).
+      const expectedCycleDays = between(240, 330);
+      // Days the job has been in flight, scaled by completion with noise.
+      const elapsedFraction = (completionPct / 100) * (0.85 + rand() * 0.30);
+      const elapsedDays = Math.max(7, Math.round(expectedCycleDays * elapsedFraction));
+      const startDate = addDays(refDate, -elapsedDays);
+      const startYear = new Date(startDate).getFullYear();
 
-      const estMonths = between(8, 14);
+      const estMonths = between(9, 12);
       const estDate = new Date(startDate);
       estDate.setMonth(estDate.getMonth() + estMonths);
       const estCompletion = estDate.toISOString().slice(0, 10);
 
-      /* Compute total cycle days from start to now (or completion) */
-      const refDate = "2026-03-25";
       const totalCycleDays = Math.max(1, daysBetween(startDate, refDate));
       // Realistic distribution from the source data: median 16d, p90 ~50d
       // (the long-tail 100d+ outliers represent stalled jobs we surface
@@ -377,8 +384,13 @@ function generateJobs(): SHJob[] {
         { pct: 100,key: "msReceiveCO",           label: "100%. Receive CO" },
       ];
 
-      // Cycle goal: pad with 5% slop around totalCycleDays as the target build window.
-      const goalCycleDays = Math.round(totalCycleDays * (rand() > 0.5 ? 0.95 : 1.05));
+      // Cycle goal: target full-build window for THIS job (not elapsed).
+      // Audit-fix: previously goalCycleDays = totalCycleDays * 0.95-1.05,
+      // which made every job's goal ≈ its elapsed time. The on/off-track
+      // calc then read every low-completion job as "behind" because
+      // expectedPct = (elapsed/elapsed)*100 = 100. Now the goal is the
+      // full ~280d build window with ±10% builder-specific noise.
+      const goalCycleDays = Math.round(expectedCycleDays * (0.92 + rand() * 0.16));
       // Map percent to day-offset across the goal cycle.
       const dayForPct = (pct: number) => Math.round((pct / 100) * goalCycleDays);
 
@@ -1803,9 +1815,11 @@ function generateAuditJobs(): SHAuditJob[] {
     const desiredNetProfit = Math.round(salePrice * targetNetMarginPct);
     const desiredTotalCost = Math.round(salePrice - contingency - builderFee - desiredNetProfit);
     const solvedVertical = desiredTotalCost - (nonVerticalDirect + totalIndirect);
-    // Widened clamp (140k-380k) covers price range $380k-$720k without silently breaking P&L.
-    // When clamping does hit, we re-solve netProfit to keep the audit reconciliation intact.
-    vertical = Math.max(140000, Math.min(380000, solvedVertical));
+    // Vertical clamp floor at 165K — audit found that 175K floor pushed
+    // 5 jobs into negative net margin because the solver re-balanced
+    // netProfit downward. 165K is high enough to match the xlsx p10
+    // (164K) without breaking the "no negative margin" guarantee.
+    vertical = Math.max(165000, Math.min(380000, solvedVertical));
 
     const totalDirect = nonVerticalDirect + vertical;
     const totalCost = totalDirect + totalIndirect;
@@ -1814,14 +1828,32 @@ function generateAuditJobs(): SHAuditJob[] {
     const closingFee = 1500;
     const loanPayoff = Math.round(totalCost * 0.75); // typical loan covers ~75% of cost
     const proceeds = salePrice - loanPayoff - commission - closingFee;
-    const netProfit = salePrice - totalCost - contingency - builderFee;
+    let netProfit = salePrice - totalCost - contingency - builderFee;
+
+    /* "Look pretty good" guarantee: floor every audit at $20K net profit
+       (~5% margin floor on a $400K sale). When the vertical clamp pushed
+       margin too low, claw back the deficit by trimming contingency first,
+       then builderFee. Every change is reflected in the totals so books
+       still reconcile (totalDirect+totalIndirect = totalCost preserved). */
+    let adjustedContingency = contingency;
+    let adjustedBuilderFee = builderFee;
+    const NET_FLOOR = 20000;
+    if (netProfit < NET_FLOOR) {
+      const shortfall = NET_FLOOR - netProfit;
+      const fromContingency = Math.min(adjustedContingency, shortfall);
+      adjustedContingency -= fromContingency;
+      const remaining = shortfall - fromContingency;
+      if (remaining > 0) adjustedBuilderFee = Math.max(0, adjustedBuilderFee - remaining);
+      netProfit = salePrice - totalCost - adjustedContingency - adjustedBuilderFee;
+    }
     const netMargin = salePrice > 0 ? Math.round((netProfit / salePrice) * 1000) / 10 : 0;
 
     /* ── Audits-sheet enrichment ── */
     /* BGH (Builder Gross Hold) = gross profit before builder fee + financing
        are deducted. Net Profit + Builder Fee + Financing gives the gross
-       profit the builder "held" before those overhead items consumed it. */
-    const bghTotal = netProfit + builderFee + financing;
+       profit the builder "held" before those overhead items consumed it.
+       Uses the adjustedBuilderFee so BGH stays consistent with the books. */
+    const bghTotal = netProfit + adjustedBuilderFee + financing;
     const bghMargin = salePrice > 0 ? Math.round((bghTotal / salePrice) * 1000) / 10 : 0;
     /* Financing position */
     const loanAmount = Math.round(totalCost * (0.65 + rng.rand() * 0.18));
@@ -1886,8 +1918,8 @@ function generateAuditJobs(): SHAuditJob[] {
       totalDirectCost: totalDirect,
       totalIndirectCost: totalIndirect,
       totalCost,
-      contingency,
-      builderFee,
+      contingency: adjustedContingency,
+      builderFee: adjustedBuilderFee,
       builderFeePct: Math.round(builderFeePct * 1000) / 10,
       netProfit,
       netMargin,
