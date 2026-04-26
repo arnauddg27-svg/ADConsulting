@@ -85,14 +85,38 @@ const loanExpPill = (r: Record<string, unknown>) => {
   return <SHPill tone={d <= 30 ? "alert" : d <= 60 ? "watch" : "good"} label={`${d}d`} />;
 };
 
+/* Loan drilldown — enriched with the Centralized Data 2.0 / Loan Tracker
+   sheet fields. Surfaces loan number, appraisal, monthly payment, draw
+   activity (totalDrawn, drawableWIP, lastDrawDate), extensions, equity,
+   and loan status. */
 const loanCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
-  { key: "lender", label: "Lender", width: "120px" },
-  { key: "loanAmount", label: "Amount", width: "80px", align: "right", render: r => fmt$(Number(r.loanAmount)) },
-  { key: "drawPct", label: "Draw %", width: "60px", align: "right", render: r => fmtPct(Number(r.drawPct)) },
-  { key: "interestRate", label: "Rate", width: "50px", align: "right", render: r => `${Number(r.interestRate)}%` },
-  { key: "daysUntilExpiration", label: "Exp", width: "50px", align: "right", render: loanExpPill },
+  { key: "lender", label: "Lender", width: "130px" },
+  { key: "loanNumber", label: "Loan #", width: "140px", render: r => String(r.loanNumber ?? "\u2014") },
+  { key: "loanAmount", label: "Amount", width: "85px", align: "right", render: r => fmt$(Number(r.loanAmount)) },
+  { key: "appraisalAmount", label: "Appraisal", width: "90px", align: "right", render: r => r.appraisalAmount ? fmt$(Number(r.appraisalAmount)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "interestRate", label: "Rate", width: "55px", align: "right", render: r => `${Number(r.interestRate)}%` },
+  { key: "monthlyInterestPayment", label: "Monthly", width: "75px", align: "right", render: r => r.monthlyInterestPayment ? fmt$(Number(r.monthlyInterestPayment)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "totalDrawn", label: "Drawn", width: "80px", align: "right", render: r => fmt$(Number(r.totalDrawn)) },
+  { key: "drawPct", label: "Draw %", width: "65px", align: "right", render: r => fmtPct(Number(r.drawPct)) },
+  { key: "drawableWIP", label: "Drawable", width: "85px", align: "right", render: r => r.drawableWIP !== undefined ? fmt$(Number(r.drawableWIP)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "wipBalance", label: "WIP", width: "80px", align: "right", render: r => r.wipBalance !== undefined ? fmt$(Number(r.wipBalance)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "equity", label: "Equity", width: "75px", align: "right", render: r => r.equity !== undefined ? fmt$(Number(r.equity)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "loanRequestDate", label: "Req'd", width: "85px", render: r => r.loanRequestDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.loanRequestDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "loanClosingDate", label: "Closed", width: "85px", render: r => r.loanClosingDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.loanClosingDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "lastDrawDate", label: "Last Draw", width: "90px", render: r => r.lastDrawDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.lastDrawDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "expirationDate", label: "Expires", width: "85px" },
+  { key: "extensionCount", label: "Ext", width: "60px", align: "right", render: r => {
+    const n = Number(r.extensionCount ?? 0);
+    return n > 0 ? <SHPill tone="watch" label={`${n}x`} /> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span>;
+  }},
+  { key: "loanStatus", label: "Status", width: "85px", render: r => {
+    const s = String(r.loanStatus ?? "Active");
+    const tone = s === "Paid Off" ? "good" : s === "Expiring" || s === "Pending" ? "watch" : (s === "Expired" || s === "Default") ? "alert" : "good";
+    return <SHPill tone={tone} label={s} />;
+  }},
+  { key: "daysUntilExpiration", label: "Exp Days", width: "75px", align: "right", render: loanExpPill },
 ];
 
 const saleStatusPill = (r: Record<string, unknown>) => {

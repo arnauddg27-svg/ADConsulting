@@ -736,6 +736,46 @@ function generateLoans(): SHLoan[] {
 
     const expDate = addDays("2026-03-25", daysUntilExpiration);
 
+    /* ── Loan Tracker enrichment ── */
+    const loanNumber = `${lender.split(" ").map(w => w[0]).join("").slice(0,3).toUpperCase()}-${between(2024, 2026)}-${String(between(10000, 99999)).padStart(5, "0")}`;
+    const parcelId = `${between(10, 99)}-${between(1000, 9999)}-${String(between(0, 99)).padStart(2, "0")}`;
+    /* Appraisal typically 105-120% of contract value */
+    const appraisalAmount = Math.round(job.contractValue * (1.05 + rand() * 0.15));
+    /* Monthly interest = (loanAmount * rate) / 12 */
+    const monthlyInterestPayment = Math.round((loanAmount * (interestRate / 100)) / 12);
+    /* Loan request typically 30-90 days before start */
+    const loanRequestDate = addDays(job.startDate, -between(30, 90));
+    /* Loan closes 5-25 days after request */
+    const loanClosingDate = addDays(loanRequestDate, between(5, 25));
+    /* Last draw — recent if active, near closing if late stage */
+    const lastDrawDate = job.completionPct > 5
+      ? addDays("2026-03-25", -between(2, 35))
+      : null;
+    /* Extensions: 18% of loans have been extended once or twice */
+    const hasExtension = rand() < 0.18;
+    const extensionCount = hasExtension ? (rand() < 0.7 ? 1 : 2) : 0;
+    const extendedTo = hasExtension ? addDays(expDate, between(60, 180)) : null;
+    /* Drawable WIP: how much more can be drawn (loanAmount - totalDrawn, capped) */
+    const drawableWIP = Math.max(0, loanAmount - totalDrawn - Math.round(loanAmount * 0.05)); // 5% reserve
+    /* WIP balance from job (actual cost to date) */
+    const wipBalance = job.actualCostToDate;
+    /* Equity = WIP - totalDrawn */
+    const equity = Math.max(0, wipBalance - totalDrawn);
+    /* Loan status derived from days-until-expiration + completion */
+    const loanStatus: "Active" | "Pending" | "Expiring" | "Expired" | "Paid Off" | "Default" =
+      job.completionPct >= 99 && drawPct >= 95 ? "Paid Off"
+      : daysUntilExpiration < 0 ? "Expired"
+      : daysUntilExpiration <= 30 ? "Expiring"
+      : job.stage === "Permit" && drawPct < 10 ? "Pending"
+      : (rand() < 0.02 ? "Default" : "Active");
+    const notes = hasExtension
+      ? `Extended ${extensionCount}x — projected close ${extendedTo}`
+      : loanStatus === "Expiring"
+        ? "Within 30d of expiration — confirm extension or payoff"
+        : loanStatus === "Default"
+          ? "Past due on monthly interest — escalate"
+          : "";
+
     result.push({
       id: i + 1,
       jobCode: job.jobCode,
@@ -750,6 +790,20 @@ function generateLoans(): SHLoan[] {
       expirationDate: expDate,
       daysUntilExpiration,
       year: new Date(job.startDate).getFullYear(),
+      loanNumber,
+      parcelId,
+      appraisalAmount,
+      monthlyInterestPayment,
+      loanRequestDate,
+      loanClosingDate,
+      lastDrawDate,
+      extendedTo,
+      extensionCount,
+      drawableWIP,
+      equity,
+      wipBalance,
+      loanStatus,
+      notes,
     });
   }
   return result;

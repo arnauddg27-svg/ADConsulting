@@ -163,6 +163,21 @@ export interface SHLoan {
   expirationDate: string;
   daysUntilExpiration: number;
   year: number;
+  /* ── Loan Tracker sheet enrichment (Centralized Data 2.0) — all optional ── */
+  loanNumber?: string;
+  parcelId?: string;
+  appraisalAmount?: number;
+  monthlyInterestPayment?: number;
+  loanRequestDate?: string | null;
+  loanClosingDate?: string | null;
+  lastDrawDate?: string | null;
+  extendedTo?: string | null;
+  extensionCount?: number;
+  drawableWIP?: number;
+  equity?: number;
+  wipBalance?: number;
+  loanStatus?: "Active" | "Pending" | "Expiring" | "Expired" | "Paid Off" | "Default";
+  notes?: string;
 }
 
 export interface SHLandDeal {
