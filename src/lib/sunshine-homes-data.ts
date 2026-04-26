@@ -1526,18 +1526,19 @@ export const avgPhaseDays = [
   { phase: "Closing",       days: 15, color: "#1e40af" },
 ];
 
-/* Cycle-time distribution computed from actual jobs (was hard-coded with
-   stale 200-350d buckets that didn't match the realism-pass cycle data
-   p10=46d, med=158d, p90=272d). Boundaries here MUST match the
-   `cycle-bucket` case in SHDrawer.tsx. */
+/* Cycle-time distribution computed from completed jobs (those with a CO
+   date). Audit feedback: previous boundaries (<150 / 150-200) were tuned
+   for ALL-job cycle times but the histogram filters to completed-only,
+   which clusters 200-340d. Re-tuned to spread across that range.
+   Boundaries here MUST match the `cycle-bucket` case in SHDrawer.tsx. */
 export const cycleTimeDistribution = (() => {
   const completed = jobs.filter(j => j.coDate);
   const buckets = [
-    { bucket: "< 150d",    min: 0,    max: 150,      color: "#0f766e", count: 0 },
-    { bucket: "150–200d",  min: 150,  max: 200,      color: "#14b8a6", count: 0 },
-    { bucket: "200–250d",  min: 200,  max: 250,      color: "#22d3ee", count: 0 },
-    { bucket: "250–300d",  min: 250,  max: 300,      color: "#3b82f6", count: 0 },
-    { bucket: "> 300d",    min: 300,  max: Infinity, color: "#1e40af", count: 0 },
+    { bucket: "< 220d",    min: 0,    max: 220,      color: "#0f766e", count: 0 },
+    { bucket: "220–260d",  min: 220,  max: 260,      color: "#14b8a6", count: 0 },
+    { bucket: "260–300d",  min: 260,  max: 300,      color: "#22d3ee", count: 0 },
+    { bucket: "300–340d",  min: 300,  max: 340,      color: "#3b82f6", count: 0 },
+    { bucket: "> 340d",    min: 340,  max: Infinity, color: "#1e40af", count: 0 },
   ];
   for (const j of completed) {
     const d = j.totalCycleDays;

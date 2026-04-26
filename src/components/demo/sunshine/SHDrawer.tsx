@@ -1287,13 +1287,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       const completed = jobs.filter(j => j.coDate);
       const inBucket = completed.filter(j => {
         const d = Number(j.totalCycleDays);
-        // Buckets aligned with realism-pass cycle distribution
-        // (p10=46d, med=158d, p90=272d).
-        if (detail.value === "< 150d") return d < 150;
-        if (detail.value === "150–200d") return d >= 150 && d < 200;
-        if (detail.value === "200–250d") return d >= 200 && d < 250;
-        if (detail.value === "250–300d") return d >= 250 && d < 300;
-        if (detail.value === "> 300d") return d >= 300;
+        // Boundaries calibrated for COMPLETED-job cycle distribution
+        // (clusters 200-340d). Must match cycleTimeDistribution export.
+        if (detail.value === "< 220d") return d < 220;
+        if (detail.value === "220–260d") return d >= 220 && d < 260;
+        if (detail.value === "260–300d") return d >= 260 && d < 300;
+        if (detail.value === "300–340d") return d >= 300 && d < 340;
+        if (detail.value === "> 340d") return d >= 340;
         return true;
       });
       title = detail.label;
