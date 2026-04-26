@@ -864,6 +864,47 @@ function generatePermits(): SHPermit[] {
     const issuedDate = status === "issued" ? addDays(approvedDate!, between(3, 10)) : null;
     const year = new Date(submittedDate).getFullYear();
 
+    /* ── Centralized Data 2.0 / Permitting sheet enrichment ── */
+    const parcelId = `${between(10, 99)}-${between(1000, 9999)}-${String(between(0, 99)).padStart(2,"0")}`;
+    const permitNumber = `${meta.city.slice(0,3).toUpperCase()}-${between(2024, 2026)}-${String(between(1000, 9999)).padStart(4,"0")}`;
+    const lotBlockSection = `Lot ${between(1, 80)} / Blk ${pick(["A","B","C","D"])} / Sec ${between(1, 6)}`;
+    const clerk = pick(["Tonya James", "Marcus Lee", "Carla Vance", "Kim Patel", "Greg Holt", "Lisa Chen"]);
+    const surveyor = pick(["Apex Survey Co.", "Bayside Land Surveys", "FL Land Solutions", "Coastal Geomatics", "Magnolia Survey"]);
+    const envIssues = rand() < 0.18 ? pick(["Wetlands buffer", "Tree protection", "Gopher tortoise", "Stormwater"]) : "None";
+    const furthestMilestone = status === "issued"
+      ? "Permit Issued"
+      : status === "approved"
+        ? "Permit Approved"
+        : status === "rejected"
+          ? "Rejected — pending revisions"
+          : "Awaiting Review";
+
+    /* Per-step cycle times (only filled where they make sense given status) */
+    const surveyCT = between(3, 12);
+    const septicPermitCT = between(7, 28);
+    const plansCT = between(5, 18);
+    const trussesCT = between(4, 14);
+    const energyCalcsCT = between(2, 8);
+    const permitCT = daysInReview;
+    const totalCycleTime = surveyCT + septicPermitCT + plansCT + trussesCT + energyCalcsCT + permitCT;
+
+    /* Date-flow extras */
+    const surveyOrderedDate = addDays(submittedDate, -between(8, 25));
+    const noCRecordedDate = (status === "approved" || status === "issued")
+      ? addDays(approvedDate!, between(2, 8))
+      : null;
+    const dayCheckRequestedDate = (status === "in-review" || status === "approved" || status === "issued")
+      ? addDays(submittedDate, between(5, 18))
+      : null;
+    const dayCheckMailedDate = dayCheckRequestedDate
+      ? addDays(dayCheckRequestedDate, between(2, 9))
+      : null;
+    const expirationDate = (status === "approved" || status === "issued")
+      ? addDays(issuedDate ?? approvedDate!, between(180, 365))
+      : null;
+    const certOfOccupancyDate = job.coDate ?? null;
+    const permitFeeAmount = Math.round(between(1500, 6800) / 50) * 50;
+
     result.push({
       id: i + 1,
       jobCode: job.jobCode,
@@ -877,6 +918,27 @@ function generatePermits(): SHPermit[] {
       daysInReview,
       status,
       year,
+      parcelId,
+      permitNumber,
+      lotBlockSection,
+      clerk,
+      surveyor,
+      envIssues,
+      furthestMilestone,
+      expirationDate,
+      noCRecordedDate,
+      surveyOrderedDate,
+      certOfOccupancyDate,
+      dayCheckRequestedDate,
+      dayCheckMailedDate,
+      surveyCT,
+      septicPermitCT,
+      plansCT,
+      trussesCT,
+      energyCalcsCT,
+      permitCT,
+      totalCycleTime,
+      permitFeeAmount,
     });
   }
   return result;
@@ -1055,7 +1117,7 @@ function isInTimePeriod(dateStr: string | null | undefined, period: import("@/ty
   return true;
 }
 
-export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; status?: string; occupancy?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string; leaseStart?: string; leaseEnd?: string | null }>(
+export function matchFilters<T extends { community?: string; city?: string; entity?: string; stage?: string; status?: string; occupancy?: string; startDate?: string; contractDate?: string; submittedDate?: string; closeDate?: string | null; expirationDate?: string | null; leaseStart?: string; leaseEnd?: string | null }>(
   item: T,
   filters: SHDashboardFilters,
 ): boolean {

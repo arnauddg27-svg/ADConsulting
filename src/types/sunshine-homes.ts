@@ -194,6 +194,34 @@ export interface SHPermit {
   daysInReview: number;
   status: "approved" | "in-review" | "pending" | "rejected" | "issued";
   year: number;
+  /* ── Permitting-sheet fields (Centralized Data 2.0) — all optional ── */
+  /* Identity / location */
+  parcelId?: string;
+  permitNumber?: string;
+  lotBlockSection?: string;
+  /* People */
+  clerk?: string;
+  surveyor?: string;
+  /* Status detail */
+  envIssues?: string;          // "None" / specific issue
+  furthestMilestone?: string;
+  /* Dates beyond submitted/approved/issued */
+  expirationDate?: string | null;
+  noCRecordedDate?: string | null;     // NOC Date Recorded
+  surveyOrderedDate?: string | null;
+  certOfOccupancyDate?: string | null;
+  dayCheckRequestedDate?: string | null;
+  dayCheckMailedDate?: string | null;
+  /* Per-step cycle times (in days) — drives the permitting funnel chart */
+  surveyCT?: number;
+  septicPermitCT?: number;
+  plansCT?: number;
+  trussesCT?: number;
+  energyCalcsCT?: number;
+  permitCT?: number;
+  totalCycleTime?: number;
+  /* Misc */
+  permitFeeAmount?: number;
 }
 
 export interface SHPropertyUnit {

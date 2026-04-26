@@ -53,14 +53,31 @@ const permitStatusPill = (r: Record<string, unknown>) => {
   return <SHPill tone={s === "approved" || s === "issued" ? "good" : s === "in-review" || s === "pending" ? "watch" : "alert"} label={s.replace(/-/g, " ")} />;
 };
 
+/* Permit drilldown — enriched with the Centralized Data 2.0 / Permitting
+   sheet fields. Surfaces parcel + permit number, clerk, surveyor, env
+   flag, per-step cycle times, and the full date flow. */
 const permitCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
   { key: "city", label: "City", width: "80px" },
+  { key: "permitNumber", label: "Permit #", width: "115px", render: r => String(r.permitNumber ?? "\u2014") },
+  { key: "parcelId", label: "Parcel ID", width: "105px", render: r => String(r.parcelId ?? "\u2014") },
   { key: "permitType", label: "Type", width: "80px" },
+  { key: "envIssues", label: "Env", width: "85px", render: r => {
+    const v = String(r.envIssues ?? "None");
+    return v === "None" ? <span style={{ color: "var(--sh-text-muted)" }}>None</span> : <SHPill tone="watch" label={v} />;
+  }},
+  { key: "clerk", label: "Clerk", width: "100px", render: r => String(r.clerk ?? "\u2014") },
+  { key: "surveyor", label: "Surveyor", width: "130px", render: r => String(r.surveyor ?? "\u2014") },
   { key: "submittedDate", label: "Submitted", width: "85px" },
-  { key: "daysInReview", label: "Days", width: "50px", align: "right", render: permitDaysPill },
-  { key: "status", label: "Status", width: "80px", render: permitStatusPill },
+  { key: "approvedDate", label: "Approved", width: "85px", render: r => r.approvedDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.approvedDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "issuedDate", label: "Issued", width: "85px", render: r => r.issuedDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.issuedDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "expirationDate", label: "Expires", width: "85px", render: r => r.expirationDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.expirationDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "permitCT", label: "Permit CT", width: "75px", align: "right", render: r => `${Number(r.permitCT ?? r.daysInReview)}d` },
+  { key: "totalCycleTime", label: "Total CT", width: "70px", align: "right", render: r => r.totalCycleTime ? `${Number(r.totalCycleTime)}d` : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "permitFeeAmount", label: "Fee", width: "70px", align: "right", render: r => r.permitFeeAmount ? fmt$(Number(r.permitFeeAmount)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "daysInReview", label: "In Review", width: "75px", align: "right", render: permitDaysPill },
+  { key: "status", label: "Status", width: "85px", render: permitStatusPill },
 ];
 
 const loanExpPill = (r: Record<string, unknown>) => {
