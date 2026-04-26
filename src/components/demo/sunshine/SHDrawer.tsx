@@ -33,14 +33,36 @@ const landStatusPill = (r: Record<string, unknown>) => {
   return <SHPill tone={s === "closed" ? "good" : s === "under-contract" ? "watch" : "alert"} label={s.replace(/-/g, " ")} />;
 };
 
+/* Land drilldown — enriched with parcel ID, lot type, zoning, env
+   clearance, dev cost + projected revenue, release to sales / first
+   closing dates, seller + broker. */
 const landCols: Col[] = [
-  { key: "name", label: "Deal", width: "1.2fr" },
+  { key: "name", label: "Deal", width: "200px" },
   { key: "city", label: "City", width: "90px" },
+  { key: "parcelId", label: "Parcel ID", width: "105px", render: r => String(r.parcelId ?? "\u2014") },
+  { key: "lotType", label: "Lot Type", width: "95px", render: r => String(r.lotType ?? "\u2014") },
+  { key: "zoning", label: "Zoning", width: "70px", render: r => String(r.zoning ?? "\u2014") },
+  { key: "envClearance", label: "Env", width: "90px", render: r => {
+    const v = String(r.envClearance ?? "\u2014");
+    const tone = v === "Cleared" ? "good" : v === "Issue" ? "alert" : "watch";
+    return v === "\u2014" ? <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> : <SHPill tone={tone} label={v} />;
+  }},
   { key: "acres", label: "Acres", width: "55px", align: "right" },
+  { key: "acresEntitled", label: "Entitled", width: "70px", align: "right", render: r => r.acresEntitled !== undefined ? `${Number(r.acresEntitled)}` : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
   { key: "lots", label: "Lots", width: "50px", align: "right" },
-  { key: "costPerLot", label: "$/Lot", width: "65px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
-  { key: "acquisitionCost", label: "Total", width: "75px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
-  { key: "status", label: "Status", width: "90px", render: landStatusPill },
+  { key: "costPerLot", label: "$/Lot", width: "75px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
+  { key: "acquisitionCost", label: "Acq Cost", width: "85px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
+  { key: "developmentCostEst", label: "Dev Cost", width: "85px", align: "right", render: r => r.developmentCostEst !== undefined ? fmt$(Number(r.developmentCostEst)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "totalInvestmentEst", label: "Total Inv", width: "85px", align: "right", render: r => r.totalInvestmentEst !== undefined ? fmt$(Number(r.totalInvestmentEst)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "projectedRevenue", label: "Proj Rev", width: "90px", align: "right", render: r => r.projectedRevenue !== undefined ? fmt$(Number(r.projectedRevenue)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "projectedMarginPct", label: "Margin Est", width: "85px", align: "right", render: r => r.projectedMarginPct !== undefined ? fmtPct(Number(r.projectedMarginPct)) : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "contractDate", label: "Contract", width: "85px" },
+  { key: "closeDate", label: "Closed", width: "85px", render: r => r.closeDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.closeDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "releaseToSalesDate", label: "Sales Rel", width: "90px", render: r => r.releaseToSalesDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.releaseToSalesDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "firstClosingDate", label: "1st Close", width: "90px", render: r => r.firstClosingDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.firstClosingDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>\u2014</span> },
+  { key: "seller", label: "Seller", width: "150px", render: r => String(r.seller ?? "\u2014") },
+  { key: "brokerCompany", label: "Broker", width: "140px", render: r => String(r.brokerCompany ?? "\u2014") },
+  { key: "status", label: "Status", width: "100px", render: landStatusPill },
 ];
 
 const permitDaysPill = (r: Record<string, unknown>) => {

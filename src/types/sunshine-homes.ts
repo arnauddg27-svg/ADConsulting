@@ -194,6 +194,23 @@ export interface SHLandDeal {
   closeDate: string | null;
   contractDate: string;
   year: number;
+  /* ── Land enrichment from Inventory Details + Lot Cost sheets ──
+     All optional. */
+  parcelId?: string;
+  lotType?: "Standard" | "Premium" | "Cul-de-sac" | "Corner" | "Pond" | "Wooded";
+  zoning?: string;
+  envClearance?: "Cleared" | "In Review" | "Pending" | "Issue";
+  developmentCostEst?: number;
+  totalInvestmentEst?: number;
+  projectedRevenue?: number;
+  projectedMarginPct?: number;
+  releaseToSalesDate?: string | null;
+  firstClosingDate?: string | null;
+  acresAvailable?: number;
+  acresEntitled?: number;
+  seller?: string;
+  brokerCompany?: string;
+  notes?: string;
 }
 
 export interface SHPermit {

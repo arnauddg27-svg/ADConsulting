@@ -841,6 +841,39 @@ function generateLandDeals(): SHLandDeal[] {
       ? dateToStr(year, contractMonth, Math.min(contractDay + between(1, 10), 28))
       : null;
 
+    /* ── Land enrichment ── */
+    const parcelId = `${between(10, 99)}-${between(1000, 9999)}-${String(between(0, 99)).padStart(2, "0")}`;
+    const lotType = pick(["Standard", "Premium", "Cul-de-sac", "Corner", "Pond", "Wooded"]) as SHLandDeal["lotType"];
+    const zoning = pick(["R-1A", "R-1B", "R-2", "PUD", "MF-1", "AG-1"]);
+    const envClearance: SHLandDeal["envClearance"] =
+      status === "closed" ? "Cleared"
+      : status === "cancelled" ? "Issue"
+      : pick(["In Review", "Pending", "Cleared"]);
+    /* Development cost typically 10-25% of acquisition */
+    const developmentCostEst = Math.round(acquisitionCost * (0.10 + rand() * 0.15));
+    const totalInvestmentEst = acquisitionCost + developmentCostEst;
+    /* Projected revenue ~3-4x lot cost per home, so total ~lots * lotPrice */
+    const avgHomePriceEstimate = pick([460000, 485000, 510000, 540000, 575000, 605000]);
+    const projectedRevenue = Math.round(lots * avgHomePriceEstimate);
+    const projectedMarginPct = Math.round((10 + rand() * 14) * 10) / 10;
+    const releaseToSalesDate = status === "closed"
+      ? addDays(closeDate!, between(60, 180))
+      : null;
+    const firstClosingDate = status === "closed" && rand() > 0.4
+      ? addDays(closeDate!, between(180, 540))
+      : null;
+    const acresAvailable = Math.max(0, acres - Math.round(acres * (lots / (lots + 5))));
+    const acresEntitled = Math.round(acres * (status === "closed" ? 1 : 0.7));
+    const seller = pick(["Coastal Holdings LLC", "Lakeside Land Trust", "Peninsula Realty Co.", "Sunbelt Properties Inc.", "Atlas Land Group", "Gulfshore Investments"]);
+    const brokerCompany = pick(["JLL Land", "CBRE Land Services", "Colliers Florida", "Marcus & Millichap", "Land Advisors Org."]);
+    const notes = envClearance === "Issue"
+      ? "Environmental review issue — seller renegotiation in progress"
+      : status === "under-contract"
+        ? "Diligence period active"
+        : status === "closed" && firstClosingDate
+          ? `First home closing ${firstClosingDate}`
+          : "";
+
     result.push({
       id: i + 1,
       name: `${comm} Parcel ${String.fromCharCode(65 + (i % 15))}-${i + 1}`,
@@ -855,6 +888,21 @@ function generateLandDeals(): SHLandDeal[] {
       closeDate,
       contractDate,
       year,
+      parcelId,
+      lotType,
+      zoning,
+      envClearance,
+      developmentCostEst,
+      totalInvestmentEst,
+      projectedRevenue,
+      projectedMarginPct,
+      releaseToSalesDate,
+      firstClosingDate,
+      acresAvailable,
+      acresEntitled,
+      seller,
+      brokerCompany,
+      notes,
     });
   }
   return result;
