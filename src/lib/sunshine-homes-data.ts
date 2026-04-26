@@ -713,9 +713,12 @@ export const sales: SHSale[] = generateSales();
 /* ═══════════════════════════════════════════════════════════
    LOANS (~80 total) — generated from actual jobs array
    ═══════════════════════════════════════════════════════════ */
+/* Pool tightened to 5 lenders (was 10). Real homebuilders concentrate
+   construction lending with 2-5 banks for relationship pricing —
+   spreading 80 loans across 10 lenders made the "Lender Count" KPI
+   look like a procurement audit rather than a portfolio. */
 const EXTRA_LENDERS = [
-  "First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank",
-  "Wells Fargo CRE", "JPMorgan Builder Finance", "Centennial Bank", "Seacoast Bank", "Valley National",
+  "First National Bank", "SunTrust Builders", "Regions Construction", "Wells Fargo CRE", "Seacoast Bank",
 ] as const;
 
 function generateLoans(): SHLoan[] {

@@ -75,7 +75,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
   /* Cross-tab: City x Status */
   const cityStatusCross = buildCrossTab(permits, "city", "status");
 
-  /* Histogram: Cycle time distribution (daysInReview, 5 buckets) */
+  /* Histogram: Cycle time distribution (daysInReview, 5 buckets).
+     Audit found ">60d+" bucket always empty — permit data tops out at
+     ~60d. Filter strips empty buckets so the histogram doesn't render
+     a phantom column. */
   const cycleTimeBuckets = (() => {
     const thresholds = [15, 30, 45, 60, Infinity];
     const labels = ["0–15d", "16–30d", "31–45d", "46–60d", "60d+"];
@@ -87,7 +90,9 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
         if (d <= thresholds[i]) { counts[i]++; break; }
       }
     }
-    return labels.map((bucket, i) => ({ bucket, count: counts[i], color: colors[i] }));
+    return labels
+      .map((bucket, i) => ({ bucket, count: counts[i], color: colors[i] }))
+      .filter(b => b.count > 0);
   })();
 
   /* Ranked Bars: Avg cycle time by city */
