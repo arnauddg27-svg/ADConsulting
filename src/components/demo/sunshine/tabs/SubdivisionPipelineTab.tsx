@@ -7,16 +7,21 @@ import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
 
-function LotBar({ sold, construction, completed, remaining, total }: { sold: number; construction: number; completed: number; remaining: number; total: number }) {
-  const pctSold = (sold / total) * 100;
-  const pctConst = (construction / total) * 100;
+/* Mutually exclusive lot lifecycle: completed + building + toStart +
+   available = total. Visual stack uses the same partition so the bar
+   length always equals total inventory. */
+function LotBar({ completed, construction, toStart, remaining, total }: { completed: number; construction: number; toStart: number; remaining: number; total: number }) {
   const pctDone = (completed / total) * 100;
+  const pctConst = (construction / total) * 100;
+  const pctToStart = (toStart / total) * 100;
+  const pctRemaining = (remaining / total) * 100;
   return (
     <div style={{ minWidth: 80 }}>
       <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", background: "rgba(255,255,255,0.04)" }}>
         <div style={{ width: `${pctDone}%`, background: "#14b8a6" }} title={`${completed} completed`} />
         <div style={{ width: `${pctConst}%`, background: "#22d3ee" }} title={`${construction} under construction`} />
-        <div style={{ width: `${pctSold}%`, background: "#3b82f6" }} title={`${sold} sold`} />
+        <div style={{ width: `${pctToStart}%`, background: "#3b82f6" }} title={`${toStart} sold, awaiting start`} />
+        <div style={{ width: `${pctRemaining}%`, background: "rgba(255,255,255,0.08)" }} title={`${remaining} available`} />
       </div>
     </div>
   );
@@ -49,31 +54,45 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
                 return <SHPill tone={tone} label={s.replace("-", " ")} />;
               }},
               { key: "totalAcres", label: "Acres", width: "65px", align: "right" },
-              { key: "totalLots", label: "Total Lots", width: "70px", align: "right" },
+              { key: "totalLots", label: "Total", width: "60px", align: "right" },
+              /* Mutually-exclusive lifecycle: total = completed + building +
+                 toStart + remaining. Solved that "Sold" overlapped with both
+                 Completed and Building, so the row math never reconciled. */
               { key: "lotsCompleted", label: "Completed", width: "75px", align: "right" },
               { key: "lotsUnderConstruction", label: "Building", width: "70px", align: "right" },
-              { key: "lotsSold", label: "Sold", width: "60px", align: "right" },
+              { key: "lotsToStart", label: "To Start", width: "70px", align: "right", render: r => {
+                const toStart = Number(r.lotsSold) - Number(r.lotsUnderConstruction) - Number(r.lotsCompleted);
+                return Math.max(0, toStart);
+              }},
               { key: "lotsRemaining", label: "Available", width: "70px", align: "right" },
-              { key: "lotProgress", label: "Lot Progress", width: "110px", render: r => (
-                <LotBar
-                  sold={Number(r.lotsSold)}
-                  construction={Number(r.lotsUnderConstruction)}
-                  completed={Number(r.lotsCompleted)}
-                  remaining={Number(r.lotsRemaining)}
-                  total={Number(r.totalLots)}
-                />
-              )},
+              { key: "lotProgress", label: "Lot Progress", width: "120px", render: r => {
+                const total = Number(r.totalLots);
+                const completed = Number(r.lotsCompleted);
+                const construction = Number(r.lotsUnderConstruction);
+                const remaining = Number(r.lotsRemaining);
+                const toStart = Math.max(0, Number(r.lotsSold) - construction - completed);
+                return (
+                  <LotBar
+                    completed={completed}
+                    construction={construction}
+                    toStart={toStart}
+                    remaining={remaining}
+                    total={total}
+                  />
+                );
+              }},
               { key: "totalInvestment", label: "Investment", width: "90px", align: "right", render: r => fmt$(Number(r.totalInvestment)) },
               { key: "profitMarginPct", label: "Proj Margin", width: "80px", align: "right", render: r => {
                 const m = Number(r.profitMarginPct);
                 return <SHPill tone={m >= 20 ? "good" : m >= 10 ? "watch" : "alert"} label={fmtPct(m)} />;
               }},
               { key: "absorptionRate", label: "Absorption", width: "80px", align: "right", render: r => `${Number(r.absorptionRate)}/mo` },
-              { key: "zoningApproved", label: "Zoning", width: "65px", render: r => <SHPill tone={r.zoningApproved ? "good" : "alert"} label={r.zoningApproved ? "✓" : "○"} /> },
-              { key: "platRecorded", label: "Plat", width: "60px", render: r => <SHPill tone={r.platRecorded ? "good" : "alert"} label={r.platRecorded ? "✓" : "○"} /> },
-              { key: "utilityStubs", label: "Utilities", width: "65px", render: r => <SHPill tone={r.utilityStubs ? "good" : "alert"} label={r.utilityStubs ? "✓" : "○"} /> },
-              { key: "roadsComplete", label: "Roads", width: "65px", render: r => <SHPill tone={r.roadsComplete ? "good" : "alert"} label={r.roadsComplete ? "✓" : "○"} /> },
-              { key: "retentionPonds", label: "Retention", width: "70px", render: r => <SHPill tone={r.retentionPonds ? "good" : "alert"} label={r.retentionPonds ? "✓" : "○"} /> },
+              { key: "infrastructure", label: "Infra", width: "75px", render: r => {
+                const checks = [r.zoningApproved, r.platRecorded, r.utilityStubs, r.roadsComplete, r.retentionPonds];
+                const done = checks.filter(Boolean).length;
+                const tone = done === 5 ? "good" : done >= 3 ? "watch" : "alert";
+                return <SHPill tone={tone} label={`${done}/5`} />;
+              }},
               { key: "monthsRemaining", label: "Mo. Remain", width: "75px", align: "right", render: r => {
                 const remaining = Number(r.lotsRemaining);
                 const rate = Number(r.absorptionRate);

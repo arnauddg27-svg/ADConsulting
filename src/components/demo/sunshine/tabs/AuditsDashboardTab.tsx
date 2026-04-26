@@ -67,7 +67,10 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
     });
   })();
 
-  /* By community avg margin */
+  /* By community avg margin. No `status` field — bar length already
+     conveys high vs low; explicit status mapped every value to the same
+     orange "watch" gradient when most communities landed in 14-18%.
+     SHRankedBars now uses its rank-based teal/cyan palette for variety. */
   const byCommunity = (() => {
     const map = new Map<string, { count: number; totalMargin: number }>();
     for (const a of audits) {
@@ -80,12 +83,11 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       .map(([label, d]) => ({
         label,
         value: Math.round(d.totalMargin / d.count * 10) / 10,
-        status: (d.totalMargin / d.count) >= 15 ? "good" as const : (d.totalMargin / d.count) >= 5 ? "watch" as const : "alert" as const,
       }))
       .sort((a, b) => b.value - a.value);
   })();
 
-  /* By plan avg margin */
+  /* By plan avg margin (same treatment as byCommunity). */
   const byPlan = (() => {
     const map = new Map<string, { count: number; totalMargin: number }>();
     for (const a of audits) {
@@ -98,7 +100,6 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       .map(([label, d]) => ({
         label,
         value: Math.round(d.totalMargin / d.count * 10) / 10,
-        status: (d.totalMargin / d.count) >= 15 ? "good" as const : (d.totalMargin / d.count) >= 5 ? "watch" as const : "alert" as const,
       }))
       .sort((a, b) => b.value - a.value);
   })();

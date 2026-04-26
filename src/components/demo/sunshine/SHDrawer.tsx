@@ -927,7 +927,9 @@ function renderCostBreakdown(
         ))}
       </div>
 
-      {/* Per-category budget vs actual bars */}
+      {/* Per-category budget vs actual — compact 3-tile grid (replaces the
+          full-width horizontal bars that ate too much space). Each tile
+          stacks values + a small 4px progress meter. */}
       <div style={{
         border: "1px solid var(--sh-border)",
         borderRadius: 8,
@@ -938,48 +940,53 @@ function renderCostBreakdown(
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--sh-accent)", marginBottom: 10, paddingBottom: 6, borderBottom: "1px solid rgba(20,184,166,0.25)" }}>
           Budget vs Actual by Category
         </div>
-        {categories.map(c => {
-          const over = c.variance > 0;
-          return (
-            <div key={c.key} style={{ padding: "8px 0", borderBottom: "1px solid var(--sh-border-dim)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--sh-text-primary)" }}>{c.label}</div>
-                <div style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: over ? "var(--sh-danger)" : "var(--sh-accent)", fontWeight: 700 }}>
-                  {over ? "+" : ""}{c.variancePct.toFixed(1)}%
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+          {categories.map(c => {
+            const over = c.variance > 0;
+            const accent = over ? "var(--sh-danger)" : "var(--sh-accent)";
+            const meterPct = Math.max(2, Math.min(100, c.progressPct));
+            return (
+              <div key={c.key} style={{
+                border: "1px solid var(--sh-border-dim)",
+                borderRadius: 6,
+                padding: "8px 10px",
+                background: "var(--sh-bg-surface-raised)",
+                display: "flex", flexDirection: "column", gap: 6,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--sh-text-primary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{c.label}</span>
+                  <span style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: accent, fontWeight: 700 }}>
+                    {over ? "+" : ""}{c.variancePct.toFixed(1)}%
+                  </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--sh-text-muted)" }}>
+                  <span>Budget</span>
+                  <span style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{fmt$(c.budget)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--sh-text-muted)" }}>
+                  <span>Actual</span>
+                  <span style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{fmt$(c.actual)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--sh-text-muted)" }}>
+                  <span>Variance</span>
+                  <span style={{ color: accent, fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{over ? "+" : ""}{fmt$(c.variance)}</span>
+                </div>
+                {/* Slim 4px meter — actual vs budget. Overrun shown by the
+                    color flipping to danger plus a small tick at 100%. */}
+                <div style={{ position: "relative", height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", marginTop: 2 }}>
+                  <div style={{
+                    position: "absolute", left: 0, top: 0, bottom: 0,
+                    width: `${meterPct}%`,
+                    background: over ? "var(--sh-danger)" : "var(--sh-accent)",
+                  }} />
+                  {c.progressPct > 100 && (
+                    <div style={{ position: "absolute", left: "calc(100% - 1px)", top: 0, bottom: 0, width: 1, background: "rgba(255,255,255,0.6)" }} />
+                  )}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, fontSize: 10, color: "var(--sh-text-muted)", marginBottom: 4 }}>
-                <span>Budget: <strong style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmt$(c.budget)}</strong></span>
-                <span>Actual: <strong style={{ color: "var(--sh-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmt$(c.actual)}</strong></span>
-                <span>Variance: <strong style={{ color: over ? "var(--sh-danger)" : "var(--sh-accent)", fontVariantNumeric: "tabular-nums" }}>{over ? "+" : ""}{fmt$(c.variance)}</strong></span>
-              </div>
-              {/* Twin bars: actual over budget */}
-              <div style={{ position: "relative", height: 12, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden" }}>
-                {/* Budget bar (full width baseline) */}
-                <div style={{
-                  position: "absolute", left: 0, top: 0, bottom: 0,
-                  width: "100%",
-                  background: "rgba(59,130,246,0.25)",
-                }} />
-                {/* Actual bar on top */}
-                <div style={{
-                  position: "absolute", left: 0, top: 0, bottom: 0,
-                  width: `${Math.min(100, c.progressPct)}%`,
-                  background: `linear-gradient(90deg, ${over ? "#f46a6a" : "var(--sh-accent)"}, ${over ? "#ef4444" : "#22d3ee"})`,
-                  boxShadow: `0 0 10px ${over ? "rgba(244,106,106,0.4)" : "rgba(20,184,166,0.4)"}`,
-                }} />
-                {/* Overrun marker if actual > budget */}
-                {c.progressPct > 100 && (
-                  <div style={{
-                    position: "absolute", right: 0, top: 0, bottom: 0,
-                    width: 2,
-                    background: "var(--sh-danger)",
-                  }} />
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Per-house cost breakdown table */}

@@ -382,13 +382,16 @@
   margin-bottom: 14px;
 }
 
-/* ── KPI Card ── */
+/* ── KPI Card ──
+   Audit-tightened sizing: padding 12/14/10 -> 9/11/7, value 20px -> 16px,
+   accent bar 2px -> 1px. Tiles previously dominated the dashboard above
+   the fold; the new sizes match the visual weight of table cells. */
 .sh-kpi-card {
   position: relative;
-  padding: 12px 14px 10px;
+  padding: 9px 11px 7px;
   background: linear-gradient(135deg, var(--sh-bg-surface) 0%, var(--sh-bg-surface-raised) 100%);
   border: 1px solid var(--sh-border);
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   cursor: default;
   transition: transform 0.15s, box-shadow 0.15s;
@@ -403,35 +406,35 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1px;
   background: var(--_kpi-accent, var(--sh-accent));
 }
 .sh-kpi-card.clickable { cursor: pointer; }
 .sh-kpi-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--sh-text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .sh-kpi-value {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.1;
   color: var(--_kpi-accent, var(--sh-accent));
-  text-shadow: 0 0 20px color-mix(in srgb, var(--_kpi-accent, var(--sh-accent)) 30%, transparent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--_kpi-accent, var(--sh-accent)) 25%, transparent);
 }
 .sh-kpi-sub {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 400;
   color: var(--sh-text-secondary);
-  margin-top: 3px;
+  margin-top: 2px;
 }
 .sh-kpi-delta {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 .sh-kpi-delta.up { color: var(--sh-accent); }
 .sh-kpi-delta.down { color: var(--sh-danger); }
