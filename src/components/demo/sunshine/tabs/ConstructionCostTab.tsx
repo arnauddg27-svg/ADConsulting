@@ -45,7 +45,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           label="Total Budget"
           value={fmt$(kpis.totalBudget)}
           sparkline={[3.2, 3.5, 3.8, 4.1, 4.4, 4.7, 5.0, 5.2, 5.5, 5.8]}
-          delta="+12% YoY" deltaDir="up"
+
           onClick={() => onDrill({ type: "cost-category", value: "budget", label: "Total Budget — All Jobs" })}
         />
         <SHKpiCard
@@ -72,7 +72,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
           value={fmtPct(kpis.avgMargin)}
           accent="#22d3ee"
           sparkline={[22.1, 23.0, 22.8, 23.5, 24.0, 23.8, 24.2, 24.5, 24.3, 24.6]}
-          delta="Healthy" deltaDir="up"
+
           onClick={() => onDrill({ type: "cost-category", value: "margin", label: "Margin — All Jobs" })}
         />
       </div>

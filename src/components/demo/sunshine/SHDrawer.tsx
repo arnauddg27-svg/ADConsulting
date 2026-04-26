@@ -1287,11 +1287,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       const completed = jobs.filter(j => j.coDate);
       const inBucket = completed.filter(j => {
         const d = Number(j.totalCycleDays);
-        if (detail.value === "< 200d") return d < 200;
-        if (detail.value === "200–250d") return d >= 200 && d <= 250;
-        if (detail.value === "250–300d") return d >= 250 && d <= 300;
-        if (detail.value === "300–350d") return d >= 300 && d <= 350;
-        if (detail.value === "> 350d") return d > 350;
+        // Buckets aligned with realism-pass cycle distribution
+        // (p10=46d, med=158d, p90=272d).
+        if (detail.value === "< 150d") return d < 150;
+        if (detail.value === "150–200d") return d >= 150 && d < 200;
+        if (detail.value === "200–250d") return d >= 200 && d < 250;
+        if (detail.value === "250–300d") return d >= 250 && d < 300;
+        if (detail.value === "> 300d") return d >= 300;
         return true;
       });
       title = detail.label;
@@ -1697,7 +1699,47 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       } else if (detail.value === "drawn") {
         result = result.sort((a, b) => b.totalDrawn - a.totalDrawn);
       } else if (detail.value === "lenders") {
-        result = result.sort((a, b) => a.lender.localeCompare(b.lender));
+        // Special case: clicking the "Lenders" KPI should show grouped totals
+        // per lender, not every loan sorted by name. Renders a small custom
+        // table with lender summary stats.
+        const grouped = new Map<string, { count: number; total: number; drawn: number; avgRate: number; sumRate: number; expSoon: number }>();
+        for (const l of loans) {
+          const e = grouped.get(l.lender) ?? { count: 0, total: 0, drawn: 0, avgRate: 0, sumRate: 0, expSoon: 0 };
+          e.count += 1;
+          e.total += l.loanAmount;
+          e.drawn += l.totalDrawn;
+          e.sumRate += l.interestRate;
+          if (l.daysUntilExpiration <= 60) e.expSoon += 1;
+          grouped.set(l.lender, e);
+        }
+        const lenderRows = Array.from(grouped.entries())
+          .map(([lender, e]) => ({
+            lender,
+            count: e.count,
+            totalAmount: e.total,
+            totalDrawn: e.drawn,
+            drawPct: e.total > 0 ? Math.round((e.drawn / e.total) * 1000) / 10 : 0,
+            avgRate: Math.round((e.sumRate / e.count) * 100) / 100,
+            expSoon: e.expSoon,
+          }))
+          .sort((a, b) => b.totalAmount - a.totalAmount);
+        subtitle = `${lenderRows.length} lenders \u00b7 ${loans.length} loans`;
+        columns = [
+          { key: "lender", label: "Lender", width: "200px" },
+          { key: "count", label: "Loans", width: "70px", align: "right" },
+          { key: "totalAmount", label: "Exposure", width: "100px", align: "right", render: r => fmt$(Number(r.totalAmount)) },
+          { key: "totalDrawn", label: "Drawn", width: "95px", align: "right", render: r => fmt$(Number(r.totalDrawn)) },
+          { key: "drawPct", label: "Draw %", width: "75px", align: "right", render: r => fmtPct(Number(r.drawPct)) },
+          { key: "avgRate", label: "Avg Rate", width: "80px", align: "right", render: r => `${Number(r.avgRate)}%` },
+          { key: "expSoon", label: "Exp <60d", width: "85px", align: "right", render: r => {
+            const n = Number(r.expSoon);
+            return n > 0
+              ? <SHPill tone="alert" label={`${n}`} />
+              : <span style={{ color: "var(--sh-text-muted)" }}>0</span>;
+          }},
+        ];
+        rows = lenderRows as unknown as Record<string, unknown>[];
+        break;
       } else if (detail.value === "expiring") {
         result = result.filter(l => l.daysUntilExpiration <= 60).sort((a, b) => a.daysUntilExpiration - b.daysUntilExpiration);
       } else {
@@ -1720,14 +1762,14 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "loan-rate": {
       const matched = loans.filter(l => {
         const v = detail.value;
-        if (v.includes("<") || v.includes("Under")) return l.interestRate < 5;
-        if (v.includes("5") && v.includes("6")) return l.interestRate >= 5 && l.interestRate < 6;
-        if (v.includes("6") && v.includes("7")) return l.interestRate >= 6 && l.interestRate < 7;
-        if (v.includes("7") && v.includes("8")) return l.interestRate >= 7 && l.interestRate < 8;
-        if (v.includes(">") || v.includes("8+") || v.includes("Over")) return l.interestRate >= 8;
-        // Try exact match on rate value
+        // Buckets aligned with realism-pass loan rates (8.5-10.75%).
+        if (v.includes("8.5") && v.includes("9")) return l.interestRate >= 8.5 && l.interestRate < 9;
+        if (v.includes("9.5")) return l.interestRate >= 9.5 && l.interestRate < 10;
+        if (v.includes("9") && v.includes("9.5")) return l.interestRate >= 9 && l.interestRate < 9.5;
+        if (v.includes("10")) return l.interestRate >= 10;
+        // Backward-compat catch-all
         const num = parseFloat(v);
-        if (!isNaN(num)) return Math.floor(l.interestRate) === Math.floor(num);
+        if (!isNaN(num)) return Math.abs(l.interestRate - num) < 0.5;
         return true;
       });
       title = detail.label;

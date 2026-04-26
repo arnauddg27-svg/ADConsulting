@@ -37,8 +37,6 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
           label="Total Jobs"
           value={fmtN(jobs.length)}
           sparkline={[22, 24, 23, 25, 26, 27, 26, 28, 29, 30]}
-          delta="+3 vs prior"
-          deltaDir="up"
           tone="good"
           onClick={() => onDrill({ type: "job", value: "all", label: "All Construction Jobs" })}
         />
@@ -56,8 +54,6 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
           label="Avg Completion"
           value={`${avgCompletion}%`}
           progress={avgCompletion}
-          delta="+5% vs Q3"
-          deltaDir="up"
           tone="good"
           onClick={() => onDrill({ type: "job", value: "completion", label: "Construction Completion Overview" })}
         />

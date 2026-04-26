@@ -35,13 +35,15 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
     ...l, color: LENDER_COLORS[i % LENDER_COLORS.length],
   }));
 
-  /* Donut: Interest rate distribution */
+  /* Donut: Interest rate distribution. Buckets aligned with the actual
+     loan-rate distribution from the realism pass (8.5-10.75%) — previous
+     5-8% buckets were stale and dumped every loan into one slice. */
   const rateDistribution = (() => {
     const buckets = [
-      { label: "5–6%", min: 5, max: 6, color: "#0f766e" },
-      { label: "6–7%", min: 6, max: 7, color: "#14b8a6" },
-      { label: "7–8%", min: 7, max: 8, color: "#22d3ee" },
-      { label: "8%+",  min: 8, max: Infinity, color: "#3b82f6" },
+      { label: "8.5–9%",   min: 8.5, max: 9,        color: "#0f766e" },
+      { label: "9–9.5%",   min: 9,   max: 9.5,      color: "#14b8a6" },
+      { label: "9.5–10%",  min: 9.5, max: 10,       color: "#22d3ee" },
+      { label: "10%+",     min: 10,  max: Infinity, color: "#3b82f6" },
     ];
     return buckets.map(b => ({
       label: b.label,
@@ -111,7 +113,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
       <div className="sh-kpi-row">
         <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5]} onClick={() => onDrill({ type: "loan-metric", value: "exposure", label: `Total Exposure — ${fmt$(kpis.totalBalance)}` })} />
         <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} onClick={() => onDrill({ type: "loan-metric", value: "drawn", label: `Total Drawn — ${fmt$(kpis.totalDrawn)}` })} />
-        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} delta="Diversified" deltaDir="up" onClick={() => onDrill({ type: "loan-metric", value: "lenders", label: `${fmtN(kpis.lenderCount)} Lenders` })} />
+        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} onClick={() => onDrill({ type: "loan-metric", value: "lenders", label: `${fmtN(kpis.lenderCount)} Lenders` })} />
         <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} sparkline={[4, 3, 5, 4, 3, 2, 3, 4, 3, kpis.expiringSoon]} delta={kpis.expiringSoon > 0 ? "Action needed" : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? "down" : "up"} onClick={() => onDrill({ type: "loan-metric", value: "expiring", label: `${fmtN(kpis.expiringSoon)} Expiring < 60d` })} />
       </div>
 

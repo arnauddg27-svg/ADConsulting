@@ -158,9 +158,9 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
+        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
         <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onDrill({ type: "job", value: "active", label: `Active Jobs — ${fmtN(kpis.activeJobs)}` })} />
-        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
+        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
         <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onDrill({ type: "cost-category", value: "wip", label: `Total WIP — ${fmt$(kpis.totalWip)}` })} />
       </div>
 
@@ -196,22 +196,6 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         </SHPanel>
       </div>
 
-      {/* Row 3: Community × Stage CrossTab (full width) */}
-      <div className="sh-panels-row single">
-        <SHPanel kicker="Matrix" title="Job Count by Community & Stage">
-          <SHCrossTab
-            rows={crossTab.rows}
-            cols={sortedCols}
-            data={crossTab.data}
-            rowTotals={crossTab.rowTotals}
-            colTotals={crossTab.colTotals}
-            grandTotal={crossTab.grandTotal}
-            onCellClick={(row, col) => { onCommunityClick(row); onStageClick(col); onDrill({ type: "community", value: row, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "community", value: row, label: row }); }}
-          />
-        </SHPanel>
-      </div>
-
       {/* Row 4: Completions by Year — City × Time drill-down */}
       <div className="sh-panels-row single">
         <SHPanel kicker="City × Time" title={
@@ -234,7 +218,10 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         </SHPanel>
       </div>
 
-      {/* Row 5: WIP Trend (Area) + Jobs by Job Type (Donut) */}
+      {/* Row 5: WIP Trend + Avg Days in Phase by Stage. Trimmed the
+          redundant Jobs-by-Type donut and Avg-Completion-by-Community
+          rank (already conveyed by Active Jobs by Community + the
+          stage donut). Dashboard down from 10 panels to 7. */}
       <div className="sh-panels-row">
         <SHPanel kicker="Trend" title="WIP Balance Trend">
           <SHAreaChart
@@ -249,30 +236,12 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             }}
           />
         </SHPanel>
-        <SHPanel kicker="Mix" title="Jobs by Type">
-          <SHDonutChart
-            segments={byJobType}
-            onSegmentClick={label => onDrill({ type: "job", value: label, label })}
-          />
-        </SHPanel>
-      </div>
-
-      {/* Row 6: Avg Days in Phase by Stage + Avg Completion by Community */}
-      <div className="sh-panels-row">
         <SHPanel kicker="Cycle Time" title="Avg Days in Phase by Stage">
           <SHRankedBars
             items={avgDaysByStage}
             showRank
             formatValue={(v: number) => `${v}d`}
             onBarClick={label => { onStageClick(label); onDrill({ type: "stage", value: label, label: `Avg Days — ${label}` }); }}
-          />
-        </SHPanel>
-        <SHPanel kicker="Progress" title="Avg Completion by Community">
-          <SHRankedBars
-            items={avgCompletionByCommunity}
-            showRank
-            formatValue={(v: number) => `${v}%`}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
           />
         </SHPanel>
       </div>

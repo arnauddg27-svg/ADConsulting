@@ -113,10 +113,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "total", label: `Total Permits — ${fmtN(kpis.total)}` })} />
-        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "approved", label: `Approved — ${fmtN(kpis.approved)}` })} />
-        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" onClick={() => onDrill({ type: "permit-status", value: "in-review", label: `In Review — ${fmtN(kpis.inReview)}` })} />
-        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "avg-days", label: `Avg Days — ${Math.round(kpis.avgDaysToApproval)}d` })} />
+        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} onClick={() => onDrill({ type: "permit-status", value: "total", label: `Total Permits — ${fmtN(kpis.total)}` })} />
+        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} onClick={() => onDrill({ type: "permit-status", value: "approved", label: `Approved — ${fmtN(kpis.approved)}` })} />
+        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} onClick={() => onDrill({ type: "permit-status", value: "in-review", label: `In Review — ${fmtN(kpis.inReview)}` })} />
+        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} onClick={() => onDrill({ type: "permit-status", value: "avg-days", label: `Avg Days — ${Math.round(kpis.avgDaysToApproval)}d` })} />
       </div>
 
       <div className="sh-panels-row">

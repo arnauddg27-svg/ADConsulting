@@ -252,7 +252,11 @@ export default function SunshineDashboard() {
           onToggleMode={() => setMode(prev => prev === "night" ? "day" : "night")}
           onToggleFullPage={() => setIsFullPage(prev => !prev)}
         />
-        <FilterBar filters={filters} onChange={setFilters} />
+        <FilterBar
+          filters={filters}
+          onChange={setFilters}
+          hideTimeFilters={activeTab.startsWith("pm")}
+        />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
           <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />

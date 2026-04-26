@@ -137,9 +137,9 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "total-units", label: `Total Units — ${fmtN(kpis.totalUnits)}` })} />
-        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "occupancy", label: `Occupancy Rate — ${fmtPct(kpis.occupancyRate)}` })} />
-        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "revenue", label: `Monthly Revenue — ${fmt$(kpis.monthlyRent)}` })} />
+        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} onClick={() => onDrill({ type: "pm-metric", value: "total-units", label: `Total Units — ${fmtN(kpis.totalUnits)}` })} />
+        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} onClick={() => onDrill({ type: "pm-metric", value: "occupancy", label: `Occupancy Rate — ${fmtPct(kpis.occupancyRate)}` })} />
+        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} onClick={() => onDrill({ type: "pm-metric", value: "revenue", label: `Monthly Revenue — ${fmt$(kpis.monthlyRent)}` })} />
         <SHKpiCard
           label="Delinquent"
           value={fmtN(kpis.delinquentUnits)}

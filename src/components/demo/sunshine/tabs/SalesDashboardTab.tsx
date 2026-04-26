@@ -104,10 +104,10 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} delta="+2 this month" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-sales", label: `Total Sales — ${fmtN(kpis.totalSales)}` })} />
-        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} delta="+15% YoY" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-value", label: `Total Value — ${fmt$(kpis.totalValue)}` })} />
-        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} delta="+3% vs prior" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: `Avg Sale Price — ${fmt$(kpis.avgPrice)}` })} />
-        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" onClick={() => onDrill({ type: "sale-metric", value: "pending-close", label: `Pending Close — ${fmtN(kpis.pendingClosings)}` })} />
+        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} onClick={() => onDrill({ type: "sale-metric", value: "total-sales", label: `Total Sales — ${fmtN(kpis.totalSales)}` })} />
+        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} onClick={() => onDrill({ type: "sale-metric", value: "total-value", label: `Total Value — ${fmt$(kpis.totalValue)}` })} />
+        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: `Avg Sale Price — ${fmt$(kpis.avgPrice)}` })} />
+        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} onClick={() => onDrill({ type: "sale-metric", value: "pending-close", label: `Pending Close — ${fmtN(kpis.pendingClosings)}` })} />
       </div>
 
       <div className="sh-panels-row">

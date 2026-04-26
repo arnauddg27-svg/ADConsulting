@@ -1526,13 +1526,26 @@ export const avgPhaseDays = [
   { phase: "Closing",       days: 15, color: "#1e40af" },
 ];
 
-export const cycleTimeDistribution = [
-  { bucket: "< 200d",   count: 8,  color: "#0f766e" },
-  { bucket: "200–250d", count: 18, color: "#14b8a6" },
-  { bucket: "250–300d", count: 20, color: "#22d3ee" },
-  { bucket: "300–350d", count: 10, color: "#3b82f6" },
-  { bucket: "> 350d",   count: 4,  color: "#1e40af" },
-];
+/* Cycle-time distribution computed from actual jobs (was hard-coded with
+   stale 200-350d buckets that didn't match the realism-pass cycle data
+   p10=46d, med=158d, p90=272d). Boundaries here MUST match the
+   `cycle-bucket` case in SHDrawer.tsx. */
+export const cycleTimeDistribution = (() => {
+  const completed = jobs.filter(j => j.coDate);
+  const buckets = [
+    { bucket: "< 150d",    min: 0,    max: 150,      color: "#0f766e", count: 0 },
+    { bucket: "150–200d",  min: 150,  max: 200,      color: "#14b8a6", count: 0 },
+    { bucket: "200–250d",  min: 200,  max: 250,      color: "#22d3ee", count: 0 },
+    { bucket: "250–300d",  min: 250,  max: 300,      color: "#3b82f6", count: 0 },
+    { bucket: "> 300d",    min: 300,  max: Infinity, color: "#1e40af", count: 0 },
+  ];
+  for (const j of completed) {
+    const d = j.totalCycleDays;
+    const b = buckets.find(b => d >= b.min && d < b.max);
+    if (b) b.count += 1;
+  }
+  return buckets.map(({ bucket, count, color }) => ({ bucket, count, color }));
+})();
 
 /* ═══════════════════════════════════════════════════════════
    CYCLE TIME DERIVED FUNCTIONS
