@@ -840,17 +840,21 @@ function generateLoans(): SHLoan[] {
 export const loans: SHLoan[] = generateLoans();
 
 /* ═══════════════════════════════════════════════════════════
-   LAND DEALS (15 total) — realistic for a mid-size builder (~600 total lots)
+   LAND DEALS (28 total) — balanced acquisition pipeline for demo filters
    ═══════════════════════════════════════════════════════════ */
 function generateLandDeals(): SHLandDeal[] {
   const rng = createRng(311);
   const { rand, pick, between } = rng;
   const result: SHLandDeal[] = [];
 
-  const TOTAL = 15;
+  const TOTAL = 28;
+  const statusPattern: SHLandDeal["status"][] = [
+    "closed", "under-contract", "pending", "closed", "under-contract", "pending", "closed", "cancelled",
+    "under-contract", "closed", "pending", "under-contract", "closed", "pending",
+  ];
 
   for (let i = 0; i < TOTAL; i++) {
-    const comm = pick(COMMUNITIES);
+    const comm = COMMUNITIES[i % COMMUNITIES.length];
     const meta = COMM_META[comm];
     const acres = between(10, 45);
     const lots = between(25, 55);
@@ -861,9 +865,8 @@ function generateLandDeals(): SHLandDeal[] {
     const contractMonth = between(1, 12);
     const contractDay = between(1, 28);
     const contractDate = dateToStr(year, contractMonth, contractDay);
-    // 60% closed, 30% under-contract, 10% cancelled
-    const roll = rand();
-    const status: SHLandDeal["status"] = roll < 0.60 ? "closed" : roll < 0.90 ? "under-contract" : "cancelled";
+    // Deterministic mix so every dashboard status has enough rows to drill into.
+    const status = statusPattern[i % statusPattern.length];
     // For closed deals, close in the SAME month (small offset) so drill-down date matches
     const closeDate = status === "closed"
       ? dateToStr(year, contractMonth, Math.min(contractDay + between(1, 10), 28))
@@ -876,6 +879,7 @@ function generateLandDeals(): SHLandDeal[] {
     const envClearance: SHLandDeal["envClearance"] =
       status === "closed" ? "Cleared"
       : status === "cancelled" ? "Issue"
+      : status === "pending" ? pick(["Pending", "In Review"])
       : pick(["In Review", "Pending", "Cleared"]);
     /* Development cost typically 10-25% of acquisition */
     const developmentCostEst = Math.round(acquisitionCost * (0.10 + rand() * 0.15));
@@ -896,6 +900,8 @@ function generateLandDeals(): SHLandDeal[] {
     const brokerCompany = pick(["JLL Land", "CBRE Land Services", "Colliers Florida", "Marcus & Millichap", "Land Advisors Org."]);
     const notes = envClearance === "Issue"
       ? "Environmental review issue — seller renegotiation in progress"
+      : status === "pending"
+        ? "LOI submitted — awaiting seller response and diligence kickoff"
       : status === "under-contract"
         ? "Diligence period active"
         : status === "closed" && firstClosingDate
@@ -1401,13 +1407,15 @@ export function getLenderDistribution(filteredLoans: SHLoan[]) {
 }
 
 export function getLandKPIs(filteredDeals: SHLandDeal[]) {
-  const active = filteredDeals.filter(d => d.status === "under-contract");
+  const underContract = filteredDeals.filter(d => d.status === "under-contract");
+  const pending = filteredDeals.filter(d => d.status === "pending");
+  const active = [...underContract, ...pending];
   const closed = filteredDeals.filter(d => d.status === "closed");
   const totalLotsInPipeline = active.reduce((s, d) => s + d.lots, 0);
   const avgCostPerLot = active.length
     ? active.reduce((s, d) => s + d.costPerLot, 0) / active.length
     : 0;
-  return { activeDeals: active.length, closedDeals: closed.length, totalLotsInPipeline, avgCostPerLot };
+  return { activeDeals: active.length, underContractDeals: underContract.length, pendingDeals: pending.length, closedDeals: closed.length, totalLotsInPipeline, avgCostPerLot };
 }
 
 export function getPermitKPIs(filteredPermits: SHPermit[]) {

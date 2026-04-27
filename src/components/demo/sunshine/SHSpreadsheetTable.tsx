@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 export interface SSColumn {
   key: string;
@@ -36,6 +36,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const HEADER_ROW_HEIGHT = 50;
   const DATA_ROW_HEIGHT = 30;
 
+  let frozenOffset = 0;
   const normalizedColumns = columns.map((c, idx) => {
     const specifiedPx = widthToPx(c.width);
     const headerMinPx = estimateHeaderWidth(c.label);
@@ -43,24 +44,23 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
     // columns whose data is wider than the label, and auto-grows narrow columns
     // whose label would truncate otherwise.
     const effectivePx = Math.max(specifiedPx, headerMinPx);
+    const frozen = c.frozen ?? idx < 2;
+    const left = frozen ? frozenOffset : undefined;
+    if (frozen) frozenOffset += effectivePx;
     return {
       ...c,
       width: `${effectivePx}px`,
       // Default Excel-like freeze panes: keep first two columns visible.
-      frozen: c.frozen ?? idx < 2,
+      frozen,
+      left,
     };
   });
 
-  const frozenColumns = normalizedColumns.filter((c) => c.frozen);
-  const scrollColumns = normalizedColumns.filter((c) => !c.frozen);
-  const frozenWidth = frozenColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
-  const scrollMinWidth = scrollColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
+  const lastFrozenIndex = normalizedColumns.map(c => c.frozen).lastIndexOf(true);
+  const totalMinWidth = normalizedColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
 
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
-  const syncSourceRef = useRef<"left" | "right" | null>(null);
 
   const columnOptions = useMemo(() => {
     const options: Record<string, string[]> = {};
@@ -93,18 +93,6 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
     }),
   );
   const visibleRows = filteredRows.slice(0, maxRows);
-
-  const syncVertical = (source: "left" | "right") => {
-    const sourceEl = source === "left" ? leftRef.current : rightRef.current;
-    const targetEl = source === "left" ? rightRef.current : leftRef.current;
-    if (!sourceEl || !targetEl) return;
-    if (syncSourceRef.current && syncSourceRef.current !== source) return;
-    syncSourceRef.current = source;
-    targetEl.scrollTop = sourceEl.scrollTop;
-    requestAnimationFrame(() => {
-      if (syncSourceRef.current === source) syncSourceRef.current = null;
-    });
-  };
 
   const rowBg = (i: number) => {
     if (hoveredRow === i) return "rgba(20,184,166,0.04)";
@@ -181,203 +169,110 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
       style={{
         border: "1px solid var(--sh-border)",
         borderRadius: 6,
-        overflow: "hidden",
+        overflow: "auto",
+        maxHeight: 400,
         background: "var(--sh-bg-surface)",
       }}
     >
-      <div
+      <table
         style={{
-          display: "grid",
-          gridTemplateColumns: scrollColumns.length > 0 ? `${frozenWidth}px minmax(0, 1fr)` : "1fr",
+          borderCollapse: "separate",
+          borderSpacing: 0,
+          tableLayout: "fixed",
+          fontSize: 11,
+          color: "var(--sh-text-primary)",
+          minWidth: totalMinWidth,
         }}
       >
-        <div style={{ borderRight: scrollColumns.length > 0 ? "2px solid var(--sh-border)" : undefined }}>
-          <div ref={leftRef} onScroll={() => syncVertical("left")} style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 400 }}>
-            <table
-              style={{
-                borderCollapse: "separate",
-                borderSpacing: 0,
-                tableLayout: "fixed",
-                fontSize: 11,
-                color: "var(--sh-text-primary)",
-                width: frozenWidth,
-                minWidth: frozenWidth,
-              }}
+        <thead>
+          <tr>
+            {normalizedColumns.map((c, ci) => {
+              const isFrozen = Boolean(c.frozen);
+              const isLastFrozen = ci === lastFrozenIndex;
+              return (
+                <th
+                  key={c.key}
+                  style={{
+                    padding: "5px 8px",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "var(--sh-text-muted)",
+                    textAlign: c.align ?? "left",
+                    whiteSpace: "nowrap",
+                    minWidth: widthToPx(c.width),
+                    width: widthToPx(c.width),
+                    maxWidth: widthToPx(c.width),
+                    position: "sticky",
+                    top: 0,
+                    left: isFrozen ? c.left : undefined,
+                    zIndex: isFrozen ? 50 : 40,
+                    background: "var(--sh-bg-surface-raised)",
+                    borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
+                    borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
+                    boxShadow: isLastFrozen ? "4px 0 8px rgba(0,0,0,0.25)" : undefined,
+                    height: HEADER_ROW_HEIGHT,
+                    minHeight: HEADER_ROW_HEIGHT,
+                    maxHeight: HEADER_ROW_HEIGHT,
+                    verticalAlign: "top",
+                  }}
+                >
+                  {headerContent(c)}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {visibleRows.map((row, i) => (
+            <tr
+              key={i}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              onMouseEnter={() => setHoveredRow(i)}
+              onMouseLeave={() => setHoveredRow(null)}
+              style={{ cursor: onRowClick ? "pointer" : "default", background: rowBg(i) }}
             >
-              <thead>
-                <tr>
-                  {frozenColumns.map((c, ci) => {
-                    const isLastFrozen = ci === frozenColumns.length - 1;
-                    return (
-                      <th
-                        key={c.key}
-                        style={{
-                          padding: "5px 8px",
-                          fontSize: 10,
-                          fontWeight: 600,
-                          letterSpacing: "0.06em",
-                          textTransform: "uppercase",
-                          color: "var(--sh-text-muted)",
-                          textAlign: c.align ?? "left",
-                          whiteSpace: "nowrap",
-                          minWidth: widthToPx(c.width),
-                          width: widthToPx(c.width),
-                          maxWidth: widthToPx(c.width),
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 40,
-                          background: "var(--sh-bg-surface-raised)",
-                          borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
-                          borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
-                          boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
-                          height: HEADER_ROW_HEIGHT,
-                          minHeight: HEADER_ROW_HEIGHT,
-                          maxHeight: HEADER_ROW_HEIGHT,
-                          verticalAlign: "top",
-                        }}
-                      >
-                          {headerContent(c)}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRows.map((row, i) => (
-                  <tr
-                    key={i}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    onMouseEnter={() => setHoveredRow(i)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    style={{ cursor: onRowClick ? "pointer" : "default", background: rowBg(i) }}
+              {normalizedColumns.map((c, ci) => {
+                const isFrozen = Boolean(c.frozen);
+                const isLastFrozen = ci === lastFrozenIndex;
+                return (
+                  <td
+                    key={c.key}
+                    style={{
+                      padding: "5px 10px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textAlign: c.align,
+                      fontFamily: c.mono ? '"SF Mono", "Fira Code", monospace' : undefined,
+                      fontSize: c.mono ? 10 : undefined,
+                      minWidth: widthToPx(c.width),
+                      width: widthToPx(c.width),
+                      maxWidth: widthToPx(c.width),
+                      position: isFrozen ? "sticky" : undefined,
+                      left: isFrozen ? c.left : undefined,
+                      zIndex: isFrozen ? 20 : 1,
+                      borderBottom: "1px solid var(--sh-border-dim)",
+                      borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
+                      boxShadow: isLastFrozen ? "4px 0 8px rgba(0,0,0,0.25)" : undefined,
+                      background: rowBg(i),
+                      height: DATA_ROW_HEIGHT,
+                      minHeight: DATA_ROW_HEIGHT,
+                      maxHeight: DATA_ROW_HEIGHT,
+                      verticalAlign: "middle",
+                    }}
                   >
-                    {frozenColumns.map((c, ci) => {
-                      const isLastFrozen = ci === frozenColumns.length - 1;
-                      return (
-                        <td
-                          key={c.key}
-                          style={{
-                            padding: "5px 10px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textAlign: c.align,
-                            fontFamily: c.mono ? '"SF Mono", "Fira Code", monospace' : undefined,
-                            fontSize: c.mono ? 10 : undefined,
-                            minWidth: widthToPx(c.width),
-                            width: widthToPx(c.width),
-                            maxWidth: widthToPx(c.width),
-                            borderBottom: "1px solid var(--sh-border-dim)",
-                            borderRight: isLastFrozen ? "2px solid var(--sh-border)" : undefined,
-                            boxShadow: isLastFrozen ? "2px 0 4px rgba(0,0,0,0.3)" : undefined,
-                            background: rowBg(i),
-                            height: DATA_ROW_HEIGHT,
-                            minHeight: DATA_ROW_HEIGHT,
-                            maxHeight: DATA_ROW_HEIGHT,
-                            verticalAlign: "middle",
-                          }}
-                        >
-                          <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
-                            {c.render ? c.render(row) : rawText(row, c.key)}
-                          </span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {scrollColumns.length > 0 ? (
-          <div ref={rightRef} onScroll={() => syncVertical("right")} style={{ overflow: "auto", maxHeight: 400 }}>
-            <table
-              style={{
-                borderCollapse: "separate",
-                borderSpacing: 0,
-                tableLayout: "fixed",
-                fontSize: 11,
-                color: "var(--sh-text-primary)",
-                minWidth: scrollMinWidth,
-              }}
-            >
-              <thead>
-                <tr>
-                  {scrollColumns.map((c) => (
-                    <th
-                      key={c.key}
-                      style={{
-                        padding: "5px 8px",
-                        fontSize: 10,
-                        fontWeight: 600,
-                        letterSpacing: "0.06em",
-                        textTransform: "uppercase",
-                        color: "var(--sh-text-muted)",
-                        textAlign: c.align ?? "left",
-                        whiteSpace: "nowrap",
-                        minWidth: widthToPx(c.width),
-                        width: widthToPx(c.width),
-                        maxWidth: widthToPx(c.width),
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 30,
-                        background: "var(--sh-bg-surface-raised)",
-                        borderBottom: "2px solid rgba(20, 184, 166, 0.2)",
-                        height: HEADER_ROW_HEIGHT,
-                        minHeight: HEADER_ROW_HEIGHT,
-                        maxHeight: HEADER_ROW_HEIGHT,
-                        verticalAlign: "top",
-                      }}
-                    >
-                      {headerContent(c)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRows.map((row, i) => (
-                  <tr
-                    key={i}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    onMouseEnter={() => setHoveredRow(i)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    style={{ cursor: onRowClick ? "pointer" : "default", background: rowBg(i) }}
-                  >
-                    {scrollColumns.map((c) => (
-                      <td
-                        key={c.key}
-                        style={{
-                          padding: "5px 10px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textAlign: c.align,
-                          fontFamily: c.mono ? '"SF Mono", "Fira Code", monospace' : undefined,
-                          fontSize: c.mono ? 10 : undefined,
-                          minWidth: widthToPx(c.width),
-                          width: widthToPx(c.width),
-                          maxWidth: widthToPx(c.width),
-                          borderBottom: "1px solid var(--sh-border-dim)",
-                          background: rowBg(i),
-                          height: DATA_ROW_HEIGHT,
-                          minHeight: DATA_ROW_HEIGHT,
-                          maxHeight: DATA_ROW_HEIGHT,
-                          verticalAlign: "middle",
-                        }}
-                      >
-                        <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
-                          {c.render ? c.render(row) : rawText(row, c.key)}
-                        </span>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-      </div>
+                    <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
+                      {c.render ? c.render(row) : rawText(row, c.key)}
+                    </span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

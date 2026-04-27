@@ -37,7 +37,7 @@ interface Col {
 
 const landStatusPill = (r: Record<string, unknown>) => {
   const s = String(r.status);
-  return <SHPill tone={s === "closed" ? "good" : s === "under-contract" ? "watch" : "alert"} label={s.replace(/-/g, " ")} />;
+  return <SHPill tone={s === "closed" ? "good" : s === "under-contract" || s === "pending" ? "watch" : "alert"} label={s.replace(/-/g, " ")} />;
 };
 
 /* Land drilldown — enriched with parcel ID, lot type, zoning, env
@@ -1491,7 +1491,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       title = detail.label;
       let result = [...landScope];
       if (detail.value === "active-deals") {
-        result = result.filter(d => d.status === "under-contract");
+        result = result.filter(d => d.status === "under-contract" || d.status === "pending");
       } else if (detail.value === "total-lots") {
         result = result.sort((a, b) => b.lots - a.lots);
       } else if (detail.value === "invested") {

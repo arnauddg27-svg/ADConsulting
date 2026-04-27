@@ -190,7 +190,7 @@ export interface SHLandDeal {
   lots: number;
   acquisitionCost: number;
   costPerLot: number;
-  status: "under-contract" | "closed" | "cancelled";
+  status: "under-contract" | "pending" | "closed" | "cancelled";
   closeDate: string | null;
   contractDate: string;
   year: number;

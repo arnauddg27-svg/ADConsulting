@@ -42,10 +42,12 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
   const byStatus = (() => {
     const closed = deals.filter(d => d.status === "closed").length;
     const active = deals.filter(d => d.status === "under-contract").length;
+    const pending = deals.filter(d => d.status === "pending").length;
     const cancelled = deals.filter(d => d.status === "cancelled").length;
     return [
       { label: "Closed", value: closed, color: "#14b8a6" },
-      { label: "Under Contract", value: active, color: "#efb562" },
+      { label: "Active", value: active, color: "#22d3ee" },
+      { label: "Pending", value: pending, color: "#efb562" },
       ...(cancelled > 0 ? [{ label: "Cancelled", value: cancelled, color: "#f46a6a" }] : []),
     ];
   })();
@@ -71,9 +73,9 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
     return buildCrossTab(deals, "city", "year");
   })();
 
-  /* Ranked Bars: Under Contract lots by city */
-  const underContractByCity = (() => {
-    const activeDeals = deals.filter(d => d.status === "under-contract");
+  /* Ranked Bars: active/pending acquisition lots by city */
+  const activePipelineByCity = (() => {
+    const activeDeals = deals.filter(d => d.status === "under-contract" || d.status === "pending");
     const map = new Map<string, number>();
     for (const d of activeDeals) map.set(d.city, (map.get(d.city) || 0) + d.lots);
     return Array.from(map.entries())
@@ -113,7 +115,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} onClick={() => onDrill({ type: "land-metric", value: "active-deals", label: `Active Deals — ${fmtN(kpis.activeDeals)}` })} />
+        <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.pendingDeals} pending · ${kpis.closedDeals} closed`} onClick={() => onDrill({ type: "land-metric", value: "active-deals", label: `Active Deals — ${fmtN(kpis.activeDeals)}` })} />
         <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[320, 380, 420, 460, 510, 540, 570, 600]} onClick={() => onDrill({ type: "land-metric", value: "total-lots", label: `Total Lots — ${fmtN(totalLots)}` })} />
         <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} onClick={() => onDrill({ type: "land-metric", value: "invested", label: `Total Invested — ${fmt$(totalInvestment)}` })} />
         <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} onClick={() => onDrill({ type: "land-metric", value: "avg-cost", label: `Avg Cost/Lot — ${fmt$(kpis.avgCostPerLot)}` })} />
@@ -122,9 +124,9 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Deal Status Distribution">
           <SHDonutChart segments={byStatus} onSegmentClick={label => {
-            const map: Record<string, string> = { "Closed": "closed", "Under Contract": "under-contract", "Cancelled": "cancelled" };
+            const map: Record<string, string> = { "Closed": "closed", "Active": "under-contract", "Pending": "pending", "Cancelled": "cancelled" };
             onStatusClick(map[label] ?? label.toLowerCase());
-            onDrill({ type: "land-status", value: label, label });
+            onDrill({ type: "land-status", value: map[label] ?? label, label });
           }} />
         </SHPanel>
         <SHPanel kicker="Geography" title="Lots by City">
@@ -160,16 +162,16 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             }
           />
         </SHPanel>
-        <SHPanel kicker="Pipeline" title="Under Contract — Lots by City">
+        <SHPanel kicker="Pipeline" title="Active / Pending Lots by City">
           <SHRankedBars
-            items={underContractByCity}
+            items={activePipelineByCity}
             onBarClick={label => {
               onCityClick(label);
               onDrill({
                 type: "city",
                 value: label,
                 label,
-                scopedLandDealIds: deals.filter(d => d.city === label && d.status === "under-contract").map(d => d.id),
+                scopedLandDealIds: deals.filter(d => d.city === label && (d.status === "under-contract" || d.status === "pending")).map(d => d.id),
               });
             }}
             showRank

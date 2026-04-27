@@ -15,7 +15,7 @@ interface Props {
 
 export default function LandPipelineTab({ deals, onDrill }: Props) {
   const cancelled = deals.filter(d => d.status === "cancelled").length;
-  const agingUnderContract = deals.filter(d => d.status === "under-contract" && Math.round((new Date("2026-03-25").getTime() - new Date(d.contractDate).getTime()) / 86400000) > 120).length;
+  const agingUnderContract = deals.filter(d => (d.status === "under-contract" || d.status === "pending") && Math.round((new Date("2026-03-25").getTime() - new Date(d.contractDate).getTime()) / 86400000) > 120).length;
   const lowYield = deals.filter(d => {
     const rev = d.lots * 480000;
     const roi = d.acquisitionCost > 0 ? ((rev - d.acquisitionCost) / d.acquisitionCost) * 100 : 0;
@@ -32,7 +32,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
 
       <SHExceptionSummary
         items={[
-          { label: "Under Contract > 120d", value: String(agingUnderContract), tone: agingUnderContract >= 4 ? "alert" : agingUnderContract >= 2 ? "watch" : "good" },
+          { label: "Active / Pending > 120d", value: String(agingUnderContract), tone: agingUnderContract >= 4 ? "alert" : agingUnderContract >= 2 ? "watch" : "good" },
           { label: "Cancelled Deals", value: String(cancelled), tone: cancelled >= 3 ? "alert" : cancelled >= 1 ? "watch" : "good" },
           { label: "Low Yield Parcels", value: String(lowYield), tone: lowYield >= 6 ? "watch" : "good" },
         ]}
@@ -56,7 +56,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
               { key: "closeDate", label: "Close Date", width: "90px", render: r => String(r.closeDate ?? "\u2014") },
               { key: "status", label: "Status", width: "110px", render: r => {
                 const s = String(r.status);
-                const tone = s === "closed" ? "good" : s === "under-contract" ? "watch" : "alert";
+                const tone = s === "closed" ? "good" : s === "under-contract" || s === "pending" ? "watch" : "alert";
                 return <SHPill tone={tone} label={s.replace("-", " ")} />;
               }},
               { key: "acres", label: "Acres", width: "65px", align: "right" },
