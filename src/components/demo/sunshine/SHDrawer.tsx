@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHSubdivision, SHAuditJob } from "@/types/sunshine-homes";
 import { jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs, warrantyTickets, fmt$, fmtPct, getPropertyClass } from "@/lib/sunshine-homes-data";
 import SHPill from "./SHPill";
@@ -425,7 +426,14 @@ function estimateHeaderWidth(label: string): number {
   return Math.ceil(label.length * 7.2) + 20;
 }
 
-function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
+function renderTable(
+  columns: Col[],
+  rows: Record<string, unknown>[],
+  globalFilter: string,
+  setGlobalFilter: Dispatch<SetStateAction<string>>,
+  columnFilters: Record<string, string>,
+  setColumnFilters: Dispatch<SetStateAction<Record<string, string>>>,
+) {
   /* Auto-grow each column so the header label is never truncated.
      Consumer-specified width wins when data is wider than the label. */
   const effectiveColumns = columns.map(c => {
@@ -449,15 +457,126 @@ function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
     return String(value);
   };
 
+  const columnOptions = columns.reduce<Record<string, string[]>>((acc, column) => {
+    const values = new Set<string>();
+    for (const row of rows) {
+      const value = row[column.key];
+      if (value === null || value === undefined || value === "") continue;
+      values.add(String(value));
+    }
+    acc[column.key] = Array.from(values).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+    return acc;
+  }, {});
+
+  const query = globalFilter.trim().toLowerCase();
+  const filteredRows = rows.filter(row => {
+    if (query && !columns.some(column => rawText(row, column.key).toLowerCase().includes(query))) return false;
+    return columns.every(column => {
+      const selected = columnFilters[column.key];
+      if (!selected) return true;
+      return rawText(row, column.key) === selected;
+    });
+  });
+  const hasFilters = Boolean(query) || Object.values(columnFilters).some(Boolean);
+  const setColumnFilter = (key: string, value: string) => {
+    setColumnFilters(prev => ({ ...prev, [key]: value }));
+  };
+  const clearFilters = () => {
+    setGlobalFilter("");
+    setColumnFilters({});
+  };
+
   return (
-    <div style={{ flex: 1, overflowX: "auto", overflowY: "auto" }}>
+    <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <div style={{
+        flexShrink: 0,
+        display: "grid",
+        gridTemplateColumns: "minmax(220px, 340px) 1fr auto",
+        gap: 8,
+        alignItems: "center",
+        padding: "8px 8px 6px",
+        borderBottom: "1px solid var(--sh-border-dim)",
+        background: "var(--sh-bg-surface-raised)",
+      }}>
+        <input
+          value={globalFilter}
+          onChange={e => setGlobalFilter(e.target.value)}
+          placeholder="Search this drilldown..."
+          aria-label="Search drilldown rows"
+          style={{
+            height: 28,
+            borderRadius: 6,
+            border: "1px solid var(--sh-border)",
+            background: "var(--sh-bg-surface)",
+            color: "var(--sh-text-primary)",
+            padding: "0 10px",
+            fontSize: 11,
+            outline: "none",
+          }}
+        />
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 1 }}>
+          {columns
+            .filter(column => columnOptions[column.key]?.length > 1)
+            .slice(0, 8)
+            .map(column => (
+              <select
+                key={column.key}
+                value={columnFilters[column.key] ?? ""}
+                onChange={e => setColumnFilter(column.key, e.target.value)}
+                aria-label={`Filter ${column.label}`}
+                title={`Filter ${column.label}`}
+                style={{
+                  height: 28,
+                  minWidth: 116,
+                  borderRadius: 6,
+                  border: `1px solid ${columnFilters[column.key] ? "rgba(20,184,166,0.45)" : "var(--sh-border)"}`,
+                  background: columnFilters[column.key] ? "rgba(20,184,166,0.10)" : "var(--sh-bg-surface)",
+                  color: columnFilters[column.key] ? "var(--sh-accent)" : "var(--sh-text-secondary)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  padding: "0 8px",
+                  outline: "none",
+                }}
+              >
+                <option value="">{column.label}: All</option>
+                {columnOptions[column.key].map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end" }}>
+          <span style={{ fontSize: 10, color: "var(--sh-text-muted)", whiteSpace: "nowrap" }}>
+            Showing {filteredRows.length} of {rows.length}
+          </span>
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              style={{
+                height: 28,
+                borderRadius: 6,
+                border: "1px solid var(--sh-border)",
+                background: "var(--sh-bg-surface)",
+                color: "var(--sh-text-secondary)",
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                padding: "0 10px",
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+      <div style={{ flex: 1, minHeight: 0, overflowX: "auto", overflowY: "auto" }}>
       <div style={{ minWidth: minW }}>
         <div style={{ display: "grid", gridTemplateColumns: grid, padding: "6px 0", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
           {columns.map(c => (
             <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.label}>{c.label}</span>
           ))}
         </div>
-        {rows.map((r, i) => (
+        {filteredRows.map((r, i) => (
           <div key={i} style={{ display: "grid", gridTemplateColumns: grid, padding: "5px 0", borderBottom: "1px solid var(--sh-border-dim)", fontSize: 11, color: "var(--sh-text-primary)" }}>
             {columns.map(c => (
               <span key={c.key} style={{ padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={rawText(r, c.key)}>
@@ -466,7 +585,8 @@ function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
             ))}
           </div>
         ))}
-        {rows.length === 0 && <div style={{ padding: 16, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>No data</div>}
+        {filteredRows.length === 0 && <div style={{ padding: 16, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>No matching rows</div>}
+      </div>
       </div>
     </div>
   );
@@ -1091,11 +1211,19 @@ function renderCostBreakdown(
 /* ── Main component ──────────────────────────────────────────────── */
 
 export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
+  const [drawerSearch, setDrawerSearch] = useState("");
+  const [drawerColumnFilters, setDrawerColumnFilters] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    setDrawerSearch("");
+    setDrawerColumnFilters({});
+  }, [detail?.type, detail?.value, detail?.label]);
 
   if (!detail) return null;
 
@@ -2311,7 +2439,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
               ? renderMilestoneTimeline(milestoneJob.job, milestoneJob.jobSales, milestoneJob.jobLoans)
               : costBreakdown
                 ? renderCostBreakdown(costBreakdown.jobs, costBreakdown.mode)
-                : renderTable(columns, rows)}
+                : renderTable(columns, rows, drawerSearch, setDrawerSearch, drawerColumnFilters, setDrawerColumnFilters)}
         </div>
       </div>
     </>
