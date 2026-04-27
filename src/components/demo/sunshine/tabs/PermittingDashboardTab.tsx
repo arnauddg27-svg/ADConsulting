@@ -12,6 +12,7 @@ import SHHistogram from "../SHHistogram";
 
 const STATUS_COLORS: Record<string, string> = {
   approved: "#14b8a6",
+  issued: "#0d9488",
   "in-review": "#22d3ee",
   pending: "#efb562",
   rejected: "#f46a6a",
@@ -37,8 +38,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
 
   const byStatus = [
     { label: "Approved", value: kpis.approved, color: STATUS_COLORS.approved },
+    { label: "Issued", value: kpis.issued, color: STATUS_COLORS.issued },
     { label: "In Review", value: kpis.inReview, color: STATUS_COLORS["in-review"] },
     { label: "Pending", value: kpis.pending, color: STATUS_COLORS.pending },
+    { label: "Rejected", value: kpis.rejected, color: STATUS_COLORS.rejected },
   ].filter(s => s.value > 0);
 
   const byCommunity = (() => {
@@ -127,7 +130,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Permits by Status">
           <SHDonutChart segments={byStatus} onSegmentClick={label => {
-            const map: Record<string, string> = { "Approved": "approved", "In Review": "in-review", "Pending": "pending", "Rejected": "rejected" };
+            const map: Record<string, string> = { "Approved": "approved", "Issued": "issued", "In Review": "in-review", "Pending": "pending", "Rejected": "rejected" };
             onStatusClick(map[label] ?? label.toLowerCase());
             onDrill({ type: "permit-status", value: label, label });
           }} />
