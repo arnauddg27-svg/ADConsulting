@@ -434,13 +434,13 @@ function renderTable(
   columnFilters: Record<string, string>,
   setColumnFilters: Dispatch<SetStateAction<Record<string, string>>>,
 ) {
-  /* Auto-grow each column so the header label is never truncated.
+  /* Auto-grow each column so the header label and filter control are usable.
      Consumer-specified width wins when data is wider than the label. */
   const effectiveColumns = columns.map(c => {
     if (c.width.endsWith("fr")) return c; // proportional cols don't need adjustment
     const specifiedPx = parseInt(c.width) || 80;
     const headerPx = estimateHeaderWidth(c.label);
-    const effective = Math.max(specifiedPx, headerPx);
+    const effective = Math.max(specifiedPx, headerPx, 78);
     return { ...c, width: `${effective}px` };
   });
   const grid = effectiveColumns.map(c => c.width).join(" ");
@@ -491,7 +491,7 @@ function renderTable(
       <div style={{
         flexShrink: 0,
         display: "grid",
-        gridTemplateColumns: "minmax(220px, 340px) 1fr auto",
+        gridTemplateColumns: "minmax(220px, 360px) auto",
         gap: 8,
         alignItems: "center",
         padding: "8px 8px 6px",
@@ -514,37 +514,6 @@ function renderTable(
             outline: "none",
           }}
         />
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 1 }}>
-          {columns
-            .filter(column => columnOptions[column.key]?.length > 1)
-            .slice(0, 8)
-            .map(column => (
-              <select
-                key={column.key}
-                value={columnFilters[column.key] ?? ""}
-                onChange={e => setColumnFilter(column.key, e.target.value)}
-                aria-label={`Filter ${column.label}`}
-                title={`Filter ${column.label}`}
-                style={{
-                  height: 28,
-                  minWidth: 116,
-                  borderRadius: 6,
-                  border: `1px solid ${columnFilters[column.key] ? "rgba(20,184,166,0.45)" : "var(--sh-border)"}`,
-                  background: columnFilters[column.key] ? "rgba(20,184,166,0.10)" : "var(--sh-bg-surface)",
-                  color: columnFilters[column.key] ? "var(--sh-accent)" : "var(--sh-text-secondary)",
-                  fontSize: 10,
-                  fontWeight: 600,
-                  padding: "0 8px",
-                  outline: "none",
-                }}
-              >
-                <option value="">{column.label}: All</option>
-                {columnOptions[column.key].map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            ))}
-        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end" }}>
           <span style={{ fontSize: 10, color: "var(--sh-text-muted)", whiteSpace: "nowrap" }}>
             Showing {filteredRows.length} of {rows.length}
@@ -571,9 +540,42 @@ function renderTable(
       </div>
       <div style={{ flex: 1, minHeight: 0, overflowX: "auto", overflowY: "auto" }}>
       <div style={{ minWidth: minW }}>
-        <div style={{ display: "grid", gridTemplateColumns: grid, padding: "6px 0", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: grid, padding: "7px 0 8px", borderBottom: "2px solid rgba(20,184,166,0.2)", position: "sticky", top: 0, background: "var(--sh-bg-surface-raised)", zIndex: 2 }}>
           {columns.map(c => (
-            <span key={c.key} style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", padding: "0 8px", textAlign: c.align, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.label}>{c.label}</span>
+            <div key={c.key} style={{ minWidth: 0, padding: "0 8px", textAlign: c.align }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--sh-text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.label}>
+                {c.label}
+              </div>
+              {columnOptions[c.key]?.length > 1 ? (
+                <select
+                  value={columnFilters[c.key] ?? ""}
+                  onChange={e => setColumnFilter(c.key, e.target.value)}
+                  aria-label={`Filter ${c.label}`}
+                  title={`Filter ${c.label}`}
+                  style={{
+                    width: "100%",
+                    height: 23,
+                    marginTop: 5,
+                    borderRadius: 5,
+                    border: `1px solid ${columnFilters[c.key] ? "rgba(20,184,166,0.55)" : "var(--sh-border)"}`,
+                    background: columnFilters[c.key] ? "rgba(20,184,166,0.12)" : "var(--sh-bg-surface)",
+                    color: columnFilters[c.key] ? "var(--sh-accent)" : "var(--sh-text-secondary)",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: "0 6px",
+                    outline: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="">All</option>
+                  {columnOptions[c.key].map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              ) : (
+                <div style={{ height: 28 }} />
+              )}
+            </div>
           ))}
         </div>
         {filteredRows.map((r, i) => (
