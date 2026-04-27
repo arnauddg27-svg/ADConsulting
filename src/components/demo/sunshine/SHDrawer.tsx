@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHAuditJob } from "@/types/sunshine-homes";
-import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, warrantyTickets, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHSubdivision, SHAuditJob } from "@/types/sunshine-homes";
+import { jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs, warrantyTickets, fmt$, fmtPct, getPropertyClass } from "@/lib/sunshine-homes-data";
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "construction-city-time" | "sales-city-time" | "loans-city-time" | "pm-city-time" | "audits-community-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "subdivision" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "sales-plan" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "audit-plan" | "construction-city-time" | "construction-time" | "land-time" | "permit-time" | "sales-city-time" | "sales-time" | "loans-city-time" | "loans-time" | "pm-city-time" | "pm-time" | "audits-community-time" | "audits-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
   scopedJobCodes?: string[]; // optional context scope to preserve filtered views
+  scopedSaleIds?: number[];
+  scopedLoanIds?: number[];
+  scopedLandDealIds?: number[];
+  scopedPermitIds?: number[];
+  scopedPropertyUnitIds?: number[];
+  scopedSubdivisionIds?: number[];
+  scopedAuditJobIds?: number[];
 }
 
 interface SHDrawerProps {
@@ -381,6 +388,11 @@ function matchTimeToken(dateStr: string, token: string): boolean {
   if (Number.isNaN(d.getTime())) return false;
   const t = token.trim();
   if (/^\d{4}$/.test(t)) return d.getFullYear() === Number(t);
+  const yearFirstQuarter = t.match(/^(\d{4})\s+Q([1-4])$/i);
+  if (yearFirstQuarter) {
+    const dq = Math.floor(d.getMonth() / 3) + 1;
+    return d.getFullYear() === Number(yearFirstQuarter[1]) && dq === Number(yearFirstQuarter[2]);
+  }
   const q = t.match(/^Q([1-4])(?:\s*'?(\d{2,4}))?$/i);
   if (q) {
     const quarter = Number(q[1]);
@@ -391,6 +403,16 @@ function matchTimeToken(dateStr: string, token: string): boolean {
   if (/^\d{1,2}$/.test(t)) return d.getDate() === Number(t);
   const shortMonth = d.toLocaleString("en-US", { month: "short" });
   return shortMonth.toLowerCase() === t.toLowerCase();
+}
+
+function scopeRows<T, K extends string | number>(
+  rows: T[],
+  ids: K[] | undefined,
+  getId: (row: T) => K,
+): T[] {
+  if (!ids) return rows;
+  const set = new Set<K>(ids);
+  return rows.filter(row => set.has(getId(row)));
 }
 
 /* ── Table renderer ──────────────────────────────────────────────── */
@@ -1077,6 +1099,15 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
   if (!detail) return null;
 
+  const jobScope = scopeRows(jobs, detail.scopedJobCodes, j => j.jobCode);
+  const saleScope = scopeRows(sales, detail.scopedSaleIds, s => s.id);
+  const loanScope = scopeRows(loans, detail.scopedLoanIds, l => l.id);
+  const landScope = scopeRows(landDeals, detail.scopedLandDealIds, d => d.id);
+  const permitScope = scopeRows(permits, detail.scopedPermitIds, p => p.id);
+  const unitScope = scopeRows(propertyUnits, detail.scopedPropertyUnitIds, u => u.id);
+  const subdivisionScope = scopeRows(subdivisions, detail.scopedSubdivisionIds, s => s.id);
+  const auditScope = scopeRows(auditJobs, detail.scopedAuditJobIds, a => a.id);
+
   // Custom-render modes — each replaces the default table with a tailored view.
   let proFormaAudit: SHAuditJob | null = null;
   let milestoneJob: { job: SHJob; jobSales: SHSale[]; jobLoans: SHLoan[] } | null = null;
@@ -1102,14 +1133,14 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         detail.value === "healthy-progress"
       ) {
         const filtered = detail.value === "active"
-          ? jobs.filter(j => j.stage !== "Closing" && j.stage !== "Complete")
+          ? jobScope.filter(j => j.stage !== "Closing" && j.stage !== "Complete")
           : detail.value === "on-schedule"
-            ? jobs.filter(j => j.stage === "Closing" || j.daysInCurrentPhase <= 35)
+            ? jobScope.filter(j => j.stage === "Closing" || j.daysInCurrentPhase <= 35)
             : detail.value === "within-budget"
-              ? jobs.filter(j => j.projectedFinalCost <= j.originalBudget * 1.08)
+              ? jobScope.filter(j => j.projectedFinalCost <= j.originalBudget * 1.08)
               : detail.value === "healthy-progress"
-                ? jobs.filter(j => j.stage === "Permit" || j.completionPct >= 55)
-                : jobs;
+                ? jobScope.filter(j => j.stage === "Permit" || j.completionPct >= 55)
+                : jobScope;
         title = detail.label;
         subtitle = `${filtered.length} jobs`;
         columns = [
@@ -1123,7 +1154,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         rows = filtered as unknown as Record<string, unknown>[];
         break;
       }
-      const job = jobs.find(j => j.jobCode === detail.value);
+      const job = jobScope.find(j => j.jobCode === detail.value) ?? jobs.find(j => j.jobCode === detail.value);
       if (!job) {
         title = detail.label;
         subtitle = "Record not found";
@@ -1133,9 +1164,9 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       }
       title = `${job.jobCode} — ${job.community}`;
       subtitle = `${job.lot} · ${job.plan} · ${job.superintendent}`;
-      const jobSales = sales.filter(s => s.jobCode === detail.value);
-      const jobLoans = loans.filter(l => l.jobCode === detail.value);
-      const audit = auditJobs.find(a => a.jobCode === detail.value);
+      const jobSales = saleScope.filter(s => s.jobCode === detail.value);
+      const jobLoans = loanScope.filter(l => l.jobCode === detail.value);
+      const audit = auditScope.find(a => a.jobCode === detail.value);
       columns = [
         { key: "field", label: "Field", width: "1.2fr" },
         { key: "value", label: "Value", width: "1fr", align: "right" },
@@ -1157,7 +1188,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "community": {
-      const communityJobs = jobs.filter(j => j.community === detail.value);
+      const communityJobs = jobScope.filter(j => j.community === detail.value);
       title = `${detail.value} \u2014 All Jobs`;
       subtitle = `${communityJobs.length} jobs`;
       columns = [
@@ -1181,7 +1212,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "stage": {
-      const stageJobs = jobs.filter(j => j.stage === detail.value);
+      const stageJobs = jobScope.filter(j => j.stage === detail.value);
       title = `${detail.value} \u2014 All Jobs`;
       subtitle = `${stageJobs.length} jobs in this phase`;
       columns = [
@@ -1221,7 +1252,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "plan": {
-      const planJobs = jobs.filter(j => j.plan === detail.value);
+      const planJobs = jobScope.filter(j => j.plan === detail.value);
       title = `${detail.value} \u2014 Jobs`;
       subtitle = `${planJobs.length} jobs with this plan`;
       columns = [
@@ -1237,7 +1268,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "super": {
-      const superJobs = jobs.filter(j => j.superintendent === detail.value);
+      const superJobs = jobScope.filter(j => j.superintendent === detail.value);
       title = `${detail.value} \u2014 Workload`;
       subtitle = `${superJobs.length} assigned jobs`;
       columns = [
@@ -1253,8 +1284,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "cycle-metric": {
-      const completed = jobs.filter(j => j.coDate);
-      const inConstruction = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95);
+      const completed = jobScope.filter(j => j.coDate);
+      const inConstruction = jobScope.filter(j => j.stage !== "Closing" && j.completionPct < 95);
       let result = completed;
       title = detail.label;
       subtitle = `${completed.length} completed jobs`;
@@ -1284,7 +1315,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "cycle-bucket": {
-      const completed = jobs.filter(j => j.coDate);
+      const completed = jobScope.filter(j => j.coDate);
       const inBucket = completed.filter(j => {
         const d = Number(j.totalCycleDays);
         // Boundaries calibrated for COMPLETED-job cycle distribution
@@ -1314,12 +1345,12 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "construction-completion-bucket": {
       const range = parsePctRange(detail.value);
       const matched = range
-        ? jobs.filter(j => {
+        ? jobScope.filter(j => {
             const lowOk = j.completionPct >= range.min;
             const highOk = range.max >= 100 ? j.completionPct <= range.max : j.completionPct < range.max;
             return lowOk && highOk;
           })
-        : jobs;
+        : jobScope;
       title = detail.label;
       subtitle = `${matched.length} jobs`;
       columns = [
@@ -1336,25 +1367,14 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "cycle-time-cohort": {
       /* Drill-down for cycle time trendline clicks — filter by quarter cohort */
-      const cohortJobs = jobs.filter(j => {
+      const cohortJobs = jobScope.filter(j => {
         if (!j.coDate) return false;
         const d = new Date(j.startDate);
         const q = Math.floor(d.getMonth() / 3) + 1;
         const key = `${d.getFullYear()} Q${q}`;
         return key === detail.value;
       });
-      // If a cohort is too thin, expand to same-year completed jobs for a more useful sample.
-      const cohortYear = Number(String(detail.value).split(" ")[0]);
-      const sameYearJobs = jobs.filter(j => j.coDate && new Date(j.startDate).getFullYear() === cohortYear);
-      let result = cohortJobs;
-      let subtitleMode: "cohort" | "year" | "all" = "cohort";
-      if (result.length > 0 && result.length < 5 && sameYearJobs.length >= 5) {
-        result = sameYearJobs;
-        subtitleMode = "year";
-      } else if (result.length === 0) {
-        result = jobs.filter(j => j.coDate);
-        subtitleMode = "all";
-      }
+      const result = cohortJobs;
       /* Helper: days between two date strings (null-safe) */
       const daysBetween = (a: string | null, b: string | null) => {
         if (!a || !b) return null;
@@ -1362,12 +1382,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         return Math.round(ms / 86400000);
       };
       title = `${detail.label}`;
-      subtitle =
-        subtitleMode === "cohort"
-          ? `${result.length} completed jobs`
-          : subtitleMode === "year"
-            ? `${result.length} completed jobs (expanded to ${cohortYear} year sample)`
-            : `${result.length} completed jobs (all — cohort empty)`;
+      subtitle = `${result.length} completed jobs`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
@@ -1404,8 +1419,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
        * per-house pivot table (Permitting / Site Work / Vertical B/A) via
        * custom renderCostBreakdown. */
       const filtered = detail.community
-        ? jobs.filter(j => j.community === detail.community)
-        : jobs;
+        ? jobScope.filter(j => j.community === detail.community)
+        : jobScope;
       // Interpret the KPI clicked: budget / actual / variance / margin — or a
       // donut segment (Labor, Materials, Subcontractors, etc.) — fall back to
       // "budget" mode which shows everything side by side.
@@ -1432,7 +1447,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         monthIdx = monthOrder.findIndex(m => m.toLowerCase() === detail.value.toLowerCase());
       }
       const scopedSet = detail.scopedJobCodes ? new Set(detail.scopedJobCodes) : null;
-      const scopedJobs = scopedSet ? jobs.filter(j => scopedSet.has(j.jobCode)) : jobs;
+      const scopedJobs = scopedSet ? jobScope.filter(j => scopedSet.has(j.jobCode)) : jobScope;
       const monthlyJobs = monthIdx >= 0
         ? scopedJobs.filter(j => new Date(j.startDate).getMonth() === monthIdx)
         : [];
@@ -1461,21 +1476,20 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     /* ═══════════════ LAND ═══════════════ */
 
     case "land-status": {
-      const matched = landDeals.filter(d =>
+      const matched = landScope.filter(d =>
         d.status === detail.value || d.name === detail.value ||
         normStatus(d.status) === normStatus(detail.value)
       );
-      const result = matched.length > 0 ? matched : landDeals;
       title = detail.label;
-      subtitle = `${result.length} land deals`;
+      subtitle = `${matched.length} land deals`;
       columns = landCols;
-      rows = result as unknown as Record<string, unknown>[];
+      rows = matched as unknown as Record<string, unknown>[];
       break;
     }
 
     case "land-metric": {
       title = detail.label;
-      let result = [...landDeals];
+      let result = [...landScope];
       if (detail.value === "active-deals") {
         result = result.filter(d => d.status === "under-contract");
       } else if (detail.value === "total-lots") {
@@ -1503,18 +1517,65 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "land-city-year": {
       const [city, token] = parsePipe(detail.value);
-      const matched = landDeals.filter(d => d.city === city && (!token || matchTimeToken(d.contractDate, token)));
-      const result = matched.length > 0 ? matched : landDeals;
+      const matched = landScope.filter(d => d.city === city && (!token || matchTimeToken(d.contractDate, token)));
       title = detail.label;
-      subtitle = `${result.length} land deals`;
+      subtitle = `${matched.length} land deals`;
       columns = landCols;
-      rows = result as unknown as Record<string, unknown>[];
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "land-time": {
+      const matched = landScope.filter(d => matchTimeToken(d.contractDate, detail.value));
+      title = detail.label;
+      subtitle = `${matched.length} land deals`;
+      columns = landCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "subdivision": {
+      const sub = subdivisionScope.find(s => s.projectName === detail.value || String(s.id) === detail.value)
+        ?? subdivisions.find(s => s.projectName === detail.value || String(s.id) === detail.value);
+      if (!sub) {
+        title = detail.label;
+        subtitle = "Record not found";
+        columns = [{ key: "field", label: "Field", width: "1.2fr" }, { key: "value", label: "Value", width: "1fr" }];
+        rows = [{ field: "Not Found", value: "Subdivision may have been filtered out" }];
+        break;
+      }
+      title = `Subdivision — ${sub.projectName}`;
+      subtitle = `${sub.community} · ${sub.city} · ${sub.status.replace(/-/g, " ")}`;
+      columns = [
+        { key: "field", label: "Field", width: "1.2fr" },
+        { key: "value", label: "Value", width: "1fr", align: "right" },
+      ];
+      rows = [
+        { field: "Community", value: sub.community },
+        { field: "City", value: sub.city },
+        { field: "Entity", value: sub.entity },
+        { field: "Total Lots", value: sub.totalLots },
+        { field: "Sold", value: sub.lotsSold },
+        { field: "Completed", value: sub.lotsCompleted },
+        { field: "Under Construction", value: sub.lotsUnderConstruction },
+        { field: "Available", value: sub.lotsRemaining },
+        { field: "Total Acres", value: sub.totalAcres },
+        { field: "Investment", value: fmt$(sub.totalInvestment) },
+        { field: "Projected Revenue", value: fmt$(sub.projectedRevenue) },
+        { field: "Projected Profit", value: fmt$(sub.projectedProfit) },
+        { field: "Projected Margin", value: fmtPct(sub.profitMarginPct) },
+        { field: "Absorption", value: `${sub.absorptionRate}/mo` },
+        { field: "Months of Inventory", value: `${sub.monthsOfInventory}mo` },
+        { field: "Infrastructure", value: `${[sub.zoningApproved, sub.platRecorded, sub.utilityStubs, sub.roadsComplete, sub.retentionPonds].filter(Boolean).length}/5` },
+        { field: "Start Date", value: sub.startDate },
+        { field: "Est. Completion", value: sub.estCompletionDate },
+      ];
       break;
     }
 
     case "construction-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = jobs.filter(j => j.city === city && (!token || matchTimeToken(j.startDate, token)));
+      const matched = jobScope.filter(j => j.city === city && (!token || matchTimeToken(j.startDate, token)));
       title = detail.label;
       subtitle = `${matched.length} construction jobs`;
       columns = [
@@ -1529,15 +1590,32 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "construction-time": {
+      const matched = jobScope.filter(j => matchTimeToken(j.startDate, detail.value));
+      title = detail.label;
+      subtitle = `${matched.length} construction jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "75px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "city", label: "City", width: "80px" },
+        { key: "startDate", label: "Start", width: "80px" },
+        { key: "stage", label: "Stage", width: "95px" },
+        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+      ];
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     case "city": {
-      const cityDeals = landDeals.filter(d => d.city === detail.value);
+      const cityDeals = landScope.filter(d => d.city === detail.value);
       if (cityDeals.length > 0) {
         title = `${detail.value} \u2014 Land Deals`;
         subtitle = `${cityDeals.length} deals, ${cityDeals.reduce((s, d) => s + d.lots, 0)} lots`;
         columns = landCols;
         rows = cityDeals as unknown as Record<string, unknown>[];
       } else {
-        const cityJobs = jobs.filter(j => j.city === detail.value);
+        const cityJobs = jobScope.filter(j => j.city === detail.value);
         title = `${detail.value} \u2014 All Jobs`;
         subtitle = `${cityJobs.length} jobs`;
         columns = [
@@ -1557,9 +1635,9 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "permit-status": {
       const v = detail.value.toLowerCase().replace(/\s+/g, "-");
       /* "in-progress" means in-review + pending; "all"/"total"/"avg-days" means everything */
-      const statusPermits = (v === "all" || v === "total" || v === "avg-days") ? permits
-        : v === "in-progress" ? permits.filter(p => p.status === "in-review" || p.status === "pending")
-        : permits.filter(p => p.status === v || p.status.replace(/-/g, " ") === detail.value.toLowerCase());
+      const statusPermits = (v === "all" || v === "total" || v === "avg-days") ? permitScope
+        : v === "in-progress" ? permitScope.filter(p => p.status === "in-review" || p.status === "pending")
+        : permitScope.filter(p => p.status === v || p.status.replace(/-/g, " ") === detail.value.toLowerCase());
       title = `${detail.value} Permits`;
       subtitle = `${statusPermits.length} permits`;
       columns = permitCols;
@@ -1570,8 +1648,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "permit-cycle-bucket": {
       const range = parseDaysRange(detail.value);
       const matched = range
-        ? permits.filter(p => p.daysInReview >= range.min && p.daysInReview <= range.max)
-        : permits;
+        ? permitScope.filter(p => p.daysInReview >= range.min && p.daysInReview <= range.max)
+        : permitScope;
       title = detail.label;
       subtitle = `${matched.length} permits`;
       columns = permitCols;
@@ -1581,7 +1659,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "permit-city-year": {
       const [city, token] = parsePipe(detail.value);
-      const matched = permits.filter(p => {
+      const matched = permitScope.filter(p => {
         const cityMatch = p.city === city;
         const timeMatch = token ? matchTimeToken(p.submittedDate, token) : true;
         return cityMatch && timeMatch;
@@ -1595,7 +1673,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "permit-city-status": {
       const [city, status] = parsePipe(detail.value);
-      const matched = permits.filter(p => {
+      const matched = permitScope.filter(p => {
         const cityMatch = p.city === city;
         const statusMatch = status ? normStatus(p.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
@@ -1608,7 +1686,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "permits-community": {
-      const matched = permits.filter(p => p.community === detail.value);
+      const matched = permitScope.filter(p => p.community === detail.value);
+      title = detail.label;
+      subtitle = `${matched.length} permits`;
+      columns = permitCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "permit-time": {
+      const matched = permitScope.filter(p => matchTimeToken(p.submittedDate, detail.value));
       title = detail.label;
       subtitle = `${matched.length} permits`;
       columns = permitCols;
@@ -1617,7 +1704,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "permit": {
-      const p = permits.find(p => p.jobCode === detail.value || String(p.id) === detail.value);
+      const p = permitScope.find(p => p.jobCode === detail.value || String(p.id) === detail.value) ?? permits.find(p => p.jobCode === detail.value || String(p.id) === detail.value);
       if (!p) {
         title = detail.label;
         subtitle = "Record not found";
@@ -1651,7 +1738,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     /* ═══════════════ LOANS ═══════════════ */
 
     case "lender": {
-      const lenderLoans = loans.filter(l => l.lender === detail.value);
+      const lenderLoans = loanScope.filter(l => l.lender === detail.value);
       title = `${detail.value} \u2014 Loans`;
       subtitle = `${lenderLoans.length} active loans`;
       columns = loanCols;
@@ -1660,7 +1747,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "loan": {
-      const l = loans.find(l => l.jobCode === detail.value || String(l.id) === detail.value);
+      const l = loanScope.find(l => l.jobCode === detail.value || String(l.id) === detail.value) ?? loans.find(l => l.jobCode === detail.value || String(l.id) === detail.value);
       if (!l) {
         title = detail.label;
         subtitle = "Record not found";
@@ -1693,7 +1780,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "loan-metric": {
       title = detail.label;
-      let result = [...loans];
+      let result = [...loanScope];
       if (detail.value === "exposure") {
         result = result.sort((a, b) => b.loanAmount - a.loanAmount);
       } else if (detail.value === "drawn") {
@@ -1703,7 +1790,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         // per lender, not every loan sorted by name. Renders a small custom
         // table with lender summary stats.
         const grouped = new Map<string, { count: number; total: number; drawn: number; avgRate: number; sumRate: number; expSoon: number }>();
-        for (const l of loans) {
+        for (const l of loanScope) {
           const e = grouped.get(l.lender) ?? { count: 0, total: 0, drawn: 0, avgRate: 0, sumRate: 0, expSoon: 0 };
           e.count += 1;
           e.total += l.loanAmount;
@@ -1723,7 +1810,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
             expSoon: e.expSoon,
           }))
           .sort((a, b) => b.totalAmount - a.totalAmount);
-        subtitle = `${lenderRows.length} lenders \u00b7 ${loans.length} loans`;
+        subtitle = `${lenderRows.length} lenders \u00b7 ${loanScope.length} loans`;
         columns = [
           { key: "lender", label: "Lender", width: "200px" },
           { key: "count", label: "Loans", width: "70px", align: "right" },
@@ -1760,7 +1847,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "loan-rate": {
-      const matched = loans.filter(l => {
+      const matched = loanScope.filter(l => {
         const v = detail.value;
         // Buckets aligned with realism-pass loan rates (8.5-10.75%).
         if (v.includes("8.5") && v.includes("9")) return l.interestRate >= 8.5 && l.interestRate < 9;
@@ -1781,7 +1868,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "loans-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = loans.filter(l => l.city === city && (!token || matchTimeToken(l.startDate, token)));
+      const matched = loanScope.filter(l => l.city === city && (!token || matchTimeToken(l.startDate, token)));
       title = detail.label;
       subtitle = `${matched.length} loans`;
       columns = loanCols;
@@ -1790,7 +1877,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "loans-community": {
-      const matched = loans.filter(l => l.community === detail.value);
+      const matched = loanScope.filter(l => l.community === detail.value);
+      title = detail.label;
+      subtitle = `${matched.length} loans`;
+      columns = loanCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "loans-time": {
+      const matched = loanScope.filter(l => matchTimeToken(l.startDate, detail.value));
       title = detail.label;
       subtitle = `${matched.length} loans`;
       columns = loanCols;
@@ -1801,7 +1897,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     /* ═══════════════ SALES ═══════════════ */
 
     case "sale": {
-      const s = sales.find(s => s.jobCode === detail.value || String(s.id) === detail.value);
+      const s = saleScope.find(s => s.jobCode === detail.value || String(s.id) === detail.value) ?? sales.find(s => s.jobCode === detail.value || String(s.id) === detail.value);
       if (!s) {
         title = detail.label;
         subtitle = "Record not found";
@@ -1834,7 +1930,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "sale-status": {
-      const matched = sales.filter(s => normStatus(s.status) === normStatus(detail.value));
+      const matched = saleScope.filter(s => normStatus(s.status) === normStatus(detail.value));
       title = `${detail.value} Sales`;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
@@ -1843,7 +1939,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "sales-community": {
-      const matched = sales.filter(s => s.community === detail.value);
+      const matched = saleScope.filter(s => s.community === detail.value && s.status !== "cancelled");
+      title = detail.label;
+      subtitle = `${matched.length} sales`;
+      columns = saleCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "sales-plan": {
+      const matched = saleScope.filter(s => s.plan === detail.value && s.status !== "cancelled");
       title = detail.label;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
@@ -1853,13 +1958,13 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sale-metric": {
       title = detail.label;
-      let result = [...sales];
+      let result = [...saleScope];
       if (detail.value === "total-sales") {
-        result = result.sort((a, b) => b.salePrice - a.salePrice);
+        result = result.filter(s => s.status === "active" || s.status === "pending").sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "total-value" || detail.value === "avg-price") {
-        result = result.sort((a, b) => b.salePrice - a.salePrice);
+        result = result.filter(s => s.status === "active" || s.status === "pending").sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "pending-close") {
-        result = result.filter(s => s.status === "pending" || s.status === "active");
+        result = result.filter(s => s.status === "pending");
       } else {
         const moneyRange = parseMoneyRange(detail.value);
         const quarter = parseQuarterLabel(detail.value);
@@ -1879,7 +1984,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sale-city-status": {
       const [city, status] = parsePipe(detail.value);
-      const matched = sales.filter(s => {
+      const matched = saleScope.filter(s => {
         const cityMatch = s.city === city;
         const statusMatch = status ? normStatus(s.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
@@ -1893,7 +1998,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sales-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = sales.filter(s => s.city === city && (!token || matchTimeToken(s.contractDate, token)));
+      const matched = saleScope.filter(s => s.city === city && (!token || matchTimeToken(s.contractDate, token)));
       title = detail.label;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
@@ -1903,7 +2008,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sale-entity-year": {
       const [entity, year] = parsePipe(detail.value);
-      const matched = sales.filter(s => {
+      const matched = saleScope.filter(s => {
         const entityMatch = s.entity === entity;
         const yearMatch = year ? s.contractDate.startsWith(year) || s.contractDate.includes(year) : true;
         return entityMatch && yearMatch;
@@ -1915,11 +2020,20 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       break;
     }
 
+    case "sales-time": {
+      const matched = saleScope.filter(s => matchTimeToken(s.contractDate, detail.value));
+      title = detail.label;
+      subtitle = `${matched.length} sales`;
+      columns = saleCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
     /* ═══════════════ PROPERTY MANAGEMENT ═══════════════ */
 
     case "unit":
     case "property": {
-      const u = propertyUnits.find(u => u.address === detail.value || String(u.id) === detail.value);
+      const u = unitScope.find(u => u.address === detail.value || String(u.id) === detail.value) ?? propertyUnits.find(u => u.address === detail.value || String(u.id) === detail.value);
       if (!u) {
         title = detail.label;
         subtitle = "Record not found";
@@ -1956,7 +2070,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "occupancy": {
-      const occUnits = propertyUnits.filter(u =>
+      const occUnits = unitScope.filter(u =>
         u.occupancy === detail.value ||
         normStatus(u.occupancy) === normStatus(detail.value)
       );
@@ -1969,19 +2083,18 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "pm-metric": {
       title = detail.label;
-      let result = [...propertyUnits];
+      let result = [...unitScope];
       if (detail.value === "total-units") {
         result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
       } else if (detail.value === "occupancy") {
-        result = result.filter(u => u.occupancy === "leased");
+        result = result.filter(u => u.occupancy === "leased" || u.occupancy === "eviction" || u.occupancy === "notice-to-vacate");
       } else if (detail.value === "revenue") {
         result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
       } else if (detail.value === "delinquent") {
         result = result.filter(u => u.delinquentAmount > 0).sort((a, b) => b.delinquentAmount - a.delinquentAmount);
       } else if (/^class\s+[abc]$/i.test(detail.value)) {
         const cls = detail.value.trim().toUpperCase().slice(-1);
-        const classIndex = cls === "A" ? 1 : cls === "B" ? 2 : 0;
-        result = result.filter(u => Number(u.id) % 3 === classIndex);
+        result = result.filter(u => getPropertyClass(u) === cls);
       } else {
         const moneyRange = parseMoneyRange(detail.value);
         const quarter = parseQuarterLabel(detail.value);
@@ -2000,7 +2113,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "pm-occupancy": {
-      const matched = propertyUnits.filter(u =>
+      const matched = unitScope.filter(u =>
         u.occupancy === detail.value ||
         normStatus(u.occupancy) === normStatus(detail.value)
       );
@@ -2013,7 +2126,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "pm-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = propertyUnits.filter(u => u.city === city && (!token || matchTimeToken(u.leaseStart, token)));
+      const matched = unitScope.filter(u => u.city === city && (!token || matchTimeToken(u.leaseStart, token)));
       title = detail.label;
       subtitle = `${matched.length} units`;
       columns = pmCols;
@@ -2022,7 +2135,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "pm-community": {
-      const matched = propertyUnits.filter(u => u.community === detail.value);
+      const matched = unitScope.filter(u => u.community === detail.value);
+      title = detail.label;
+      subtitle = `${matched.length} units`;
+      columns = pmCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "pm-time": {
+      const matched = unitScope.filter(u => matchTimeToken(u.leaseStart, detail.value));
       title = detail.label;
       subtitle = `${matched.length} units`;
       columns = pmCols;
@@ -2034,7 +2156,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "audit-cost": {
       title = detail.label;
-      let result = [...auditJobs];
+      let result = [...auditScope];
       if (detail.value === "audited-jobs") {
         result = result.sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "total-revenue") {
@@ -2069,7 +2191,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
 
     case "margin-bucket": {
-      const matched = auditJobs.filter(a => {
+      const matched = auditScope.filter(a => {
         const m = a.netMargin;
         if (detail.value === "< 0%") return m < 0;
         if (detail.value === "0\u201310%") return m >= 0 && m < 10;
@@ -2088,7 +2210,25 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "audits-community-time": {
       const [community, token] = parsePipe(detail.value);
-      const matched = auditJobs.filter(a => a.community === community && (!token || matchTimeToken(a.startDate, token)));
+      const matched = auditScope.filter(a => a.community === community && (!token || matchTimeToken(a.startDate, token)));
+      title = detail.label;
+      subtitle = `${matched.length} audit jobs`;
+      columns = auditCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "audit-plan": {
+      const matched = auditScope.filter(a => a.plan === detail.value);
+      title = detail.label;
+      subtitle = `${matched.length} audit jobs`;
+      columns = auditCols;
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "audits-time": {
+      const matched = auditScope.filter(a => matchTimeToken(a.startDate, detail.value));
       title = detail.label;
       subtitle = `${matched.length} audit jobs`;
       columns = auditCols;

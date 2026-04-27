@@ -19,7 +19,7 @@ interface Props {
 
 export default function ConstructionCostTab({ jobs, onDrill }: Props) {
   const kpis = getCostKPIs(jobs);
-  const breakdown = getCostBreakdown();
+  const breakdown = getCostBreakdown(jobs);
   const monthlyTrend = useMemo(() => {
     const buckets = MONTH_LABELS.map((label) => ({ label, value: 0, value2: 0, count: 0 }));
     for (const job of jobs) {

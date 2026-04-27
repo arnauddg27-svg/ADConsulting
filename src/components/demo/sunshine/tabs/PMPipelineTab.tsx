@@ -2,7 +2,7 @@
 
 import type { SHPropertyUnit } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
+import { fmt$, fmtN, fmtPct, getPropertyClass } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
@@ -100,8 +100,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
                 return owners[Number(r.id) % owners.length];
               }},
               { key: "propertyClass", label: "Class", width: "65px", render: r => {
-                const classes = ["A", "A", "B", "B", "C"];
-                const c = classes[Number(r.id) % classes.length];
+                const c = getPropertyClass({ marketRent: Number(r.marketRent), sqft: Number(r.sqft) });
                 return <SHPill tone={c === "A" ? "good" : c === "B" ? "watch" : "alert"} label={c} />;
               }},
               { key: "delinquentAmount", label: "Delinquent", width: "85px", align: "right", render: r => {

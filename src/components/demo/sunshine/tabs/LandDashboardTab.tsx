@@ -145,16 +145,33 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+              }
             }
           />
         </SHPanel>
         <SHPanel kicker="Pipeline" title="Under Contract — Lots by City">
           <SHRankedBars
             items={underContractByCity}
-            onBarClick={label => { onCityClick(label); onDrill({ type: "city", value: label, label }); }}
+            onBarClick={label => {
+              onCityClick(label);
+              onDrill({
+                type: "city",
+                value: label,
+                label,
+                scopedLandDealIds: deals.filter(d => d.city === label && d.status === "under-contract").map(d => d.id),
+              });
+            }}
             showRank
           />
         </SHPanel>
@@ -167,7 +184,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "land-metric", value: label, label: `Investment — ${label}` })}
+            onPointClick={label => onDrill({ type: "land-time", value: label, label: `Investment — ${label}` })}
           />
         </SHPanel>
         <SHPanel kicker="Distribution" title="Cost per Lot Distribution">

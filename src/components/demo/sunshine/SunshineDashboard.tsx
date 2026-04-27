@@ -136,7 +136,19 @@ export default function SunshineDashboard() {
     }
   };
 
-  const onDrill = useCallback((detail: DrillDetail) => setDrawerDetail(detail), []);
+  const onDrill = useCallback((detail: DrillDetail) => {
+    setDrawerDetail({
+      ...detail,
+      scopedJobCodes: detail.scopedJobCodes ?? filteredJobs.map(j => j.jobCode),
+      scopedSaleIds: detail.scopedSaleIds ?? filteredSales.map(s => s.id),
+      scopedLoanIds: detail.scopedLoanIds ?? filteredLoans.map(l => l.id),
+      scopedLandDealIds: detail.scopedLandDealIds ?? filteredLand.map(d => d.id),
+      scopedPermitIds: detail.scopedPermitIds ?? filteredPermits.map(p => p.id),
+      scopedPropertyUnitIds: detail.scopedPropertyUnitIds ?? filteredUnits.map(u => u.id),
+      scopedSubdivisionIds: detail.scopedSubdivisionIds ?? filteredSubs.map(s => s.id),
+      scopedAuditJobIds: detail.scopedAuditJobIds ?? filteredAudits.map(a => a.id),
+    });
+  }, [filteredAudits, filteredJobs, filteredLand, filteredLoans, filteredPermits, filteredSales, filteredSubs, filteredUnits]);
   const closeDrawer = useCallback(() => setDrawerDetail(null), []);
 
   const filterCount = useMemo(() => {

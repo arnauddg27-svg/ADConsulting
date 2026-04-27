@@ -33,6 +33,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   const kpis = getSalesKPIs(sales);
   const byCommunity = getSalesByCommunity(sales);
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
+  const reportableSales = sales.filter(s => s.status !== "cancelled");
   const salesValueTrend = useMemo(() => (
     buildQuarterTrend(
       sales.filter(s => s.status !== "cancelled"),
@@ -48,24 +49,24 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
   const cityTimeCross = (() => {
     if (drillMonth) {
-      const withDay = sales.map(s => ({ ...s, day: getDayLabel(s.contractDate) }));
+      const withDay = reportableSales.map(s => ({ ...s, day: getDayLabel(s.contractDate) }));
       return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
     }
     if (drillQuarter) {
-      const withMonth = sales.map(s => ({ ...s, month: getMonthLabel(s.contractDate) }));
+      const withMonth = reportableSales.map(s => ({ ...s, month: getMonthLabel(s.contractDate) }));
       return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
     }
     if (drillYear) {
-      const withQuarter = sales.map(s => ({ ...s, quarter: `Q${getQuarter(s.contractDate)}` }));
+      const withQuarter = reportableSales.map(s => ({ ...s, quarter: `Q${getQuarter(s.contractDate)}` }));
       return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
     }
-    return buildCrossTab(sales, "city", "year");
+    return buildCrossTab(reportableSales, "city", "year");
   })();
 
   /* Ranked bars: avg sale price by city */
   const avgPriceByCity = (() => {
     const map = new Map<string, { total: number; count: number }>();
-    for (const s of sales) {
+    for (const s of reportableSales) {
       const e = map.get(s.city) ?? { total: 0, count: 0 };
       e.total += s.salePrice;
       e.count++;
@@ -79,8 +80,8 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   /* Histogram: sale price distribution — 5 buckets */
   const HIST_COLORS = ["#14b8a6", "#22d3ee", "#3b82f6", "#6366f1", "#a855f7"];
   const priceHistogram = (() => {
-    if (sales.length === 0) return [];
-    const prices = sales.map(s => s.salePrice);
+    if (reportableSales.length === 0) return [];
+    const prices = reportableSales.map(s => s.salePrice);
     const priceMin = Math.min(...prices);
     const priceMax = Math.max(...prices);
     const priceStep = (priceMax - priceMin) / 5 || 1;
@@ -89,7 +90,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
       const hi = lo + priceStep;
       return {
         bucket: `${fmt$(Math.round(lo / 1000) * 1000)}–${fmt$(Math.round(hi / 1000) * 1000)}`,
-        count: sales.filter(s => s.salePrice >= lo && (i === 4 ? s.salePrice <= hi : s.salePrice < hi)).length,
+        count: reportableSales.filter(s => s.salePrice >= lo && (i === 4 ? s.salePrice <= hi : s.salePrice < hi)).length,
         color: HIST_COLORS[i],
       };
     });
@@ -121,7 +122,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
         <SHPanel kicker="By Plan" title="Sales by Floor Plan">
           <SHDonutChart
             segments={byPlan}
-            onSegmentClick={label => onDrill({ type: "plan", value: label, label })}
+            onSegmentClick={label => onDrill({ type: "sales-plan", value: label, label })}
           />
         </SHPanel>
       </div>
@@ -141,7 +142,7 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "sale-metric", value: label, label: `Sales Trend — ${label}` })}
+            onPointClick={label => onDrill({ type: "sales-time", value: label, label: `Sales Trend — ${label}` })}
           />
         </SHPanel>
       </div>
@@ -159,9 +160,18 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "sales-time", value: col, label: `Sales — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "sales-time", value: col, label: `Sales — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "sales-time", value: col, label: `Sales — ${col}` });
+              }
             }
           />
         </SHPanel>

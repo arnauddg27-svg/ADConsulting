@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }: Props) {
-  const completedJobs = jobs.filter(j => j.totalCycleDays > 200);
+  const completedJobs = jobs.filter(j => j.coDate);
   const avgCycleDays = completedJobs.length
     ? completedJobs.reduce((s, j) => s + j.totalCycleDays, 0) / completedJobs.length
     : 0;
@@ -84,7 +84,12 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
         <SHPanel kicker="CP-11" title="Cycle Time by City — Phase Breakdown">
           <SHStackedCycleBar
             cities={cycleByCity}
-            onPhaseClick={(city) => onCityClick ? onCityClick(city) : onDrill({ type: "community", value: city, label: city })}
+            onPhaseClick={(city, phase) => onDrill({
+              type: "stage",
+              value: phase,
+              label: `${city} — ${phase}`,
+              scopedJobCodes: jobs.filter(j => j.city === city && j.stage === phase).map(j => j.jobCode),
+            })}
           />
         </SHPanel>
       </div>
@@ -132,7 +137,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
                 status: s.status,
                 unit: "days",
               }))}
-              onCardClick={label => onDrill({ type: "community", value: label, label })}
+              onCardClick={label => onDrill({ type: "construction-city-time", value: `${label}|`, label })}
               columns={2}
             />
           </SHPanel>

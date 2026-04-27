@@ -153,9 +153,18 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "permit-time", value: col, label: `Permits — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "permit-time", value: col, label: `Permits — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "permit-time", value: col, label: `Permits — ${col}` });
+              }
             }
           />
         </SHPanel>

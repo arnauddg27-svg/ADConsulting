@@ -1226,6 +1226,13 @@ export function fmtPct(v: number): string {
   return `${v.toFixed(1)}%`;
 }
 
+export function getPropertyClass(unit: Pick<SHPropertyUnit, "marketRent" | "sqft">): "A" | "B" | "C" {
+  const rentPerSqft = unit.sqft > 0 ? unit.marketRent / unit.sqft : 0;
+  if (unit.marketRent >= 3200 || rentPerSqft >= 1.42) return "A";
+  if (unit.marketRent >= 2600 || rentPerSqft >= 1.25) return "B";
+  return "C";
+}
+
 /* ═══════════════════════════════════════════════════════════
    FILTER HELPER
    ═══════════════════════════════════════════════════════════ */
@@ -1471,14 +1478,39 @@ export function getCostKPIs(filteredJobs: SHJob[]) {
   return { totalBudget, totalActual, budgetToDate, varianceToDate, forecastFinal, variance, avgMargin };
 }
 
-export function getCostBreakdown() {
-  return [
-    { label: "Labor",          value: 8400000, color: "#14b8a6" },
-    { label: "Materials",      value: 6200000, color: "#0d9488" },
-    { label: "Subcontractors", value: 4800000, color: "#22d3ee" },
-    { label: "Land & Permits", value: 3600000, color: "#3b82f6" },
-    { label: "Overhead",       value: 1800000, color: "#1e40af" },
+export function getCostBreakdown(filteredJobs: SHJob[] = jobs) {
+  const buckets = [
+    { label: "Lot / Land", value: 0, color: "#0f766e" },
+    { label: "Permitting", value: 0, color: "#14b8a6" },
+    { label: "Site Work", value: 0, color: "#22d3ee" },
+    { label: "Vertical", value: 0, color: "#3b82f6" },
+    { label: "Other", value: 0, color: "#1e40af" },
   ];
+
+  for (const job of filteredJobs) {
+    const lot = Math.max(0, job.lotCost);
+    const permitting = Math.max(0, job.permittingBudget);
+    const siteWork = Math.max(0, job.sidewalkBudget);
+    const vertical = Math.max(0, job.verticalBudget);
+    const other = Math.max(0, job.originalBudget - lot - permitting - siteWork - vertical);
+    const basis = lot + permitting + siteWork + vertical + other;
+    if (basis <= 0) continue;
+
+    buckets[0].value += job.actualCostToDate * (lot / basis);
+    buckets[1].value += job.actualCostToDate * (permitting / basis);
+    buckets[2].value += job.actualCostToDate * (siteWork / basis);
+    buckets[3].value += job.actualCostToDate * (vertical / basis);
+    buckets[4].value += job.actualCostToDate * (other / basis);
+  }
+
+  const rounded = buckets.map(bucket => ({
+    ...bucket,
+    value: Math.round(bucket.value),
+  }));
+  const totalActual = Math.round(filteredJobs.reduce((sum, job) => sum + job.actualCostToDate, 0));
+  const roundedTotal = rounded.reduce((sum, bucket) => sum + bucket.value, 0);
+  rounded[rounded.length - 1].value += totalActual - roundedTotal;
+  return rounded;
 }
 
 /** Community-level cost category variance: Permitting Δ, Sidewalk Δ, Vertical Δ, Total Δ */

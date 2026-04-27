@@ -158,7 +158,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
           <SHRankedBars
             items={byPlan}
             formatValue={v => `${v}%`}
-            onBarClick={label => onDrill({ type: "plan", value: label, label: `${label} — Jobs` })}
+            onBarClick={label => onDrill({ type: "audit-plan", value: label, label: `${label} — Audits` })}
             showRank
           />
         </SHPanel>
@@ -177,9 +177,18 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "audits-community-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "audits-time", value: col, label: `Audits — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "audits-time", value: col, label: `Audits — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "audits-time", value: col, label: `Audits — ${col}` });
+              }
             }
           />
         </SHPanel>
@@ -195,7 +204,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
             color="#14b8a6"
             label1="Profit ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "audit-cost", value: label, label: `Profit Trend — ${label}` })}
+            onPointClick={label => onDrill({ type: "audits-time", value: label, label: `Profit Trend — ${label}` })}
           />
         </SHPanel>
       </div>

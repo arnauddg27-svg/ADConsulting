@@ -210,9 +210,9 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => { onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); } :
+              drillYear ? (col) => { onQuarterClick(Number(col.replace("Q", ""))); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); } :
+              (col) => { onYearClick(Number(col)); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); }
             }
           />
         </SHPanel>
@@ -232,7 +232,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             onPointClick={label => {
               const m = label.match(/^Q([1-4])\s*'(\d{2})$/i);
               const value = m ? `20${m[2]} Q${m[1]}` : label;
-              onDrill({ type: "cycle-time-cohort", value, label: `WIP Trend — ${label}` });
+              onDrill({ type: "construction-time", value, label: `WIP Trend — ${label}` });
             }}
           />
         </SHPanel>

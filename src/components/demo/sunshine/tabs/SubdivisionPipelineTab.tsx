@@ -102,7 +102,7 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
             ]}
             rows={subdivisions as unknown as Record<string, unknown>[]}
             maxRows={40}
-            onRowClick={onDrill ? r => onDrill({ type: "community", value: String(r.community), label: String(r.projectName) }) : undefined}
+            onRowClick={onDrill ? r => onDrill({ type: "subdivision", value: String(r.projectName), label: String(r.projectName) }) : undefined}
           />
         </SHPanel>
       </div>

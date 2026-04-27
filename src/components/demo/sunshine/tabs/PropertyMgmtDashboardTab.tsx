@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, getPropertyClass } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -104,7 +104,10 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
   /* Donut: property class A/B/C distribution */
   const classes = ["A", "B", "C"];
   const classCounts = [0, 0, 0];
-  for (const u of units) classCounts[Number(u.id) % classes.length]++;
+  for (const u of units) {
+    const idx = classes.indexOf(getPropertyClass(u));
+    if (idx >= 0) classCounts[idx]++;
+  }
   const byClass = classes.map((cls, i) => ({
     label: `Class ${cls}`,
     value: classCounts[i],
@@ -183,7 +186,15 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
           <SHRankedBars
             items={delinquentByCommunity.length > 0 ? delinquentByCommunity : [{ label: "No delinquencies", value: 0 }]}
             formatValue={v => fmt$(v)}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "pm-community", value: label, label }); }}
+            onBarClick={label => {
+              onCommunityClick(label);
+              onDrill({
+                type: "pm-community",
+                value: label,
+                label,
+                scopedPropertyUnitIds: units.filter(u => u.community === label && u.delinquentAmount > 0).map(u => u.id),
+              });
+            }}
             showRank
           />
         </SHPanel>
@@ -202,9 +213,18 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "pm-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "pm-time", value: col, label: `Leases — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "pm-time", value: col, label: `Leases — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "pm-time", value: col, label: `Leases — ${col}` });
+              }
             }
           />
         </SHPanel>
@@ -220,7 +240,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             color="#22d3ee"
             label1="Revenue ($K)"
             formatY={v => `$${v.toFixed(1)}K`}
-            onPointClick={label => onDrill({ type: "pm-metric", value: label, label: `Revenue — ${label}` })}
+            onPointClick={label => onDrill({ type: "pm-time", value: label, label: `Revenue — ${label}` })}
           />
         </SHPanel>
       </div>

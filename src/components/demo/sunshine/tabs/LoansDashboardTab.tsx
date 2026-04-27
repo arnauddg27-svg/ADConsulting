@@ -174,9 +174,18 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "loans-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "loans-time", value: col, label: `Loans — ${col}` });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "loans-time", value: col, label: `Loans — ${col}` });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "loans-time", value: col, label: `Loans — ${col}` });
+              }
             }
           />
         </SHPanel>
@@ -189,7 +198,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
             color="#22d3ee"
             label1="Exposure ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "loan-metric", value: label, label: `Exposure — ${label}` })}
+            onPointClick={label => onDrill({ type: "loans-time", value: label, label: `Exposure — ${label}` })}
           />
         </SHPanel>
         <SHPanel kicker="Expiration" title="Days Until Expiration">
