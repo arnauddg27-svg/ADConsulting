@@ -2,7 +2,7 @@
 
 import type { SHJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getJobsByStage, fmtN } from "@/lib/sunshine-homes-data";
+import { getJobsByStage, fmtN, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHPipelineBoard from "../SHPipelineBoard";
@@ -23,6 +23,11 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
   const withinBudgetJobs = jobs.filter(j => j.projectedFinalCost <= j.originalBudget * 1.08).length;
   const healthyProgressJobs = jobs.filter(j => j.stage === "Permit" || j.completionPct >= 55).length;
   const pct = (count: number) => Math.round((count / Math.max(jobs.length, 1)) * 100);
+  const jobTrend = buildQuarterTrend(jobs, j => j.startDate, () => 1, { cumulative: false, maxPoints: 8 });
+  const completionTrend = buildQuarterAverageTrend(jobs, j => j.startDate, j => j.completionPct, { maxPoints: 8 });
+  const closingTrend = buildQuarterTrend(jobs.filter(j => j.stage === "Closing"), j => j.startDate, () => 1, { cumulative: false, maxPoints: 8 });
+  const jobDelta = formatTrendDelta(trendValues(jobTrend));
+  const completionDelta = formatTrendDelta(trendValues(completionTrend), { unit: "pct" });
 
   return (
     <>
@@ -36,9 +41,9 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
         <SHKpiCard
           label="Total Jobs"
           value={fmtN(jobs.length)}
-          sparkline={[22, 24, 23, 25, 26, 27, 26, 28, 29, 30]}
-          delta="+3 vs prior"
-          deltaDir="up"
+          sparkline={trendValues(jobTrend)}
+          delta={jobDelta.delta}
+          deltaDir={jobDelta.deltaDir}
           tone="good"
           onClick={() => onDrill({ type: "job", value: "all", label: "All Construction Jobs" })}
         />
@@ -56,15 +61,16 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
           label="Avg Completion"
           value={`${avgCompletion}%`}
           progress={avgCompletion}
-          delta="+5% vs Q3"
-          deltaDir="up"
+          sparkline={trendValues(completionTrend)}
+          delta={completionDelta.delta}
+          deltaDir={completionDelta.deltaDir}
           tone="good"
           onClick={() => onDrill({ type: "job", value: "completion", label: "Construction Completion Overview" })}
         />
         <SHKpiCard
           label="Near Closing"
           value={fmtN(closingCount)}
-          sparkline={[2, 3, 2, 4, 3, 5, 4, 6, 5, 7]}
+          sparkline={trendValues(closingTrend)}
           delta={`${closingCount} in closing`}
           deltaDir="up"
           tone="good"

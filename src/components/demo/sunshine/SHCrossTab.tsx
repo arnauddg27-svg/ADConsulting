@@ -86,6 +86,15 @@ export default function SHCrossTab({
             onMouseEnter={onColHeaderClick ? () => setHoveredColHeader(col) : undefined}
             onMouseLeave={onColHeaderClick ? () => setHoveredColHeader(null) : undefined}
             role={onColHeaderClick ? "button" : undefined}
+            tabIndex={onColHeaderClick ? 0 : undefined}
+            title={onColHeaderClick ? `Drill into ${col}` : col}
+            aria-label={onColHeaderClick ? `Drill into ${col}` : undefined}
+            onKeyDown={onColHeaderClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onColHeaderClick(col);
+              }
+            } : undefined}
             style={{
               cursor: onColHeaderClick ? "pointer" : "default",
               textDecoration: onColHeaderClick && hoveredColHeader === col ? "underline" : "none",
@@ -106,6 +115,15 @@ export default function SHCrossTab({
               className="sh-crosstab-row-label"
               onClick={onRowLabelClick ? () => onRowLabelClick(row) : undefined}
               role={onRowLabelClick ? "button" : undefined}
+              tabIndex={onRowLabelClick ? 0 : undefined}
+              title={onRowLabelClick ? `Open drilldown for ${row}` : row}
+              aria-label={onRowLabelClick ? `Open drilldown for ${row}` : undefined}
+              onKeyDown={onRowLabelClick ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onRowLabelClick(row);
+                }
+              } : undefined}
               style={{ cursor: onRowLabelClick ? "pointer" : "default" }}
             >
               {row}
@@ -130,6 +148,16 @@ export default function SHCrossTab({
                   onMouseEnter={() => setHoveredCell({ row: ri, col: ci })}
                   onMouseLeave={() => setHoveredCell(null)}
                   onClick={hasValue && onCellClick ? () => onCellClick(row, col, value) : undefined}
+                  role={hasValue && onCellClick ? "button" : undefined}
+                  tabIndex={hasValue && onCellClick ? 0 : undefined}
+                  title={hasValue && onCellClick ? `Open drilldown for ${row} / ${col}` : undefined}
+                  aria-label={hasValue && onCellClick ? `Open drilldown for ${row} / ${col}` : undefined}
+                  onKeyDown={hasValue && onCellClick ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onCellClick(row, col, value);
+                    }
+                  } : undefined}
                 >
                   {hasValue ? value : ""}
                 </div>

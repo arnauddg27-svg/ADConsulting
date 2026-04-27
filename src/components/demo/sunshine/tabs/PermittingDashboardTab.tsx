@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import type { SHPermit, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel, getDayLabel } from "@/lib/sunshine-homes-data";
+import { getPermitKPIs, buildCrossTab, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues, isApprovedPermit } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -34,11 +35,18 @@ interface Props {
 
 export default function PermittingDashboardTab({ permits, onCommunityClick, onCityClick, onTabChange, onStatusClick, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getPermitKPIs(permits);
+  const permitCountTrend = useMemo(() => buildQuarterTrend(permits, p => p.submittedDate, () => 1, { cumulative: true, maxPoints: 8 }), [permits]);
+  const inReviewTrend = useMemo(() => buildQuarterTrend(permits.filter(p => p.status === "in-review"), p => p.submittedDate, () => 1, { cumulative: false, maxPoints: 8 }), [permits]);
+  const approvalCycleTrend = useMemo(() => buildQuarterAverageTrend(permits.filter(isApprovedPermit), p => p.submittedDate, p => p.daysInReview, { maxPoints: 8 }), [permits]);
+  const permitDelta = formatTrendDelta(trendValues(permitCountTrend));
+  const reviewDelta = formatTrendDelta(trendValues(inReviewTrend), { goodWhen: "down" });
+  const approvalDelta = formatTrendDelta(trendValues(approvalCycleTrend), { unit: "days", goodWhen: "down" });
 
   const byStatus = [
     { label: "Approved", value: kpis.approved, color: STATUS_COLORS.approved },
     { label: "In Review", value: kpis.inReview, color: STATUS_COLORS["in-review"] },
     { label: "Pending", value: kpis.pending, color: STATUS_COLORS.pending },
+    { label: "Rejected", value: kpis.rejected, color: STATUS_COLORS.rejected },
   ].filter(s => s.value > 0);
 
   const byCommunity = (() => {
@@ -113,10 +121,10 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={[18, 22, 25, 28, 30, 33, 35, 38, 40, 42]} delta="+8 this quarter" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "total", label: `Total Permits — ${fmtN(kpis.total)}` })} />
-        <SHKpiCard label="Approved" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% approved`} deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "approved", label: `Approved — ${fmtN(kpis.approved)}` })} />
-        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={[5, 4, 6, 7, 5, 6, 8, 7, 6, 5]} delta={`${kpis.pending} pending`} deltaDir="neutral" onClick={() => onDrill({ type: "permit-status", value: "in-review", label: `In Review — ${fmtN(kpis.inReview)}` })} />
-        <SHKpiCard label="Avg Days" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="To approval" sparkline={[32, 30, 28, 27, 26, 25, 24, 23, 22, 21]} delta="-3d vs prior" deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "avg-days", label: `Avg Days — ${Math.round(kpis.avgDaysToApproval)}d` })} />
+        <SHKpiCard label="Total Permits" value={fmtN(kpis.total)} sparkline={trendValues(permitCountTrend)} delta={permitDelta.delta} deltaDir={permitDelta.deltaDir} onClick={() => onDrill({ type: "permit-status", value: "total", label: `Total Permits — ${fmtN(kpis.total)}` })} />
+        <SHKpiCard label="Approved / Issued" value={fmtN(kpis.approved)} accent="#14b8a6" progress={Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)} delta={`${Math.round((kpis.approved / Math.max(kpis.total, 1)) * 100)}% cleared`} deltaDir="up" onClick={() => onDrill({ type: "permit-status", value: "approved", label: `Approved / Issued — ${fmtN(kpis.approved)}` })} />
+        <SHKpiCard label="In Review" value={fmtN(kpis.inReview)} accent="#22d3ee" sparkline={trendValues(inReviewTrend)} delta={`${reviewDelta.delta}; ${kpis.pending} pending`} deltaDir={reviewDelta.deltaDir} onClick={() => onDrill({ type: "permit-status", value: "in-review", label: `In Review — ${fmtN(kpis.inReview)}` })} />
+        <SHKpiCard label="Avg Approval Cycle" value={`${Math.round(kpis.avgDaysToApproval)}d`} sub="Approved / issued permits" sparkline={trendValues(approvalCycleTrend)} delta={approvalDelta.delta} deltaDir={approvalDelta.deltaDir} onClick={() => onDrill({ type: "permit-status", value: "avg-days", label: `Avg Approval Cycle — ${Math.round(kpis.avgDaysToApproval)}d` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -145,9 +153,18 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "permit-city-year", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "permit-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "permit-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "permit-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

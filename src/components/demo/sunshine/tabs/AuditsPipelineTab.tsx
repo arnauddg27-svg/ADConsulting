@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function AuditsPipelineTab({ audits, onDrill }: Props) {
-  const negativeMargin = audits.filter(a => a.netMargin < 0).length;
+  const profitable = audits.filter(a => a.netMargin > 0).length;
   const lowMargin = audits.filter(a => a.netMargin >= 0 && a.netMargin < 10).length;
   const highContingency = audits.filter(a => a.contingency > 3500).length;
 
@@ -28,9 +28,9 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
 
       <SHExceptionSummary
         items={[
-          { label: "Negative Margin Jobs", value: String(negativeMargin), tone: negativeMargin >= 5 ? "alert" : negativeMargin >= 2 ? "watch" : "good" },
-          { label: "Low Margin (<10%)", value: String(lowMargin), tone: lowMargin >= 12 ? "watch" : "good" },
-          { label: "High Contingency", value: String(highContingency), tone: highContingency >= 14 ? "watch" : "good" },
+          { label: "Profitable Jobs", value: `${profitable}/${audits.length}`, tone: profitable === audits.length ? "good" : "watch", onClick: () => onDrill({ type: "audit-cost", value: "total-profit", label: "Profitable Audited Jobs" }) },
+          { label: "Margin Watch (<10%)", value: String(lowMargin), tone: lowMargin >= 12 ? "watch" : "good", onClick: () => onDrill({ type: "margin-bucket", value: "0–10%", label: "Margin Watch — 0–10%" }) },
+          { label: "Contingency Watch", value: String(highContingency), tone: highContingency >= 14 ? "watch" : "good", onClick: () => onDrill({ type: "audit-cost", value: "contingency-watch", label: "Contingency Watch" }) },
         ]}
       />
 

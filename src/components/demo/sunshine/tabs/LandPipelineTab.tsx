@@ -16,11 +16,7 @@ interface Props {
 export default function LandPipelineTab({ deals, onDrill }: Props) {
   const cancelled = deals.filter(d => d.status === "cancelled").length;
   const agingUnderContract = deals.filter(d => d.status === "under-contract" && Math.round((new Date("2026-03-25").getTime() - new Date(d.contractDate).getTime()) / 86400000) > 120).length;
-  const lowYield = deals.filter(d => {
-    const rev = d.lots * 480000;
-    const roi = d.acquisitionCost > 0 ? ((rev - d.acquisitionCost) / d.acquisitionCost) * 100 : 0;
-    return roi < 900;
-  }).length;
+  const lowYield = deals.filter(d => (d.roiPct ?? 0) < 22).length;
 
   return (
     <>
@@ -46,11 +42,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
               { key: "city", label: "City", width: "100px", frozen: true },
               { key: "county", label: "County", width: "100px" },
               { key: "community", label: "Community", width: "130px" },
-              { key: "entity", label: "Entity", width: "150px", render: r => {
-                const city = String(r.city);
-                const meta: Record<string, string> = { Orlando: "Sunshine Homes LLC", Tampa: "Sunshine Homes LLC", Jacksonville: "Sunshine Homes East LLC", Lakeland: "Sunshine Homes East LLC" };
-                return meta[city] ?? city;
-              }},
+              { key: "entity", label: "Entity", width: "150px" },
               { key: "contractDate", label: "Contract", width: "90px" },
               { key: "year", label: "Year", width: "60px", align: "right" },
               { key: "closeDate", label: "Close Date", width: "90px", render: r => String(r.closeDate ?? "\u2014") },
@@ -63,54 +55,44 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
               { key: "lots", label: "Lots", width: "65px", align: "right" },
               { key: "costPerLot", label: "Cost/Lot", width: "80px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
               { key: "acquisitionCost", label: "Total Cost", width: "90px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
-              { key: "revenuePotential", label: "Rev Potential", width: "95px", align: "right", render: r => fmt$(Number(r.lots) * 480000) },
-              { key: "profitPotential", label: "Profit Pot.", width: "90px", align: "right", render: r => fmt$(Number(r.lots) * 480000 - Number(r.acquisitionCost)) },
-              { key: "roi", label: "ROI %", width: "75px", align: "right", render: r => {
-                const cost = Number(r.acquisitionCost);
-                const rev = Number(r.lots) * 480000;
-                return cost > 0 ? fmtPct(((rev - cost) / cost) * 100) : "\u2014";
+              { key: "revenuePotential", label: "Rev Potential", width: "105px", align: "right", render: r => fmt$(Number(r.revenuePotential ?? 0)) },
+              { key: "profitPotential", label: "Profit Pot.", width: "95px", align: "right", render: r => fmt$(Number(r.profitPotential ?? 0)) },
+              { key: "roiPct", label: "ROI %", width: "75px", align: "right", render: r => fmtPct(Number(r.roiPct ?? 0)) },
+              { key: "riskScore", label: "Risk", width: "70px", align: "right", render: r => {
+                const v = Number(r.riskScore ?? 0);
+                return <SHPill tone={v >= 65 ? "alert" : v >= 40 ? "watch" : "good"} label={String(v)} />;
               }},
-              { key: "hasWetlands", label: "Wetlands", width: "75px", render: r => {
-                const v = Number(r.id) % 3 === 0;
-                return <SHPill tone={v ? "alert" : "good"} label={v ? "Yes" : "No"} />;
-              }},
-              { key: "hasTrees", label: "Trees", width: "65px", render: r => {
-                const v = Number(r.id) % 2 === 0;
+              { key: "hasWetlands", label: "Wetlands", width: "80px", render: r => {
+                const v = Boolean(r.hasWetlands);
                 return <SHPill tone={v ? "watch" : "good"} label={v ? "Yes" : "No"} />;
               }},
-              { key: "ddStatus", label: "DD Status", width: "105px", render: r => {
-                const statuses = ["Complete", "In Progress", "Pending"];
-                const s = statuses[Number(r.id) % 3];
+              { key: "hasTreeClearing", label: "Trees", width: "75px", render: r => {
+                const v = Boolean(r.hasTreeClearing);
+                return <SHPill tone={v ? "watch" : "good"} label={v ? "Yes" : "No"} />;
+              }},
+              { key: "dueDiligenceStatus", label: "DD Status", width: "115px", render: r => {
+                const s = String(r.dueDiligenceStatus ?? "Pending");
                 return <SHPill tone={s === "Complete" ? "good" : s === "In Progress" ? "watch" : "alert"} label={s} />;
               }},
               { key: "soilTesting", label: "Soil Test", width: "105px", render: r => {
-                const statuses = ["Pass", "In Progress", "Pending"];
-                const s = statuses[Number(r.id) % 3];
+                const s = String(r.soilTesting ?? "Pending");
                 return <SHPill tone={s === "Pass" ? "good" : s === "In Progress" ? "watch" : "alert"} label={s} />;
               }},
               { key: "surveyStatus", label: "Survey", width: "100px", render: r => {
-                const statuses = ["Complete", "Scheduled", "Pending"];
-                const s = statuses[(Number(r.id) + 1) % 3];
+                const s = String(r.surveyStatus ?? "Pending");
                 return <SHPill tone={s === "Complete" ? "good" : s === "Scheduled" ? "watch" : "alert"} label={s} />;
               }},
               { key: "zoningStatus", label: "Zoning", width: "100px", render: r => {
-                const statuses = ["Approved", "In Review", "Pending"];
-                const s = statuses[(Number(r.id) + 2) % 3];
+                const s = String(r.zoningStatus ?? "Pending");
                 return <SHPill tone={s === "Approved" ? "good" : s === "In Review" ? "watch" : "alert"} label={s} />;
               }},
               { key: "platStatus", label: "Plat", width: "100px", render: r => {
-                const statuses = ["Recorded", "Submitted", "Pending"];
-                const s = statuses[Number(r.id) % 3];
+                const s = String(r.platStatus ?? "Pending");
                 return <SHPill tone={s === "Recorded" ? "good" : s === "Submitted" ? "watch" : "alert"} label={s} />;
               }},
-              { key: "seller", label: "Seller", width: "130px", render: r => {
-                const sellers = ["J. Morrison", "Lakewood Trust", "FL Land Group", "Carter Family", "Pine Valley LLC"];
-                return sellers[Number(r.id) % sellers.length];
-              }},
-              { key: "source", label: "Source", width: "85px", render: r => {
-                const sources = ["Direct", "Assignment", "Broker"];
-                return sources[Number(r.id) % 3];
-              }},
+              { key: "dueDiligenceDays", label: "DD Days", width: "80px", align: "right" },
+              { key: "seller", label: "Seller", width: "130px" },
+              { key: "source", label: "Source", width: "90px" },
             ]}
             rows={deals as unknown as Record<string, unknown>[]}
             maxRows={40}

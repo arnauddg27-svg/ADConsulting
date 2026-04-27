@@ -76,6 +76,9 @@ const SUPERS = ["Mike Torres", "Sarah Chen", "David Brooks", "Lisa Nguyen", "Jam
 const STAGES = ["Permit", "Foundation", "Framing", "MEP / Drywall", "Finishes", "Closing"] as const;
 const LENDERS = ["First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank"] as const;
 const AGENTS = ["Alex Rivera", "Jessica Chen", "Mark Thompson", "Sarah Patel", "David Kim"] as const;
+const FINANCING_TYPES = ["Conventional", "FHA", "VA", "Cash"] as const;
+const TITLE_COMPANIES = ["First American", "Fidelity Title", "Old Republic", "Stewart Title", "Chicago Title"] as const;
+const CLOSING_ATTORNEYS = ["Smith & Associates", "Johnson Law", "Davis Legal", "Wilson Group", "Brown Partners"] as const;
 
 /* City → county mapping */
 const CITY_COUNTY: Record<string, string> = {
@@ -177,6 +180,52 @@ export function buildQuarterTrend<T>(
   const maxPoints = opts?.maxPoints ?? 8;
   const finalPoints = points.length > maxPoints ? points.slice(-maxPoints) : points;
   return finalPoints.length > 0 ? finalPoints : [{ label: "Q1 '24", value: 0 }];
+}
+
+export function buildQuarterAverageTrend<T>(
+  rows: T[],
+  getDate: (row: T) => string | null | undefined,
+  getValue: (row: T) => number,
+  opts?: { maxPoints?: number },
+): Array<{ label: string; value: number }> {
+  const byQuarter = new Map<string, { total: number; count: number }>();
+  for (const row of rows) {
+    const key = quarterKey(String(getDate(row) ?? ""));
+    if (!key) continue;
+    const current = byQuarter.get(key) ?? { total: 0, count: 0 };
+    current.total += getValue(row);
+    current.count += 1;
+    byQuarter.set(key, current);
+  }
+  const points = Array.from(byQuarter.entries())
+    .sort((a, b) => quarterSortValue(a[0]) - quarterSortValue(b[0]))
+    .map(([key, d]) => ({
+      label: quarterDisplayLabel(key),
+      value: d.count ? d.total / d.count : 0,
+    }));
+  const maxPoints = opts?.maxPoints ?? 8;
+  const finalPoints = points.length > maxPoints ? points.slice(-maxPoints) : points;
+  return finalPoints.length > 0 ? finalPoints : [{ label: "Q1 '24", value: 0 }];
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED KPI DEFINITIONS
+   ═══════════════════════════════════════════════════════════ */
+
+export function isActiveJob(job: SHJob): boolean {
+  return job.stage !== "Closing" && job.completionPct < 95;
+}
+
+export function isOpenSale(sale: SHSale): boolean {
+  return sale.status === "active" || sale.status === "pending";
+}
+
+export function isOccupiedUnit(unit: SHPropertyUnit): boolean {
+  return unit.occupancy === "leased" || unit.occupancy === "eviction" || unit.occupancy === "notice-to-vacate";
+}
+
+export function isApprovedPermit(permit: SHPermit): boolean {
+  return permit.status === "approved" || permit.status === "issued";
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -430,6 +479,16 @@ function generateSales(): SHSale[] {
       : status === "pending"
         ? addDays(contractDate, between(60, 220))
         : null;
+    const financingType = pick(FINANCING_TYPES);
+    const lenderName = financingType === "Cash" ? "Cash Buyer" : pick(LENDERS);
+    const commissionPct = financingType === "Cash"
+      ? Math.round((2.5 + rand() * 1.0) * 10) / 10
+      : Math.round((3.0 + rand() * 1.5) * 10) / 10;
+    const commissionAmount = Math.round(salePrice * commissionPct / 100);
+    const closingCosts = Math.round(salePrice * (0.016 + rand() * 0.008));
+    const deposit = Math.round(salePrice * (status === "closed" ? 0.05 : 0.03));
+    const netProceeds = salePrice - commissionAmount - closingCosts;
+    const contractToCloseDays = closingDate ? daysBetween(contractDate, closingDate) : null;
     const cy = new Date(contractDate).getFullYear();
 
     result.push({
@@ -444,6 +503,15 @@ function generateSales(): SHSale[] {
       salePrice,
       contractDate,
       closingDate,
+      deposit,
+      financingType,
+      lenderName,
+      titleCompany: pick(TITLE_COMPANIES),
+      closingAttorney: pick(CLOSING_ATTORNEYS),
+      commissionPct,
+      commissionAmount,
+      netProceeds,
+      contractToCloseDays,
       status,
       year: cy,
     });
@@ -460,6 +528,7 @@ const EXTRA_LENDERS = [
   "First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank",
   "Wells Fargo CRE", "JPMorgan Builder Finance", "Centennial Bank", "Seacoast Bank", "Valley National",
 ] as const;
+const LENDER_CONTACTS = ["Tom Harris", "Linda Park", "Rick Stein", "Carol Wu", "Sam Diaz", "Priya Shah", "Miguel Ortiz"] as const;
 
 function generateLoans(): SHLoan[] {
   const rng = createRng(271);
@@ -473,6 +542,8 @@ function generateLoans(): SHLoan[] {
   for (let i = 0; i < loanJobs.length; i++) {
     const job = loanJobs[i];
     const lender = pick(EXTRA_LENDERS);
+    const sale = sales.find(s => s.jobCode === job.jobCode);
+    const collateralValue = sale?.salePrice ?? job.contractValue;
     // Loan principal tracks home value and stage profile rather than random flat bands.
     // Lenders cap early-stage commitment and ramp up for later-stage builds.
     const stageCap =
@@ -491,6 +562,10 @@ function generateLoans(): SHLoan[] {
     const drawPct = Math.max(5, Math.min(97, Math.round(drawTarget * 10) / 10));
     const totalDrawn = Math.round(loanAmount * drawPct / 100);
     const interestRate = Math.round((5.50 + rand() * 2.5) * 100) / 100; // 5.50% to 8.00%
+    const loanType: SHLoan["loanType"] =
+      job.stage === "Permit" && rand() > 0.55 ? "Acquisition" :
+      job.stage === "Closing" && rand() > 0.65 ? "Bridge" :
+      "Construction";
 
     // Expiration runway compresses as jobs move toward close.
     let daysUntilExpiration: number;
@@ -502,17 +577,37 @@ function generateLoans(): SHLoan[] {
     if (job.completionPct >= 95) daysUntilExpiration = between(5, 75);
 
     const expDate = addDays("2026-03-25", daysUntilExpiration);
+    const monthsOpen = Math.max(1, Math.min(24, Math.round(daysBetween(job.startDate, "2026-03-25") / 30)));
+    const monthlyInterest = Math.round(loanAmount * (interestRate / 100) / 12);
+    const accruedInterest = Math.round(monthlyInterest * monthsOpen * (0.85 + rand() * 0.20));
+    const loanClosingDate = addDays(job.startDate, -between(10, 35));
+    const lastPaymentDate = addDays("2026-03-25", -between(3, 28));
+    const drawRequests = Math.max(1, Math.round(drawPct / 14) + (job.stage === "Closing" ? 1 : 0));
 
     result.push({
       id: i + 1,
       jobCode: job.jobCode,
       community: job.community,
       city: job.city,
+      entity: job.entity,
+      plan: job.plan,
+      stage: job.stage,
+      completionPct: job.completionPct,
+      wipBalance: job.wipBalance,
       lender,
+      loanType,
       loanAmount,
       totalDrawn,
       drawPct,
       interestRate,
+      salePrice: collateralValue,
+      ltvPct: Math.round((loanAmount / collateralValue) * 1000) / 10,
+      monthlyInterest,
+      accruedInterest,
+      loanClosingDate,
+      lastPaymentDate,
+      drawRequests,
+      lenderContact: pick(LENDER_CONTACTS),
       startDate: job.startDate,
       expirationDate: expDate,
       daysUntilExpiration,
@@ -531,6 +626,13 @@ function generateLandDeals(): SHLandDeal[] {
   const rng = createRng(311);
   const { rand, pick, between } = rng;
   const result: SHLandDeal[] = [];
+  const sellers = ["J. Morrison", "Lakewood Trust", "FL Land Group", "Carter Family", "Pine Valley LLC", "Northlake Holdings"];
+  const sources: SHLandDeal["source"][] = ["Direct", "Broker", "Assignment"];
+  const ddStatuses: SHLandDeal["dueDiligenceStatus"][] = ["Complete", "In Progress", "Pending"];
+  const soilStatuses: SHLandDeal["soilTesting"][] = ["Pass", "In Progress", "Pending"];
+  const surveyStatuses: SHLandDeal["surveyStatus"][] = ["Complete", "Scheduled", "Pending"];
+  const zoningStatuses: SHLandDeal["zoningStatus"][] = ["Approved", "In Review", "Pending"];
+  const platStatuses: SHLandDeal["platStatus"][] = ["Recorded", "Submitted", "Pending"];
 
   const TOTAL = 15;
 
@@ -553,6 +655,27 @@ function generateLandDeals(): SHLandDeal[] {
     const closeDate = status === "closed"
       ? dateToStr(year, contractMonth, Math.min(contractDay + between(1, 10), 28))
       : null;
+    const developmentCost = lots * between(285000, 345000);
+    const allInCost = acquisitionCost + developmentCost;
+    const revenuePotential = Math.round(allInCost * (1.14 + rand() * 0.10));
+    const profitPotential = revenuePotential - allInCost;
+    const roiPct = allInCost > 0 ? Math.round((profitPotential / allInCost) * 1000) / 10 : 0;
+    const hasWetlands = rand() < (meta.city === "Orlando" ? 0.24 : 0.14);
+    const hasTreeClearing = rand() < 0.42;
+    const dueDiligenceDays = status === "closed" ? between(32, 75) : status === "under-contract" ? between(22, 115) : between(12, 64);
+    const ddStatus = status === "closed" ? "Complete" : dueDiligenceDays > 90 ? "Pending" : pick(ddStatuses);
+    const soilTesting = ddStatus === "Complete" ? "Pass" : pick(soilStatuses);
+    const surveyStatus = ddStatus === "Complete" ? "Complete" : pick(surveyStatuses);
+    const zoningStatus = status === "closed" ? "Approved" : pick(zoningStatuses);
+    const platStatus = status === "closed" ? "Recorded" : zoningStatus === "Approved" ? pick(platStatuses) : "Pending";
+    const riskScore = Math.min(100, Math.max(0,
+      18 +
+      (status === "cancelled" ? 35 : status === "under-contract" ? 12 : 0) +
+      (hasWetlands ? 18 : 0) +
+      (hasTreeClearing ? 8 : 0) +
+      (ddStatus === "Pending" ? 14 : ddStatus === "In Progress" ? 6 : 0) +
+      (roiPct < 18 ? 16 : roiPct < 28 ? 6 : -4),
+    ));
 
     result.push({
       id: i + 1,
@@ -560,10 +683,25 @@ function generateLandDeals(): SHLandDeal[] {
       city: meta.city,
       county: meta.county,
       community: comm,
+      entity: meta.entity,
       acres,
       lots,
       acquisitionCost,
       costPerLot,
+      revenuePotential,
+      profitPotential,
+      roiPct,
+      seller: pick(sellers),
+      source: pick(sources),
+      dueDiligenceDays,
+      dueDiligenceStatus: ddStatus,
+      soilTesting,
+      surveyStatus,
+      zoningStatus,
+      platStatus,
+      hasWetlands,
+      hasTreeClearing,
+      riskScore,
       status,
       closeDate,
       contractDate,
@@ -630,18 +768,42 @@ function generatePermits(): SHPermit[] {
     const approvedDate = (status === "approved" || status === "issued") ? addDays(submittedDate, daysInReview) : null;
     const issuedDate = status === "issued" ? addDays(approvedDate!, between(3, 10)) : null;
     const year = new Date(submittedDate).getFullYear();
+    const sitePlanCycleDays = Math.max(1, Math.round(daysInReview * 0.20));
+    const housePlanCycleDays = Math.max(1, Math.round(daysInReview * 0.22));
+    const septicCycleDays = Math.max(1, Math.round(daysInReview * 0.14));
+    const buildingDeptCycleDays = Math.max(1, Math.round(daysInReview * 0.30));
+    const jioApprovalCycleDays = Math.max(1, daysInReview - sitePlanCycleDays - housePlanCycleDays - septicCycleDays - buildingDeptCycleDays);
+    const coastalOrLake = comm.includes("Palm") || comm.includes("Cypress") || comm.includes("Lake");
+    const floodZone: SHPermit["floodZone"] = coastalOrLake
+      ? (rand() > 0.94 ? "VE" : rand() > 0.72 ? "AE" : "X")
+      : (rand() > 0.90 ? "AE" : "X");
 
     result.push({
       id: i + 1,
       jobCode: job.jobCode,
       community: comm,
       city: meta.city,
+      county: meta.county,
+      entity: job.entity,
+      plan: job.plan,
+      superintendent: job.superintendent,
+      stage: job.stage,
+      completionPct: job.completionPct,
       permitType,
       permitSubType,
       submittedDate,
       approvedDate,
       issuedDate,
       daysInReview,
+      sitePlanCycleDays,
+      housePlanCycleDays,
+      septicCycleDays,
+      buildingDeptCycleDays,
+      jioApprovalCycleDays,
+      gopherTortoise: coastalOrLake ? rand() > 0.74 : rand() > 0.88,
+      treeSurvey: comm.includes("Magnolia") || comm.includes("Cypress") ? rand() > 0.45 : rand() > 0.72,
+      floodZone,
+      productType: "Single Family",
       status,
       year,
     });
@@ -680,6 +842,7 @@ function generatePMUnits(): SHPropertyUnit[] {
     "Tucker", "Powers", "Blake", "Hoffman", "Holland", "Dean", "Kelley", "Page",
     "Schwartz", "Barker", "Valdez", "Medina", "Hicks", "Chambers",
   ] as const;
+  const owners = ["Sunshine Holdings", "Palm Coast Trust", "Emerald Bay LLC", "Coral Springs LP", "Magnolia Investors"] as const;
 
   const planBedsBaths: Record<string, { beds: string; sqft: number }> = {
     "Avalon 1983":   { beds: "3/2", sqft: 1983 },
@@ -718,6 +881,9 @@ function generatePMUnits(): SHPropertyUnit[] {
       const baseRentPerSqft = 1.15 + rand() * 0.35; // $1.15-$1.50/sqft
       const marketRent = Math.round(info.sqft * baseRentPerSqft / 25) * 25; // snap to $25
       const monthlyRent = isOccupied ? marketRent - between(0, 120) : 0;
+      const rentPerSqft = marketRent / info.sqft;
+      const propertyClass: SHPropertyUnit["propertyClass"] =
+        rentPerSqft >= 1.42 ? "A" : rentPerSqft >= 1.28 ? "B" : "C";
       const tenant = isOccupied ? `${pick(tenantFamilies)} Family` : null;
       const leaseStartYear = 2022 + (id % 5); // spread across 2022-2026
       const leaseStartMonth = between(1, 12);
@@ -737,17 +903,54 @@ function generatePMUnits(): SHPropertyUnit[] {
       const daysPastDue = isDelinquent ? between(3, 27) : 0; // stay under 28
       const managementPct = Math.round((8 + rand() * 2) * 10) / 10;
       const deposit = monthlyRent > 0 ? monthlyRent : marketRent;
+      const yearBuilt = 2019 + ((ci + j) % 7);
+      const lotSqft = 4400 + ((ci * 3 + j) % 9) * 450;
+      const hoaMonthly = 140 + ((ci + j) % 5) * 35;
+      const assessedValue = Math.round((marketRent * 12 / (0.067 + rand() * 0.014)) / 1000) * 1000;
+      const propertyTaxAnnual = Math.round(assessedValue * (0.009 + rand() * 0.003) / 100) * 100;
+      const insuranceAnnual = Math.round((1250 + info.sqft * 0.18 + rand() * 550) / 25) * 25;
+      const maintenanceYtd = Math.round((450 + ((ci + j) % 6) * 325 + (occupancy === "make-ready" ? 900 : 0)) / 25) * 25;
+      const vacancyDays = isOccupied ? 0 : occupancy === "make-ready" ? between(6, 24) : between(18, 58);
+      const turnoverCount = occupancy === "make-ready" ? 1 + (j % 2) : (id + ci) % 3 === 0 ? 1 : 0;
+      const stabilizedRent = monthlyRent > 0 ? monthlyRent : marketRent;
+      const monthlyExpenses =
+        hoaMonthly +
+        propertyTaxAnnual / 12 +
+        insuranceAnnual / 12 +
+        maintenanceYtd / 12 +
+        stabilizedRent * managementPct / 100;
+      const noiMonthly = Math.max(250, Math.round(stabilizedRent - monthlyExpenses));
+      const estimatedValue = Math.round((noiMonthly * 12 / (0.052 + rand() * 0.016)) / 1000) * 1000;
+      const capRatePct = Math.round(((noiMonthly * 12) / estimatedValue) * 1000) / 10;
+      const lastInspectionDate = addDays("2026-03-25", -between(28, 150));
+      const nextInspectionDate = addDays("2026-03-25", between(30, 210));
 
       result.push({
         id,
         address: `${100 + j * 14} ${street}`,
         community: comm,
         city: meta.city,
+        county: meta.county,
         entity: meta.entity,
         bedsBaths: info.beds,
         sqft: info.sqft,
         monthlyRent,
         marketRent,
+        propertyClass,
+        yearBuilt,
+        lotSqft,
+        hoaMonthly,
+        propertyTaxAnnual,
+        insuranceAnnual,
+        lastInspectionDate,
+        nextInspectionDate,
+        maintenanceYtd,
+        vacancyDays,
+        turnoverCount,
+        noiMonthly,
+        capRatePct,
+        estimatedValue,
+        owner: owners[(ci + j) % owners.length],
         deposit,
         managementPct,
         occupancy,
@@ -799,6 +1002,33 @@ export function fmtN(v: number): string {
 export function fmtPct(v: number): string {
   if (!isFinite(v)) return "N/A";
   return `${v.toFixed(1)}%`;
+}
+
+export function trendValues(points: Array<{ value: number }>, fallback = 0): number[] {
+  const values = points.map(p => Number.isFinite(p.value) ? p.value : fallback);
+  return values.length > 0 ? values : [fallback];
+}
+
+export function formatTrendDelta(
+  values: number[],
+  opts?: { unit?: "count" | "money" | "pct" | "days"; goodWhen?: "up" | "down"; label?: string },
+): { delta: string; deltaDir: "up" | "down" | "neutral" } {
+  if (values.length < 2) return { delta: opts?.label ?? "No prior period", deltaDir: "neutral" };
+  const current = values[values.length - 1] ?? 0;
+  const prior = [...values].slice(0, -1).reverse().find(v => Number.isFinite(v));
+  if (prior === undefined) return { delta: opts?.label ?? "No prior period", deltaDir: "neutral" };
+  const diff = current - prior;
+  const absDiff = Math.abs(diff);
+  const sign = diff > 0 ? "+" : diff < 0 ? "-" : "";
+  const label =
+    opts?.unit === "money" ? `${sign}${fmt$(absDiff)} vs prior` :
+    opts?.unit === "pct" ? `${sign}${absDiff.toFixed(1)} pts vs prior` :
+    opts?.unit === "days" ? `${sign}${Math.round(absDiff)}d vs prior` :
+    `${sign}${fmtN(Math.round(absDiff))} vs prior`;
+  if (diff === 0) return { delta: label, deltaDir: "neutral" };
+  const goodWhen = opts?.goodWhen ?? "up";
+  const movedUp = diff > 0;
+  return { delta: label, deltaDir: movedUp === (goodWhen === "up") ? "up" : "down" };
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -882,7 +1112,7 @@ export function getDayLabel(dateStr: string): string {
    ═══════════════════════════════════════════════════════════ */
 
 export function getConstructionKPIs(filteredJobs: SHJob[]) {
-  const active = filteredJobs.filter(j => j.stage !== "Closing" && j.completionPct < 95);
+  const active = filteredJobs.filter(isActiveJob);
   const totalWip = filteredJobs.reduce((s, j) => s + j.wipBalance, 0);
   const avgCompletion = filteredJobs.length
     ? filteredJobs.reduce((s, j) => s + j.completionPct, 0) / filteredJobs.length
@@ -913,7 +1143,7 @@ export function getCommunityBreakdown(filteredJobs: SHJob[]) {
 
 export function getSalesKPIs(filteredSales: SHSale[]) {
   // Pipeline KPIs should track open contracts, not already-closed sales.
-  const openSales = filteredSales.filter(s => s.status === "active" || s.status === "pending");
+  const openSales = filteredSales.filter(isOpenSale);
   const totalValue = openSales.reduce((s, r) => s + r.salePrice, 0);
   const avgPrice = openSales.length ? totalValue / openSales.length : 0;
   const pending = filteredSales.filter(s => s.status === "pending").length;
@@ -979,21 +1209,20 @@ export function getLandKPIs(filteredDeals: SHLandDeal[]) {
 }
 
 export function getPermitKPIs(filteredPermits: SHPermit[]) {
-  const approved = filteredPermits.filter(p => p.status === "approved").length;
+  const approvedPermits = filteredPermits.filter(isApprovedPermit);
+  const approved = approvedPermits.length;
   const inReview = filteredPermits.filter(p => p.status === "in-review").length;
   const pending = filteredPermits.filter(p => p.status === "pending").length;
   const rejected = filteredPermits.filter(p => p.status === "rejected").length;
   const issued = filteredPermits.filter(p => p.status === "issued").length;
-  const avgDays = filteredPermits.length
-    ? filteredPermits.reduce((s, p) => s + p.daysInReview, 0) / filteredPermits.length
+  const avgDays = approved
+    ? approvedPermits.reduce((s, p) => s + p.daysInReview, 0) / approved
     : 0;
   return { total: filteredPermits.length, approved, inReview, pending, rejected, issued, avgDaysToApproval: avgDays };
 }
 
 export function getPMKPIs(filteredUnits: SHPropertyUnit[]) {
-  const occupied = filteredUnits.filter(u =>
-    u.occupancy === "leased" || u.occupancy === "eviction" || u.occupancy === "notice-to-vacate",
-  ).length;
+  const occupied = filteredUnits.filter(isOccupiedUnit).length;
   const total = filteredUnits.length;
   const occupancyRate = total ? (occupied / total) * 100 : 0;
   const totalRent = filteredUnits.reduce((s, u) => s + u.monthlyRent, 0);
@@ -1046,7 +1275,22 @@ export function getCostKPIs(filteredJobs: SHJob[]) {
   return { totalBudget, totalActual, budgetToDate, varianceToDate, forecastFinal, variance, avgMargin };
 }
 
-export function getCostBreakdown() {
+export function getCostBreakdown(filteredJobs?: SHJob[]) {
+  if (filteredJobs) {
+    const projectedFinal = filteredJobs.reduce((s, j) => s + j.projectedFinalCost, 0);
+    const categories = [
+      { label: "Vertical", value: filteredJobs.reduce((s, j) => s + j.verticalActual, 0), color: "#14b8a6" },
+      { label: "Lot / Land", value: filteredJobs.reduce((s, j) => s + j.lotCost, 0), color: "#0d9488" },
+      { label: "Site Work", value: filteredJobs.reduce((s, j) => s + j.sidewalkActual, 0), color: "#22d3ee" },
+      { label: "Permits & Fees", value: filteredJobs.reduce((s, j) => s + j.permittingActual, 0), color: "#3b82f6" },
+    ];
+    const known = categories.reduce((s, c) => s + c.value, 0);
+    const remaining = Math.max(0, projectedFinal - known);
+    return remaining > 0
+      ? [...categories, { label: "Overhead / Other", value: remaining, color: "#6366f1" }]
+      : categories;
+  }
+
   return [
     { label: "Labor",          value: 8400000, color: "#14b8a6" },
     { label: "Materials",      value: 6200000, color: "#0d9488" },
@@ -1124,6 +1368,61 @@ const PHASE_COLORS: Record<string, string> = {
   "Finishes": "#3b82f6",
   "Closing": "#1e40af",
 };
+
+export function getAvgPhaseDays(allJobs: SHJob[]) {
+  const phaseTotals: Record<string, number> = {};
+  const phaseCounts: Record<string, number> = {};
+
+  for (const job of allJobs) {
+    const milestones: [string, string | null][] = [
+      ["Permit", job.permitDate],
+      ["Foundation", job.foundationDate],
+      ["Framing", job.framingDate],
+      ["MEP / Drywall", job.mepDate],
+      ["Finishes", job.finishesDate],
+      ["Closing", job.coDate],
+    ];
+
+    let prevDate = job.startDate;
+    for (const [phase, date] of milestones) {
+      if (!date) continue;
+      const days = daysBetween(prevDate, date);
+      if (days > 0) {
+        phaseTotals[phase] = (phaseTotals[phase] ?? 0) + days;
+        phaseCounts[phase] = (phaseCounts[phase] ?? 0) + 1;
+      }
+      prevDate = date;
+    }
+  }
+
+  return STAGES.map(phase => ({
+    phase,
+    days: phaseCounts[phase] ? Math.round(phaseTotals[phase] / phaseCounts[phase]) : 0,
+    color: PHASE_COLORS[phase] || "#64748b",
+  })).filter(p => p.days > 0);
+}
+
+export function getCycleTimeDistribution(allJobs: SHJob[]) {
+  const completed = allJobs.filter(j => j.coDate);
+  const buckets = [
+    { bucket: "< 200d", min: Number.NEGATIVE_INFINITY, max: 200, color: "#0f766e" },
+    { bucket: "200–250d", min: 200, max: 250, color: "#14b8a6" },
+    { bucket: "250–300d", min: 250, max: 300, color: "#22d3ee" },
+    { bucket: "300–350d", min: 300, max: 350, color: "#3b82f6" },
+    { bucket: "> 350d", min: 350, max: Number.POSITIVE_INFINITY, color: "#1e40af" },
+  ];
+
+  return buckets.map((bucket, index) => ({
+    bucket: bucket.bucket,
+    count: completed.filter(job => {
+      const days = job.totalCycleDays;
+      if (index === 0) return days < bucket.max;
+      if (index === buckets.length - 1) return days > bucket.min;
+      return days >= bucket.min && days <= bucket.max;
+    }).length,
+    color: bucket.color,
+  }));
+}
 
 /** CP-11: Stacked cycle time by city — per-city phase durations from milestone dates */
 export function getCycleTimeByCity(allJobs: SHJob[]): SHCycleTimeByCity[] {

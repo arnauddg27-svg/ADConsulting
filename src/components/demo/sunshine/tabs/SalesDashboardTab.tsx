@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHSale, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getSalesKPIs, getSalesByCommunity, getSalesByPlan, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues, isOpenSale } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -35,12 +35,18 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
   const byPlan = getSalesByPlan(sales).map((p, i) => ({ ...p, color: PLAN_COLORS[i % PLAN_COLORS.length] }));
   const salesValueTrend = useMemo(() => (
     buildQuarterTrend(
-      sales.filter(s => s.status !== "cancelled"),
+      sales.filter(isOpenSale),
       s => s.contractDate,
       s => s.salePrice,
       { cumulative: true, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
   ), [sales]);
+  const salesCountTrend = useMemo(() => buildQuarterTrend(sales.filter(isOpenSale), s => s.contractDate, () => 1, { cumulative: true, maxPoints: 8 }), [sales]);
+  const avgPriceTrend = useMemo(() => buildQuarterAverageTrend(sales.filter(isOpenSale), s => s.contractDate, s => s.salePrice / 1000, { maxPoints: 8 }), [sales]);
+  const pendingTrend = useMemo(() => buildQuarterTrend(sales.filter(s => s.status === "pending"), s => s.contractDate, () => 1, { cumulative: false, maxPoints: 8 }), [sales]);
+  const salesCountDelta = formatTrendDelta(trendValues(salesCountTrend));
+  const salesValueDelta = formatTrendDelta(salesValueTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const avgPriceDelta = formatTrendDelta(trendValues(avgPriceTrend), { goodWhen: "up" });
 
   /* CrossTab: city x status */
   const crossTab = buildCrossTab(sales, "city", "status");
@@ -104,10 +110,10 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={[12, 13, 14, 13, 15, 16, 15, 17, 18]} delta="+2 this month" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-sales", label: `Total Sales — ${fmtN(kpis.totalSales)}` })} />
-        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={[5.2, 5.8, 6.3, 6.9, 7.4, 8.0, 8.5, 9.1, 9.6]} delta="+15% YoY" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "total-value", label: `Total Value — ${fmt$(kpis.totalValue)}` })} />
-        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={[460, 470, 475, 480, 490, 495, 498, 502, 505]} delta="+3% vs prior" deltaDir="up" onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: `Avg Sale Price — ${fmt$(kpis.avgPrice)}` })} />
-        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8]} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" onClick={() => onDrill({ type: "sale-metric", value: "pending-close", label: `Pending Close — ${fmtN(kpis.pendingClosings)}` })} />
+        <SHKpiCard label="Total Sales" value={fmtN(kpis.totalSales)} sub="Active contracts" sparkline={trendValues(salesCountTrend)} delta={salesCountDelta.delta} deltaDir={salesCountDelta.deltaDir} onClick={() => onDrill({ type: "sale-metric", value: "total-sales", label: `Total Sales — ${fmtN(kpis.totalSales)}` })} />
+        <SHKpiCard label="Total Value" value={fmt$(kpis.totalValue)} accent="#22d3ee" sparkline={salesValueTrend.map(p => p.value)} delta={salesValueDelta.delta} deltaDir={salesValueDelta.deltaDir} onClick={() => onDrill({ type: "sale-metric", value: "total-value", label: `Total Value — ${fmt$(kpis.totalValue)}` })} />
+        <SHKpiCard label="Avg Sale Price" value={fmt$(kpis.avgPrice)} sparkline={trendValues(avgPriceTrend)} delta={avgPriceDelta.delta} deltaDir={avgPriceDelta.deltaDir} onClick={() => onDrill({ type: "sale-metric", value: "avg-price", label: `Avg Sale Price — ${fmt$(kpis.avgPrice)}` })} />
+        <SHKpiCard label="Pending Close" value={fmtN(kpis.pendingClosings)} accent="#efb562" sparkline={trendValues(pendingTrend)} delta={`${kpis.pendingClosings} awaiting`} deltaDir="neutral" onClick={() => onDrill({ type: "sale-metric", value: "pending-close", label: `Pending Close — ${fmtN(kpis.pendingClosings)}` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -159,9 +165,18 @@ export default function SalesDashboardTab({ sales, onCommunityClick, onCityClick
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "sales-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "sales-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "sales-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "sales-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

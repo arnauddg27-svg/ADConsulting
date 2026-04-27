@@ -5,9 +5,10 @@ interface SHDataContextStripProps {
   rows: number;
   filterCount: number;
   asOf?: string;
+  dateBasis?: string;
 }
 
-export default function SHDataContextStrip({ scopeLabel, rows, filterCount, asOf = "Mar 25, 2026" }: SHDataContextStripProps) {
+export default function SHDataContextStrip({ scopeLabel, rows, filterCount, asOf = "Mar 25, 2026", dateBasis }: SHDataContextStripProps) {
   return (
     <div
       style={{
@@ -25,6 +26,7 @@ export default function SHDataContextStrip({ scopeLabel, rows, filterCount, asOf
       <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}><strong style={{ color: "var(--sh-text-primary)" }}>{scopeLabel}</strong></span>
       <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Rows: <strong style={{ color: "var(--sh-text-primary)" }}>{rows.toLocaleString()}</strong></span>
       <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Filters: <strong style={{ color: "var(--sh-text-primary)" }}>{filterCount}</strong></span>
+      {dateBasis && <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Date basis: <strong style={{ color: "var(--sh-text-primary)" }}>{dateBasis}</strong></span>}
       <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>As of: <strong style={{ color: "var(--sh-text-primary)" }}>{asOf}</strong></span>
     </div>
   );

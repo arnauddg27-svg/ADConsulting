@@ -35,6 +35,17 @@ export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipel
                 onStageClick?.(stage);
                 onDrill({ type: "stage", value: stage, label: stage });
               } : onStageClick ? () => onStageClick(stage) : undefined}
+              role={onDrill || onStageClick ? "button" : undefined}
+              tabIndex={onDrill || onStageClick ? 0 : undefined}
+              title={`Open drilldown for ${stage}`}
+              aria-label={`Open drilldown for ${stage}`}
+              onKeyDown={onDrill || onStageClick ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onStageClick?.(stage);
+                  onDrill?.({ type: "stage", value: stage, label: stage });
+                }
+              } : undefined}
             >
               <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${STAGE_COLORS[i]}33, ${STAGE_COLORS[i]}11)`, border: `1px solid ${STAGE_COLORS[i]}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, boxShadow: `0 0 12px ${STAGE_COLORS[i]}22` }}>
                 {STAGE_ICONS[i]}
@@ -71,6 +82,16 @@ export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipel
                       className={`sh-pipeline-card ${status}`}
                       style={{ cursor: onDrill ? "pointer" : "default" }}
                       onClick={onDrill ? () => onDrill({ type: "job", value: job.jobCode, label: job.jobCode }) : undefined}
+                      role={onDrill ? "button" : undefined}
+                      tabIndex={onDrill ? 0 : undefined}
+                      title={onDrill ? `Open drilldown for ${job.jobCode}` : undefined}
+                      aria-label={onDrill ? `Open drilldown for ${job.jobCode}` : undefined}
+                      onKeyDown={onDrill ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onDrill({ type: "job", value: job.jobCode, label: job.jobCode });
+                        }
+                      } : undefined}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div className="sh-pipeline-card-code">{job.jobCode}</div>

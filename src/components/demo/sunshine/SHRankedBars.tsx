@@ -65,6 +65,16 @@ export default function SHRankedBars({ items, formatValue, onBarClick, showRank 
               display: "flex", alignItems: "center", gap: 8, cursor: onBarClick ? "pointer" : "default",
             }}
             onClick={onBarClick ? () => onBarClick(item.label) : undefined}
+            role={onBarClick ? "button" : undefined}
+            tabIndex={onBarClick ? 0 : undefined}
+            title={onBarClick ? `Open drilldown for ${item.label}` : item.label}
+            aria-label={onBarClick ? `Open drilldown for ${item.label}` : undefined}
+            onKeyDown={onBarClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onBarClick(item.label);
+              }
+            } : undefined}
           >
             {showRank && (
               <span style={{ width: 16, fontSize: 10, fontWeight: 700, color: "var(--sh-text-muted)", textAlign: "right", flexShrink: 0 }}>

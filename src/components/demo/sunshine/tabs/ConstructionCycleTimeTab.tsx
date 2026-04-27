@@ -3,10 +3,15 @@
 import type { SHJob } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
 import {
-  avgPhaseDays, cycleTimeDistribution,
+  avgPhaseDays,
+  getAvgPhaseDays, getCycleTimeDistribution,
   getCycleTimeByCity, getCycleTimeTrend, getCompletionTrendlines,
   getMilestoneSparklines,
+  buildQuarterTrend,
+  formatTrendDelta,
+  trendValues,
   fmtN,
+  isActiveJob,
 } from "@/lib/sunshine-homes-data";
 
 import SHKpiCard from "../SHKpiCard";
@@ -24,15 +29,17 @@ interface Props {
 }
 
 export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }: Props) {
-  const completedJobs = jobs.filter(j => j.totalCycleDays > 200);
+  const completedJobs = jobs.filter(j => j.coDate);
   const avgCycleDays = completedJobs.length
     ? completedJobs.reduce((s, j) => s + j.totalCycleDays, 0) / completedJobs.length
     : 0;
   const avgCycleMonths = (avgCycleDays / 30.44); // days → months
 
+  const actualPhaseDays = getAvgPhaseDays(jobs);
+  const actualCycleDistribution = getCycleTimeDistribution(jobs);
   const totalPhaseDays = avgPhaseDays.reduce((s, p) => s + p.days, 0);
   const targetMonths = (totalPhaseDays / 30.44);
-  const activeCount = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95).length;
+  const activeCount = jobs.filter(isActiveJob).length;
   const completionsThisPeriod = jobs.filter(j => j.coDate).length;
 
   /* Cycle Time derived data */
@@ -40,6 +47,8 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
   const cycleTrend = getCycleTimeTrend(jobs);
   const completionTrends = getCompletionTrendlines(jobs);
   const sparklines = getMilestoneSparklines(jobs);
+  const completionsTrend = buildQuarterTrend(completedJobs, j => j.coDate, () => 1, { cumulative: false, maxPoints: 8 });
+  const completionsDelta = formatTrendDelta(trendValues(completionsTrend));
   /* Multi-line chart data */
   const trendLines = [
     { label: "Foundation→CO", color: "#1e3a5f", data: completionTrends.map(t => ({ x: t.period, y: t.foundationToCompletion })) },
@@ -65,17 +74,17 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
       <div className="sh-kpi-row">
         <SHKpiCard label="Average Cycle Time" value={`${avgCycleMonths.toFixed(1)} months`} sub="Start → CO" sparkline={cycleTrend.map(t => t.avgDays)} onClick={() => onDrill({ type: "cycle-metric", value: "avg-cycle", label: `Average Cycle Time — ${avgCycleMonths.toFixed(1)} months` })} />
         <SHKpiCard label="Target Cycle" value={`${targetMonths.toFixed(1)} months`} sub="Start → CO target" accent="#22d3ee" delta={avgCycleMonths > targetMonths ? `+${(avgCycleMonths - targetMonths).toFixed(1)}mo over` : `${(targetMonths - avgCycleMonths).toFixed(1)}mo under`} deltaDir={avgCycleMonths <= targetMonths ? "up" : "down"} onClick={() => onDrill({ type: "cycle-metric", value: "target-cycle", label: `Target Cycle — ${targetMonths.toFixed(1)} months` })} />
-        <SHKpiCard label="Completions" value={fmtN(completionsThisPeriod)} sub="COs received" accent="#0f766e" sparkline={[3, 4, 5, 4, 6, 5, 7, 6, 8, completionsThisPeriod]} delta="+2 vs prior" deltaDir="up" onClick={() => onDrill({ type: "cycle-metric", value: "completions", label: `Completions — ${fmtN(completionsThisPeriod)}` })} />
+        <SHKpiCard label="Completions" value={fmtN(completionsThisPeriod)} sub="COs received" accent="#0f766e" sparkline={trendValues(completionsTrend)} delta={completionsDelta.delta} deltaDir={completionsDelta.deltaDir} onClick={() => onDrill({ type: "cycle-metric", value: "completions", label: `Completions — ${fmtN(completionsThisPeriod)}` })} />
         <SHKpiCard label="In Construction" value={fmtN(activeCount)} sub="Active jobs" accent="#3b82f6" progress={Math.round((activeCount / Math.max(jobs.length, 1)) * 100)} delta={`${Math.round((activeCount / Math.max(jobs.length, 1)) * 100)}% of total`} deltaDir="neutral" onClick={() => onDrill({ type: "cycle-metric", value: "in-construction", label: `In Construction — ${fmtN(activeCount)}` })} />
       </div>
 
       {/* Phase duration bar + histogram */}
       <div className="sh-panels-row">
         <SHPanel kicker="Phase Analysis" title="Average Phase Durations">
-          <SHCycleTimePipeline phases={avgPhaseDays} onPhaseClick={(phase) => onDrill({ type: "stage", value: phase, label: `${phase} Phase Jobs` })} />
+          <SHCycleTimePipeline phases={actualPhaseDays} onPhaseClick={(phase) => onDrill({ type: "stage", value: phase, label: `${phase} Phase Jobs` })} />
         </SHPanel>
         <SHPanel kicker="Distribution" title="Cycle Time Distribution">
-          <SHHistogram buckets={cycleTimeDistribution} onBucketClick={(bucket) => onDrill({ type: "cycle-bucket", value: bucket, label: `Cycle Time Bucket — ${bucket}` })} />
+          <SHHistogram buckets={actualCycleDistribution} onBucketClick={(bucket) => onDrill({ type: "cycle-bucket", value: bucket, label: `Cycle Time Bucket — ${bucket}` })} />
         </SHPanel>
       </div>
 

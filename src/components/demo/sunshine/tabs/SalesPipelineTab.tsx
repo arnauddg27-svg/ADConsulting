@@ -20,8 +20,6 @@ function CompletionBar({ pct }: { pct: number }) {
   );
 }
 
-const LENDERS = ["First National Bank", "SunTrust Builders", "Capital One CRE", "Regions Construction", "TD Bank"];
-
 interface Props {
   sales: SHSale[];
   onDrill: (detail: DrillDetail) => void;
@@ -107,33 +105,14 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
                 const diff = Math.round((new Date(String(r.closingDate)).getTime() - new Date(String(r.contractDate)).getTime()) / 86400000);
                 return `${diff}d`;
               }},
-              { key: "deposit", label: "Deposit", width: "75px", align: "right", render: r => fmt$(Number(r.salePrice) * 0.05) },
-              { key: "financingType", label: "Financing", width: "95px", render: r => {
-                const types = ["Conventional", "FHA", "VA", "Cash"];
-                return types[Number(r.id) % types.length];
-              }},
-              { key: "lenderName", label: "Lender", width: "130px", render: r => LENDERS[Number(r.id) % LENDERS.length] },
-              { key: "titleCompany", label: "Title Co.", width: "120px", render: r => {
-                const cos = ["First American", "Fidelity Title", "Old Republic", "Stewart Title", "Chicago Title"];
-                return cos[Number(r.id) % cos.length];
-              }},
-              { key: "closingAttorney", label: "Closing Atty", width: "110px", render: r => {
-                const attys = ["Smith & Associates", "Johnson Law", "Davis Legal", "Wilson Group", "Brown Partners"];
-                return attys[Number(r.id) % attys.length];
-              }},
-              { key: "commissionPct", label: "Comm %", width: "75px", align: "right", render: r => {
-                const pct = 3 + (Number(r.id) % 4);
-                return `${pct}%`;
-              }},
-              { key: "commissionAmt", label: "Commission", width: "85px", align: "right", render: r => {
-                const pct = (3 + (Number(r.id) % 4)) / 100;
-                return fmt$(Number(r.salePrice) * pct);
-              }},
-              { key: "netProceeds", label: "Net Proceeds", width: "90px", align: "right", render: r => {
-                const commPct = (3 + (Number(r.id) % 4)) / 100;
-                const closingCosts = Number(r.salePrice) * 0.02;
-                return fmt$(Number(r.salePrice) - Number(r.salePrice) * commPct - closingCosts);
-              }},
+              { key: "deposit", label: "Deposit", width: "75px", align: "right", render: r => fmt$(Number(r.deposit ?? 0)) },
+              { key: "financingType", label: "Financing", width: "95px", render: r => String(r.financingType ?? "\u2014") },
+              { key: "lenderName", label: "Lender", width: "130px", render: r => String(r.lenderName ?? "\u2014") },
+              { key: "titleCompany", label: "Title Co.", width: "120px", render: r => String(r.titleCompany ?? "\u2014") },
+              { key: "closingAttorney", label: "Closing Atty", width: "110px", render: r => String(r.closingAttorney ?? "\u2014") },
+              { key: "commissionPct", label: "Comm %", width: "75px", align: "right", render: r => fmtPct(Number(r.commissionPct ?? 0)) },
+              { key: "commissionAmount", label: "Commission", width: "85px", align: "right", render: r => fmt$(Number(r.commissionAmount ?? 0)) },
+              { key: "netProceeds", label: "Net Proceeds", width: "90px", align: "right", render: r => fmt$(Number(r.netProceeds ?? 0)) },
             ]}
             rows={sortedSales as unknown as Record<string, unknown>[]}
             maxRows={40}

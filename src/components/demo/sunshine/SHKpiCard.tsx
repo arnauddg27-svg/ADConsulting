@@ -14,6 +14,7 @@ interface SHKpiCardProps {
   sparkline?: number[];
   /** Standard guardrail tone for consistent KPI coloring */
   tone?: "good" | "watch" | "alert";
+  drillHint?: string;
 }
 
 /** Mini SVG sparkline */
@@ -42,9 +43,10 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
   );
 }
 
-export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, onClick, progress, sparkline, tone }: SHKpiCardProps) {
+export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, onClick, progress, sparkline, tone, drillHint }: SHKpiCardProps) {
   const toneColor = tone === "alert" ? "#f46a6a" : tone === "watch" ? "#efb562" : tone === "good" ? "#14b8a6" : undefined;
   const accentColor = accent ?? toneColor ?? "var(--sh-accent)";
+  const hint = drillHint ?? `Open drilldown for ${label}`;
   return (
     <div
       className={`sh-kpi-card ${onClick ? "clickable" : ""}`}
@@ -52,6 +54,8 @@ export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, 
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
+      title={onClick ? hint : undefined}
+      aria-label={onClick ? hint : undefined}
       onKeyDown={onClick ? e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
     >
       <div className="sh-kpi-label">{label}</div>
@@ -77,9 +81,7 @@ export default function SHKpiCard({ label, value, sub, delta, deltaDir, accent, 
           {delta}
         </div>
       )}
-      {onClick && (
-        <div style={{ position: "absolute", top: 10, right: 10, fontSize: 10, color: "var(--sh-text-muted)", opacity: 0.5 }}>→</div>
-      )}
+      {onClick && <div className="sh-click-hint">Open</div>}
     </div>
   );
 }

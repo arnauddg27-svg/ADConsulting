@@ -16,7 +16,7 @@ interface SHAreaChartProps {
   label2?: string;
   formatY?: (v: number) => string;
   height?: number;
-  onPointClick?: (label: string, index: number) => void;
+  onPointClick?: (label: string, index: number, series?: "value" | "value2" | "all") => void;
 }
 
 export default function SHAreaChart({
@@ -100,22 +100,7 @@ export default function SHAreaChart({
           style={{ filter: `drop-shadow(0 0 4px ${color}66)` }}
         />
 
-        {/* Data points */}
-        {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={toX(i)} cy={toY(d.value)}
-            r={hovered === i ? 4 : 2}
-            fill={color}
-            stroke="var(--sh-bg-shell)"
-            strokeWidth="1.5"
-            style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default" }}
-            onMouseEnter={() => setHovered(i)}
-            onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
-          />
-        ))}
-
-        {/* Click zones per month (easier interaction than tiny points) */}
+        {/* Broad click zones sit under the precise point targets. */}
         {data.map((d, i) => {
           const prevX = i === 0 ? padX : (toX(i - 1) + toX(i)) / 2;
           const nextX = i === data.length - 1 ? w : (toX(i) + toX(i + 1)) / 2;
@@ -128,11 +113,43 @@ export default function SHAreaChart({
               height={h - padT - padB}
               fill="transparent"
               style={{ cursor: onPointClick ? "pointer" : "default" }}
+              aria-label={onPointClick ? `Open drilldown for ${d.label}` : undefined}
               onMouseEnter={() => setHovered(i)}
-              onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
+              onClick={onPointClick ? () => onPointClick(d.label, i, "all") : undefined}
             />
           );
         })}
+
+        {hasSecondLine && data.map((d, i) => (
+          <circle
+            key={`pt2-${i}`}
+            cx={toX(i)} cy={toY(d.value2 ?? 0)}
+            r={hovered === i ? 4 : 2}
+            fill={color2}
+            stroke="var(--sh-bg-shell)"
+            strokeWidth="1.5"
+            style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default", opacity: 0.85 }}
+            aria-label={onPointClick ? `Open ${label2} drilldown for ${d.label}` : undefined}
+            onMouseEnter={() => setHovered(i)}
+            onClick={onPointClick ? () => onPointClick(d.label, i, "value2") : undefined}
+          />
+        ))}
+
+        {/* Data points */}
+        {data.map((d, i) => (
+          <circle
+            key={i}
+            cx={toX(i)} cy={toY(d.value)}
+            r={hovered === i ? 4 : 2}
+            fill={color}
+            stroke="var(--sh-bg-shell)"
+            strokeWidth="1.5"
+            style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default" }}
+            aria-label={onPointClick ? `Open ${label1} drilldown for ${d.label}` : undefined}
+            onMouseEnter={() => setHovered(i)}
+            onClick={onPointClick ? () => onPointClick(d.label, i, "value") : undefined}
+          />
+        ))}
 
         {/* Hover line */}
         {hovered !== null && (
@@ -149,7 +166,7 @@ export default function SHAreaChart({
             x={toX(i)} y={h - 6}
             textAnchor="middle" fill="var(--sh-text-muted)" fontSize="8" fontWeight="500"
             style={{ cursor: onPointClick ? "pointer" : "default" }}
-            onClick={onPointClick ? () => onPointClick(d.label, i) : undefined}
+            onClick={onPointClick ? () => onPointClick(d.label, i, "all") : undefined}
           >
             {d.label}
           </text>

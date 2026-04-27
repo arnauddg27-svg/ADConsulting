@@ -90,6 +90,16 @@ export default function SHSparklineCards({ cards, onCardClick, columns = 2 }: SH
             onMouseEnter={() => setHoveredIdx(i)}
             onMouseLeave={() => setHoveredIdx(null)}
             onClick={onCardClick ? () => onCardClick(card.label) : undefined}
+            role={onCardClick ? "button" : undefined}
+            tabIndex={onCardClick ? 0 : undefined}
+            title={onCardClick ? `Open drilldown for ${card.label}` : card.label}
+            aria-label={onCardClick ? `Open drilldown for ${card.label}` : undefined}
+            onKeyDown={onCardClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onCardClick(card.label);
+              }
+            } : undefined}
           >
             {/* Header row */}
             <div className="sh-sparkline-card-header">

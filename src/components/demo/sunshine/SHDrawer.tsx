@@ -1,21 +1,43 @@
 "use client";
 
 import { useEffect } from "react";
-import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHAuditJob } from "@/types/sunshine-homes";
-import { jobs, sales, loans, landDeals, permits, propertyUnits, auditJobs, fmt$, fmtPct } from "@/lib/sunshine-homes-data";
+import type { SHJob, SHSale, SHLoan, SHLandDeal, SHPermit, SHPropertyUnit, SHAuditJob, SHDashboardFilters } from "@/types/sunshine-homes";
+import {
+  jobs as allJobs,
+  sales as allSales,
+  loans as allLoans,
+  landDeals as allLandDeals,
+  permits as allPermits,
+  propertyUnits as allPropertyUnits,
+  auditJobs as allAuditJobs,
+  fmt$,
+  fmtPct,
+  isActiveJob,
+  isOpenSale,
+  isOccupiedUnit,
+  isApprovedPermit,
+  matchFilters,
+} from "@/lib/sunshine-homes-data";
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
   type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "construction-city-time" | "sales-city-time" | "loans-city-time" | "pm-city-time" | "audits-community-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
   value: string;
   label: string;
+  domain?: string; // normalized source domain shown in the drawer contract
+  metric?: string; // normalized metric being drilled into
+  scopeLabel?: string; // exact current row/filter scope
+  filterSummary?: string[]; // active dashboard filters when clicked
   community?: string; // optional community pre-filter for cost drill-downs
   scopedJobCodes?: string[]; // optional context scope to preserve filtered views
+  series?: string; // optional chart series, e.g. actual/planned
+  dateBasis?: string; // optional explanation of the date field behind a click
 }
 
 interface SHDrawerProps {
   detail: DrillDetail | null;
   onClose: () => void;
+  filters?: SHDashboardFilters;
 }
 
 interface Col {
@@ -36,10 +58,20 @@ const landStatusPill = (r: Record<string, unknown>) => {
 const landCols: Col[] = [
   { key: "name", label: "Deal", width: "1.2fr" },
   { key: "city", label: "City", width: "90px" },
+  { key: "entity", label: "Entity", width: "140px" },
   { key: "acres", label: "Acres", width: "55px", align: "right" },
   { key: "lots", label: "Lots", width: "50px", align: "right" },
   { key: "costPerLot", label: "$/Lot", width: "65px", align: "right", render: r => fmt$(Number(r.costPerLot)) },
   { key: "acquisitionCost", label: "Total", width: "75px", align: "right", render: r => fmt$(Number(r.acquisitionCost)) },
+  { key: "roiPct", label: "ROI", width: "55px", align: "right", render: r => fmtPct(Number(r.roiPct ?? 0)) },
+  { key: "dueDiligenceStatus", label: "DD", width: "95px", render: r => {
+    const s = String(r.dueDiligenceStatus ?? "Pending");
+    return <SHPill tone={s === "Complete" ? "good" : s === "In Progress" ? "watch" : "alert"} label={s} />;
+  }},
+  { key: "riskScore", label: "Risk", width: "55px", align: "right", render: r => {
+    const v = Number(r.riskScore ?? 0);
+    return <SHPill tone={v >= 65 ? "alert" : v >= 40 ? "watch" : "good"} label={String(v)} />;
+  }},
   { key: "status", label: "Status", width: "90px", render: landStatusPill },
 ];
 
@@ -57,10 +89,13 @@ const permitCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
   { key: "city", label: "City", width: "80px" },
+  { key: "entity", label: "Entity", width: "140px" },
+  { key: "stage", label: "Stage", width: "90px" },
   { key: "permitType", label: "Type", width: "80px" },
   { key: "submittedDate", label: "Submitted", width: "85px" },
   { key: "daysInReview", label: "Days", width: "50px", align: "right", render: permitDaysPill },
   { key: "status", label: "Status", width: "80px", render: permitStatusPill },
+  { key: "floodZone", label: "Flood", width: "55px" },
 ];
 
 const loanExpPill = (r: Record<string, unknown>) => {
@@ -71,8 +106,12 @@ const loanExpPill = (r: Record<string, unknown>) => {
 const loanCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
+  { key: "stage", label: "Stage", width: "90px" },
   { key: "lender", label: "Lender", width: "120px" },
+  { key: "loanType", label: "Type", width: "95px" },
   { key: "loanAmount", label: "Amount", width: "80px", align: "right", render: r => fmt$(Number(r.loanAmount)) },
+  { key: "salePrice", label: "Collateral", width: "85px", align: "right", render: r => fmt$(Number(r.salePrice ?? 0)) },
+  { key: "ltvPct", label: "LTV", width: "55px", align: "right", render: r => fmtPct(Number(r.ltvPct ?? 0)) },
   { key: "drawPct", label: "Draw %", width: "60px", align: "right", render: r => fmtPct(Number(r.drawPct)) },
   { key: "interestRate", label: "Rate", width: "50px", align: "right", render: r => `${Number(r.interestRate)}%` },
   { key: "daysUntilExpiration", label: "Exp", width: "50px", align: "right", render: loanExpPill },
@@ -86,8 +125,12 @@ const saleStatusPill = (r: Record<string, unknown>) => {
 const saleCols: Col[] = [
   { key: "jobCode", label: "Job", width: "80px" },
   { key: "community", label: "Community", width: "120px" },
+  { key: "entity", label: "Entity", width: "140px" },
   { key: "buyer", label: "Buyer", width: "100px" },
   { key: "salePrice", label: "Price", width: "80px", align: "right", render: r => fmt$(Number(r.salePrice)) },
+  { key: "financingType", label: "Financing", width: "95px" },
+  { key: "lenderName", label: "Lender", width: "120px" },
+  { key: "netProceeds", label: "Net", width: "80px", align: "right", render: r => fmt$(Number(r.netProceeds ?? 0)) },
   { key: "contractDate", label: "Contract", width: "85px" },
   { key: "status", label: "Status", width: "80px", render: saleStatusPill },
 ];
@@ -103,6 +146,9 @@ const pmCols: Col[] = [
   { key: "occupancy", label: "Status", width: "80px", render: pmOccPill },
   { key: "tenant", label: "Tenant", width: "100px", render: r => String(r.tenant ?? "\u2014") },
   { key: "monthlyRent", label: "Rent", width: "70px", align: "right", render: r => fmt$(Number(r.monthlyRent)) },
+  { key: "marketRent", label: "Market", width: "70px", align: "right", render: r => fmt$(Number(r.marketRent)) },
+  { key: "propertyClass", label: "Class", width: "55px" },
+  { key: "noiMonthly", label: "NOI", width: "65px", align: "right", render: r => fmt$(Number(r.noiMonthly ?? 0)) },
   { key: "delinquentAmount", label: "Delinq", width: "65px", align: "right", render: r => {
     const v = Number(r.delinquentAmount);
     return v > 0 ? <span style={{ color: "var(--sh-danger)", fontWeight: 700 }}>{fmt$(v)}</span> : "\u2014";
@@ -264,7 +310,11 @@ function renderTable(columns: Col[], rows: Record<string, unknown>[]) {
             ))}
           </div>
         ))}
-        {rows.length === 0 && <div style={{ padding: 16, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>No data</div>}
+        {rows.length === 0 && (
+          <div style={{ padding: 18, fontSize: 11, color: "var(--sh-text-muted)", fontStyle: "italic" }}>
+            No rows match this exact click and the current filters.
+          </div>
+        )}
       </div>
     </div>
   );
@@ -881,7 +931,7 @@ function renderCostBreakdown(
 
 /* ── Main component ──────────────────────────────────────────────── */
 
-export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
+export default function SHDrawer({ detail, onClose, filters }: SHDrawerProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -889,6 +939,17 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
   }, [onClose]);
 
   if (!detail) return null;
+
+  const scopedJobSet = detail.scopedJobCodes ? new Set(detail.scopedJobCodes) : null;
+  const jobs = scopedJobSet
+    ? allJobs.filter(j => scopedJobSet.has(j.jobCode))
+    : filters ? allJobs.filter(j => matchFilters(j, filters)) : allJobs;
+  const sales = filters ? allSales.filter(s => matchFilters(s, filters)) : allSales;
+  const loans = filters ? allLoans.filter(l => matchFilters(l, filters)) : allLoans;
+  const landDeals = filters ? allLandDeals.filter(d => matchFilters(d, filters)) : allLandDeals;
+  const permits = filters ? allPermits.filter(p => matchFilters(p, filters)) : allPermits;
+  const propertyUnits = filters ? allPropertyUnits.filter(u => matchFilters(u, filters)) : allPropertyUnits;
+  const auditJobs = filters ? allAuditJobs.filter(a => matchFilters(a, filters)) : allAuditJobs;
 
   // Custom-render modes — each replaces the default table with a tailored view.
   let proFormaAudit: SHAuditJob | null = null;
@@ -915,7 +976,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         detail.value === "healthy-progress"
       ) {
         const filtered = detail.value === "active"
-          ? jobs.filter(j => j.stage !== "Closing" && j.stage !== "Complete")
+          ? jobs.filter(isActiveJob)
           : detail.value === "on-schedule"
             ? jobs.filter(j => j.stage === "Closing" || j.daysInCurrentPhase <= 35)
             : detail.value === "within-budget"
@@ -1048,7 +1109,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "cycle-metric": {
       const completed = jobs.filter(j => j.coDate);
-      const inConstruction = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95);
+      const inConstruction = jobs.filter(isActiveJob);
       let result = completed;
       title = detail.label;
       subtitle = `${completed.length} completed jobs`;
@@ -1135,18 +1196,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         const key = `${d.getFullYear()} Q${q}`;
         return key === detail.value;
       });
-      // If a cohort is too thin, expand to same-year completed jobs for a more useful sample.
-      const cohortYear = Number(String(detail.value).split(" ")[0]);
-      const sameYearJobs = jobs.filter(j => j.coDate && new Date(j.startDate).getFullYear() === cohortYear);
-      let result = cohortJobs;
-      let subtitleMode: "cohort" | "year" | "all" = "cohort";
-      if (result.length > 0 && result.length < 5 && sameYearJobs.length >= 5) {
-        result = sameYearJobs;
-        subtitleMode = "year";
-      } else if (result.length === 0) {
-        result = jobs.filter(j => j.coDate);
-        subtitleMode = "all";
-      }
+      const result = cohortJobs;
       /* Helper: days between two date strings (null-safe) */
       const daysBetween = (a: string | null, b: string | null) => {
         if (!a || !b) return null;
@@ -1154,12 +1204,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         return Math.round(ms / 86400000);
       };
       title = `${detail.label}`;
-      subtitle =
-        subtitleMode === "cohort"
-          ? `${result.length} completed jobs`
-          : subtitleMode === "year"
-            ? `${result.length} completed jobs (expanded to ${cohortYear} year sample)`
-            : `${result.length} completed jobs (all — cohort empty)`;
+      subtitle = `${result.length} completed jobs · Date basis: start date`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
@@ -1202,6 +1247,48 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       // donut segment (Labor, Materials, Subcontractors, etc.) — fall back to
       // "budget" mode which shows everything side by side.
       const modeValue = detail.value.toLowerCase();
+      if (modeValue === "wip") {
+        title = detail.label;
+        subtitle = `${filtered.length} jobs sorted by WIP balance`;
+        columns = [
+          { key: "jobCode", label: "Job", width: "75px" },
+          { key: "community", label: "Community", width: "120px" },
+          { key: "stage", label: "Stage", width: "95px" },
+          { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+          { key: "wipBalance", label: "WIP", width: "80px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+          { key: "projectedFinalCost", label: "Projected", width: "90px", align: "right", render: r => fmt$(Number(r.projectedFinalCost)) },
+        ];
+        rows = [...filtered].sort((a, b) => b.wipBalance - a.wipBalance) as unknown as Record<string, unknown>[];
+        break;
+      }
+      const categoryAmount = (job: SHJob) => {
+        if (detail.value === "Vertical") return job.verticalActual;
+        if (detail.value === "Lot / Land") return job.lotCost;
+        if (detail.value === "Site Work") return job.sidewalkActual;
+        if (detail.value === "Permits & Fees") return job.permittingActual;
+        if (detail.value === "Overhead / Other") {
+          return Math.max(0, job.projectedFinalCost - job.verticalActual - job.lotCost - job.sidewalkActual - job.permittingActual);
+        }
+        return null;
+      };
+      const firstCategoryAmount = filtered[0] ? categoryAmount(filtered[0]) : null;
+      if (firstCategoryAmount !== null) {
+        const rowsWithCategory = filtered
+          .map(job => ({ ...job, categoryAmount: categoryAmount(job) ?? 0 }))
+          .sort((a, b) => b.categoryAmount - a.categoryAmount);
+        title = detail.label;
+        subtitle = `${rowsWithCategory.length} jobs · ${detail.value} cost detail`;
+        columns = [
+          { key: "jobCode", label: "Job", width: "75px" },
+          { key: "community", label: "Community", width: "120px" },
+          { key: "stage", label: "Stage", width: "95px" },
+          { key: "categoryAmount", label: detail.value, width: "110px", align: "right", render: r => fmt$(Number(r.categoryAmount)) },
+          { key: "projectedFinalCost", label: "Projected", width: "90px", align: "right", render: r => fmt$(Number(r.projectedFinalCost)) },
+          { key: "marginPct", label: "Margin", width: "65px", align: "right", render: r => fmtPct(Number(r.marginPct)) },
+        ];
+        rows = rowsWithCategory as unknown as Record<string, unknown>[];
+        break;
+      }
       const mode: "budget" | "actual" | "variance" | "margin" =
         modeValue === "actual" ? "actual" :
         modeValue === "variance" ? "variance" :
@@ -1232,7 +1319,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
       title = detail.label;
       const monthLabel = monthIdx >= 0 ? monthOrder[monthIdx] : detail.value;
-      subtitle = `${result.length} jobs started in ${monthLabel}`;
+      subtitle = `${result.length} jobs started in ${monthLabel}${detail.series && detail.series !== "all" ? ` · ${detail.series}` : ""}${detail.dateBasis ? ` · Date basis: ${detail.dateBasis}` : ""}`;
       columns = [
         { key: "jobCode", label: "Job", width: "70px" },
         { key: "community", label: "Community", width: "110px" },
@@ -1257,11 +1344,10 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         d.status === detail.value || d.name === detail.value ||
         normStatus(d.status) === normStatus(detail.value)
       );
-      const result = matched.length > 0 ? matched : landDeals;
       title = detail.label;
-      subtitle = `${result.length} land deals`;
+      subtitle = `${matched.length} land deals`;
       columns = landCols;
-      rows = result as unknown as Record<string, unknown>[];
+      rows = matched as unknown as Record<string, unknown>[];
       break;
     }
 
@@ -1271,11 +1357,11 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       if (detail.value === "active-deals") {
         result = result.filter(d => d.status === "under-contract");
       } else if (detail.value === "total-lots") {
-        result = result.sort((a, b) => b.lots - a.lots);
+        result = result.filter(d => d.status !== "cancelled").sort((a, b) => b.lots - a.lots);
       } else if (detail.value === "invested") {
-        result = result.sort((a, b) => b.acquisitionCost - a.acquisitionCost);
+        result = result.filter(d => d.status !== "cancelled").sort((a, b) => b.acquisitionCost - a.acquisitionCost);
       } else if (detail.value === "avg-cost") {
-        result = result.sort((a, b) => b.costPerLot - a.costPerLot);
+        result = result.filter(d => d.status === "under-contract").sort((a, b) => b.costPerLot - a.costPerLot);
       } else {
         const moneyRange = parseMoneyRange(detail.value);
         const quarter = parseQuarterLabel(detail.value);
@@ -1295,18 +1381,17 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "land-city-year": {
       const [city, token] = parsePipe(detail.value);
-      const matched = landDeals.filter(d => d.city === city && (!token || matchTimeToken(d.contractDate, token)));
-      const result = matched.length > 0 ? matched : landDeals;
+      const matched = landDeals.filter(d => (!city || d.city === city) && (!token || matchTimeToken(d.contractDate, token)));
       title = detail.label;
-      subtitle = `${result.length} land deals`;
+      subtitle = `${matched.length} land deals · Date basis: contract date`;
       columns = landCols;
-      rows = result as unknown as Record<string, unknown>[];
+      rows = matched as unknown as Record<string, unknown>[];
       break;
     }
 
     case "construction-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = jobs.filter(j => j.city === city && (!token || matchTimeToken(j.startDate, token)));
+      const matched = jobs.filter(j => (!city || j.city === city) && (!token || matchTimeToken(j.startDate, token)));
       title = detail.label;
       subtitle = `${matched.length} construction jobs`;
       columns = [
@@ -1349,7 +1434,9 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "permit-status": {
       const v = detail.value.toLowerCase().replace(/\s+/g, "-");
       /* "in-progress" means in-review + pending; "all"/"total"/"avg-days" means everything */
-      const statusPermits = (v === "all" || v === "total" || v === "avg-days") ? permits
+      const statusPermits = (v === "all" || v === "total") ? permits
+        : v === "avg-days" ? permits.filter(isApprovedPermit)
+        : v === "approved" || v === "approved-issued" ? permits.filter(isApprovedPermit)
         : v === "in-progress" ? permits.filter(p => p.status === "in-review" || p.status === "pending")
         : permits.filter(p => p.status === v || p.status.replace(/-/g, " ") === detail.value.toLowerCase());
       title = `${detail.value} Permits`;
@@ -1374,7 +1461,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "permit-city-year": {
       const [city, token] = parsePipe(detail.value);
       const matched = permits.filter(p => {
-        const cityMatch = p.city === city;
+        const cityMatch = !city || p.city === city;
         const timeMatch = token ? matchTimeToken(p.submittedDate, token) : true;
         return cityMatch && timeMatch;
       });
@@ -1388,7 +1475,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "permit-city-status": {
       const [city, status] = parsePipe(detail.value);
       const matched = permits.filter(p => {
-        const cityMatch = p.city === city;
+        const cityMatch = !city || p.city === city;
         const statusMatch = status ? normStatus(p.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
       });
@@ -1428,12 +1515,26 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           { field: "Job Code", value: p.jobCode },
           { field: "Community", value: p.community },
           { field: "City", value: p.city },
+          { field: "County", value: p.county ?? "\u2014" },
+          { field: "Entity", value: p.entity ?? "\u2014" },
+          { field: "Plan", value: p.plan ?? "\u2014" },
+          { field: "Superintendent", value: p.superintendent ?? "\u2014" },
+          { field: "Construction Stage", value: p.stage ?? "\u2014" },
+          { field: "Completion", value: p.completionPct !== undefined ? fmtPct(p.completionPct) : "\u2014" },
           { field: "Permit Type", value: p.permitType },
           { field: "Sub-Type", value: p.permitSubType },
           { field: "Submitted", value: p.submittedDate },
           { field: "Approved", value: p.approvedDate ?? "\u2014" },
           { field: "Issued", value: p.issuedDate ?? "\u2014" },
           { field: "Days in Review", value: `${p.daysInReview}d` },
+          { field: "Site Plan Cycle", value: `${p.sitePlanCycleDays ?? 0}d` },
+          { field: "House Plan Cycle", value: `${p.housePlanCycleDays ?? 0}d` },
+          { field: "Septic Cycle", value: `${p.septicCycleDays ?? 0}d` },
+          { field: "Building Dept Cycle", value: `${p.buildingDeptCycleDays ?? 0}d` },
+          { field: "JIO Approval Cycle", value: `${p.jioApprovalCycleDays ?? 0}d` },
+          { field: "Gopher Tortoise", value: p.gopherTortoise ? "Yes" : "No" },
+          { field: "Tree Survey", value: p.treeSurvey ? "Yes" : "No" },
+          { field: "Flood Zone", value: p.floodZone ?? "\u2014" },
           { field: "Status", value: p.status.replace(/-/g, " ") },
         ];
       }
@@ -1471,11 +1572,24 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           { field: "Job Code", value: l.jobCode },
           { field: "Community", value: l.community },
           { field: "City", value: l.city },
+          { field: "Entity", value: l.entity ?? "\u2014" },
+          { field: "Plan", value: l.plan ?? "\u2014" },
+          { field: "Stage", value: l.stage ?? "\u2014" },
+          { field: "Completion", value: l.completionPct !== undefined ? fmtPct(l.completionPct) : "\u2014" },
           { field: "Lender", value: l.lender },
+          { field: "Loan Type", value: l.loanType ?? "\u2014" },
           { field: "Loan Amount", value: fmt$(l.loanAmount) },
+          { field: "Collateral / Sale Price", value: l.salePrice ? fmt$(l.salePrice) : "\u2014" },
+          { field: "LTV", value: l.ltvPct !== undefined ? fmtPct(l.ltvPct) : "\u2014" },
           { field: "Total Drawn", value: fmt$(l.totalDrawn) },
           { field: "Draw %", value: fmtPct(l.drawPct) },
           { field: "Interest Rate", value: `${l.interestRate}%` },
+          { field: "Monthly Interest", value: l.monthlyInterest ? fmt$(l.monthlyInterest) : "\u2014" },
+          { field: "Accrued Interest", value: l.accruedInterest ? fmt$(l.accruedInterest) : "\u2014" },
+          { field: "Draw Requests", value: l.drawRequests ?? "\u2014" },
+          { field: "Lender Contact", value: l.lenderContact ?? "\u2014" },
+          { field: "Loan Closing Date", value: l.loanClosingDate ?? "\u2014" },
+          { field: "Last Payment Date", value: l.lastPaymentDate ?? "\u2014" },
           { field: "Expiration Date", value: l.expirationDate },
           { field: "Days Until Exp", value: `${l.daysUntilExpiration}d` },
         ];
@@ -1533,7 +1647,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "loans-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = loans.filter(l => l.city === city && (!token || matchTimeToken(l.startDate, token)));
+      const matched = loans.filter(l => (!city || l.city === city) && (!token || matchTimeToken(l.startDate, token)));
       title = detail.label;
       subtitle = `${matched.length} loans`;
       columns = loanCols;
@@ -1577,8 +1691,16 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           { field: "Buyer", value: s.buyer },
           { field: "Agent", value: s.agent },
           { field: "Sale Price", value: fmt$(s.salePrice) },
+          { field: "Deposit", value: s.deposit ? fmt$(s.deposit) : "\u2014" },
+          { field: "Financing", value: s.financingType ?? "\u2014" },
+          { field: "Lender", value: s.lenderName ?? "\u2014" },
+          { field: "Title Company", value: s.titleCompany ?? "\u2014" },
+          { field: "Closing Attorney", value: s.closingAttorney ?? "\u2014" },
+          { field: "Commission", value: s.commissionAmount ? `${fmt$(s.commissionAmount)} (${fmtPct(s.commissionPct ?? 0)})` : "\u2014" },
+          { field: "Net Proceeds", value: s.netProceeds ? fmt$(s.netProceeds) : "\u2014" },
           { field: "Contract Date", value: s.contractDate },
           { field: "Closing Date", value: s.closingDate ?? "\u2014" },
+          { field: "Contract to Close", value: s.contractToCloseDays ? `${s.contractToCloseDays}d` : "\u2014" },
           { field: "Status", value: s.status },
         ];
       }
@@ -1607,11 +1729,11 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       title = detail.label;
       let result = [...sales];
       if (detail.value === "total-sales") {
-        result = result.sort((a, b) => b.salePrice - a.salePrice);
+        result = result.filter(isOpenSale).sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "total-value" || detail.value === "avg-price") {
-        result = result.sort((a, b) => b.salePrice - a.salePrice);
+        result = result.filter(isOpenSale).sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "pending-close") {
-        result = result.filter(s => s.status === "pending" || s.status === "active");
+        result = result.filter(s => s.status === "pending");
       } else {
         const moneyRange = parseMoneyRange(detail.value);
         const quarter = parseQuarterLabel(detail.value);
@@ -1632,7 +1754,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     case "sale-city-status": {
       const [city, status] = parsePipe(detail.value);
       const matched = sales.filter(s => {
-        const cityMatch = s.city === city;
+        const cityMatch = !city || s.city === city;
         const statusMatch = status ? normStatus(s.status) === normStatus(status) : true;
         return cityMatch && statusMatch;
       });
@@ -1645,7 +1767,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "sales-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = sales.filter(s => s.city === city && (!token || matchTimeToken(s.contractDate, token)));
+      const matched = sales.filter(s => (!city || s.city === city) && (!token || matchTimeToken(s.contractDate, token)));
       title = detail.label;
       subtitle = `${matched.length} sales`;
       columns = saleCols;
@@ -1690,15 +1812,31 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           { field: "Address", value: u.address },
           { field: "Community", value: u.community },
           { field: "City", value: u.city },
+          { field: "County", value: u.county ?? "\u2014" },
           { field: "Entity", value: u.entity },
           { field: "Beds/Baths", value: u.bedsBaths },
           { field: "Sq Ft", value: `${u.sqft.toLocaleString()} sf` },
+          { field: "Property Class", value: `Class ${u.propertyClass}` },
+          { field: "Year Built", value: u.yearBuilt ?? "\u2014" },
+          { field: "Lot Sq Ft", value: u.lotSqft ? `${u.lotSqft.toLocaleString()} sf` : "\u2014" },
           { field: "Monthly Rent", value: fmt$(u.monthlyRent) },
           { field: "Market Rent", value: fmt$(u.marketRent) },
+          { field: "NOI / Month", value: u.noiMonthly ? fmt$(u.noiMonthly) : "\u2014" },
+          { field: "Cap Rate", value: u.capRatePct ? fmtPct(u.capRatePct) : "\u2014" },
+          { field: "Estimated Value", value: u.estimatedValue ? fmt$(u.estimatedValue) : "\u2014" },
+          { field: "HOA / Month", value: u.hoaMonthly ? fmt$(u.hoaMonthly) : "\u2014" },
+          { field: "Property Tax / Year", value: u.propertyTaxAnnual ? fmt$(u.propertyTaxAnnual) : "\u2014" },
+          { field: "Insurance / Year", value: u.insuranceAnnual ? fmt$(u.insuranceAnnual) : "\u2014" },
+          { field: "Maintenance YTD", value: u.maintenanceYtd ? fmt$(u.maintenanceYtd) : "\u2014" },
           { field: "Deposit", value: fmt$(u.deposit) },
           { field: "Mgmt %", value: fmtPct(u.managementPct) },
           { field: "Occupancy", value: u.occupancy.replace(/-/g, " ") },
           { field: "Tenant", value: u.tenant ?? "\u2014" },
+          { field: "Last Inspection", value: u.lastInspectionDate ?? "\u2014" },
+          { field: "Next Inspection", value: u.nextInspectionDate ?? "\u2014" },
+          { field: "Vacancy Days", value: u.vacancyDays ? `${u.vacancyDays}d` : "0" },
+          { field: "Turnovers", value: u.turnoverCount ?? 0 },
+          { field: "Owner", value: u.owner ?? "\u2014" },
           { field: "Lease End", value: u.leaseEnd ?? "\u2014" },
           { field: "Delinquent", value: u.delinquentAmount > 0 ? fmt$(u.delinquentAmount) : "\u2014" },
           { field: "Days Past Due", value: u.daysPastDue > 0 ? `${u.daysPastDue}d` : "\u2014" },
@@ -1725,15 +1863,14 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
       if (detail.value === "total-units") {
         result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
       } else if (detail.value === "occupancy") {
-        result = result.filter(u => u.occupancy === "leased");
+        result = result.filter(isOccupiedUnit);
       } else if (detail.value === "revenue") {
         result = result.sort((a, b) => b.monthlyRent - a.monthlyRent);
       } else if (detail.value === "delinquent") {
         result = result.filter(u => u.delinquentAmount > 0).sort((a, b) => b.delinquentAmount - a.delinquentAmount);
       } else if (/^class\s+[abc]$/i.test(detail.value)) {
         const cls = detail.value.trim().toUpperCase().slice(-1);
-        const classIndex = cls === "A" ? 1 : cls === "B" ? 2 : 0;
-        result = result.filter(u => Number(u.id) % 3 === classIndex);
+        result = result.filter(u => u.propertyClass === cls);
       } else {
         const moneyRange = parseMoneyRange(detail.value);
         const quarter = parseQuarterLabel(detail.value);
@@ -1765,7 +1902,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "pm-city-time": {
       const [city, token] = parsePipe(detail.value);
-      const matched = propertyUnits.filter(u => u.city === city && (!token || matchTimeToken(u.leaseStart, token)));
+      const matched = propertyUnits.filter(u => (!city || u.city === city) && (!token || matchTimeToken(u.leaseStart, token)));
       title = detail.label;
       subtitle = `${matched.length} units`;
       columns = pmCols;
@@ -1793,6 +1930,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         result = result.sort((a, b) => b.salePrice - a.salePrice);
       } else if (detail.value === "total-profit") {
         result = result.sort((a, b) => b.netProfit - a.netProfit);
+      } else if (detail.value === "contingency-watch") {
+        result = result.filter(a => a.contingency > 3500).sort((a, b) => b.contingency - a.contingency);
       } else if (detail.value === "Vertical") {
         result = result.sort((a, b) => b.vertical - a.vertical);
       } else if (detail.value === "Lot / Land") {
@@ -1840,7 +1979,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "audits-community-time": {
       const [community, token] = parsePipe(detail.value);
-      const matched = auditJobs.filter(a => a.community === community && (!token || matchTimeToken(a.startDate, token)));
+      const matched = auditJobs.filter(a => (!community || a.community === community) && (!token || matchTimeToken(a.startDate, token)));
       title = detail.label;
       subtitle = `${matched.length} audit jobs`;
       columns = auditCols;
@@ -1860,6 +1999,14 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
     }
   }
 
+  const contractChips = [
+    detail.domain ? `Domain: ${detail.domain}` : null,
+    detail.metric ? `Metric: ${detail.metric}` : null,
+    detail.dateBasis ? `Date basis: ${detail.dateBasis}` : null,
+    detail.series ? `Series: ${detail.series}` : null,
+    detail.scopeLabel ? `Scope: ${detail.scopeLabel}` : null,
+  ].filter(Boolean) as string[];
+
   return (
     <>
       {/* Backdrop overlay */}
@@ -1876,8 +2023,8 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         onClick={e => e.stopPropagation()}
         style={{
           position: "absolute", top: 0, right: 0, bottom: 0,
-          width: "clamp(860px, 82vw, 1400px)",
-          maxWidth: "calc(100% - 4px)",
+          width: "clamp(960px, 88vw, 1560px)",
+          maxWidth: "calc(100% - 8px)",
           background: "var(--sh-bg-surface-raised)",
           borderLeft: "1px solid var(--sh-border)",
           boxShadow: "-8px 0 32px rgba(0,0,0,0.5)",
@@ -1892,9 +2039,35 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
           padding: "14px 16px 10px", borderBottom: "1px solid var(--sh-border)",
           display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexShrink: 0,
         }}>
-          <div>
+          <div style={{ minWidth: 0, paddingRight: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--sh-text-primary)" }}>{title}</div>
             {subtitle && <div style={{ fontSize: 11, color: "var(--sh-text-secondary)", marginTop: 2 }}>{subtitle}</div>}
+            {contractChips.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {contractChips.map(chip => (
+                  <span
+                    key={chip}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: "var(--sh-text-secondary)",
+                      background: "var(--sh-bg-surface)",
+                      border: "1px solid var(--sh-border-dim)",
+                      borderRadius: 999,
+                      padding: "3px 8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            )}
+            {detail.filterSummary && detail.filterSummary.length > 0 && (
+              <div style={{ fontSize: 10, color: "var(--sh-text-muted)", marginTop: 6 }}>
+                Active filters: {detail.filterSummary.join(" · ")}
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{

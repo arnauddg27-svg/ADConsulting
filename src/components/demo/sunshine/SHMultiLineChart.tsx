@@ -157,6 +157,7 @@ export default function SHMultiLineChart({
                   strokeWidth="1.5"
                   filter={isHovered ? "url(#ml-glow)" : undefined}
                   style={{ transition: "r 0.15s", cursor: onPointClick ? "pointer" : "default" }}
+                  aria-label={onPointClick ? `Open drilldown for ${line.label} ${d.x}` : undefined}
                   onMouseEnter={() => setHovered({ line: li, point: pi })}
                   onClick={onPointClick ? () => onPointClick(line.label, d.x, d.y) : undefined}
                 />

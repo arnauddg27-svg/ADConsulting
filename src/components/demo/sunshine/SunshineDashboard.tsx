@@ -6,7 +6,6 @@ import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
 import FilterBar from "./FilterBar";
-import SHBreadcrumb from "./SHBreadcrumb";
 import SHDrawer from "./SHDrawer";
 import SHDataContextStrip from "./SHDataContextStrip";
 import type { DrillDetail } from "./SHDrawer";
@@ -136,7 +135,6 @@ export default function SunshineDashboard() {
     }
   };
 
-  const onDrill = useCallback((detail: DrillDetail) => setDrawerDetail(detail), []);
   const closeDrawer = useCallback(() => setDrawerDetail(null), []);
 
   const filterCount = useMemo(() => {
@@ -155,16 +153,56 @@ export default function SunshineDashboard() {
   }, [filters]);
 
   const contextMeta = useMemo(() => {
-    if (activeTab.startsWith("construction") && activeTab !== "construction-subdivisions") return { scopeLabel: "Construction Jobs", rows: filteredJobs.length };
-    if (activeTab === "construction-subdivisions") return { scopeLabel: "Subdivision Portfolio", rows: filteredSubs.length };
-    if (activeTab.startsWith("sales")) return { scopeLabel: "Sales Contracts", rows: filteredSales.length };
-    if (activeTab.startsWith("loans")) return { scopeLabel: "Construction Loans", rows: filteredLoans.length };
-    if (activeTab.startsWith("land")) return { scopeLabel: "Land Deals", rows: filteredLand.length };
-    if (activeTab.startsWith("permitting")) return { scopeLabel: "Permit Records", rows: filteredPermits.length };
-    if (activeTab.startsWith("pm")) return { scopeLabel: "Property Units", rows: filteredUnits.length };
-    if (activeTab.startsWith("audits")) return { scopeLabel: "Audit Jobs", rows: filteredAudits.length };
-    return { scopeLabel: "Dashboard Data", rows: 0 };
+    if (activeTab.startsWith("construction") && activeTab !== "construction-subdivisions") return { scopeLabel: "Construction Jobs", rows: filteredJobs.length, dateBasis: "Job start date" };
+    if (activeTab === "construction-subdivisions") return { scopeLabel: "Subdivision Portfolio", rows: filteredSubs.length, dateBasis: "Project start date" };
+    if (activeTab.startsWith("sales")) return { scopeLabel: "Sales Contracts", rows: filteredSales.length, dateBasis: "Contract date" };
+    if (activeTab.startsWith("loans")) return { scopeLabel: "Construction Loans", rows: filteredLoans.length, dateBasis: "Loan start date" };
+    if (activeTab.startsWith("land")) return { scopeLabel: "Land Deals", rows: filteredLand.length, dateBasis: "Contract date" };
+    if (activeTab.startsWith("permitting")) return { scopeLabel: "Permit Records", rows: filteredPermits.length, dateBasis: "Submitted date" };
+    if (activeTab.startsWith("pm")) return { scopeLabel: "Property Units", rows: filteredUnits.length, dateBasis: "Lease start date" };
+    if (activeTab.startsWith("audits")) return { scopeLabel: "Audit Jobs", rows: filteredAudits.length, dateBasis: "Job start date" };
+    return { scopeLabel: "Dashboard Data", rows: 0, dateBasis: undefined };
   }, [activeTab, filteredAudits.length, filteredJobs.length, filteredLand.length, filteredLoans.length, filteredPermits.length, filteredSales.length, filteredSubs.length, filteredUnits.length]);
+
+  const filterSummary = useMemo(() => {
+    const summary: string[] = [];
+    if (filters.city) summary.push(`City: ${filters.city}`);
+    if (filters.entity) summary.push(`Entity: ${filters.entity}`);
+    if (filters.community) summary.push(`Community: ${filters.community}`);
+    if (filters.stage) summary.push(`Stage: ${filters.stage}`);
+    if (filters.status) summary.push(`Status: ${filters.status}`);
+    if (filters.drillYear) summary.push(`Year: ${filters.drillYear}`);
+    if (filters.drillQuarter) summary.push(`Quarter: Q${filters.drillQuarter}`);
+    if (filters.drillMonth) summary.push(`Month: ${new Date(2000, filters.drillMonth - 1).toLocaleString("en-US", { month: "short" })}`);
+    if (filters.timePeriod !== "all") summary.push(`Period: ${filters.timePeriod}`);
+    return summary;
+  }, [filters]);
+
+  const domainLabel = useMemo(() => {
+    if (activeTab.startsWith("construction")) return "Construction";
+    if (activeTab.startsWith("sales")) return "Sales";
+    if (activeTab.startsWith("loans")) return "Loans";
+    if (activeTab.startsWith("land")) return "Land";
+    if (activeTab.startsWith("permitting")) return "Permitting";
+    if (activeTab.startsWith("pm")) return "Property Management";
+    if (activeTab.startsWith("audits")) return "Audits";
+    return "Dashboard";
+  }, [activeTab]);
+
+  const onDrill = useCallback((detail: DrillDetail) => {
+    const labelMetric = detail.label.split("—")[0]?.trim() || detail.type;
+    const scopedCount = detail.scopedJobCodes?.length;
+    const scopeLabel = detail.scopeLabel ??
+      `${contextMeta.scopeLabel} · ${scopedCount ? `${scopedCount} scoped jobs` : `${contextMeta.rows} current rows`}`;
+    setDrawerDetail({
+      ...detail,
+      domain: detail.domain ?? domainLabel,
+      metric: detail.metric ?? labelMetric,
+      dateBasis: detail.dateBasis ?? contextMeta.dateBasis,
+      scopeLabel,
+      filterSummary,
+    });
+  }, [contextMeta.dateBasis, contextMeta.rows, contextMeta.scopeLabel, domainLabel, filterSummary]);
 
   const tabContent = () => {
     switch (activeTab) {
@@ -255,13 +293,12 @@ export default function SunshineDashboard() {
         <FilterBar filters={filters} onChange={setFilters} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
-          <SHBreadcrumb filters={filters} onClear={clearFilter} onClearAll={() => setFilters(EMPTY_FILTERS)} />
-          <SHDataContextStrip scopeLabel={contextMeta.scopeLabel} rows={contextMeta.rows} filterCount={filterCount} />
+          <SHDataContextStrip scopeLabel={contextMeta.scopeLabel} rows={contextMeta.rows} filterCount={filterCount} dateBasis={contextMeta.dateBasis} />
           <Suspense fallback={<TabLoader />}>
             {tabContent()}
           </Suspense>
         </div>
-        <SHDrawer detail={drawerDetail} onClose={closeDrawer} />
+        <SHDrawer detail={drawerDetail} onClose={closeDrawer} filters={filters} />
       </div>
     </div>
   );

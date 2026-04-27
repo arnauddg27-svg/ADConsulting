@@ -82,6 +82,7 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
             onClick={onSegmentClick ? () => onSegmentClick(arc.label) : undefined}
+            aria-label={onSegmentClick ? `Open drilldown for ${arc.label}` : undefined}
           />
         ))}
 
@@ -102,6 +103,16 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
             onClick={onSegmentClick ? () => onSegmentClick(seg.label) : undefined}
+            role={onSegmentClick ? "button" : undefined}
+            tabIndex={onSegmentClick ? 0 : undefined}
+            title={onSegmentClick ? `Open drilldown for ${seg.label}` : undefined}
+            aria-label={onSegmentClick ? `Open drilldown for ${seg.label}` : undefined}
+            onKeyDown={onSegmentClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSegmentClick(seg.label);
+              }
+            } : undefined}
             style={{ opacity: hovered !== null && hovered !== i ? 0.5 : 1, transition: "opacity 0.15s" }}
           >
             <span

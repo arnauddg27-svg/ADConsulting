@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHAuditJob, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getAuditKPIs, getAuditCostBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getAuditKPIs, getAuditCostBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -38,6 +38,16 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       { cumulative: true, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
   ), [audits]);
+  const auditCountTrend = useMemo(() => buildQuarterTrend(audits, a => a.startDate, () => 1, { cumulative: true, maxPoints: 8 }), [audits]);
+  const revenueTrend = useMemo(() => (
+    buildQuarterTrend(audits, a => a.startDate, a => a.salePrice, { cumulative: true, maxPoints: 8 })
+      .map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [audits]);
+  const marginTrend = useMemo(() => buildQuarterAverageTrend(audits, a => a.startDate, a => a.netMargin, { maxPoints: 8 }), [audits]);
+  const auditDelta = formatTrendDelta(trendValues(auditCountTrend));
+  const revenueDelta = formatTrendDelta(revenueTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const profitDelta = formatTrendDelta(profitTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const marginDelta = formatTrendDelta(trendValues(marginTrend), { unit: "pct" });
 
   /* Margin distribution */
   const marginBuckets = [
@@ -129,10 +139,10 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={[15, 18, 20, 22, 24, 26, 28, 30, 32, kpis.count]} delta="+5 this quarter" deltaDir="up" onClick={() => onDrill({ type: "audit-cost", value: "audited-jobs", label: `Audited Jobs — ${fmtN(kpis.count)}` })} />
-        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={[8.5, 9.2, 10.1, 11.0, 12.2, 13.5, 14.1, 15.0, 15.8, 16.5]} delta="+8% YoY" deltaDir="up" onClick={() => onDrill({ type: "audit-cost", value: "total-revenue", label: `Total Revenue — ${fmt$(kpis.totalRevenue)}` })} />
-        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={[1.2, 1.4, 1.3, 1.5, 1.6, 1.8, 1.7, 2.0, 2.1, 2.3]} delta={kpis.totalProfit > 0 ? "Profitable" : "Loss"} deltaDir={kpis.totalProfit > 0 ? "up" : "down"} onClick={() => onDrill({ type: "audit-cost", value: "total-profit", label: `Total Profit — ${fmt$(kpis.totalProfit)}` })} />
-        <SHKpiCard label="Avg Net Margin" value={fmtPct(kpis.avgMargin)} accent={kpis.avgMargin >= 15 ? "#14b8a6" : kpis.avgMargin >= 5 ? "#efb562" : "#f46a6a"} progress={Math.min(100, Math.round(kpis.avgMargin * 3))} delta={kpis.atRisk > 0 ? `${kpis.atRisk} at-risk` : "All profitable"} deltaDir={kpis.atRisk > 0 ? "down" : "up"} onClick={() => onDrill({ type: "margin-bucket", value: "avg-margin", label: `Avg Net Margin — ${fmtPct(kpis.avgMargin)}` })} />
+        <SHKpiCard label="Audited Jobs" value={fmtN(kpis.count)} sub="With cost data" sparkline={trendValues(auditCountTrend)} delta={auditDelta.delta} deltaDir={auditDelta.deltaDir} onClick={() => onDrill({ type: "audit-cost", value: "audited-jobs", label: `Audited Jobs — ${fmtN(kpis.count)}` })} />
+        <SHKpiCard label="Total Revenue" value={fmt$(kpis.totalRevenue)} accent="#22d3ee" sparkline={revenueTrend.map(p => p.value)} delta={revenueDelta.delta} deltaDir={revenueDelta.deltaDir} onClick={() => onDrill({ type: "audit-cost", value: "total-revenue", label: `Total Revenue — ${fmt$(kpis.totalRevenue)}` })} />
+        <SHKpiCard label="Total Profit" value={fmt$(kpis.totalProfit)} accent={kpis.totalProfit > 0 ? "#14b8a6" : "#f46a6a"} sparkline={profitTrend.map(p => p.value)} delta={profitDelta.delta} deltaDir={profitDelta.deltaDir} onClick={() => onDrill({ type: "audit-cost", value: "total-profit", label: `Total Profit — ${fmt$(kpis.totalProfit)}` })} />
+        <SHKpiCard label="Avg Net Margin" value={fmtPct(kpis.avgMargin)} accent={kpis.avgMargin >= 15 ? "#14b8a6" : kpis.avgMargin >= 5 ? "#efb562" : "#f46a6a"} progress={Math.min(100, Math.round(kpis.avgMargin * 3))} sparkline={trendValues(marginTrend)} delta={kpis.atRisk > 0 ? `${kpis.atRisk} at-risk` : marginDelta.delta} deltaDir={kpis.atRisk > 0 ? "down" : marginDelta.deltaDir} onClick={() => onDrill({ type: "margin-bucket", value: "avg-margin", label: `Avg Net Margin — ${fmtPct(kpis.avgMargin)}` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -176,9 +186,18 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "audits-community-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "audits-community-time", value: `|${col}`, label: `All Communities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "audits-community-time", value: `|${col}`, label: `All Communities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "audits-community-time", value: `|${col}`, label: `All Communities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

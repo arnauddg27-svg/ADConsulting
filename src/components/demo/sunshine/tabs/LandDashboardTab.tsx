@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHLandDeal, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getLandKPIs, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHRankedBars from "../SHRankedBars";
@@ -89,6 +89,11 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
       { cumulative: true, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
   ), [nonCancelled]);
+  const lotsTrend = useMemo(() => buildQuarterTrend(nonCancelled, d => d.contractDate, d => d.lots, { cumulative: true, maxPoints: 8 }), [nonCancelled]);
+  const costLotTrend = useMemo(() => buildQuarterAverageTrend(nonCancelled, d => d.contractDate, d => d.costPerLot / 1000, { maxPoints: 8 }), [nonCancelled]);
+  const lotsDelta = formatTrendDelta(trendValues(lotsTrend));
+  const investmentDelta = formatTrendDelta(investmentTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const costLotDelta = formatTrendDelta(trendValues(costLotTrend), { goodWhen: "down" });
 
   /* Histogram: Cost/Lot distribution (5 buckets) */
   const costPerLotBuckets = (() => {
@@ -114,9 +119,9 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
 
       <div className="sh-kpi-row">
         <SHKpiCard label="Active Deals" value={fmtN(kpis.activeDeals)} sub={`${kpis.closedDeals} closed`} delta={`+${kpis.activeDeals} in pipeline`} deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "active-deals", label: `Active Deals — ${fmtN(kpis.activeDeals)}` })} />
-        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={[320, 380, 420, 460, 510, 540, 570, 600]} delta="+35 lots YoY" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "total-lots", label: `Total Lots — ${fmtN(totalLots)}` })} />
-        <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={[2.1, 2.5, 2.8, 3.2, 3.5, 3.9, 4.2, 4.6, 5.0, 5.3]} delta="+18% YoY" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "invested", label: `Total Invested — ${fmt$(totalInvestment)}` })} />
-        <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={[38, 40, 42, 43, 44, 45, 46, 47]} delta="+4% vs prior" deltaDir="up" onClick={() => onDrill({ type: "land-metric", value: "avg-cost", label: `Avg Cost/Lot — ${fmt$(kpis.avgCostPerLot)}` })} />
+        <SHKpiCard label="Total Lots" value={fmtN(totalLots)} sparkline={trendValues(lotsTrend)} delta={lotsDelta.delta} deltaDir={lotsDelta.deltaDir} onClick={() => onDrill({ type: "land-metric", value: "total-lots", label: `Total Lots — ${fmtN(totalLots)}` })} />
+        <SHKpiCard label="Total Invested" value={fmt$(totalInvestment)} accent="#22d3ee" sparkline={investmentTrend.map(p => p.value)} delta={investmentDelta.delta} deltaDir={investmentDelta.deltaDir} onClick={() => onDrill({ type: "land-metric", value: "invested", label: `Total Invested — ${fmt$(totalInvestment)}` })} />
+        <SHKpiCard label="Avg Cost/Lot" value={fmt$(kpis.avgCostPerLot)} accent="#3b82f6" sparkline={trendValues(costLotTrend)} delta={costLotDelta.delta} deltaDir={costLotDelta.deltaDir} onClick={() => onDrill({ type: "land-metric", value: "avg-cost", label: `Avg Cost/Lot — ${fmt$(kpis.avgCostPerLot)}` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -145,9 +150,18 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "land-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "land-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "land-city-year", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

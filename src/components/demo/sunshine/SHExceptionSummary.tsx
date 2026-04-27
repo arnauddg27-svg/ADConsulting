@@ -51,7 +51,7 @@ export default function SHExceptionSummary({ items }: SHExceptionSummaryProps) {
               position: "relative",
               overflow: "hidden",
               border: `1px solid ${tone.border}`,
-              background: `linear-gradient(180deg, rgba(13,24,37,0.92), rgba(10,18,29,0.94)), ${tone.glow}`,
+              background: `linear-gradient(180deg, color-mix(in srgb, var(--sh-bg-surface-raised) 92%, transparent), color-mix(in srgb, var(--sh-bg-surface) 96%, transparent)), ${tone.glow}`,
               borderRadius: 10,
               padding: "10px 12px",
               minHeight: 64,

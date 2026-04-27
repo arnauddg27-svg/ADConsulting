@@ -2,7 +2,6 @@
 
 import type { SHPermit } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { jobs } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
@@ -53,14 +52,8 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
               { key: "jobCode", label: "Job", width: "80px", frozen: true, mono: true },
               { key: "community", label: "Community", width: "140px", frozen: true },
               { key: "city", label: "City", width: "100px" },
-              { key: "county", label: "County", width: "90px", render: r => {
-                const cityCounty: Record<string, string> = { Orlando: "Orange", Tampa: "Hillsborough", Jacksonville: "Duval", Lakeland: "Polk" };
-                return cityCounty[String(r.city)] ?? "\u2014";
-              }},
-              { key: "entity", label: "Entity", width: "160px", render: r => {
-                const job = jobs.find(j => j.jobCode === String(r.jobCode));
-                return job?.entity ?? "\u2014";
-              }},
+              { key: "county", label: "County", width: "90px", render: r => String(r.county ?? "\u2014") },
+              { key: "entity", label: "Entity", width: "160px", render: r => String(r.entity ?? "\u2014") },
               { key: "permitType", label: "Type", width: "100px" },
               { key: "permitSubType", label: "Sub-Type", width: "110px" },
               { key: "submittedDate", label: "Submitted", width: "90px" },
@@ -72,45 +65,32 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
                 const tone = s === "issued" ? "good" : s === "approved" ? "good" : s === "in-review" ? "watch" : s === "pending" ? "watch" : "alert";
                 return <SHPill tone={tone} label={s.replace("-", " ")} />;
               }},
-              { key: "plan", label: "Plan", width: "100px", render: r => {
-                const job = jobs.find(j => j.jobCode === String(r.jobCode));
-                return job?.plan ?? "\u2014";
-              }},
-              { key: "superintendent", label: "Super", width: "130px", render: r => {
-                const job = jobs.find(j => j.jobCode === String(r.jobCode));
-                return job?.superintendent ?? "\u2014";
-              }},
-              { key: "stage", label: "Stage", width: "90px", render: r => {
-                const job = jobs.find(j => j.jobCode === String(r.jobCode));
-                return job?.stage ?? "\u2014";
-              }},
-              { key: "completionPct", label: "Completion", width: "110px", render: r => {
-                const job = jobs.find(j => j.jobCode === String(r.jobCode));
-                return <CompletionBar pct={job?.completionPct ?? 0} />;
-              }},
+              { key: "plan", label: "Plan", width: "100px", render: r => String(r.plan ?? "\u2014") },
+              { key: "superintendent", label: "Super", width: "130px", render: r => String(r.superintendent ?? "\u2014") },
+              { key: "stage", label: "Stage", width: "90px", render: r => String(r.stage ?? "\u2014") },
+              { key: "completionPct", label: "Completion", width: "110px", render: r => <CompletionBar pct={Number(r.completionPct ?? 0)} /> },
               { key: "daysInReview", label: "Total Days", width: "80px", align: "right", render: r => {
                 const d = Number(r.daysInReview);
                 return <span style={{ color: d > 30 ? "var(--sh-danger)" : d > 20 ? "var(--sh-warning)" : "var(--sh-text-secondary)", fontWeight: d > 20 ? 700 : 400 }}>{d}d</span>;
               }},
-              { key: "sitePlanCT", label: "Site Plan CT", width: "85px", align: "right", render: r => `${Math.round(Number(r.daysInReview) * 0.25)}d` },
-              { key: "housePlanCT", label: "House Plan CT", width: "90px", align: "right", render: r => `${Math.round(Number(r.daysInReview) * 0.20)}d` },
-              { key: "septicCT", label: "Septic CT", width: "75px", align: "right", render: r => `${Math.round(Number(r.daysInReview) * 0.15)}d` },
-              { key: "bldgDeptCT", label: "Bldg Dept CT", width: "85px", align: "right", render: r => `${Math.round(Number(r.daysInReview) * 0.25)}d` },
-              { key: "jioApprovedCT", label: "JIO to Appr CT", width: "95px", align: "right", render: r => `${Math.round(Number(r.daysInReview) * 0.15)}d` },
+              { key: "sitePlanCycleDays", label: "Site Plan CT", width: "85px", align: "right", render: r => `${Number(r.sitePlanCycleDays ?? 0)}d` },
+              { key: "housePlanCycleDays", label: "House Plan CT", width: "90px", align: "right", render: r => `${Number(r.housePlanCycleDays ?? 0)}d` },
+              { key: "septicCycleDays", label: "Septic CT", width: "75px", align: "right", render: r => `${Number(r.septicCycleDays ?? 0)}d` },
+              { key: "buildingDeptCycleDays", label: "Bldg Dept CT", width: "85px", align: "right", render: r => `${Number(r.buildingDeptCycleDays ?? 0)}d` },
+              { key: "jioApprovalCycleDays", label: "JIO to Appr CT", width: "95px", align: "right", render: r => `${Number(r.jioApprovalCycleDays ?? 0)}d` },
               { key: "gopherTortoise", label: "Gopher Tortoise", width: "100px", render: r => {
-                const v = Number(r.id) % 4 === 0;
+                const v = Boolean(r.gopherTortoise);
                 return <SHPill tone={v ? "watch" : "good"} label={v ? "Y" : "N"} />;
               }},
               { key: "treeSurvey", label: "Tree Survey", width: "85px", render: r => {
-                const v = Number(r.id) % 3 === 0;
+                const v = Boolean(r.treeSurvey);
                 return <SHPill tone={v ? "watch" : "good"} label={v ? "Y" : "N"} />;
               }},
               { key: "floodZone", label: "Flood Zone", width: "80px", render: r => {
-                const zones = ["X", "X", "AE", "X", "VE"];
-                const z = zones[Number(r.id) % zones.length];
+                const z = String(r.floodZone ?? "X");
                 return <SHPill tone={z === "X" ? "good" : z === "AE" ? "watch" : "alert"} label={z} />;
               }},
-              { key: "productType", label: "Product", width: "90px", render: () => "Single Family" },
+              { key: "productType", label: "Product", width: "90px", render: r => String(r.productType ?? "\u2014") },
             ]}
             rows={permits as unknown as Record<string, unknown>[]}
             maxRows={40}

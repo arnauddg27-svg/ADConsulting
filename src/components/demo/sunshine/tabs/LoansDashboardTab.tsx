@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHLoan, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getLoanKPIs, getLenderDistribution, buildCrossTab, fmt$, fmtN, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, formatTrendDelta, trendValues } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -58,6 +58,18 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
       { cumulative: true, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
   ), [loans]);
+  const drawnTrend = useMemo(() => (
+    buildQuarterTrend(loans, l => l.startDate, l => l.totalDrawn, { cumulative: true, maxPoints: 8 })
+      .map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
+  ), [loans]);
+  const lenderCountTrend = useMemo(() => {
+    const points = buildQuarterTrend(loans, l => l.startDate, () => 1, { cumulative: true, maxPoints: 8 });
+    return points.map((p, idx) => ({ ...p, value: Math.min(kpis.lenderCount, Math.max(1, Math.ceil((idx + 1) / Math.max(points.length, 1) * kpis.lenderCount))) }));
+  }, [loans, kpis.lenderCount]);
+  const expiringTrend = useMemo(() => buildQuarterTrend(loans.filter(l => l.daysUntilExpiration <= 60), l => l.startDate, () => 1, { cumulative: false, maxPoints: 8 }), [loans]);
+  const exposureDelta = formatTrendDelta(exposureTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const drawnDelta = formatTrendDelta(drawnTrend.map(p => p.value * 1_000_000), { unit: "money" });
+  const expiringDelta = formatTrendDelta(trendValues(expiringTrend), { goodWhen: "down" });
 
   /* Ranked Bars: Loan exposure by city */
   const exposureByCity = (() => {
@@ -109,10 +121,10 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={[4.2, 4.5, 4.8, 5.0, 5.1, 5.3, 5.2, 5.4, 5.5]} onClick={() => onDrill({ type: "loan-metric", value: "exposure", label: `Total Exposure — ${fmt$(kpis.totalBalance)}` })} />
-        <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} onClick={() => onDrill({ type: "loan-metric", value: "drawn", label: `Total Drawn — ${fmt$(kpis.totalDrawn)}` })} />
-        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={[3, 3, 4, 4, 4, 5, 5, 5, 5, 5]} delta="Diversified" deltaDir="up" onClick={() => onDrill({ type: "loan-metric", value: "lenders", label: `${fmtN(kpis.lenderCount)} Lenders` })} />
-        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#f46a6a" : "#24c18d"} sparkline={[4, 3, 5, 4, 3, 2, 3, 4, 3, kpis.expiringSoon]} delta={kpis.expiringSoon > 0 ? "Action needed" : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? "down" : "up"} onClick={() => onDrill({ type: "loan-metric", value: "expiring", label: `${fmtN(kpis.expiringSoon)} Expiring < 60d` })} />
+        <SHKpiCard label="Total Exposure" value={fmt$(kpis.totalBalance)} sparkline={exposureTrend.map(p => p.value)} delta={exposureDelta.delta} deltaDir={exposureDelta.deltaDir} onClick={() => onDrill({ type: "loan-metric", value: "exposure", label: `Total Exposure — ${fmt$(kpis.totalBalance)}` })} />
+        <SHKpiCard label="Total Drawn" value={fmt$(kpis.totalDrawn)} accent="#22d3ee" progress={Math.round(kpis.avgDrawPct)} sub={`${Math.round(kpis.avgDrawPct)}% avg draw`} sparkline={drawnTrend.map(p => p.value)} delta={drawnDelta.delta} deltaDir={drawnDelta.deltaDir} onClick={() => onDrill({ type: "loan-metric", value: "drawn", label: `Total Drawn — ${fmt$(kpis.totalDrawn)}` })} />
+        <SHKpiCard label="Lender Count" value={fmtN(kpis.lenderCount)} accent="#3b82f6" sparkline={trendValues(lenderCountTrend)} delta="Diversified pool" deltaDir="up" onClick={() => onDrill({ type: "loan-metric", value: "lenders", label: `${fmtN(kpis.lenderCount)} Lenders` })} />
+        <SHKpiCard label="Expiring < 60d" value={fmtN(kpis.expiringSoon)} accent={kpis.expiringSoon > 0 ? "#efb562" : "#24c18d"} sparkline={trendValues(expiringTrend)} delta={kpis.expiringSoon > 0 ? expiringDelta.delta : "No urgency"} deltaDir={kpis.expiringSoon > 0 ? expiringDelta.deltaDir : "up"} onClick={() => onDrill({ type: "loan-metric", value: "expiring", label: `${fmtN(kpis.expiringSoon)} Expiring < 60d` })} />
       </div>
 
       <div className="sh-panels-row">
@@ -172,9 +184,18 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "loans-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "loans-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "loans-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "loans-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

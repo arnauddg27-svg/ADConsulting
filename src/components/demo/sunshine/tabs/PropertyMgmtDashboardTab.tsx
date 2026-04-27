@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHPropertyUnit, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getPMKPIs, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues, isOccupiedUnit } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -47,6 +47,13 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
       { cumulative: false, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000) * 10) / 10 }))
   ), [units]);
+  const unitTrend = useMemo(() => buildQuarterTrend(units, u => u.leaseStart, () => 1, { cumulative: true, maxPoints: 8 }), [units]);
+  const occupancyTrend = useMemo(() => buildQuarterAverageTrend(units, u => u.leaseStart, u => isOccupiedUnit(u) ? 100 : 0, { maxPoints: 8 }), [units]);
+  const delinquentTrend = useMemo(() => buildQuarterTrend(units.filter(u => u.delinquentAmount > 0), u => u.leaseStart, () => 1, { cumulative: false, maxPoints: 8 }), [units]);
+  const unitDelta = formatTrendDelta(trendValues(unitTrend));
+  const occupancyDelta = formatTrendDelta(trendValues(occupancyTrend), { unit: "pct" });
+  const revenueDelta = formatTrendDelta(revenueTrend.map(p => p.value * 1_000), { unit: "money" });
+  const delinquentDelta = formatTrendDelta(trendValues(delinquentTrend), { goodWhen: "down" });
 
   const byOccupancy = (() => {
     const map = new Map<string, number>();
@@ -104,7 +111,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
   /* Donut: property class A/B/C distribution */
   const classes = ["A", "B", "C"];
   const classCounts = [0, 0, 0];
-  for (const u of units) classCounts[Number(u.id) % classes.length]++;
+  for (const u of units) classCounts[classes.indexOf(u.propertyClass)]++;
   const byClass = classes.map((cls, i) => ({
     label: `Class ${cls}`,
     value: classCounts[i],
@@ -137,16 +144,16 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={[28, 30, 32, 34, 35, 36, 38, 39, 40, kpis.totalUnits]} delta="+4 units YoY" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "total-units", label: `Total Units — ${fmtN(kpis.totalUnits)}` })} />
-        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} delta="+2% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "occupancy", label: `Occupancy Rate — ${fmtPct(kpis.occupancyRate)}` })} />
-        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={[32, 34, 35, 37, 38, 39, 40, 41, 42, 44]} delta="+6% vs prior" deltaDir="up" onClick={() => onDrill({ type: "pm-metric", value: "revenue", label: `Monthly Revenue — ${fmt$(kpis.monthlyRent)}` })} />
+        <SHKpiCard label="Total Units" value={fmtN(kpis.totalUnits)} sparkline={trendValues(unitTrend)} delta={unitDelta.delta} deltaDir={unitDelta.deltaDir} onClick={() => onDrill({ type: "pm-metric", value: "total-units", label: `Total Units — ${fmtN(kpis.totalUnits)}` })} />
+        <SHKpiCard label="Occupancy Rate" value={fmtPct(kpis.occupancyRate)} accent="#14b8a6" progress={Math.round(kpis.occupancyRate)} sparkline={trendValues(occupancyTrend)} delta={occupancyDelta.delta} deltaDir={occupancyDelta.deltaDir} onClick={() => onDrill({ type: "pm-metric", value: "occupancy", label: `Occupancy Rate — ${fmtPct(kpis.occupancyRate)}` })} />
+        <SHKpiCard label="Monthly Revenue" value={fmt$(kpis.monthlyRent)} accent="#22d3ee" sparkline={revenueTrend.map(p => p.value)} delta={revenueDelta.delta} deltaDir={revenueDelta.deltaDir} onClick={() => onDrill({ type: "pm-metric", value: "revenue", label: `Monthly Revenue — ${fmt$(kpis.monthlyRent)}` })} />
         <SHKpiCard
           label="Delinquent"
           value={fmtN(kpis.delinquentUnits)}
           accent={kpis.delinquentUnits > 0 ? "#f46a6a" : "#24c18d"}
-          sparkline={[5, 4, 6, 5, 3, 4, 3, 2, 3, kpis.delinquentUnits]}
-          delta={kpis.delinquentUnits > 0 ? "Past due" : "All current"}
-          deltaDir={kpis.delinquentUnits > 0 ? "down" : "up"}
+          sparkline={trendValues(delinquentTrend)}
+          delta={kpis.delinquentUnits > 0 ? delinquentDelta.delta : "All current"}
+          deltaDir={kpis.delinquentUnits > 0 ? delinquentDelta.deltaDir : "up"}
           onClick={() => onDrill({ type: "pm-metric", value: "delinquent", label: `Delinquent — ${fmtN(kpis.delinquentUnits)}` })}
         />
       </div>
@@ -202,9 +209,18 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
             onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "pm-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "pm-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "pm-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "pm-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>

@@ -17,9 +17,7 @@ export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps
   const [hovered, setHovered] = useState<number | null>(null);
   const counts = buckets.map(b => b.count);
   const max = Math.max(...counts, 1);
-  // Amplify visual contrast: rescale non-zero buckets to a 25-100% range
-  // relative to (min non-zero .. max). Empty buckets show a 3% sliver so
-  // they stay clickable without distorting the scale.
+  // Amplify visual contrast for non-zero buckets without drawing fake bars for empty slices.
   const nonZero = counts.filter(c => c > 0);
   const min = nonZero.length > 0 ? Math.min(...nonZero) : 0;
   const range = max - min || 1;
@@ -27,7 +25,7 @@ export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps
   return (
     <div className="sh-histogram">
       {buckets.map((b, i) => {
-        const pct = b.count === 0 ? 3 : 25 + ((b.count - min) / range) * 75;
+        const pct = b.count === 0 ? 0 : 25 + ((b.count - min) / range) * 75;
         const isHovered = hovered === i;
         return (
           <div
@@ -38,6 +36,14 @@ export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps
             onClick={onBucketClick ? () => onBucketClick(b.bucket) : undefined}
             role={onBucketClick ? "button" : undefined}
             tabIndex={onBucketClick ? 0 : undefined}
+            title={onBucketClick ? `Open drilldown for ${b.bucket}` : undefined}
+            aria-label={onBucketClick ? `Open drilldown for ${b.bucket}` : undefined}
+            onKeyDown={onBucketClick ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onBucketClick(b.bucket);
+              }
+            } : undefined}
             style={{ cursor: onBucketClick ? "pointer" : undefined }}
           >
             <div className="sh-histogram-count" style={{

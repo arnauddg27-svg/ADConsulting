@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { SHJob, SHTab } from "@/types/sunshine-homes";
 import type { DrillDetail } from "../SHDrawer";
-import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend } from "@/lib/sunshine-homes-data";
+import { getConstructionKPIs, getJobsByStage, getCommunityBreakdown, buildCrossTab, fmt$, fmtN, fmtPct, getQuarter, getMonthLabel, getDayLabel, buildQuarterTrend, buildQuarterAverageTrend, formatTrendDelta, trendValues } from "@/lib/sunshine-homes-data";
 import SHKpiCard from "../SHKpiCard";
 import SHPanel from "../SHPanel";
 import SHDonutChart from "../SHDonutChart";
@@ -19,9 +19,6 @@ const STAGE_COLORS: Record<string, string> = {
 
 // Teal-blue palette for histogram and job-type donut
 const TEAL_BLUE_PALETTE = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
-
-const SPARKLINE_JOBS = [22, 24, 23, 25, 26, 27, 26, 28, 29, 30];
-const SPARKLINE_WIP = [3.8, 4.1, 4.0, 4.3, 4.5, 4.7, 4.9, 5.0, 5.1, 5.3];
 
 const STAGE_ORDER = ["Permit", "Foundation", "Framing", "MEP / Drywall", "Finishes", "Closing"];
 
@@ -44,6 +41,8 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
   const kpis = getConstructionKPIs(jobs);
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
   const byCommunity = getCommunityBreakdown(jobs);
+  const jobTrend = useMemo(() => buildQuarterTrend(jobs, j => j.startDate, () => 1, { cumulative: false, maxPoints: 8 }), [jobs]);
+  const completionTrend = useMemo(() => buildQuarterAverageTrend(jobs, j => j.startDate, j => j.completionPct, { maxPoints: 8 }), [jobs]);
   const wipTrendData = useMemo(() => (
     buildQuarterTrend(
       jobs,
@@ -52,6 +51,9 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       { cumulative: false, maxPoints: 8 },
     ).map(p => ({ label: p.label, value: Math.round((p.value / 1_000_000) * 10) / 10 }))
   ), [jobs]);
+  const jobDelta = formatTrendDelta(trendValues(jobTrend));
+  const completionDelta = formatTrendDelta(trendValues(completionTrend), { unit: "pct" });
+  const wipDelta = formatTrendDelta(wipTrendData.map(p => p.value * 1_000_000), { unit: "money" });
 
   // --- Histogram: Completion Distribution ---
   const completionBuckets = [
@@ -158,10 +160,10 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} delta="+3 vs last month" deltaDir="up" onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
+        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={trendValues(jobTrend)} delta={jobDelta.delta} deltaDir={jobDelta.deltaDir} onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
         <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onDrill({ type: "job", value: "active", label: `Active Jobs — ${fmtN(kpis.activeJobs)}` })} />
-        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} delta="+5% vs Q3" deltaDir="up" onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
-        <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onDrill({ type: "cost-category", value: "wip", label: `Total WIP — ${fmt$(kpis.totalWip)}` })} />
+        <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} sparkline={trendValues(completionTrend)} delta={completionDelta.delta} deltaDir={completionDelta.deltaDir} onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
+        <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={wipTrendData.map(p => p.value)} delta={wipDelta.delta} deltaDir={wipDelta.deltaDir} onClick={() => onDrill({ type: "cost-category", value: "wip", label: `Total WIP — ${fmt$(kpis.totalWip)}` })} />
       </div>
 
       {/* Row 1: Jobs by Stage + Active Jobs by Community */}
@@ -226,9 +228,18 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
             onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|`, label: row }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1) :
-              drillYear ? (col) => onQuarterClick(Number(col.replace("Q", ""))) :
-              (col) => onYearClick(Number(col))
+              drillQuarter ? (col) => {
+                onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
+                onDrill({ type: "construction-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Month header" });
+              } :
+              drillYear ? (col) => {
+                onQuarterClick(Number(col.replace("Q", "")));
+                onDrill({ type: "construction-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Quarter header" });
+              } :
+              (col) => {
+                onYearClick(Number(col));
+                onDrill({ type: "construction-city-time", value: `|${col}`, label: `All Cities — ${col}`, metric: "Year header" });
+              }
             }
           />
         </SHPanel>
