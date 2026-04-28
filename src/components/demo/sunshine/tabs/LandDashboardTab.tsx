@@ -55,22 +55,25 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
   /* Total investment */
   const totalInvestment = nonCancelled.reduce((s, d) => s + d.acquisitionCost, 0);
   const totalLots = nonCancelled.reduce((s, d) => s + d.lots, 0);
+  const landActivityDeals = nonCancelled;
+  const landActivityDealIds = landActivityDeals.map(d => d.id);
 
   /* CrossTab: City x Time — drill-aware (Year → Quarter → Month → Day) */
   const cityTimeCross = (() => {
     if (drillMonth) {
-      const withDay = deals.map(d => ({ ...d, day: getDayLabel(d.contractDate) }));
+      const withDay = landActivityDeals.map(d => ({ ...d, day: getDayLabel(d.contractDate) }));
       return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
     }
     if (drillQuarter) {
-      const withMonth = deals.map(d => ({ ...d, month: getMonthLabel(d.contractDate) }));
+      const withMonth = landActivityDeals.map(d => ({ ...d, month: getMonthLabel(d.contractDate) }));
       return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
     }
     if (drillYear) {
-      const withQuarter = deals.map(d => ({ ...d, quarter: `Q${getQuarter(d.contractDate)}` }));
+      const withQuarter = landActivityDeals.map(d => ({ ...d, quarter: `Q${getQuarter(d.contractDate)}` }));
       return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
     }
-    return buildCrossTab(deals, "city", "year");
+    const withYear = landActivityDeals.map(d => ({ ...d, contractYear: new Date(d.contractDate).getFullYear() }));
+    return buildCrossTab(withYear, "city", "contractYear" as keyof typeof withYear[0]);
   })();
 
   /* Ranked Bars: active/pending acquisition lots by city */
@@ -136,28 +139,28 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
 
       <div className="sh-panels-row">
         <SHPanel kicker="City × Time" title={
-          drillMonth ? `Closed Deals: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
-          drillQuarter ? `Closed Deals: City by Month (Q${drillQuarter} ${drillYear})` :
-          drillYear ? `Closed Deals: City by Quarter (${drillYear})` :
-          "Closed Deals: City by Year"
+          drillMonth ? `Contract Activity: City by Day (${new Date(2000, drillMonth - 1).toLocaleString("en-US", { month: "short" })} ${drillYear})` :
+          drillQuarter ? `Contract Activity: City by Month (Q${drillQuarter} ${drillYear})` :
+          drillYear ? `Contract Activity: City by Quarter (${drillYear})` :
+          "Contract Activity: City by Year"
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "land-city-year", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: row }); }}
+            onCellClick={(row, col) => { onCityClick(row); onDrill({ type: "land-city-year", value: `${row}|${col}`, label: `${row} — ${col}`, scopedLandDealIds: landActivityDealIds }); }}
+            onRowLabelClick={(row) => { onCityClick(row); onDrill({ type: "city", value: row, label: `${row} — Contract Activity`, scopedLandDealIds: landActivityDeals.filter(d => d.city === row).map(d => d.id) }); }}
             onColHeaderClick={
               drillMonth ? undefined :
               drillQuarter ? (col) => {
                 onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1);
-                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+                onDrill({ type: "land-time", value: col, label: `Land Contracts — ${col}`, scopedLandDealIds: landActivityDealIds });
               } :
               drillYear ? (col) => {
                 onQuarterClick(Number(col.replace("Q", "")));
-                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+                onDrill({ type: "land-time", value: col, label: `Land Contracts — ${col}`, scopedLandDealIds: landActivityDealIds });
               } :
               (col) => {
                 onYearClick(Number(col));
-                onDrill({ type: "land-time", value: col, label: `Land — ${col}` });
+                onDrill({ type: "land-time", value: col, label: `Land Contracts — ${col}`, scopedLandDealIds: landActivityDealIds });
               }
             }
           />
@@ -186,11 +189,11 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
             color="#14b8a6"
             label1="Cumulative ($M)"
             formatY={v => `$${v.toFixed(1)}M`}
-            onPointClick={label => onDrill({ type: "land-time", value: label, label: `Investment — ${label}` })}
+            onPointClick={label => onDrill({ type: "land-time", value: label, label: `Investment — ${label}`, scopedLandDealIds: landActivityDealIds })}
           />
         </SHPanel>
         <SHPanel kicker="Distribution" title="Cost per Lot Distribution">
-          <SHHistogram buckets={costPerLotBuckets} onBucketClick={bucket => onDrill({ type: "land-metric", value: bucket, label: `Cost/Lot ${bucket}` })} />
+          <SHHistogram buckets={costPerLotBuckets} onBucketClick={bucket => onDrill({ type: "land-metric", value: bucket, label: `Cost/Lot ${bucket}`, scopedLandDealIds: landActivityDealIds })} />
         </SHPanel>
       </div>
 

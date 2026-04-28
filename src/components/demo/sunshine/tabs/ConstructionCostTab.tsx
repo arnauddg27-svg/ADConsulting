@@ -78,7 +78,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
       </div>
 
       <div className="sh-panels-row">
-        <SHPanel kicker="Trend" title="Budget vs. Actual Spend">
+        <SHPanel kicker="Start Month" title="Budget vs. Actual by Start Month">
           <SHAreaChart
             data={monthlyTrend}
             color="#14b8a6"
@@ -90,7 +90,7 @@ export default function ConstructionCostTab({ jobs, onDrill }: Props) {
               onDrill({
                 type: "cost-trend-month",
                 value: `month-${monthIndex + 1}`,
-                label: `Budget vs. Actual — ${month}`,
+                label: `Budget vs. Actual by Start Month — ${month}`,
                 scopedJobCodes: jobs.map(j => j.jobCode),
               })
             }

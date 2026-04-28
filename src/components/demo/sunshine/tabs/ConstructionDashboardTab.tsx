@@ -42,8 +42,11 @@ interface Props {
 
 export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
   const kpis = getConstructionKPIs(jobs);
+  const activeJobs = jobs.filter(j => j.stage !== "Closing" && j.completionPct < 95);
+  const completedJobs = jobs.filter((j): j is SHJob & { coDate: string } => Boolean(j.coDate));
+  const totalCommunities = new Set(jobs.map(j => j.community)).size;
   const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
-  const byCommunity = getCommunityBreakdown(jobs);
+  const byCommunity = getCommunityBreakdown(activeJobs);
   const wipTrendData = useMemo(() => (
     buildQuarterTrend(
       jobs,
@@ -86,24 +89,19 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
   // --- CrossTab: City x Time (drill-aware) ---
   const cityTimeCross = (() => {
     if (drillMonth) {
-      const withDay = jobs
-        .filter(j => j.startDate)
-        .map(j => ({ ...j, day: getDayLabel(j.startDate) }));
+      const withDay = completedJobs.map(j => ({ ...j, day: getDayLabel(j.coDate) }));
       return buildCrossTab(withDay, "city", "day" as keyof typeof withDay[0]);
     }
     if (drillQuarter) {
-      const withMonth = jobs
-        .filter(j => j.startDate)
-        .map(j => ({ ...j, month: getMonthLabel(j.startDate) }));
+      const withMonth = completedJobs.map(j => ({ ...j, month: getMonthLabel(j.coDate) }));
       return buildCrossTab(withMonth, "city", "month" as keyof typeof withMonth[0]);
     }
     if (drillYear) {
-      const withQuarter = jobs
-        .filter(j => j.startDate)
-        .map(j => ({ ...j, quarter: `Q${getQuarter(j.startDate)}` }));
+      const withQuarter = completedJobs.map(j => ({ ...j, quarter: `Q${getQuarter(j.coDate)}` }));
       return buildCrossTab(withQuarter, "city", "quarter" as keyof typeof withQuarter[0]);
     }
-    return buildCrossTab(jobs, "city", "year");
+    const withYear = completedJobs.map(j => ({ ...j, completionYear: new Date(j.coDate).getFullYear() }));
+    return buildCrossTab(withYear, "city", "completionYear" as keyof typeof withYear[0]);
   })();
 
   // --- Donut: Jobs by Job Type ---
@@ -158,7 +156,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
       </div>
 
       <div className="sh-kpi-row">
-        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${byCommunity.length} communities`} sparkline={SPARKLINE_JOBS} onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
+        <SHKpiCard label="Total Jobs" value={fmtN(kpis.totalJobs)} sub={`${totalCommunities} communities`} sparkline={SPARKLINE_JOBS} onClick={() => onDrill({ type: "job", value: "all", label: `Total Jobs — ${fmtN(kpis.totalJobs)}` })} />
         <SHKpiCard label="Active Jobs" value={fmtN(kpis.activeJobs)} sub="In construction" progress={Math.round((kpis.activeJobs / kpis.totalJobs) * 100)} onClick={() => onDrill({ type: "job", value: "active", label: `Active Jobs — ${fmtN(kpis.activeJobs)}` })} />
         <SHKpiCard label="Avg Completion" value={fmtPct(kpis.avgCompletion)} accent="#22d3ee" progress={Math.round(kpis.avgCompletion)} onClick={() => onDrill({ type: "job", value: "completion", label: `Avg Completion — ${fmtPct(kpis.avgCompletion)}` })} />
         <SHKpiCard label="Total WIP" value={fmt$(kpis.totalWip)} accent="#3b82f6" sparkline={SPARKLINE_WIP} onClick={() => onDrill({ type: "cost-category", value: "wip", label: `Total WIP — ${fmt$(kpis.totalWip)}` })} />
@@ -175,7 +173,7 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         <SHPanel kicker="Communities" title="Active Jobs by Community">
           <SHRankedBars
             items={byCommunity}
-            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label }); }}
+            onBarClick={label => { onCommunityClick(label); onDrill({ type: "community", value: label, label: `${label} — Active Jobs`, scopedJobCodes: activeJobs.filter(j => j.community === label).map(j => j.jobCode) }); }}
             showRank
           />
         </SHPanel>
@@ -206,13 +204,13 @@ export default function ConstructionDashboardTab({ jobs, onCommunityClick, onSta
         }>
           <SHCrossTab
             {...cityTimeCross}
-            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|${col}`, label: `${row} — ${col}` }); }}
-            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "construction-city-time", value: `${row}|`, label: row }); }}
+            onCellClick={(row, col) => { onCommunityClick(row); onDrill({ type: "construction-completion-city-time", value: `${row}|${col}`, label: `${row} — ${col} Completions` }); }}
+            onRowLabelClick={(row) => { onCommunityClick(row); onDrill({ type: "construction-completion-city-time", value: `${row}|`, label: `${row} — Completions` }); }}
             onColHeaderClick={
               drillMonth ? undefined :
-              drillQuarter ? (col) => { onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); } :
-              drillYear ? (col) => { onQuarterClick(Number(col.replace("Q", ""))); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); } :
-              (col) => { onYearClick(Number(col)); onDrill({ type: "construction-time", value: col, label: `Construction — ${col}` }); }
+              drillQuarter ? (col) => { onMonthClick(new Date(Date.parse(col + " 1, 2000")).getMonth() + 1); onDrill({ type: "construction-completion-time", value: col, label: `Completions — ${col}` }); } :
+              drillYear ? (col) => { onQuarterClick(Number(col.replace("Q", ""))); onDrill({ type: "construction-completion-time", value: col, label: `Completions — ${col}` }); } :
+              (col) => { onYearClick(Number(col)); onDrill({ type: "construction-completion-time", value: col, label: `Completions — ${col}` }); }
             }
           />
         </SHPanel>

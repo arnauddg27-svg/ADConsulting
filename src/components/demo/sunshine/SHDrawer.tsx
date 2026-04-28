@@ -7,7 +7,7 @@ import { jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, au
 import SHPill from "./SHPill";
 
 export interface DrillDetail {
-  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "subdivision" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "sales-plan" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "audit-plan" | "construction-city-time" | "construction-time" | "land-time" | "permit-time" | "sales-city-time" | "sales-time" | "loans-city-time" | "loans-time" | "pm-city-time" | "pm-time" | "audits-community-time" | "audits-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
+  type: "job" | "community" | "city" | "stage" | "plan" | "lender" | "super" | "sale" | "loan" | "permit" | "unit" | "property" | "subdivision" | "cost-category" | "cost-trend-month" | "margin-bucket" | "permit-status" | "occupancy" | "land-status" | "land-metric" | "land-city-year" | "permit-city-year" | "permit-city-status" | "loan-metric" | "loan-rate" | "sale-status" | "sale-metric" | "sale-city-status" | "sale-entity-year" | "sales-plan" | "pm-metric" | "pm-occupancy" | "cycle-time-cohort" | "cycle-metric" | "cycle-bucket" | "audit-cost" | "audit-plan" | "construction-city-time" | "construction-time" | "construction-completion-city-time" | "construction-completion-time" | "land-time" | "permit-time" | "sales-city-time" | "sales-time" | "loans-city-time" | "loans-time" | "pm-city-time" | "pm-time" | "audits-community-time" | "audits-time" | "sales-community" | "loans-community" | "permits-community" | "pm-community" | "construction-completion-bucket" | "permit-cycle-bucket";
   value: string;
   label: string;
   community?: string; // optional community pre-filter for cost drill-downs
@@ -1319,7 +1319,7 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
 
     case "community": {
       const communityJobs = jobScope.filter(j => j.community === detail.value);
-      title = `${detail.value} \u2014 All Jobs`;
+      title = detail.label !== detail.value ? detail.label : `${detail.value} \u2014 All Jobs`;
       subtitle = `${communityJobs.length} jobs`;
       columns = [
         { key: "jobCode", label: "Job", width: "80px" },
@@ -1713,6 +1713,44 @@ export default function SHDrawer({ detail, onClose }: SHDrawerProps) {
         { key: "community", label: "Community", width: "110px" },
         { key: "startDate", label: "Start", width: "80px" },
         { key: "stage", label: "Stage", width: "95px" },
+        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+      ];
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "construction-completion-city-time": {
+      const [city, token] = parsePipe(detail.value);
+      const matched = jobScope.filter(j => j.city === city && j.coDate && (!token || matchTimeToken(j.coDate, token)));
+      title = detail.label;
+      subtitle = `${matched.length} completed jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "75px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "startDate", label: "Start", width: "80px" },
+        { key: "coDate", label: "CO Date", width: "80px", render: r => r.coDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.coDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>—</span> },
+        { key: "stage", label: "Stage", width: "95px" },
+        { key: "totalCycleDays", label: "Cycle", width: "65px", align: "right", render: r => `${Number(r.totalCycleDays)}d` },
+        { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
+        { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
+      ];
+      rows = matched as unknown as Record<string, unknown>[];
+      break;
+    }
+
+    case "construction-completion-time": {
+      const matched = jobScope.filter(j => j.coDate && matchTimeToken(j.coDate, detail.value));
+      title = detail.label;
+      subtitle = `${matched.length} completed jobs`;
+      columns = [
+        { key: "jobCode", label: "Job", width: "75px" },
+        { key: "community", label: "Community", width: "110px" },
+        { key: "city", label: "City", width: "80px" },
+        { key: "startDate", label: "Start", width: "80px" },
+        { key: "coDate", label: "CO Date", width: "80px", render: r => r.coDate ? <span style={{ fontVariantNumeric: "tabular-nums" }}>{String(r.coDate)}</span> : <span style={{ color: "var(--sh-text-muted)" }}>—</span> },
+        { key: "stage", label: "Stage", width: "95px" },
+        { key: "totalCycleDays", label: "Cycle", width: "65px", align: "right", render: r => `${Number(r.totalCycleDays)}d` },
         { key: "completionPct", label: "Comp", width: "60px", align: "right", render: r => fmtPct(Number(r.completionPct)) },
         { key: "wipBalance", label: "WIP", width: "70px", align: "right", render: r => fmt$(Number(r.wipBalance)) },
       ];
