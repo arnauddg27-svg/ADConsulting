@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Phone, Mail, ArrowUpRight } from "lucide-react";
+import { MapPin, Mail, ArrowUpRight } from "lucide-react";
 import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
 
@@ -77,15 +77,6 @@ export default function Footer() {
                 Contact
               </h3>
               <ul className="mt-5 space-y-4 text-sm text-slate-200">
-                <li className="flex items-start gap-3">
-                  <Phone size={16} className="mt-0.5 text-accent-300" />
-                  <a
-                    href={SITE_CONFIG.phoneHref}
-                    className="transition-colors hover:text-accent-200"
-                  >
-                    {SITE_CONFIG.phone}
-                  </a>
-                </li>
                 <li className="flex items-start gap-3">
                   <Mail size={16} className="mt-0.5 text-accent-300" />
                   <a

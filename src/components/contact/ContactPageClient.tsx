@@ -1,241 +1,140 @@
-"use client";
-
-import { useState } from "react";
-import { Phone, Mail, MapPin, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarCheck,
+  CheckCircle2,
+  Clock,
+  Database,
+  Mail,
+  MapPin,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { SITE_CONFIG } from "@/lib/constants";
 
-const faqs = [
+const fitPoints = [
+  "ERP, spreadsheet, finance, API, and export data live in too many places.",
+  "Leadership needs cleaner visibility across land, permitting, construction, sales, and P&L.",
+  "The team wants a client-owned reporting system rather than another disconnected dashboard.",
+];
+
+const firstCallSteps = [
   {
-    q: "What size builder do you usually work with?",
-    a: "The core fit is residential builders doing roughly 20-500+ homes per year across North America. The strongest fit is usually the point where ERP data, spreadsheets, and reporting no longer stay aligned without heavy manual work.",
+    title: "Review current systems",
+    description:
+      "We identify the systems of record, manual reporting points, and where KPI definitions break down.",
   },
   {
-    q: "How long do projects usually take?",
-    a: "Timeline depends on scope and source-system complexity. Many projects deliver a first working reporting release in a few weeks, then expand in phases.",
+    title: "Prioritize the first phase",
+    description:
+      "We narrow the scope to the reporting workflows with the clearest operational value.",
   },
   {
-    q: "Do you replace our current systems?",
-    a: "No. The model is to extract from the systems you already use, whether that is Buildertrend, Hyphen, Sage, JME, Google Sheets, CSV exports, or a mix. The platform sits on top of the operation so the data becomes usable without forcing a full rip-and-replace.",
-  },
-  {
-    q: "What happens on the first call?",
-    a: "The discovery call reviews your current systems, reporting gaps, and priority decisions. You leave with a clear recommendation for scope and next steps.",
+    title: "Outline practical next steps",
+    description:
+      "You leave with a plain-English view of the data path, likely build sequence, and fit.",
   },
 ];
 
-type SubmissionState = "idle" | "submitting" | "submitted" | "error";
+const faqs = [
+  {
+    q: "What size builder is the best fit?",
+    a: "The strongest fit is usually residential builders doing roughly 20-500+ homes per year where reporting relies on ERP exports, spreadsheets, and manual reconciliation.",
+  },
+  {
+    q: "Do you replace our existing systems?",
+    a: "No. The work usually connects to the systems already in place and centralizes the data into a structured warehouse, reporting system, and operational tools.",
+  },
+  {
+    q: "What happens after the first call?",
+    a: "If there is a fit, we define the source systems, priority workflows, and first practical build phase so you can evaluate scope and cost clearly.",
+  },
+  {
+    q: "Who owns the platform?",
+    a: "The client owns the code, data, hosting, and infrastructure. The goal is a system your business can keep using and improving.",
+  },
+];
 
 export default function ContactPageClient() {
-  const [status, setStatus] = useState<SubmissionState>("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [lastSubmitTime, setLastSubmitTime] = useState(0);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (status === "submitting") {
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastSubmitTime < 30_000) {
-      setStatus("error");
-      setErrorMessage("Please wait 30 seconds before submitting again.");
-      return;
-    }
-    setLastSubmitTime(now);
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    formData.append("_subject", "New consultation request from website");
-    formData.append("_template", "table");
-    formData.append("_captcha", "true");
-
-    setStatus("submitting");
-    setErrorMessage("");
-
-    try {
-      const response = await fetch(`https://formsubmit.co/ajax/${SITE_CONFIG.email}`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        body: formData,
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result?.success) {
-        throw new Error("Submission service returned an unexpected response.");
-      }
-
-      form.reset();
-      setStatus("submitted");
-    } catch {
-      setStatus("error");
-      setErrorMessage(
-        `The form couldn’t be sent right now. Please try again, or email ${SITE_CONFIG.email} directly.`
-      );
-    }
-  };
-
   return (
     <>
       <section className="page-hero">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1fr_0.85fr] lg:items-end">
             <div>
-              <span className="eyebrow">Start the Conversation</span>
-              <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.05em] text-slate-50 sm:text-6xl">
-                Discuss your current systems and reporting needs.
+              <span className="eyebrow">Book a Discovery Call</span>
+              <h1 className="mt-6 max-w-4xl font-heading text-5xl leading-[0.9] tracking-[0.03em] text-slate-50 sm:text-6xl">
+                Discuss your builder data, reporting, and operational tools.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                The first call is focused on fit and clarity: what data you
-                have, where reporting breaks down, and what a practical plan
-                could look like for your team.
+                The first call is focused on fit and clarity: what systems you
+                use, where reporting slows down, and what a practical first
+                phase could look like.
               </p>
             </div>
+            <Card padding="lg" className="bg-accent-500/[0.08]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-400/25 bg-accent-500/15 text-accent-200">
+                <CalendarCheck size={22} />
+              </div>
+              <h2 className="mt-6 font-heading text-4xl leading-none tracking-[0.02em] text-slate-50">
+                Book a 30-minute discovery call.
+              </h2>
+              <p className="mt-5 text-base leading-7 text-slate-200">
+                We will review your current reporting workflow, source systems,
+                and decision priorities to confirm whether a custom data
+                platform is the right fit.
+              </p>
+              <TrackedCalendlyLink
+                source="contact_hero"
+                className="mt-7 inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
+              >
+                Pick a Time
+                <ArrowRight size={16} />
+              </TrackedCalendlyLink>
+            </Card>
           </div>
         </Container>
       </section>
 
       <section className="section-space pt-0">
         <Container>
-          <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
             <div className="panel p-6 md:p-8">
-              {status === "submitted" ? (
-                <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 p-8 text-center">
-                  <CheckCircle2 size={48} className="mx-auto text-emerald-400" />
-                  <h2 className="mt-5 font-heading text-3xl tracking-[0.04em] text-slate-50">
-                    Message received.
-                  </h2>
-                  <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-200">
-                    Thanks. We&apos;ll reply with the best next step, whether that is
-                    a focused systems-mapping session or a scoped platform plan.
-                  </p>
-                  <Button
-                    variant="secondary"
-                    className="mt-6"
-                    onClick={() => setStatus("idle")}
+              <div className="grid gap-4 sm:grid-cols-3">
+                {firstCallSteps.map((step, index) => (
+                  <div key={step.title} className="panel-soft p-5">
+                    <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
+                      Step {index + 1}
+                    </div>
+                    <h3 className="mt-4 font-heading text-2xl leading-none tracking-[0.03em] text-slate-50">
+                      {step.title}
+                    </h3>
+                    <p className="mt-4 text-sm leading-6 text-slate-300">
+                      {step.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {[
+                  { icon: Database, label: "Centralized builder data" },
+                  { icon: BarChart3, label: "Dashboards and reporting" },
+                  { icon: Wrench, label: "Internal operational tools" },
+                ].map(({ icon: Icon, label }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4 text-sm font-semibold text-slate-200"
                   >
-                    Send another message
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <input
-                    type="text"
-                    name="_honey"
-                    className="hidden"
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className="field-label" htmlFor="contact-name">
-                        Name
-                      </label>
-                      <input
-                        id="contact-name"
-                        name="name"
-                        type="text"
-                        required
-                        className="field"
-                        placeholder="Your name"
-                      />
-                    </div>
-                    <div>
-                      <label className="field-label" htmlFor="contact-email">
-                        Email
-                      </label>
-                      <input
-                        id="contact-email"
-                        name="email"
-                        type="email"
-                        required
-                        className="field"
-                        placeholder="you@company.com"
-                      />
-                    </div>
+                    <Icon size={18} className="text-accent-300" />
+                    {label}
                   </div>
-
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className="field-label" htmlFor="contact-company">
-                        Company
-                      </label>
-                      <input
-                        id="contact-company"
-                        name="company"
-                        type="text"
-                        className="field"
-                        placeholder="Your company"
-                      />
-                    </div>
-                    <div>
-                      <label className="field-label" htmlFor="contact-phone">
-                        Phone
-                      </label>
-                      <input
-                        id="contact-phone"
-                        name="phone"
-                        type="tel"
-                        className="field"
-                        placeholder="(407) 555-0123"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="field-label" htmlFor="contact-volume">
-                      Homes closed per year
-                    </label>
-                    <select id="contact-volume" name="homes_per_year" className="field" defaultValue="">
-                      <option value="" disabled>
-                        Select range
-                      </option>
-                      <option value="under-20">Under 20 homes</option>
-                      <option value="20-100">20 - 100 homes</option>
-                      <option value="100-300">100 - 300 homes</option>
-                      <option value="300-500">300 - 500 homes</option>
-                      <option value="500+">500+ homes</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="field-label" htmlFor="contact-message">
-                      Project goals and reporting needs
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      name="message"
-                      required
-                      rows={6}
-                      className="field resize-none"
-                      placeholder="Tell us your core systems of record, where reporting is still manual, and which decisions need better visibility."
-                    />
-                  </div>
-
-                  {status === "error" && (
-                    <div className="rounded-[1.25rem] border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle size={18} className="mt-0.5 shrink-0" />
-                        <span>{errorMessage}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button type="submit" size="lg" className="min-w-[15rem] justify-center">
-                    {status === "submitting" ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
-              )}
+                ))}
+              </div>
             </div>
 
             <div className="space-y-5">
@@ -245,14 +144,11 @@ export default function ContactPageClient() {
                 </h2>
                 <div className="mt-6 space-y-4 text-sm text-slate-200">
                   <div className="flex items-start gap-3">
-                    <Phone size={18} className="mt-0.5 text-accent-300" />
-                    <a href={SITE_CONFIG.phoneHref} className="hover:text-accent-100">
-                      {SITE_CONFIG.phone}
-                    </a>
-                  </div>
-                  <div className="flex items-start gap-3">
                     <Mail size={18} className="mt-0.5 text-accent-300" />
-                    <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-accent-100">
+                    <a
+                      href={`mailto:${SITE_CONFIG.email}`}
+                      className="hover:text-accent-100"
+                    >
                       {SITE_CONFIG.email}
                     </a>
                   </div>
@@ -267,53 +163,17 @@ export default function ContactPageClient() {
                 </div>
               </Card>
 
-              <Card
-                padding="lg"
-                className="bg-[linear-gradient(135deg,rgba(209,133,63,0.18),rgba(255,255,255,0.05)_60%,rgba(255,255,255,0.03))]"
-              >
+              <Card padding="lg">
                 <h3 className="font-heading text-3xl tracking-[0.04em] text-slate-50">
-                  Book a 30-minute discovery call
+                  Strong fit if...
                 </h3>
-                <p className="mt-4 text-sm leading-7 text-slate-200 md:text-base">
-                  Skip the form and book directly. We will review your systems,
-                  reporting workflow, and decision priorities to confirm scope and fit.
-                </p>
-                <div className="mt-5">
-                  <a
-                    href="https://calendly.com/arnauddg27/30min"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-accent-400/30 bg-accent-500/15 px-5 py-3 text-sm font-semibold text-accent-200 transition-all duration-300 hover:bg-accent-500/25 hover:border-accent-400/50"
-                  >
-                    <Clock size={16} />
-                    Pick a Time
-                  </a>
-                </div>
-              </Card>
-
-              <Card
-                padding="lg"
-                className="bg-[linear-gradient(135deg,rgba(52,211,153,0.12),rgba(255,255,255,0.04)_60%,rgba(34,211,238,0.08))]"
-              >
-                <h3 className="font-heading text-2xl tracking-[0.04em] text-slate-50">
-                  Discovery Questionnaire
-                </h3>
-                <p className="mt-4 text-sm leading-7 text-slate-200">
-                  A fillable PDF covering ERP, finance, sales, construction ops, reporting,
-                  and cloud posture. Takes 25-40 minutes to complete and compresses the
-                  first two discovery calls into one. Return it before the call.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <a
-                    href="/downloads/AD-Homes-Discovery-Questionnaire.pdf"
-                    download
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.06] px-5 py-3 text-sm font-semibold text-slate-100 transition-all duration-300 hover:border-accent-400/40 hover:bg-white/[0.1] hover:text-accent-100"
-                  >
-                    Download PDF
-                    <span className="text-[0.62rem] font-normal uppercase tracking-[0.18em] text-slate-400">
-                      9 pp · 127 fields
-                    </span>
-                  </a>
+                <div className="mt-6 space-y-4">
+                  {fitPoints.map((point) => (
+                    <div key={point} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
+                      <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-accent-300" />
+                      <span>{point}</span>
+                    </div>
+                  ))}
                 </div>
               </Card>
             </div>
@@ -332,14 +192,37 @@ export default function ContactPageClient() {
           <div className="grid gap-5 md:grid-cols-2">
             {faqs.map((faq) => (
               <Card key={faq.q} padding="lg">
-                <h3 className="font-heading text-3xl leading-[0.95] tracking-[0.04em] text-slate-50">
-                  {faq.q}
-                </h3>
-                <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-                  {faq.a}
-                </p>
+                <div className="flex items-start gap-4">
+                  <ShieldCheck size={22} className="mt-1 shrink-0 text-accent-300" />
+                  <div>
+                    <h3 className="font-heading text-3xl leading-[0.95] tracking-[0.04em] text-slate-50">
+                      {faq.q}
+                    </h3>
+                    <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
               </Card>
             ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-center gap-3 rounded-[2rem] border border-accent-400/20 bg-accent-500/[0.06] p-6 text-center md:p-8">
+            <h2 className="font-heading text-3xl tracking-[0.03em] text-slate-50">
+              Ready to review your current reporting setup?
+            </h2>
+            <p className="max-w-2xl text-sm leading-7 text-slate-300 md:text-base">
+              Book the first call and we will walk through where your data lives,
+              which reports matter most, and what a realistic first release
+              could include.
+            </p>
+            <TrackedCalendlyLink
+              source="contact_bottom"
+              className="mt-2 inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
+            >
+              Book a Discovery Call
+              <ArrowRight size={16} />
+            </TrackedCalendlyLink>
           </div>
         </Container>
       </section>
