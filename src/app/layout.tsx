@@ -2,28 +2,26 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import MarketingTracking from "@/components/analytics/MarketingTracking";
 import PageAmbient from "@/components/ui/PageAmbient";
 
-
 const siteUrl = "https://consulting.aderpsystems.com";
-const siteTitle = "A.D. Homes & Consulting | Custom Data Ecosystems for Residential Homebuilders";
+const siteTitle = "A.D. Homes & Consulting | Custom Data Platforms for Residential Homebuilders";
 const siteDescription =
-  "Custom operational intelligence platforms for residential homebuilders across North America. ERP extraction, centralized data warehouses, lifecycle dashboards, pro forma tools, and client-owned delivery.";
+  "Custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data in a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.";
 
 export const metadata: Metadata = {
   title: siteTitle,
   description: siteDescription,
   keywords: [
     "residential homebuilder data platform",
+    "custom data platforms for residential homebuilders",
     "builder ERP data extraction",
-    "Buildertrend analytics",
-    "Hyphen reporting",
-    "Sage construction data warehouse",
-    "homebuilder KPI dashboard",
-    "builder operational intelligence",
+    "centralized builder data",
+    "builder reporting systems",
+    "builder dashboards",
     "construction data warehouse",
-    "per job pro forma reporting",
-    "builder lifecycle analytics",
+    "cost to complete analysis",
   ],
   metadataBase: new URL(siteUrl),
   openGraph: {
@@ -38,7 +36,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/images/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "A.D. Homes & Consulting - Custom Data Ecosystems for Residential Homebuilders",
+        alt: "A.D. Homes & Consulting - Custom Data Platforms for Residential Homebuilders",
       },
     ],
   },
@@ -69,7 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-{/* Google Analytics — add real ID when ready */}
+        <MarketingTracking />
         <div className="relative min-h-screen overflow-x-hidden">
           <PageAmbient />
           <Header />

@@ -11,9 +11,8 @@ import {
 import Container from "@/components/ui/Container";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { SITE_CONFIG } from "@/lib/constants";
-
-const bookingUrl = "https://calendly.com/adurand-aderpsystems/30min";
 
 const faqs = [
   {
@@ -77,15 +76,13 @@ export default function ContactPageClient() {
                 </p>
 
                 <div className="mt-7">
-                  <a
-                    href={bookingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <TrackedCalendlyLink
+                    source="contact_primary"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-b-2 border-zinc-950/40 bg-gradient-to-t from-accent-600 to-accent-400 px-5 py-4 text-center text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-accent-500/30 ring-1 ring-inset ring-white/25 transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-accent-500/40 active:translate-y-0 active:brightness-95 sm:w-auto sm:px-6"
                   >
                     Pick a time
                     <ArrowRight size={16} />
-                  </a>
+                  </TrackedCalendlyLink>
                 </div>
               </div>
             </Card>

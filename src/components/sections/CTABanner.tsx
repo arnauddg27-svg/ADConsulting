@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { AuroraGloss } from "@/components/ui/AuroraBackground";
@@ -28,10 +28,8 @@ export default function CTABanner({
           )}
           style={{ pointerEvents: "auto" }}
         >
-          {/* Subtle aurora gloss behind the panel content */}
           <AuroraGloss />
 
-          {/* accent glow overlays */}
           <div
             aria-hidden
             className={clsx(
@@ -56,7 +54,10 @@ export default function CTABanner({
                 {description}
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-3 text-sm text-slate-300">
-                <span className="badge-dash">Book directly online</span>
+                <span className="badge-dash">
+                  <Clock size={14} />
+                  30-minute discovery call
+                </span>
                 <span className="badge-dash">Response within 24 hours</span>
               </div>
             </div>

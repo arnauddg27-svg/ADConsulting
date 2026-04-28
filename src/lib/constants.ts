@@ -8,6 +8,7 @@ export const SITE_CONFIG = {
     "A.D. Homes & Consulting builds custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
   email: "adurand@aderpsystems.com",
+  calendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
 };
 
 export const NAV_LINKS: NavLink[] = [
