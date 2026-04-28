@@ -280,7 +280,7 @@ export default function ContactPageClient() {
                 </p>
                 <div className="mt-5">
                   <a
-                    href="https://calendly.com/arnauddg27/30min"
+                    href="https://calendly.com/adurand-aderpsystems/30min"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-xl border border-accent-400/30 bg-accent-500/15 px-5 py-3 text-sm font-semibold text-accent-200 transition-all duration-300 hover:bg-accent-500/25 hover:border-accent-400/50"

@@ -281,7 +281,7 @@ function drawCover(page, helv, helvBold) {
     "landscape, and operational pain before the discovery call. Fill out what",
     "you know — skip what you don't. We'll fill in the rest together.",
     "",
-    "Return completed PDF to arnauddg27@gmail.com or bring it to the call.",
+    "Return completed PDF to adurand@aderpsystems.com or bring it to the call.",
     "Estimated time: 25–40 minutes. Not every question applies to every builder.",
   ];
   let yy = PAGE_H - 290;

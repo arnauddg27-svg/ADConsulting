@@ -309,7 +309,7 @@ ____________________________________________________________________________
 6. **Weeks 2–6 (or 2–8): build** — warehouse, KPI logic, dashboards, drill-downs
 7. **Week 7+: review & cutover** — three calibration sessions (ops, finance, exec); you sign off; we transfer accounts to your name
 
-If you have questions while filling this out, email **arnauddg27@gmail.com** or call **(407) 840-1368**.
+If you have questions while filling this out, email **adurand@aderpsystems.com** or call **(407) 840-1368**.
 
 ---
 

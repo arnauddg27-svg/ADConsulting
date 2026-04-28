@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   location: "North America (U.S. & Canada)",
   phone: "(407) 840-1368",
   phoneHref: "tel:+14078401368",
-  email: "arnauddg27@gmail.com",
+  email: "adurand@aderpsystems.com",
 };
 
 export const NAV_LINKS: NavLink[] = [
