@@ -7,8 +7,6 @@ export const SITE_CONFIG = {
   description:
     "A.D. Homes & Consulting builds custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
-  phone: "(407) 840-1368",
-  phoneHref: "tel:+14078401368",
   email: "adurand@aderpsystems.com",
 };
 

@@ -1,8 +1,7 @@
-import { ArrowRight, PhoneCall } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { AuroraGloss } from "@/components/ui/AuroraBackground";
-import { SITE_CONFIG } from "@/lib/constants";
 import { clsx } from "clsx";
 
 interface CTABannerProps {
@@ -57,13 +56,7 @@ export default function CTABanner({
                 {description}
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-3 text-sm text-slate-300">
-                <a
-                  href={SITE_CONFIG.phoneHref}
-                  className="badge-dash transition-colors hover:border-accent-400/40 hover:text-accent-200"
-                >
-                  <PhoneCall size={14} />
-                  {SITE_CONFIG.phone}
-                </a>
+                <span className="badge-dash">Book directly online</span>
                 <span className="badge-dash">Response within 24 hours</span>
               </div>
             </div>

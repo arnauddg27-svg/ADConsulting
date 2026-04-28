@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowRight, CalendarCheck, Clock, Mail, MapPin, Phone } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarCheck,
+  CheckCircle2,
+  Clock,
+  Mail,
+  MapPin,
+} from "lucide-react";
 import Container from "@/components/ui/Container";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -30,30 +37,27 @@ const faqs = [
 export default function ContactPageClient() {
   return (
     <>
-      <section className="page-hero pb-12 sm:pb-16 md:pb-20">
+      <section className="page-hero pt-36 pb-12 sm:pt-40 sm:pb-16 md:pt-44 md:pb-20">
         <Container>
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.85fr] lg:items-end">
-            <div>
-              <span className="eyebrow">Start the Conversation</span>
-              <h1 className="mt-6 max-w-4xl font-heading text-4xl leading-[0.95] tracking-[0.02em] text-slate-50 sm:text-5xl md:text-6xl">
-                Book a call to review your systems and reporting needs.
-              </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                The first call is focused on fit and clarity: what data you
-                have, where reporting breaks down, and what a practical first
-                phase could look like.
-              </p>
-            </div>
+          <div>
+            <span className="eyebrow">Start the Conversation</span>
+            <h1 className="mt-6 max-w-4xl font-heading text-4xl leading-[0.95] tracking-[0.02em] text-slate-50 sm:text-5xl md:text-6xl">
+              Book a call to review your systems and reporting needs.
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+              A focused conversation about your current data sources, manual
+              reporting work, and the decisions that need better visibility.
+            </p>
           </div>
         </Container>
       </section>
 
       <section className="section-space pt-0">
         <Container>
-          <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
             <Card
               padding="lg"
-              className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(209,133,63,0.2),rgba(255,255,255,0.055)_58%,rgba(52,211,153,0.1))]"
+              className="relative overflow-hidden border-accent-300/20 bg-[linear-gradient(135deg,rgba(52,211,153,0.16),rgba(255,255,255,0.055)_52%,rgba(15,23,42,0.68))]"
             >
               <div
                 aria-hidden
@@ -64,13 +68,12 @@ export default function ContactPageClient() {
                   <CalendarCheck size={22} />
                 </div>
                 <h2 className="font-heading text-4xl leading-[0.95] tracking-[0.02em] text-slate-50 sm:text-5xl">
-                  Book a 30-minute discovery call.
+                  Schedule a 30-minute discovery call.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg sm:leading-8">
                   We will review your current systems, reporting workflow, and
-                  decision priorities to confirm fit. After the call, we send a
-                  short questionnaire if more detail is needed to prepare a
-                  practical quote.
+                  decision priorities to confirm fit and identify a practical
+                  first phase.
                 </p>
 
                 <div className="mt-7">
@@ -84,42 +87,34 @@ export default function ContactPageClient() {
                     <ArrowRight size={16} />
                   </a>
                 </div>
-
-                <div className="mt-7 grid gap-3 text-sm text-slate-300 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/[0.08] bg-black/15 p-4">
-                    <div className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-accent-300">
-                      Step 1
-                    </div>
-                    <div className="mt-2 leading-6">Review systems and pain points.</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/[0.08] bg-black/15 p-4">
-                    <div className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-accent-300">
-                      Step 2
-                    </div>
-                    <div className="mt-2 leading-6">Send questionnaire after fit is clear.</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/[0.08] bg-black/15 p-4">
-                    <div className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-accent-300">
-                      Step 3
-                    </div>
-                    <div className="mt-2 leading-6">Prepare scope and quote.</div>
-                  </div>
-                </div>
               </div>
             </Card>
 
-            <div className="space-y-5">
-              <Card padding="lg">
-                <h2 className="font-heading text-3xl tracking-[0.04em] text-slate-50">
-                  Contact details
+            <div className="grid gap-5">
+              <Card padding="lg" className="bg-white/[0.035]">
+                <h2 className="font-heading text-3xl tracking-[0.02em] text-slate-50">
+                  What we will cover
                 </h2>
-                <div className="mt-6 space-y-4 text-sm text-slate-200">
-                  <div className="flex items-start gap-3">
-                    <Phone size={18} className="mt-0.5 shrink-0 text-accent-300" />
-                    <a href={SITE_CONFIG.phoneHref} className="hover:text-accent-100">
-                      {SITE_CONFIG.phone}
-                    </a>
-                  </div>
+                <div className="mt-6 space-y-4 text-sm leading-7 text-slate-300">
+                  {[
+                    "Which ERP, finance, spreadsheet, API, and export data you rely on today.",
+                    "Where reporting is still manual, delayed, or hard to trust.",
+                    "Which dashboards or operating tools would create the most leverage first.",
+                    "What a realistic first phase, timeline, and quote path could look like.",
+                  ].map((item) => (
+                    <div key={item} className="flex gap-3">
+                      <CheckCircle2
+                        size={18}
+                        className="mt-1 shrink-0 text-accent-300"
+                      />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card padding="md" className="bg-black/10">
+                <div className="grid gap-4 text-sm text-slate-200 sm:grid-cols-3 lg:grid-cols-1">
                   <div className="flex items-start gap-3">
                     <Mail size={18} className="mt-0.5 shrink-0 text-accent-300" />
                     <a
@@ -138,21 +133,6 @@ export default function ContactPageClient() {
                     <span>Response within 24 hours</span>
                   </div>
                 </div>
-              </Card>
-
-              <Card
-                padding="lg"
-                className="bg-[linear-gradient(135deg,rgba(52,211,153,0.12),rgba(255,255,255,0.04)_60%,rgba(34,211,238,0.08))]"
-              >
-                <h3 className="font-heading text-2xl tracking-[0.04em] text-slate-50">
-                  Post-call questionnaire
-                </h3>
-                <p className="mt-4 text-sm leading-7 text-slate-200">
-                  After the initial call, we send a short worksheet covering your
-                  systems, reporting gaps, data access, and priority dashboards.
-                  It gives us the detail needed to prepare a practical scope and
-                  quote.
-                </p>
               </Card>
             </div>
           </div>
