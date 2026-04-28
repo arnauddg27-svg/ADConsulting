@@ -246,11 +246,11 @@
 
 @layer components {
   .section-space {
-    @apply py-20 md:py-28;
+    @apply py-14 sm:py-20 md:py-28;
   }
 
   .page-hero {
-    @apply relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-24;
+    @apply relative overflow-hidden pt-28 pb-14 sm:pt-32 sm:pb-20 md:pt-40 md:pb-24;
   }
 
   .eyebrow {
@@ -312,7 +312,7 @@
   }
 
   .field {
-    @apply w-full rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-sm text-slate-50 placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-accent-400 focus:bg-white/[0.07] focus:ring-2 focus:ring-accent-500/25;
+    @apply w-full rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-base text-slate-50 placeholder:text-slate-400 outline-none transition-all duration-300 focus:border-accent-400 focus:bg-white/[0.07] focus:ring-2 focus:ring-accent-500/25 sm:text-sm;
   }
 
   .field option {

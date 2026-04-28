@@ -19,7 +19,7 @@ const variants = {
 const sizes = {
   sm: "px-4 py-2.5 text-[0.68rem]",
   md: "px-5 py-3 text-[0.72rem]",
-  lg: "px-6 py-4 text-[0.78rem]",
+  lg: "px-5 py-3.5 text-[0.72rem] sm:px-6 sm:py-4 sm:text-[0.78rem]",
 };
 
 interface ButtonProps {
