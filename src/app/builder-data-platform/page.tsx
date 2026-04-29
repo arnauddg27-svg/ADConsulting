@@ -19,7 +19,7 @@ import Button from "@/components/ui/Button";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 
 export const metadata: Metadata = {
-  title: "Builder Data Platform | Residential Builder & Developer Dashboards",
+  title: "Builder & Developer Data Platform | Residential Dashboards",
   description:
     "A competitively priced custom data platform for residential homebuilders and residential real estate developers. Centralize ERP, spreadsheet, finance, API, and export data into dashboards, reporting systems, and internal tools.",
 };
@@ -57,8 +57,8 @@ const platformLayers = [
   },
   {
     icon: Layers3,
-    title: "Apply builder logic",
-    body: "Normalize communities, jobs, lots, budgets, stages, permits, draws, contracts, and KPI definitions.",
+    title: "Apply operating logic",
+    body: "Normalize communities, jobs, lots, budgets, stages, permits, draws, contracts, and KPI definitions for residential operations.",
   },
   {
     icon: BarChart3,
@@ -70,7 +70,7 @@ const platformLayers = [
 const whatYouBuy = [
   {
     title: "A custom data platform",
-    body: "A working builder data layer that pulls from the systems you already use, organizes the data, and gives your team one source for reporting.",
+    body: "A working data layer that pulls from the systems you already use, organizes the data, and gives your team one source for reporting.",
   },
   {
     title: "Dashboards and reporting",
@@ -200,14 +200,14 @@ export default function BuilderDataPlatformLandingPage() {
           <div className="grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
             <div>
               <h1 className="max-w-5xl font-heading text-[3.1rem] leading-[0.9] tracking-[-0.03em] text-slate-50 sm:text-6xl md:text-7xl">
-                Turn scattered builder data into reporting your team can run on.
+                Turn scattered project data into reporting your team can run on.
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
                 We build competitively priced custom data platforms for
                 residential homebuilders and residential real estate developers.
                 The product is a client-owned
                 reporting system: data extraction, a structured warehouse,
-                builder-specific KPI logic, dashboards, drilldowns, and
+                builder and developer KPI logic, dashboards, drilldowns, and
                 internal tools.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -243,7 +243,7 @@ export default function BuilderDataPlatformLandingPage() {
                 <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] pb-4">
                   <div>
                     <div className="font-heading text-2xl leading-tight text-slate-50">
-                      Builder Data Platform
+                      Builder & Developer Data Platform
                     </div>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
                       One clean path from source systems to operating decisions.
@@ -268,7 +268,7 @@ export default function BuilderDataPlatformLandingPage() {
                 <div className="grid gap-3">
                   {[
                     "Structured warehouse",
-                    "Builder KPI logic",
+                    "Builder and developer KPI logic",
                     "Dashboards, reporting, and internal tools",
                     "Competitive project-based scope",
                   ].map((output) => (
@@ -292,7 +292,7 @@ export default function BuilderDataPlatformLandingPage() {
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <div className="lg:sticky lg:top-32">
               <SectionIntro
-                title="The problem is not that builders lack data."
+                title="The problem is not a lack of data."
                 body="The problem is that the data lives in too many places, follows different definitions, and takes too much manual work to turn into decisions."
               />
               <TrackedCalendlyLink
@@ -326,7 +326,7 @@ export default function BuilderDataPlatformLandingPage() {
         <Container>
           <SectionIntro
             title="What you are buying."
-            body="This is not a generic consulting report or a dashboard template. It is a custom builder data platform that your team can use, own, and expand."
+            body="This is not a generic consulting report or a dashboard template. It is a custom data platform for residential builders and developers that your team can use, own, and expand."
           />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {whatYouBuy.map((item) => (
