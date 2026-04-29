@@ -19,9 +19,9 @@ import Button from "@/components/ui/Button";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 
 export const metadata: Metadata = {
-  title: "Builder Data Platform | Dashboards for Residential Homebuilders",
+  title: "Builder Data Platform | Residential Builder & Developer Dashboards",
   description:
-    "A competitively priced custom data platform for residential homebuilders. Centralize ERP, spreadsheet, finance, API, and export data into dashboards, reporting systems, and internal tools.",
+    "A competitively priced custom data platform for residential homebuilders and residential real estate developers. Centralize ERP, spreadsheet, finance, API, and export data into dashboards, reporting systems, and internal tools.",
 };
 
 const primaryCtaClass =
@@ -37,7 +37,7 @@ const sourceSystems = [
 ];
 
 const heroProof = [
-  "Built for residential homebuilders",
+  "Built for residential builders and developers",
   "Client-owned code, data, hosting, and infrastructure",
   "Competitive project-based pricing",
 ];
@@ -144,7 +144,7 @@ const firstPhase = [
 ];
 
 const fitSignals = [
-  "You manage roughly 20-500+ homes per year.",
+  "You manage roughly 20-500+ homes, lots, or closings per year.",
   "Critical reports still depend on exports, manual cleanup, or linked spreadsheets.",
   "Your ERP has useful data, but it does not give leadership the operating view they need.",
   "You want dashboards and tools your team owns, not a black-box reporting subscription.",
@@ -204,7 +204,8 @@ export default function BuilderDataPlatformLandingPage() {
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
                 We build competitively priced custom data platforms for
-                residential homebuilders. The product is a client-owned
+                residential homebuilders and residential real estate developers.
+                The product is a client-owned
                 reporting system: data extraction, a structured warehouse,
                 builder-specific KPI logic, dashboards, drilldowns, and
                 internal tools.
