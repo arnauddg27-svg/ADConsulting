@@ -21,7 +21,7 @@ import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 export const metadata: Metadata = {
   title: "Builder Data Platform | Dashboards for Residential Homebuilders",
   description:
-    "Custom data platforms for residential homebuilders. Centralize ERP, spreadsheet, finance, API, and export data into reporting systems, dashboards, and internal tools.",
+    "A competitively priced custom data platform for residential homebuilders. Centralize ERP, spreadsheet, finance, API, and export data into dashboards, reporting systems, and internal tools.",
 };
 
 const primaryCtaClass =
@@ -39,7 +39,7 @@ const sourceSystems = [
 const heroProof = [
   "Built for residential homebuilders",
   "Client-owned code, data, hosting, and infrastructure",
-  "Practical first releases, then phased expansion",
+  "Competitive project-based pricing",
 ];
 
 const dataProblems = [
@@ -64,6 +64,58 @@ const platformLayers = [
     icon: BarChart3,
     title: "Deliver operating views",
     body: "Turn the warehouse into dashboards, reporting systems, drilldowns, alerts, and internal tools.",
+  },
+];
+
+const whatYouBuy = [
+  {
+    title: "A custom data platform",
+    body: "A working builder data layer that pulls from the systems you already use, organizes the data, and gives your team one source for reporting.",
+  },
+  {
+    title: "Dashboards and reporting",
+    body: "Executive and operating views for land, permitting, construction, loans, sales, property management, job cost, and margin.",
+  },
+  {
+    title: "Internal tools and drilldowns",
+    body: "Per-job views, exception lists, admin controls, variance tracking, cost-to-complete views, and drilldowns behind every key metric.",
+  },
+  {
+    title: "A client-owned handoff",
+    body: "Your business owns the code, data, hosting, infrastructure, and documentation after delivery.",
+  },
+];
+
+const dashboardSamples = [
+  {
+    label: "Construction WIP",
+    value: "142 active jobs",
+    detail: "Stage, superintendent, completion %, cycle time, budget status",
+  },
+  {
+    label: "Job Cost",
+    value: "$32.0M actual to date",
+    detail: "Budget vs actual, forecast variance, category spend, margin",
+  },
+  {
+    label: "Permitting",
+    value: "120 permit records",
+    detail: "Submitted, approved, issued, rejected, in-review, cycle time",
+  },
+  {
+    label: "Sales Backlog",
+    value: "$18.4M open contracts",
+    detail: "Contracts, closings, community absorption, buyer status",
+  },
+  {
+    label: "Land Pipeline",
+    value: "583 lots tracked",
+    detail: "Acres, entitlement, due diligence, lots, cost per lot",
+  },
+  {
+    label: "Loan and Draws",
+    value: "$21.7M exposure",
+    detail: "Draws, maturities, utilization, lender, maturity risk",
   },
 ];
 
@@ -110,6 +162,11 @@ const faq = [
       "If there is a fit, the next step is a focused scope review so the first phase can be priced around real systems, priority workflows, and data access requirements.",
   },
   {
+    question: "How is pricing handled?",
+    answer:
+      "Pricing is competitive and project-based. The first phase is scoped around the source systems, priority workflows, and dashboards that will create the most value without turning the project into an open-ended enterprise BI program.",
+  },
+  {
     question: "Who owns the finished system?",
     answer:
       "The client owns the code, data, hosting, and infrastructure. The build is designed so the platform can be maintained, extended, and audited without locking the business into a proprietary reporting tool.",
@@ -146,10 +203,11 @@ export default function BuilderDataPlatformLandingPage() {
                 Turn scattered builder data into reporting your team can run on.
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
-                Custom data platforms for residential homebuilders. We
-                centralize ERP, spreadsheet, finance, API, and export data into
-                one warehouse, apply builder-specific KPI logic, and deliver
-                dashboards, reporting systems, and internal tools.
+                We build competitively priced custom data platforms for
+                residential homebuilders. The product is a client-owned
+                reporting system: data extraction, a structured warehouse,
+                builder-specific KPI logic, dashboards, drilldowns, and
+                internal tools.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <TrackedCalendlyLink
@@ -211,6 +269,7 @@ export default function BuilderDataPlatformLandingPage() {
                     "Structured warehouse",
                     "Builder KPI logic",
                     "Dashboards, reporting, and internal tools",
+                    "Competitive project-based scope",
                   ].map((output) => (
                     <div
                       key={output}
@@ -265,6 +324,27 @@ export default function BuilderDataPlatformLandingPage() {
       <section className="section-space pt-0">
         <Container>
           <SectionIntro
+            title="What you are buying."
+            body="This is not a generic consulting report or a dashboard template. It is a custom builder data platform that your team can use, own, and expand."
+          />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {whatYouBuy.map((item) => (
+              <Card key={item.title} padding="lg" className="bg-white/[0.035]">
+                <h2 className="font-heading text-3xl leading-none tracking-[0.01em] text-slate-50">
+                  {item.title}
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-slate-300">
+                  {item.body}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="section-space pt-0">
+        <Container>
+          <SectionIntro
             title="What the platform does."
             body="The first build is organized around the practical path from source data to reporting your team can trust."
           />
@@ -282,6 +362,41 @@ export default function BuilderDataPlatformLandingPage() {
                 </p>
               </Card>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="section-space pt-0">
+        <Container>
+          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+            <div className="lg:sticky lg:top-32">
+              <SectionIntro
+                title="The dashboard data is practical, not decorative."
+                body="A sample platform should show the kind of operating data builders actually ask for: WIP, job cost, permitting, sales, land, loans, draws, and margin."
+              />
+              <Button href="/demo/" variant="secondary" size="lg">
+                View Interactive Sample
+              </Button>
+            </div>
+
+            <div className="grid gap-3">
+              {dashboardSamples.map((sample) => (
+                <div
+                  key={sample.label}
+                  className="grid gap-3 rounded-3xl border border-white/[0.08] bg-white/[0.035] p-5 sm:grid-cols-[0.85fr_0.7fr_1.45fr] sm:items-center"
+                >
+                  <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-accent-300">
+                    {sample.label}
+                  </div>
+                  <div className="font-heading text-3xl leading-none text-slate-50">
+                    {sample.value}
+                  </div>
+                  <div className="text-sm leading-7 text-slate-300">
+                    {sample.detail}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </section>
