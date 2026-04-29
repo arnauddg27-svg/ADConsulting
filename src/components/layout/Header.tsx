@@ -59,7 +59,7 @@ export default function Header() {
                 {SITE_CONFIG.name.toUpperCase()}
               </span>
               <span className="block text-[0.62rem] uppercase tracking-[0.24em] text-slate-400">
-                Custom Data Platforms for Residential Homebuilders
+                {SITE_CONFIG.tagline}
               </span>
             </div>
           </Link>
@@ -102,7 +102,7 @@ export default function Header() {
                   A.D. Homes &amp; Consulting
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Custom data platforms for residential homebuilders.
+                  Custom data platforms for residential builders and developers.
                 </p>
               </div>
               <nav className="flex flex-col gap-2">

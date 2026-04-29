@@ -3,9 +3,9 @@ import type { Service, NavLink, Stat, Testimonial } from "@/types";
 export const SITE_CONFIG = {
   name: "A.D. Homes & Consulting",
   businessName: "A.D. Homes & Consulting",
-  tagline: "Custom Data Platforms for Residential Homebuilders",
+  tagline: "Residential Builder & Developer Data Platforms",
   description:
-    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.",
+    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders and residential real estate developers. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder and developer KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
   email: "adurand@aderpsystems.com",
   calendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
@@ -26,7 +26,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Data Extraction",
     headline: "Pull data out of Buildertrend, Hyphen, Sage, JME, Sheets, and exports automatically",
     description:
-      "Every platform starts with extraction. We map the builder's actual systems of record, set up the right connectors or import scripts, and automate the movement of ERP, spreadsheet, and operational data into a structure the business can trust.",
+      "Every platform starts with extraction. We map the builder or developer's actual systems of record, set up the right connectors or import scripts, and automate the movement of ERP, spreadsheet, and operational data into a structure the business can trust.",
     icon: "Wrench",
     deliverables: [
       "ERP extraction strategy by source system",
@@ -58,7 +58,7 @@ export const SERVICES: Service[] = [
     id: "builder-ops",
     title: "Reporting Systems & Dashboards",
     shortTitle: "Reporting Systems",
-    headline: "Interactive reporting systems built for builder workflows",
+    headline: "Interactive reporting systems built for builder and developer workflows",
     description:
       "We build reporting systems teams can use daily. Instead of static BI tabs, you get drill-downs, operating views, and workflow-oriented tools that support operational decisions.",
     icon: "TrendingUp",
@@ -94,7 +94,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Pro Forma",
     headline: "Configurable job-level financial views that catch margin erosion before closing",
     description:
-      "Builders need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
+      "Builder and developer teams need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
     icon: "DollarSign",
     deliverables: [
       "Per-job pro forma P&L views",
@@ -111,7 +111,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Admin Tools",
     headline: "Freshness checks, exception alerts, and controlled admin tools to keep the platform reliable",
     description:
-      "A builder platform only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
+      "A platform only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
     icon: "AlertTriangle",
     deliverables: [
       "Data freshness indicators and sync health checks",

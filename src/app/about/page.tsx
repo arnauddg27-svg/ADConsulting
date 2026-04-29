@@ -23,7 +23,7 @@ import CTABanner from "@/components/sections/CTABanner";
 export const metadata: Metadata = {
   title: "About | A.D. Homes & Consulting",
   description:
-    "About A.D. Homes & Consulting, a firm that builds custom data platforms for residential homebuilders with practical, client-owned delivery.",
+    "About A.D. Homes & Consulting, a firm that builds custom data platforms for residential builders and developers with practical, client-owned delivery.",
 };
 
 const credentials = [
@@ -44,11 +44,11 @@ const pillars = [
   {
     icon: <BarChart3 size={22} />,
     title: "Operational Reporting",
-    desc: "Reporting systems and builder dashboards across land, development, permitting, lending and draws, construction, sales, and portfolio oversight.",
+    desc: "Reporting systems and operational dashboards across land, development, permitting, lending and draws, construction, sales, and portfolio oversight.",
   },
   {
     icon: <Code2 size={22} />,
-    title: "Builder Decision Tools",
+    title: "Decision Tools",
     desc: "Pro formas, budget-vs-actual analysis, cost-to-complete, variance tracking, at-risk job flagging, sync monitoring, admin controls, and internal apps.",
   },
 ];
@@ -72,7 +72,7 @@ const benefits = [
 ];
 
 const compared = [
-  { them: "Multi-industry delivery model", us: "Residential homebuilder specialization" },
+  { them: "Multi-industry delivery model", us: "Residential builder and developer specialization" },
   { them: "Framework-first implementation", us: "Scope tailored to your systems and reporting priorities" },
   { them: "Limited platform ownership", us: "Client ownership of code, data, and hosting" },
   { them: "Layered communication model", us: "Direct senior involvement throughout delivery" },
@@ -90,7 +90,7 @@ export default function AboutPage() {
               <div>
                 <span className="eyebrow eyebrow-dot">About the Firm</span>
                 <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-                  Custom data platforms for residential homebuilders
+                  Custom data platforms for residential builders and developers
                 </h1>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
                   We pull data from the systems you already use — ERPs,
@@ -120,12 +120,12 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow eyebrow-dot">Industry Context</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Built around residential builder operations
+              Built around residential builder and developer operations
             </h2>
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               <p className="text-base leading-7 text-slate-400">
                 The firm is built around experience in residential development,
-                construction operations, and builder reporting. That background
+                construction operations, and builder and developer reporting. That background
                 informs how data is modeled, how KPI definitions are built, and
                 how reporting is organized for finance, construction,
                 development, and leadership teams.
@@ -148,7 +148,7 @@ export default function AboutPage() {
               Three connected solution categories
             </h2>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-400">
-              Each engagement combines centralized builder data, operational
+              Each engagement combines centralized builder and developer data, operational
               reporting systems, and decision tools used by teams managing
               communities, jobs, costs, sales, and portfolio performance.
             </p>

@@ -15,9 +15,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import { SERVICES, PROCESS_STEPS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Services | Custom Data Platforms for Residential Homebuilders",
+  title: "Services | Residential Builder & Developer Data Platforms",
   description:
-    "Explore services for residential homebuilders: data infrastructure, operational reporting systems, and builder decision tools.",
+    "Explore services for residential builders and developers: data infrastructure, operational reporting systems, and decision tools.",
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -38,11 +38,11 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow eyebrow-dot">What We Build</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              Custom data platforms for residential homebuilders
+              Custom data platforms for residential builders and developers
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
               Services are organized into three layers: data infrastructure,
-              operational reporting systems, and builder decision tools.
+              operational reporting systems, and decision tools.
             </p>
           </div>
         </Container>

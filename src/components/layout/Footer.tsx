@@ -29,13 +29,14 @@ export default function Footer() {
                     {SITE_CONFIG.name.toUpperCase()}
                   </div>
                   <div className="text-[0.68rem] uppercase tracking-[0.24em] text-slate-400">
-                    Custom Data Platforms for Residential Homebuilders
+                    {SITE_CONFIG.tagline}
                   </div>
                 </div>
               </div>
 
               <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 md:text-[0.95rem]">
-                We build custom data platforms for residential homebuilders by
+                We build custom data platforms for residential builders and
+                developers by
                 centralizing ERP, spreadsheet, finance, API, and export data in
                 a structured warehouse and turning it into reporting systems,
                 dashboards, and operational tools.

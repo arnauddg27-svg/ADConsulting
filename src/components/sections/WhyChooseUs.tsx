@@ -43,18 +43,19 @@ export default function WhyChooseUs() {
           <div>
             <span className="eyebrow eyebrow-dot">Why Us</span>
             <h2 className="mt-6 max-w-lg font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
-              Why homebuilders{" "}
+              Why builders and developers{" "}
               <span className="text-gradient">choose this model.</span>
             </h2>
             <p className="mt-6 text-base leading-7 text-slate-300 md:text-[1.05rem] md:leading-8">
               The approach is focused on clarity and ownership: one centralized
-              data foundation, reporting built for builder workflows, and tools
+              data foundation, reporting built for residential builder and
+              developer workflows, and tools
               teams can use to run operations with better visibility.
             </p>
 
             <div className="mt-8 flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.2em] text-slate-500">
               <span className="divider-glow flex-1" />
-              <span>Delivery in 4–8 weeks</span>
+              <span>Scoped around the first useful release</span>
             </div>
           </div>
 
