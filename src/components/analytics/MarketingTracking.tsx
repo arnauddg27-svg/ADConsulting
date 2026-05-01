@@ -5,7 +5,6 @@ const gaId = process.env.NEXT_PUBLIC_GA_ID;
 const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
 const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const linkedInPartnerId = process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID;
-const hubspotPortalId = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID;
 
 export default function MarketingTracking() {
   const gtagBaseId = gaId || googleAdsId;
@@ -79,13 +78,6 @@ export default function MarketingTracking() {
         </Script>
       )}
 
-      {hubspotPortalId && (
-        <Script
-          id="hs-script-loader"
-          strategy="afterInteractive"
-          src={`https://js-na2.hs-scripts.com/${hubspotPortalId}.js`}
-        />
-      )}
     </>
   );
 }
