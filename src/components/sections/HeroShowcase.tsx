@@ -27,7 +27,7 @@ function usePrefersReducedMotion() {
  */
 export default function HeroShowcase() {
   return (
-    <div className="reveal mt-16 grid gap-6 lg:grid-cols-[0.58fr_0.42fr]">
+    <div className="reveal mt-10 grid gap-6 lg:grid-cols-[0.58fr_0.42fr]">
       {/* ── Pipeline diagram ── */}
       <TiltCard className="premium-panel relative overflow-hidden p-6 md:p-8" tiltLimit={3} scale={1.01} spotlight={false} effect="gravitate">
         <PipelineDiagram />
@@ -57,9 +57,9 @@ function PipelineDiagram() {
   ];
   const warehouse = { x: 280, y: 130 };
   const apps = [
-    { x: 520, y: 50, label: "Dashboards", icon: LayoutGrid },
-    { x: 520, y: 130, label: "Reports", icon: BarChart3 },
-    { x: 520, y: 210, label: "Alerts", icon: Bell },
+    { x: 490, y: 50, label: "Dashboards", icon: LayoutGrid },
+    { x: 490, y: 130, label: "Reports", icon: BarChart3 },
+    { x: 490, y: 210, label: "Alerts", icon: Bell },
   ];
 
   return (
@@ -241,8 +241,7 @@ function Node({
   Icon: React.ComponentType<{ size?: number; className?: string }>;
   align: "left" | "right";
 }) {
-  const labelX = align === "left" ? x - 42 : x + 42;
-  const anchor = align === "left" ? "end" : "start";
+  const labelX = align === "left" ? x + 34 : x + 38;
 
   return (
     <g>
@@ -265,9 +264,9 @@ function Node({
       <text
         x={labelX}
         y={y + 4}
-        textAnchor={anchor}
+        textAnchor="start"
         fill="#cbd5e1"
-        fontSize="11"
+        fontSize="10"
         fontWeight="600"
         letterSpacing="0.08em"
       >
@@ -283,6 +282,51 @@ function Node({
    ════════════════════════════════════════════════════════════ */
 
 function LiveDashboardMock() {
+  const kpis = [
+    {
+      label: "Active Jobs",
+      value: 142,
+      prefix: "",
+      suffix: "",
+      detail: "11 near close",
+      tone: "text-slate-50",
+      progress: 78,
+    },
+    {
+      label: "On Schedule",
+      value: 87,
+      prefix: "",
+      suffix: "%",
+      detail: "+5 pts vs prior",
+      tone: "text-accent-300",
+      progress: 87,
+    },
+    {
+      label: "Budget Used",
+      value: 58,
+      prefix: "",
+      suffix: "%",
+      detail: "$32.0M actual",
+      tone: "text-cyan-300",
+      progress: 58,
+    },
+    {
+      label: "Open Flags",
+      value: 12,
+      prefix: "",
+      suffix: "",
+      detail: "8 resolved this week",
+      tone: "text-amber-200",
+      progress: 32,
+    },
+  ];
+
+  const communities = [
+    { name: "Sunshine Ridge", pct: 92, homes: 24 },
+    { name: "Lake Nona Shores", pct: 76, homes: 19 },
+    { name: "Emerald Bay", pct: 64, homes: 16 },
+  ];
+
   return (
     <div className="relative p-5 md:p-6">
       {/* Window chrome */}
@@ -301,13 +345,16 @@ function LiveDashboardMock() {
       </div>
 
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-start justify-between gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
         <div>
           <div className="text-[0.6rem] uppercase tracking-[0.22em] text-slate-500">
             Operating Overview
           </div>
-          <div className="mt-0.5 font-heading text-[0.95rem] text-slate-100">
-            Today · March 25
+          <div className="mt-1 font-heading text-lg tracking-[-0.02em] text-slate-100">
+            Construction health
+          </div>
+          <div className="mt-1 text-[0.68rem] text-slate-500">
+            Data through Mar 25 · all communities
           </div>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-400/25 bg-accent-500/10 px-2.5 py-0.5 text-[0.58rem] uppercase tracking-[0.18em] text-accent-200">
@@ -318,15 +365,10 @@ function LiveDashboardMock() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-2.5">
-        {[
-          { label: "Active Jobs", value: 142, prefix: "", suffix: "", tone: "text-slate-50" },
-          { label: "On-Time", value: 87, prefix: "", suffix: "%", tone: "text-accent-300" },
-          { label: "Avg Completion", value: 57, prefix: "", suffix: "%", tone: "text-cyan-400" },
-          { label: "WIP", value: 39.6, prefix: "$", suffix: "M", tone: "text-slate-50", decimals: 1 },
-        ].map((kpi) => (
+        {kpis.map((kpi, index) => (
           <div
             key={kpi.label}
-            className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3"
+            className="rounded-xl border border-white/[0.07] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
           >
             <div className="text-[0.54rem] uppercase tracking-[0.2em] text-slate-500">
               {kpi.label}
@@ -335,35 +377,39 @@ function LiveDashboardMock() {
               {kpi.prefix}
               <NumberTicker
                 value={kpi.value}
-                decimalPlaces={kpi.decimals ?? 0}
-                delay={0.2}
+                decimalPlaces={0}
+                delay={0.12 * index}
                 className="inline-block"
               />
               {kpi.suffix}
+            </div>
+            <div className="mt-1 text-[0.58rem] text-slate-500">{kpi.detail}</div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-accent-500 to-cyan-300"
+                style={{ width: `${kpi.progress}%` }}
+              />
             </div>
           </div>
         ))}
       </div>
 
       {/* Bars — communities */}
-      <div className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
+      <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.035] p-3">
         <div className="mb-2.5 flex items-center justify-between">
           <div className="text-[0.54rem] uppercase tracking-[0.2em] text-slate-500">
-            By Community
+            Project Completion by Community
           </div>
           <TrendingUp size={10} className="text-accent-400" />
         </div>
-        <div className="space-y-2">
-          {[
-            { name: "Sunshine Ridge", pct: 92 },
-            { name: "Lake Nona Shores", pct: 76 },
-            { name: "Emerald Bay", pct: 64 },
-            { name: "Cypress Landing", pct: 48 },
-          ].map((c, i) => (
+        <div className="space-y-2.5">
+          {communities.map((c, i) => (
             <div key={c.name}>
               <div className="flex justify-between text-[0.58rem]">
                 <span className="text-slate-300">{c.name}</span>
-                <span className="tabular-nums text-slate-500">{c.pct}%</span>
+                <span className="tabular-nums text-slate-500">
+                  {c.homes} jobs · {c.pct}%
+                </span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.04]">
                 <div
@@ -377,6 +423,22 @@ function LiveDashboardMock() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2.5">
+        {[
+          ["Permits", "120", "5 pending"],
+          ["Draws", "$8.4M", "ready"],
+          ["Sales", "$18.4M", "backlog"],
+        ].map(([label, value, detail]) => (
+          <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+            <div className="text-[0.52rem] uppercase tracking-[0.18em] text-slate-500">
+              {label}
+            </div>
+            <div className="mt-1 font-heading text-sm text-slate-100">{value}</div>
+            <div className="mt-0.5 text-[0.55rem] text-accent-300/80">{detail}</div>
+          </div>
+        ))}
       </div>
 
       <style jsx>{`
