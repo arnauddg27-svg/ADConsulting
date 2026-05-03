@@ -62,27 +62,27 @@ export default function HeroShowcase() {
 
 function PipelineDiagram() {
   const reduceMotion = usePrefersReducedMotion();
-  // Node positions (viewBox 600 x 280)
+  // A squarer viewBox keeps the pipeline readable in square crops and hero cards.
   const sources = [
-    { x: 40, y: 50, label: "ERP", icon: Database },
-    { x: 40, y: 130, label: "Sheets", icon: FileSpreadsheet },
-    { x: 40, y: 210, label: "APIs", icon: Cloud },
+    { x: 48, y: 78, label: "ERP", icon: Database },
+    { x: 48, y: 180, label: "Sheets", icon: FileSpreadsheet },
+    { x: 48, y: 282, label: "APIs", icon: Cloud },
   ];
-  const warehouse = { x: 280, y: 130 };
+  const warehouse = { x: 260, y: 180 };
   const apps = [
-    { x: 490, y: 50, label: "Dashboards", icon: LayoutGrid },
-    { x: 490, y: 130, label: "Reports", icon: BarChart3 },
-    { x: 490, y: 210, label: "Alerts", icon: Bell },
+    { x: 418, y: 78, label: "Dashboards", icon: LayoutGrid },
+    { x: 418, y: 180, label: "Reports", icon: BarChart3 },
+    { x: 418, y: 282, label: "Alerts", icon: Bell },
   ];
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-start justify-between gap-4">
         <div>
           <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
             Data Pipeline
           </div>
-          <div className="mt-1 font-heading text-lg tracking-[-0.01em] text-slate-100">
+          <div className="mt-1 font-heading text-[1.05rem] tracking-[-0.01em] text-slate-100 md:text-lg">
             Sources → Warehouse → Apps
           </div>
         </div>
@@ -96,7 +96,7 @@ function PipelineDiagram() {
       </div>
 
       <svg
-        viewBox="0 0 600 280"
+        viewBox="0 0 520 360"
         className="min-h-0 w-full flex-1"
         preserveAspectRatio="xMidYMid meet"
       >
@@ -122,13 +122,13 @@ function PipelineDiagram() {
           </radialGradient>
 
           {/* Grid pattern */}
-          <pattern id="heroGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+          <pattern id="heroGrid" width="26" height="26" patternUnits="userSpaceOnUse">
+            <path d="M 26 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
           </pattern>
         </defs>
 
         {/* Background grid */}
-        <rect width="600" height="280" fill="url(#heroGrid)" />
+        <rect width="520" height="360" fill="url(#heroGrid)" />
 
         {/* Source → Warehouse paths */}
         {sources.map((s, i) => {
@@ -167,13 +167,13 @@ function PipelineDiagram() {
 
         {/* Warehouse node (bigger) */}
         <g>
-          <circle cx={warehouse.x} cy={warehouse.y} r="70" fill="url(#nodeGlow)" opacity="0.6" />
+          <circle cx={warehouse.x} cy={warehouse.y} r="82" fill="url(#nodeGlow)" opacity="0.62" />
           <rect
-            x={warehouse.x - 54}
-            y={warehouse.y - 36}
-            width="108"
-            height="72"
-            rx="14"
+            x={warehouse.x - 61}
+            y={warehouse.y - 42}
+            width="122"
+            height="84"
+            rx="16"
             fill="rgba(10,15,26,0.9)"
             stroke="rgba(52,211,153,0.4)"
             strokeWidth="1.5"
@@ -183,25 +183,25 @@ function PipelineDiagram() {
             <circle
               cx={warehouse.x}
               cy={warehouse.y}
-              r="56"
+              r="66"
               fill="none"
               stroke="rgba(52,211,153,0.5)"
               strokeWidth="1"
             >
-              <animate attributeName="r" from="56" to="78" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="r" from="66" to="92" dur="3s" repeatCount="indefinite" />
               <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
             </circle>
           )}
 
-          <g transform={`translate(${warehouse.x - 9} ${warehouse.y - 18})`}>
-            <Database size={18} className="text-accent-300" />
+          <g transform={`translate(${warehouse.x - 11} ${warehouse.y - 22})`}>
+            <Database size={22} className="text-accent-300" />
           </g>
           <text
             x={warehouse.x}
-            y={warehouse.y + 16}
+            y={warehouse.y + 18}
             textAnchor="middle"
             fill="#f8fafc"
-            fontSize="11"
+            fontSize="13"
             fontWeight="700"
             fontFamily="var(--font-heading)"
             letterSpacing="0.08em"
@@ -210,10 +210,10 @@ function PipelineDiagram() {
           </text>
           <text
             x={warehouse.x}
-            y={warehouse.y + 30}
+            y={warehouse.y + 34}
             textAnchor="middle"
             fill="#94a3b8"
-            fontSize="8"
+            fontSize="9"
             letterSpacing="0.16em"
           >
             CLIENT-OWNED
@@ -227,10 +227,10 @@ function PipelineDiagram() {
       </svg>
 
       {/* bottom micro info */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-white/[0.05] pt-3 text-[0.62rem] uppercase tracking-[0.2em] text-slate-500">
-        <span>Daily sync · 5:47 AM</span>
-        <span>KPI logic · once</span>
-        <span>All datasets · client-owned</span>
+      <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/[0.05] pt-3 text-[0.56rem] uppercase tracking-[0.18em] text-slate-500 sm:text-[0.62rem]">
+        <span>Daily sync</span>
+        <span>KPI logic</span>
+        <span>Client-owned</span>
       </div>
     </div>
   );
