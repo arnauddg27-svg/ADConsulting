@@ -25,45 +25,31 @@ function usePrefersReducedMotion() {
  *  right column — live-looking dashboard mock (tickers, bars, sparkline)
  * Both tilt slightly toward cursor.
  */
-const innerPanel =
-  "relative min-h-[390px] overflow-hidden rounded-[1.65rem] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(7,11,19,0.94))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:min-h-[455px]";
+const showcasePanel =
+  "relative h-full min-h-[440px] overflow-hidden rounded-[2rem] border border-white/[0.1] bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(7,11,19,0.95))] shadow-[0_36px_110px_-46px_rgba(0,0,0,0.82),inset_0_1px_0_rgba(255,255,255,0.06)] md:min-h-[500px]";
 
 export default function HeroShowcase() {
   return (
-    <div className="reveal">
+    <div className="reveal mt-7 grid items-stretch gap-5 lg:grid-cols-2">
       <TiltCard
-        className="relative overflow-hidden rounded-[2.15rem] border border-white/[0.1] bg-[radial-gradient(circle_at_18%_16%,rgba(52,211,153,0.17),transparent_34%),linear-gradient(135deg,rgba(15,23,42,0.84),rgba(7,11,19,0.96)_58%,rgba(9,16,29,0.96))] p-3 shadow-[0_44px_120px_-46px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.06)] md:p-4"
+        className={`${showcasePanel} bg-[linear-gradient(135deg,rgba(21,80,67,0.34),rgba(15,23,42,0.72)_42%,rgba(7,11,19,0.96))] p-5 md:p-6`}
+        tiltLimit={3}
+        scale={1.01}
+        spotlight={false}
+        effect="gravitate"
+      >
+        <PipelineDiagram />
+      </TiltCard>
+
+      <TiltCard
+        className={showcasePanel}
         tiltLimit={3}
         scale={1.01}
         spotlight={false}
         effect="gravitate"
       >
         <BorderBeam size={140} duration={10} colorFrom="#34d399" colorTo="#22d3ee" />
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
-          <div>
-            <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
-              Operating layer
-            </div>
-            <div className="mt-1 font-heading text-base tracking-[-0.01em] text-slate-100">
-              Sources feed one warehouse, then power reporting.
-            </div>
-          </div>
-          <div className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-[0.58rem] uppercase tracking-[0.18em] text-slate-400">
-            Sample data
-          </div>
-        </div>
-
-        <div className="grid items-stretch gap-3 xl:grid-cols-[0.55fr_0.45fr]">
-          <div
-            className={`${innerPanel} bg-[linear-gradient(135deg,rgba(21,80,67,0.28),rgba(15,23,42,0.7)_44%,rgba(7,11,19,0.96))] p-4 md:p-5`}
-          >
-            <PipelineDiagram />
-          </div>
-
-          <div className={innerPanel}>
-            <LiveDashboardMock />
-          </div>
-        </div>
+        <LiveDashboardMock />
       </TiltCard>
     </div>
   );
