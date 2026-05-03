@@ -27,14 +27,14 @@ function usePrefersReducedMotion() {
  */
 export default function HeroShowcase() {
   return (
-    <div className="reveal mt-10 grid gap-6 lg:grid-cols-[0.58fr_0.42fr]">
+    <div className="reveal mt-7 grid items-start gap-6 lg:grid-cols-[0.58fr_0.42fr]">
       {/* ── Pipeline diagram ── */}
-      <TiltCard className="premium-panel relative overflow-hidden p-6 md:p-8" tiltLimit={3} scale={1.01} spotlight={false} effect="gravitate">
+      <TiltCard className="premium-panel relative overflow-hidden p-5 md:p-6" tiltLimit={3} scale={1.01} spotlight={false} effect="gravitate">
         <PipelineDiagram />
       </TiltCard>
 
       {/* ── Live dashboard panel ── */}
-      <TiltCard className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-[linear-gradient(180deg,rgba(11,17,32,0.9),rgba(7,11,19,0.95))] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)]" tiltLimit={4} scale={1.01} spotlight={false} effect="gravitate">
+      <TiltCard className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-[linear-gradient(180deg,rgba(11,17,32,0.92),rgba(7,11,19,0.96))] shadow-[0_36px_110px_-46px_rgba(0,0,0,0.82),inset_0_1px_0_rgba(255,255,255,0.06)]" tiltLimit={4} scale={1.01} spotlight={false} effect="gravitate">
         <BorderBeam size={140} duration={10} colorFrom="#34d399" colorTo="#22d3ee" />
         <LiveDashboardMock />
       </TiltCard>
@@ -64,7 +64,7 @@ function PipelineDiagram() {
 
   return (
     <div className="relative">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
             Data Pipeline
@@ -85,7 +85,7 @@ function PipelineDiagram() {
       <svg
         viewBox="0 0 600 280"
         className="h-auto w-full"
-        style={{ maxHeight: 340 }}
+        style={{ maxHeight: 315 }}
       >
         <defs>
           {/* Node glow */}
@@ -214,7 +214,7 @@ function PipelineDiagram() {
       </svg>
 
       {/* bottom micro info */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.66rem] uppercase tracking-[0.2em] text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.62rem] uppercase tracking-[0.2em] text-slate-500">
         <span>Daily sync · 5:47 AM</span>
         <span>KPI logic · once</span>
         <span>All datasets · client-owned</span>
@@ -328,13 +328,13 @@ function LiveDashboardMock() {
   ];
 
   return (
-    <div className="relative p-5 md:p-6">
+    <div className="relative p-4 md:p-5">
       {/* Window chrome */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+          <span className="h-2 w-2 rounded-full bg-[#ff5f57]" />
+          <span className="h-2 w-2 rounded-full bg-[#febc2e]" />
+          <span className="h-2 w-2 rounded-full bg-[#28c840]" />
         </div>
         <div className="font-space-grotesk text-[0.6rem] uppercase tracking-[0.2em] text-slate-500">
           builder.ops · dashboard
@@ -345,15 +345,15 @@ function LiveDashboardMock() {
       </div>
 
       {/* Header */}
-      <div className="mb-4 flex items-start justify-between gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
+      <div className="mb-3 flex items-start justify-between gap-4 rounded-2xl border border-accent-400/15 bg-gradient-to-br from-accent-500/[0.08] via-white/[0.035] to-cyan-400/[0.04] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
         <div>
           <div className="text-[0.6rem] uppercase tracking-[0.22em] text-slate-500">
             Operating Overview
           </div>
-          <div className="mt-1 font-heading text-lg tracking-[-0.02em] text-slate-100">
+          <div className="mt-0.5 font-heading text-base tracking-[-0.02em] text-slate-100">
             Construction health
           </div>
-          <div className="mt-1 text-[0.68rem] text-slate-500">
+          <div className="mt-0.5 text-[0.64rem] text-slate-500">
             Data through Mar 25 · all communities
           </div>
         </div>
@@ -368,12 +368,12 @@ function LiveDashboardMock() {
         {kpis.map((kpi, index) => (
           <div
             key={kpi.label}
-            className="rounded-xl border border-white/[0.07] bg-white/[0.035] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            className="rounded-xl border border-white/[0.07] bg-white/[0.035] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
           >
             <div className="text-[0.54rem] uppercase tracking-[0.2em] text-slate-500">
               {kpi.label}
             </div>
-            <div className={`mt-1.5 font-heading text-xl tabular-nums ${kpi.tone}`}>
+            <div className={`mt-1 font-heading text-[1.15rem] tabular-nums ${kpi.tone}`}>
               {kpi.prefix}
               <NumberTicker
                 value={kpi.value}
@@ -383,8 +383,8 @@ function LiveDashboardMock() {
               />
               {kpi.suffix}
             </div>
-            <div className="mt-1 text-[0.58rem] text-slate-500">{kpi.detail}</div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="mt-0.5 text-[0.56rem] text-slate-500">{kpi.detail}</div>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-accent-500 to-cyan-300"
                 style={{ width: `${kpi.progress}%` }}
@@ -395,17 +395,17 @@ function LiveDashboardMock() {
       </div>
 
       {/* Bars — communities */}
-      <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.035] p-3">
-        <div className="mb-2.5 flex items-center justify-between">
+      <div className="mt-2.5 rounded-xl border border-white/[0.07] bg-white/[0.035] p-2.5">
+        <div className="mb-2 flex items-center justify-between">
           <div className="text-[0.54rem] uppercase tracking-[0.2em] text-slate-500">
             Project Completion by Community
           </div>
           <TrendingUp size={10} className="text-accent-400" />
         </div>
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {communities.map((c, i) => (
             <div key={c.name}>
-              <div className="flex justify-between text-[0.58rem]">
+              <div className="flex justify-between text-[0.56rem]">
                 <span className="text-slate-300">{c.name}</span>
                 <span className="tabular-nums text-slate-500">
                   {c.homes} jobs · {c.pct}%
@@ -425,17 +425,17 @@ function LiveDashboardMock() {
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2.5">
+      <div className="mt-2.5 grid grid-cols-3 gap-2.5">
         {[
           ["Permits", "120", "5 pending"],
           ["Draws", "$8.4M", "ready"],
           ["Sales", "$18.4M", "backlog"],
         ].map(([label, value, detail]) => (
-          <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+          <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-2.5">
             <div className="text-[0.52rem] uppercase tracking-[0.18em] text-slate-500">
               {label}
             </div>
-            <div className="mt-1 font-heading text-sm text-slate-100">{value}</div>
+            <div className="mt-0.5 font-heading text-sm text-slate-100">{value}</div>
             <div className="mt-0.5 text-[0.55rem] text-accent-300/80">{detail}</div>
           </div>
         ))}

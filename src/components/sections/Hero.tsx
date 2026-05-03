@@ -5,7 +5,7 @@ import HeroShowcase from "@/components/sections/HeroShowcase";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pb-12 pt-28 md:pb-16 md:pt-32">
+    <section className="relative overflow-hidden pb-10 pt-[8.75rem] md:pb-14 md:pt-[9.25rem]">
       {/* Mouse spotlight is handled globally by <PageAmbient> in layout. */}
 
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -28,28 +28,34 @@ export default function Hero() {
 
       <Container className="relative">
         <div className="animate-rise-in">
-          <div className="grid items-end gap-8 lg:grid-cols-[0.58fr_0.42fr]">
+          <div className="grid items-end gap-5 lg:grid-cols-[0.62fr_0.38fr]">
             <div>
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-accent-300">
                 Builder data platform
               </p>
-              <h1 className="mt-5 max-w-3xl font-heading text-[3rem] leading-[0.95] tracking-[-0.035em] text-slate-50 sm:text-6xl lg:text-[5rem]">
+              <h1 className="mt-4 max-w-4xl font-heading text-[2.75rem] leading-[0.95] tracking-[-0.035em] text-slate-50 sm:text-5xl lg:text-[4.35rem]">
                 Dashboards built on your data, not a template.
               </h1>
             </div>
 
-            <div className="lg:pb-2">
-              <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg">
+            <div className="lg:pb-1">
+              <p className="max-w-md text-sm leading-6 text-slate-300 md:text-base">
                 Centralize your systems into a warehouse, apply builder-specific KPI
                 logic, and deliver reporting your team can use.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row lg:justify-start">
-                <Button href="/contact/" size="lg">
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row lg:justify-start">
+                <Button href="/contact/" size="md" className="whitespace-nowrap px-5 py-3">
                   Book a Discovery Call
                   <ArrowRight size={16} />
                 </Button>
-                <Button href="/demo/" variant="secondary" size="lg">
+                <Button
+                  href="/demo/"
+                  variant="outline"
+                  size="md"
+                  className="whitespace-nowrap border-accent-300/45 bg-accent-500/10 px-5 py-3 text-accent-50 shadow-[0_18px_42px_-24px_rgba(52,211,153,0.75),inset_0_1px_0_rgba(255,255,255,0.08)] hover:border-accent-300/70 hover:bg-accent-500/18 hover:shadow-[0_20px_48px_-22px_rgba(52,211,153,0.95)]"
+                >
                   Explore the Example
+                  <ArrowRight size={16} />
                 </Button>
               </div>
             </div>
