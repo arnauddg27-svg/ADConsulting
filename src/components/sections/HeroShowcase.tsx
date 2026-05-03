@@ -64,15 +64,15 @@ function PipelineDiagram() {
   const reduceMotion = usePrefersReducedMotion();
   // A squarer viewBox keeps the pipeline readable in square crops and hero cards.
   const sources = [
-    { x: 48, y: 78, label: "ERP", icon: Database },
-    { x: 48, y: 180, label: "Sheets", icon: FileSpreadsheet },
-    { x: 48, y: 282, label: "APIs", icon: Cloud },
+    { x: 48, y: 62, label: "ERP", icon: Database },
+    { x: 48, y: 165, label: "Sheets", icon: FileSpreadsheet },
+    { x: 48, y: 268, label: "APIs", icon: Cloud },
   ];
-  const warehouse = { x: 260, y: 180 };
+  const warehouse = { x: 260, y: 165 };
   const apps = [
-    { x: 418, y: 78, label: "Dashboards", icon: LayoutGrid },
-    { x: 418, y: 180, label: "Reports", icon: BarChart3 },
-    { x: 418, y: 282, label: "Alerts", icon: Bell },
+    { x: 430, y: 62, label: "Dashboards", icon: LayoutGrid },
+    { x: 430, y: 165, label: "Reports", icon: BarChart3 },
+    { x: 430, y: 268, label: "Alerts", icon: Bell },
   ];
 
   return (
@@ -96,7 +96,7 @@ function PipelineDiagram() {
       </div>
 
       <svg
-        viewBox="0 0 520 360"
+        viewBox="0 0 520 330"
         className="min-h-0 w-full flex-1"
         preserveAspectRatio="xMidYMid meet"
       >
@@ -128,14 +128,14 @@ function PipelineDiagram() {
         </defs>
 
         {/* Background grid */}
-        <rect width="520" height="360" fill="url(#heroGrid)" />
+        <rect width="520" height="330" fill="url(#heroGrid)" />
 
-        {/* Source → Warehouse paths */}
+        {/* Source → Warehouse paths. Each lane lands on its own port to avoid tangled curves. */}
         {sources.map((s, i) => {
-          const d = curvePath(s.x + 40, s.y, warehouse.x - 40, warehouse.y);
+          const d = connectorPath(s.x + 94, s.y, warehouse.x - 68, warehouse.y + (i - 1) * 25);
           return (
             <g key={`src-path-${i}`}>
-              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.5" fill="none" />
+              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.8" fill="none" />
               {!reduceMotion && (
                 <circle r="3" fill="url(#dotGrad)">
                   <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6}s`} path={d} />
@@ -147,10 +147,10 @@ function PipelineDiagram() {
 
         {/* Warehouse → Apps paths */}
         {apps.map((a, i) => {
-          const d = curvePath(warehouse.x + 40, warehouse.y, a.x - 40, a.y);
+          const d = connectorPath(warehouse.x + 68, warehouse.y + (i - 1) * 25, a.x - 34, a.y);
           return (
             <g key={`app-path-${i}`}>
-              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.5" fill="none" />
+              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.8" fill="none" />
               {!reduceMotion && (
                 <circle r="3" fill="url(#dotGrad)">
                   <animateMotion dur={`${3.2 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.8 + 1.5}s`} path={d} />
@@ -167,7 +167,7 @@ function PipelineDiagram() {
 
         {/* Warehouse node (bigger) */}
         <g>
-          <circle cx={warehouse.x} cy={warehouse.y} r="82" fill="url(#nodeGlow)" opacity="0.62" />
+          <circle cx={warehouse.x} cy={warehouse.y} r="76" fill="url(#nodeGlow)" opacity="0.56" />
           <rect
             x={warehouse.x - 61}
             y={warehouse.y - 42}
@@ -183,12 +183,12 @@ function PipelineDiagram() {
             <circle
               cx={warehouse.x}
               cy={warehouse.y}
-              r="66"
+              r="62"
               fill="none"
               stroke="rgba(52,211,153,0.5)"
               strokeWidth="1"
             >
-              <animate attributeName="r" from="66" to="92" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="r" from="62" to="86" dur="3s" repeatCount="indefinite" />
               <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
             </circle>
           )}
@@ -236,9 +236,9 @@ function PipelineDiagram() {
   );
 }
 
-function curvePath(x1: number, y1: number, x2: number, y2: number) {
-  const mx = (x1 + x2) / 2;
-  return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+function connectorPath(x1: number, y1: number, x2: number, y2: number) {
+  const dx = Math.max(18, Math.min(58, Math.abs(x2 - x1) * 0.45));
+  return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
 }
 
 function Node({
