@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import HeroShowcase from "@/components/sections/HeroShowcase";
@@ -52,10 +52,14 @@ export default function Hero() {
                   href="/demo/"
                   variant="outline"
                   size="md"
-                  className="whitespace-nowrap border-accent-300/45 bg-accent-500/10 px-5 py-3 text-accent-50 shadow-[0_18px_42px_-24px_rgba(52,211,153,0.75),inset_0_1px_0_rgba(255,255,255,0.08)] hover:border-accent-300/70 hover:bg-accent-500/18 hover:shadow-[0_20px_48px_-22px_rgba(52,211,153,0.95)]"
+                  className="relative isolate overflow-hidden whitespace-nowrap border-accent-200/70 bg-[linear-gradient(135deg,rgba(52,211,153,0.24),rgba(34,211,238,0.13),rgba(99,102,241,0.16))] px-5 py-3 text-accent-50 shadow-[0_0_0_1px_rgba(110,231,183,0.18),0_22px_62px_-18px_rgba(52,211,153,0.95),inset_0_1px_0_rgba(255,255,255,0.16)] before:absolute before:inset-[-180%] before:-z-10 before:animate-[spin_3.4s_linear_infinite] before:bg-[conic-gradient(from_90deg,transparent_0deg,transparent_80deg,rgba(167,243,208,0.55)_120deg,rgba(34,211,238,0.2)_145deg,transparent_190deg)] after:absolute after:inset-[1px] after:-z-10 after:rounded-full after:bg-[linear-gradient(135deg,rgba(8,13,24,0.84),rgba(12,74,58,0.76),rgba(8,13,24,0.88))] hover:-translate-y-1 hover:scale-[1.025] hover:border-accent-100 hover:bg-accent-500/25 hover:text-white hover:shadow-[0_0_36px_-8px_rgba(52,211,153,1),0_28px_74px_-24px_rgba(34,211,238,0.95)]"
                 >
-                  Explore the Example
-                  <ArrowRight size={16} />
+                  <Sparkles size={15} className="text-accent-200" />
+                  <span>Explore the Example</span>
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform duration-300 group-hover:translate-x-0.5"
+                  />
                 </Button>
               </div>
             </div>
