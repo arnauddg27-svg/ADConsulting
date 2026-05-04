@@ -82,10 +82,11 @@ function PipelineDiagram() {
         <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent-300/10 bg-accent-400/[0.035] blur-[0.2px]" />
 
         <div className="relative z-10 flex min-h-[340px] w-full max-w-[560px] flex-col justify-between">
+          <PipelineFlowLines />
           <PipelineRow eyebrow="Input Sources" items={sources} />
           <PipelineRail label="Extract + normalize" />
 
-          <div className="relative mx-auto flex w-full max-w-[360px] items-center justify-center">
+          <div className="relative z-10 mx-auto flex w-full max-w-[360px] items-center justify-center">
             <div className="absolute h-44 w-44 rounded-full border border-accent-300/12 bg-accent-400/[0.035] shadow-[0_0_84px_-28px_rgba(52,211,153,0.75)]" />
             <div className="absolute h-32 w-[92%] rounded-full bg-accent-400/[0.055] blur-3xl" />
             <div className="relative flex h-32 w-full max-w-[210px] flex-col items-center justify-center rounded-[1.5rem] border border-accent-400/45 bg-[linear-gradient(180deg,rgba(8,13,24,0.98),rgba(10,22,31,0.98))] px-6 text-center shadow-[0_24px_80px_-32px_rgba(52,211,153,0.82),inset_0_1px_0_rgba(255,255,255,0.09)]">
@@ -114,6 +115,102 @@ function PipelineDiagram() {
   );
 }
 
+function PipelineFlowLines() {
+  const inboundPaths = [
+    "M 96 82 C 112 118, 204 108, 246 148",
+    "M 280 82 C 280 112, 280 126, 280 148",
+    "M 464 82 C 448 118, 356 108, 314 148",
+  ];
+  const outboundPaths = [
+    "M 246 208 C 204 248, 112 238, 96 274",
+    "M 280 208 C 280 230, 280 248, 280 274",
+    "M 314 208 C 356 248, 448 238, 464 274",
+  ];
+  const ports = [
+    [96, 82],
+    [280, 82],
+    [464, 82],
+    [246, 148],
+    [280, 148],
+    [314, 148],
+    [246, 208],
+    [280, 208],
+    [314, 208],
+    [96, 274],
+    [280, 274],
+    [464, 274],
+  ];
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+      preserveAspectRatio="none"
+      viewBox="0 0 560 356"
+    >
+      <defs>
+        <linearGradient id="heroPipelineFlow" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stopColor="#34d399" stopOpacity="0.76" />
+          <stop offset="48%" stopColor="#6ee7b7" stopOpacity="0.92" />
+          <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.78" />
+        </linearGradient>
+        <filter id="heroPipelineGlow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feColorMatrix
+            in="blur"
+            result="glow"
+            type="matrix"
+            values="0 0 0 0 0.20 0 0 0 0 0.83 0 0 0 0 0.60 0 0 0 0.82 0"
+          />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <marker
+          id="heroPipelineArrow"
+          markerHeight="7"
+          markerWidth="7"
+          orient="auto"
+          refX="5.5"
+          refY="3.5"
+        >
+          <path d="M 0 0 L 6 3.5 L 0 7 Z" fill="#6ee7b7" opacity="0.72" />
+        </marker>
+      </defs>
+
+      {[...inboundPaths, ...outboundPaths].map((path) => (
+        <path
+          key={`glow-${path}`}
+          d={path}
+          fill="none"
+          stroke="rgba(52,211,153,0.14)"
+          strokeLinecap="round"
+          strokeWidth="12"
+        />
+      ))}
+      {[...inboundPaths, ...outboundPaths].map((path) => (
+        <path
+          key={path}
+          d={path}
+          fill="none"
+          filter="url(#heroPipelineGlow)"
+          markerEnd="url(#heroPipelineArrow)"
+          stroke="url(#heroPipelineFlow)"
+          strokeLinecap="round"
+          strokeWidth="2.6"
+        />
+      ))}
+      {ports.map(([cx, cy]) => (
+        <g key={`${cx}-${cy}`} filter="url(#heroPipelineGlow)">
+          <circle cx={cx} cy={cy} fill="#07131f" r="5.5" />
+          <circle cx={cx} cy={cy} fill="#6ee7b7" opacity="0.88" r="3" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 function PipelineRow({
   eyebrow,
   items,
@@ -125,7 +222,7 @@ function PipelineRow({
   }>;
 }) {
   return (
-    <div className="rounded-[1.35rem] border border-white/[0.07] bg-slate-950/58 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
+    <div className="relative z-10 rounded-[1.35rem] border border-white/[0.07] bg-slate-950/58 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
       <div className="mb-3 text-center text-[0.55rem] uppercase tracking-[0.2em] text-slate-500">{eyebrow}</div>
       <div className="grid grid-cols-3 gap-2">
         {items.map(({ label, icon: Icon }) => (
@@ -148,8 +245,8 @@ function PipelineRow({
 
 function PipelineRail({ label }: { label: string }) {
   return (
-    <div className="relative mx-auto flex h-8 w-full max-w-[360px] items-center justify-center">
-      <div className="absolute bottom-0 top-0 w-px bg-gradient-to-b from-transparent via-accent-300/60 to-transparent" />
+    <div className="relative z-10 mx-auto flex h-8 w-full max-w-[360px] items-center justify-center">
+      <div className="absolute bottom-0 top-0 w-px bg-gradient-to-b from-transparent via-accent-300/75 to-transparent" />
       <div className="relative rounded-full border border-accent-300/25 bg-slate-950/95 px-2.5 py-1 text-[0.48rem] uppercase tracking-[0.14em] text-accent-200 shadow-[0_0_26px_-14px_rgba(52,211,153,0.9)]">
         {label}
       </div>
