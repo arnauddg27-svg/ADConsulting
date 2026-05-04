@@ -33,7 +33,7 @@ export default function Hero() {
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-accent-300">
                 Builder data platform
               </p>
-              <h1 className="mt-4 max-w-4xl font-heading text-[2.75rem] leading-[0.95] tracking-[-0.04em] text-slate-50 sm:text-5xl lg:text-[4.1rem] xl:text-[4.45rem]">
+              <h1 className="mt-4 max-w-[52rem] font-heading text-[2.75rem] leading-[0.96] tracking-[-0.04em] text-slate-50 sm:text-5xl lg:text-[4rem] xl:text-[4.25rem]">
                 Dashboards built on your data, not a template.
               </h1>
             </div>

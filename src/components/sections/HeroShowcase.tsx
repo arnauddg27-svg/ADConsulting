@@ -62,17 +62,17 @@ export default function HeroShowcase() {
 
 function PipelineDiagram() {
   const reduceMotion = usePrefersReducedMotion();
-  // A squarer viewBox keeps the pipeline readable in square crops and hero cards.
+  // Keep the diagram square-first so the same graphic works in hero crops and ad previews.
   const sources = [
-    { x: 48, y: 62, label: "ERP", icon: Database },
-    { x: 48, y: 165, label: "Sheets", icon: FileSpreadsheet },
-    { x: 48, y: 268, label: "APIs", icon: Cloud },
+    { x: 70, y: 100, label: "ERP", icon: Database },
+    { x: 70, y: 210, label: "Sheets", icon: FileSpreadsheet },
+    { x: 70, y: 320, label: "APIs", icon: Cloud },
   ];
-  const warehouse = { x: 260, y: 165 };
+  const warehouse = { x: 210, y: 210 };
   const apps = [
-    { x: 430, y: 62, label: "Dashboards", icon: LayoutGrid },
-    { x: 430, y: 165, label: "Reports", icon: BarChart3 },
-    { x: 430, y: 268, label: "Alerts", icon: Bell },
+    { x: 350, y: 100, label: "Dashboards", icon: LayoutGrid },
+    { x: 350, y: 210, label: "Reports", icon: BarChart3 },
+    { x: 350, y: 320, label: "Alerts", icon: Bell },
   ];
 
   return (
@@ -95,136 +95,161 @@ function PipelineDiagram() {
         </div>
       </div>
 
-      <svg
-        viewBox="0 0 520 330"
-        className="min-h-0 w-full flex-1"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <defs>
-          {/* Node glow */}
-          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
-          </radialGradient>
+      <div className="relative mt-3 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/[0.04] bg-[radial-gradient(circle_at_50%_48%,rgba(52,211,153,0.12),transparent_32%),linear-gradient(180deg,rgba(8,13,24,0.2),rgba(8,13,24,0.72))]">
+        <svg
+          viewBox="0 0 420 420"
+          className="h-full max-h-[430px] w-full max-w-[430px]"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            {/* Node glow */}
+            <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.46" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </radialGradient>
 
-          {/* Path gradient */}
-          <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#34d399" stopOpacity="0.1" />
-            <stop offset="50%" stopColor="#34d399" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.4" />
-          </linearGradient>
+            {/* Path gradient */}
+            <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.12" />
+              <stop offset="48%" stopColor="#34d399" stopOpacity="0.72" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.46" />
+            </linearGradient>
 
-          {/* Traveling dot gradient */}
-          <radialGradient id="dotGrad">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-            <stop offset="30%" stopColor="#34d399" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
-          </radialGradient>
+            {/* Traveling dot gradient */}
+            <radialGradient id="dotGrad">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="30%" stopColor="#34d399" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </radialGradient>
 
-          {/* Grid pattern */}
-          <pattern id="heroGrid" width="26" height="26" patternUnits="userSpaceOnUse">
-            <path d="M 26 0 L 0 0 0 26" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-          </pattern>
-        </defs>
+            {/* Grid pattern */}
+            <pattern id="heroGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+              <path
+                d="M 28 0 L 0 0 0 28"
+                fill="none"
+                stroke="rgba(255,255,255,0.04)"
+                strokeWidth="1"
+              />
+            </pattern>
+          </defs>
 
-        {/* Background grid */}
-        <rect width="520" height="330" fill="url(#heroGrid)" />
+          {/* Background grid */}
+          <rect x="28" y="28" width="364" height="364" rx="24" fill="url(#heroGrid)" opacity="0.72" />
+          <circle cx={warehouse.x} cy={warehouse.y} r="120" fill="url(#nodeGlow)" opacity="0.18" />
 
-        {/* Source → Warehouse paths. Each lane lands on its own port to avoid tangled curves. */}
-        {sources.map((s, i) => {
-          const d = connectorPath(s.x + 94, s.y, warehouse.x - 68, warehouse.y + (i - 1) * 25);
-          return (
-            <g key={`src-path-${i}`}>
-              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.8" fill="none" />
-              {!reduceMotion && (
-                <circle r="3" fill="url(#dotGrad)">
-                  <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6}s`} path={d} />
-                </circle>
-              )}
+          {/* Source → Warehouse paths. Each lane lands on its own port to avoid tangled curves. */}
+          {sources.map((s, i) => {
+            const portY = warehouse.y + (i - 1) * 34;
+            const d = connectorPath(s.x + 29, s.y, warehouse.x - 74, portY);
+            return (
+              <g key={`src-path-${i}`}>
+                <path d={d} stroke="rgba(15,23,42,0.82)" strokeWidth="7" fill="none" />
+                <path d={d} stroke="url(#pathGrad)" strokeWidth="2.1" fill="none" />
+                <circle cx={warehouse.x - 74} cy={portY} r="3" fill="#34d399" opacity="0.75" />
+                {!reduceMotion && (
+                  <circle r="3.2" fill="url(#dotGrad)">
+                    <animateMotion
+                      dur={`${3.2 + i * 0.35}s`}
+                      repeatCount="indefinite"
+                      begin={`${i * 0.5}s`}
+                      path={d}
+                    />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Warehouse → Apps paths */}
+          {apps.map((a, i) => {
+            const portY = warehouse.y + (i - 1) * 34;
+            const d = connectorPath(warehouse.x + 74, portY, a.x - 29, a.y);
+            return (
+              <g key={`app-path-${i}`}>
+                <path d={d} stroke="rgba(15,23,42,0.82)" strokeWidth="7" fill="none" />
+                <path d={d} stroke="url(#pathGrad)" strokeWidth="2.1" fill="none" />
+                <circle cx={warehouse.x + 74} cy={portY} r="3" fill="#34d399" opacity="0.75" />
+                {!reduceMotion && (
+                  <circle r="3.2" fill="url(#dotGrad)">
+                    <animateMotion
+                      dur={`${3.4 + i * 0.35}s`}
+                      repeatCount="indefinite"
+                      begin={`${i * 0.65 + 1.15}s`}
+                      path={d}
+                    />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Source nodes */}
+          {sources.map((s) => (
+            <Node key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} Icon={s.icon} align="left" />
+          ))}
+
+          {/* Warehouse node */}
+          <g>
+            <circle cx={warehouse.x} cy={warehouse.y} r="84" fill="none" stroke="rgba(52,211,153,0.12)" />
+            <circle cx={warehouse.x} cy={warehouse.y} r="68" fill="url(#nodeGlow)" opacity="0.54" />
+            <rect
+              x={warehouse.x - 68}
+              y={warehouse.y - 48}
+              width="136"
+              height="96"
+              rx="18"
+              fill="rgba(8,13,24,0.94)"
+              stroke="rgba(52,211,153,0.48)"
+              strokeWidth="1.5"
+            />
+            {/* pulse ring (skipped under reduced-motion) */}
+            {!reduceMotion && (
+              <circle
+                cx={warehouse.x}
+                cy={warehouse.y}
+                r="70"
+                fill="none"
+                stroke="rgba(52,211,153,0.45)"
+                strokeWidth="1"
+              >
+                <animate attributeName="r" from="70" to="98" dur="3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" from="0.55" to="0" dur="3s" repeatCount="indefinite" />
+              </circle>
+            )}
+
+            <g transform={`translate(${warehouse.x - 12} ${warehouse.y - 28})`}>
+              <Database size={24} className="text-accent-300" />
             </g>
-          );
-        })}
-
-        {/* Warehouse → Apps paths */}
-        {apps.map((a, i) => {
-          const d = connectorPath(warehouse.x + 68, warehouse.y + (i - 1) * 25, a.x - 34, a.y);
-          return (
-            <g key={`app-path-${i}`}>
-              <path d={d} stroke="url(#pathGrad)" strokeWidth="1.8" fill="none" />
-              {!reduceMotion && (
-                <circle r="3" fill="url(#dotGrad)">
-                  <animateMotion dur={`${3.2 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.8 + 1.5}s`} path={d} />
-                </circle>
-              )}
-            </g>
-          );
-        })}
-
-        {/* Source nodes */}
-        {sources.map((s) => (
-          <Node key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} Icon={s.icon} align="left" />
-        ))}
-
-        {/* Warehouse node (bigger) */}
-        <g>
-          <circle cx={warehouse.x} cy={warehouse.y} r="76" fill="url(#nodeGlow)" opacity="0.56" />
-          <rect
-            x={warehouse.x - 61}
-            y={warehouse.y - 42}
-            width="122"
-            height="84"
-            rx="16"
-            fill="rgba(10,15,26,0.9)"
-            stroke="rgba(52,211,153,0.4)"
-            strokeWidth="1.5"
-          />
-          {/* pulse ring (skipped under reduced-motion) */}
-          {!reduceMotion && (
-            <circle
-              cx={warehouse.x}
-              cy={warehouse.y}
-              r="62"
-              fill="none"
-              stroke="rgba(52,211,153,0.5)"
-              strokeWidth="1"
+            <text
+              x={warehouse.x}
+              y={warehouse.y + 15}
+              textAnchor="middle"
+              fill="#f8fafc"
+              fontSize="15"
+              fontWeight="700"
+              fontFamily="var(--font-heading)"
+              letterSpacing="0.08em"
             >
-              <animate attributeName="r" from="62" to="86" dur="3s" repeatCount="indefinite" />
-              <animate attributeName="opacity" from="0.6" to="0" dur="3s" repeatCount="indefinite" />
-            </circle>
-          )}
-
-          <g transform={`translate(${warehouse.x - 11} ${warehouse.y - 22})`}>
-            <Database size={22} className="text-accent-300" />
+              WAREHOUSE
+            </text>
+            <text
+              x={warehouse.x}
+              y={warehouse.y + 34}
+              textAnchor="middle"
+              fill="#94a3b8"
+              fontSize="9.5"
+              letterSpacing="0.16em"
+            >
+              CLIENT-OWNED
+            </text>
           </g>
-          <text
-            x={warehouse.x}
-            y={warehouse.y + 18}
-            textAnchor="middle"
-            fill="#f8fafc"
-            fontSize="13"
-            fontWeight="700"
-            fontFamily="var(--font-heading)"
-            letterSpacing="0.08em"
-          >
-            WAREHOUSE
-          </text>
-          <text
-            x={warehouse.x}
-            y={warehouse.y + 34}
-            textAnchor="middle"
-            fill="#94a3b8"
-            fontSize="9"
-            letterSpacing="0.16em"
-          >
-            CLIENT-OWNED
-          </text>
-        </g>
 
-        {/* App nodes */}
-        {apps.map((a) => (
-          <Node key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} Icon={a.icon} align="right" />
-        ))}
-      </svg>
+          {/* App nodes */}
+          {apps.map((a) => (
+            <Node key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} Icon={a.icon} align="right" />
+          ))}
+        </svg>
+      </div>
 
       {/* bottom micro info */}
       <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/[0.05] pt-3 text-[0.56rem] uppercase tracking-[0.18em] text-slate-500 sm:text-[0.62rem]">
@@ -246,7 +271,6 @@ function Node({
   y,
   label,
   Icon,
-  align,
 }: {
   x: number;
   y: number;
@@ -254,8 +278,6 @@ function Node({
   Icon: React.ComponentType<{ size?: number; className?: string }>;
   align: "left" | "right";
 }) {
-  const labelX = align === "left" ? x + 34 : x + 38;
-
   return (
     <g>
       {/* halo */}
@@ -275,11 +297,11 @@ function Node({
         <Icon size={18} className="text-accent-300" />
       </g>
       <text
-        x={labelX}
-        y={y + 4}
-        textAnchor="start"
+        x={x}
+        y={y + 39}
+        textAnchor="middle"
         fill="#cbd5e1"
-        fontSize="10"
+        fontSize="9.5"
         fontWeight="600"
         letterSpacing="0.08em"
       >
