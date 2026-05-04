@@ -28,7 +28,7 @@ export default function Hero() {
 
       <Container className="relative">
         <div className="animate-rise-in">
-          <div className="grid items-end gap-6 lg:grid-cols-[0.62fr_0.38fr]">
+          <div className="grid items-center gap-8 lg:grid-cols-[0.58fr_0.42fr] lg:gap-12">
             <div>
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-accent-300">
                 Builder data platform
@@ -38,13 +38,13 @@ export default function Hero() {
               </h1>
             </div>
 
-            <div className="lg:pb-2">
-              <p className="max-w-md text-sm leading-6 text-slate-300 md:text-base">
+            <div className="max-w-[34rem] justify-self-start lg:justify-self-center">
+              <p className="text-sm leading-6 text-slate-300 md:text-base">
                 Centralize your systems into a warehouse, apply builder-specific KPI logic,
                 and deliver reporting your team can use.
               </p>
 
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                 <Button href="/contact/" size="md" className="whitespace-nowrap px-5 py-3">
                   Book a Discovery Call
                   <ArrowRight size={16} />
