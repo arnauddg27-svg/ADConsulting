@@ -126,11 +126,13 @@ function PipelineDiagram() {
             <pattern id="heroGrid" width="32" height="32" patternUnits="userSpaceOnUse">
               <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
             </pattern>
-            {/* Path gradient — green → cyan, fades at endpoints */}
-            <linearGradient id="pathFlow" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#34d399" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#34d399" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.5" />
+            {/* Path gradient — green → cyan, fades at endpoints.
+                userSpaceOnUse so straight horizontal paths (zero-height
+                bbox) still render — objectBoundingBox would collapse. */}
+            <linearGradient id="pathFlow" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="600" y2="0">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.55" />
+              <stop offset="50%" stopColor="#6ee7b7" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.55" />
             </linearGradient>
             {/* Glowing dot */}
             <radialGradient id="flowDot">
