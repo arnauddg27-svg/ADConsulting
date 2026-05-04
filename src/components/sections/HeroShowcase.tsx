@@ -44,19 +44,19 @@ export default function HeroShowcase() {
 
 /* ════════════════════════════════════════════════════════════
    PIPELINE DIAGRAM
-   Sources → Warehouse → Apps with a square-friendly stage layout
+   Sources → Warehouse → Apps with a vertical square-friendly flow
    ════════════════════════════════════════════════════════════ */
 
 function PipelineDiagram() {
   const sources = [
-    { label: "ERP", detail: "job + finance data", icon: Database },
-    { label: "Sheets", detail: "manual trackers", icon: FileSpreadsheet },
-    { label: "APIs", detail: "cloud systems", icon: Cloud },
+    { label: "ERP", icon: Database },
+    { label: "Sheets", icon: FileSpreadsheet },
+    { label: "APIs", icon: Cloud },
   ];
   const apps = [
-    { label: "Dashboards", detail: "operating views", icon: LayoutGrid },
-    { label: "Reports", detail: "weekly packages", icon: BarChart3 },
-    { label: "Alerts", detail: "exception flags", icon: Bell },
+    { label: "Dashboards", icon: LayoutGrid },
+    { label: "Reports", icon: BarChart3 },
+    { label: "Alerts", icon: Bell },
   ];
 
   return (
@@ -77,20 +77,20 @@ function PipelineDiagram() {
         </div>
       </div>
 
-      <div className="relative mt-6 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/[0.055] bg-[radial-gradient(circle_at_50%_48%,rgba(52,211,153,0.12),transparent_33%),linear-gradient(180deg,rgba(8,13,24,0.34),rgba(8,13,24,0.82))] p-4">
+      <div className="relative mt-6 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/[0.055] bg-[radial-gradient(circle_at_50%_48%,rgba(52,211,153,0.12),transparent_33%),linear-gradient(180deg,rgba(8,13,24,0.34),rgba(8,13,24,0.82))] p-4 md:p-5">
         <div className="absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent-300/10 bg-accent-400/[0.035] blur-[0.2px]" />
+        <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent-300/10 bg-accent-400/[0.035] blur-[0.2px]" />
 
-        <div className="relative z-10 grid w-full max-w-[650px] grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_44px_minmax(166px,1.08fr)_44px_minmax(0,1fr)] sm:items-center">
-          <PipelineStage eyebrow="Input sources" items={sources} />
-          <PipelineConnector label="Extract" />
+        <div className="relative z-10 flex min-h-[340px] w-full max-w-[560px] flex-col justify-between">
+          <PipelineRow eyebrow="Input Sources" items={sources} />
+          <PipelineRail label="Extract + normalize" />
 
-          <div className="relative flex min-h-[230px] items-center justify-center rounded-[1.7rem] border border-accent-300/[0.18] bg-[linear-gradient(180deg,rgba(9,14,25,0.98),rgba(10,22,31,0.98))] p-4 text-center shadow-[0_24px_80px_-34px_rgba(52,211,153,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <div className="absolute inset-4 rounded-[1.3rem] border border-accent-400/[0.08]" />
-            <div className="absolute left-4 right-4 top-1/2 h-px bg-gradient-to-r from-transparent via-accent-300/30 to-transparent" />
-            <div className="relative flex h-36 w-full max-w-[170px] flex-col items-center justify-center rounded-[1.35rem] border border-accent-400/45 bg-slate-950/80 px-5 shadow-[0_0_70px_-22px_rgba(52,211,153,0.95)]">
-              <Database size={32} className="text-accent-300" />
-              <div className="mt-4 font-heading text-[1.18rem] font-semibold uppercase tracking-[0.12em] text-white">
+          <div className="relative mx-auto flex w-full max-w-[360px] items-center justify-center">
+            <div className="absolute h-44 w-44 rounded-full border border-accent-300/12 bg-accent-400/[0.035] shadow-[0_0_84px_-28px_rgba(52,211,153,0.75)]" />
+            <div className="absolute h-32 w-[92%] rounded-full bg-accent-400/[0.055] blur-3xl" />
+            <div className="relative flex h-32 w-full max-w-[210px] flex-col items-center justify-center rounded-[1.5rem] border border-accent-400/45 bg-[linear-gradient(180deg,rgba(8,13,24,0.98),rgba(10,22,31,0.98))] px-6 text-center shadow-[0_24px_80px_-32px_rgba(52,211,153,0.82),inset_0_1px_0_rgba(255,255,255,0.09)]">
+              <Database size={31} className="text-accent-300" />
+              <div className="mt-4 font-heading text-[1.2rem] font-semibold uppercase tracking-[0.12em] text-white">
                 Warehouse
               </div>
               <div className="mt-1 text-[0.66rem] uppercase tracking-[0.2em] text-slate-400">
@@ -99,8 +99,8 @@ function PipelineDiagram() {
             </div>
           </div>
 
-          <PipelineConnector label="Deliver" />
-          <PipelineStage eyebrow="Output apps" items={apps} align="right" />
+          <PipelineRail label="Apply KPI logic" />
+          <PipelineRow eyebrow="Output Apps" items={apps} />
         </div>
       </div>
 
@@ -114,36 +114,30 @@ function PipelineDiagram() {
   );
 }
 
-function PipelineStage({
+function PipelineRow({
   eyebrow,
   items,
-  align = "left",
 }: {
   eyebrow: string;
   items: Array<{
     label: string;
-    detail: string;
     icon: ComponentType<{ size?: number; className?: string }>;
   }>;
-  align?: "left" | "right";
 }) {
   return (
-    <div className={`rounded-[1.35rem] border border-white/[0.07] bg-slate-950/55 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] ${align === "right" ? "text-right" : ""}`}>
-      <div className="mb-3 text-[0.56rem] uppercase tracking-[0.18em] text-slate-500">{eyebrow}</div>
-      <div className="space-y-2">
-        {items.map(({ label, detail, icon: Icon }) => (
+    <div className="rounded-[1.35rem] border border-white/[0.07] bg-slate-950/58 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
+      <div className="mb-3 text-center text-[0.55rem] uppercase tracking-[0.2em] text-slate-500">{eyebrow}</div>
+      <div className="grid grid-cols-3 gap-2">
+        {items.map(({ label, icon: Icon }) => (
           <div
             key={label}
-            className={`flex items-center gap-2.5 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-2.5 py-2.5 ${align === "right" ? "flex-row-reverse" : ""}`}
+            className="flex min-h-[60px] flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035] px-2 py-2 text-center"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-accent-400/30 bg-accent-500/10 text-accent-300">
-              <Icon size={17} />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent-400/30 bg-accent-500/10 text-accent-300">
+              <Icon size={18} />
             </div>
-            <div className="min-w-0">
-              <div className="font-semibold tracking-[0.02em] text-slate-100">{label}</div>
-              <div className="mt-0.5 truncate text-[0.58rem] uppercase tracking-[0.12em] text-slate-500">
-                {detail}
-              </div>
+            <div className="mt-2 text-[0.72rem] font-semibold tracking-[0.03em] text-slate-100">
+              {label}
             </div>
           </div>
         ))}
@@ -152,14 +146,12 @@ function PipelineStage({
   );
 }
 
-function PipelineConnector({ label }: { label: string }) {
+function PipelineRail({ label }: { label: string }) {
   return (
-    <div className="hidden h-full items-center justify-center sm:flex">
-      <div className="relative flex h-[72%] w-full items-center justify-center">
-        <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-accent-300/10 via-accent-300/65 to-cyan-300/10" />
-        <div className="relative rounded-full border border-accent-300/25 bg-slate-950 px-2 py-1 text-[0.48rem] uppercase tracking-[0.14em] text-accent-200 shadow-[0_0_26px_-14px_rgba(52,211,153,0.9)]">
-          {label}
-        </div>
+    <div className="relative mx-auto flex h-8 w-full max-w-[360px] items-center justify-center">
+      <div className="absolute bottom-0 top-0 w-px bg-gradient-to-b from-transparent via-accent-300/60 to-transparent" />
+      <div className="relative rounded-full border border-accent-300/25 bg-slate-950/95 px-2.5 py-1 text-[0.48rem] uppercase tracking-[0.14em] text-accent-200 shadow-[0_0_26px_-14px_rgba(52,211,153,0.9)]">
+        {label}
       </div>
     </div>
   );
