@@ -1,10 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { ComponentType } from "react";
 import { Database, FileSpreadsheet, Cloud, BarChart3, Bell, LayoutGrid, Activity, TrendingUp } from "lucide-react";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import TiltCard from "@/components/ui/TiltCard";
+
+/** Reads the user's prefers-reduced-motion preference. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
 
 /**
  * The Hero "showcase" block:
@@ -44,10 +58,12 @@ export default function HeroShowcase() {
 
 /* ════════════════════════════════════════════════════════════
    PIPELINE DIAGRAM
-   Sources → Warehouse → Apps with a vertical square-friendly flow
+   Sources (LEFT) → Warehouse (CENTER) → Apps (RIGHT)
+   with traveling dots along curved bezier paths.
    ════════════════════════════════════════════════════════════ */
 
 function PipelineDiagram() {
+  const reduceMotion = usePrefersReducedMotion();
   const sources = [
     { label: "ERP", icon: Database },
     { label: "Sheets", icon: FileSpreadsheet },
@@ -59,16 +75,36 @@ function PipelineDiagram() {
     { label: "Alerts", icon: Bell },
   ];
 
+  // Horizontal layout — viewBox 600×320, sources at x=70 left,
+  // warehouse centered at x=300, apps at x=530 right. The viewBox
+  // is intentionally not padded; chip + label both render inside.
+  const sourcePositions = [
+    { x: 70, y: 70 },
+    { x: 70, y: 160 },
+    { x: 70, y: 250 },
+  ];
+  const appPositions = [
+    { x: 530, y: 70 },
+    { x: 530, y: 160 },
+    { x: 530, y: 250 },
+  ];
+  const wh = { x: 300, y: 160 };
+  const sourceNodes = sources.map((s, i) => ({ ...s, ...sourcePositions[i] }));
+  const appNodes = apps.map((a, i) => ({ ...a, ...appPositions[i] }));
+
   return (
     <div className="relative flex h-full flex-col">
-      <div className="relative text-center">
-        <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
-          Data Pipeline
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
+            Data Pipeline
+          </div>
+          <div className="mt-1 font-heading text-[1.2rem] tracking-[-0.02em] text-white md:text-[1.35rem]">
+            Sources → Warehouse → Apps
+          </div>
         </div>
-        <div className="mt-1 font-heading text-[1.35rem] tracking-[-0.02em] text-white md:text-[1.55rem]">
-          Sources → Warehouse → Apps
-        </div>
-        <div className="mx-auto mt-3 flex w-fit items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-accent-200 sm:absolute sm:right-0 sm:top-0 sm:mt-0">
+        <div className="flex shrink-0 items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-accent-200">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-400" />
@@ -77,35 +113,136 @@ function PipelineDiagram() {
         </div>
       </div>
 
-      <div className="relative mt-6 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/[0.055] bg-[radial-gradient(circle_at_50%_48%,rgba(52,211,153,0.12),transparent_33%),linear-gradient(180deg,rgba(8,13,24,0.34),rgba(8,13,24,0.82))] p-4 md:p-5">
-        <div className="absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent-300/10 bg-accent-400/[0.035] blur-[0.2px]" />
+      {/* Diagram canvas */}
+      <div className="relative mt-5 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/[0.055] bg-[radial-gradient(circle_at_50%_50%,rgba(52,211,153,0.1),transparent_55%),linear-gradient(180deg,rgba(8,13,24,0.4),rgba(8,13,24,0.85))] p-4 md:p-5">
+        <svg
+          viewBox="0 0 600 320"
+          className="h-auto w-full"
+          preserveAspectRatio="xMidYMid meet"
+          aria-hidden="true"
+        >
+          <defs>
+            {/* Subtle grid pattern */}
+            <pattern id="heroGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            </pattern>
+            {/* Path gradient — green → cyan, fades at endpoints */}
+            <linearGradient id="pathFlow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.15" />
+              <stop offset="50%" stopColor="#34d399" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.5" />
+            </linearGradient>
+            {/* Glowing dot */}
+            <radialGradient id="flowDot">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="35%" stopColor="#6ee7b7" stopOpacity="1" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </radialGradient>
+            {/* Warehouse pulse glow */}
+            <radialGradient id="whGlow">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </radialGradient>
+            {/* Chip glow under hover */}
+            <radialGradient id="chipGlow">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+            </radialGradient>
+          </defs>
 
-        <div className="relative z-10 flex min-h-[340px] w-full max-w-[560px] flex-col justify-between">
-          <PipelineFlowLines />
-          <PipelineRow eyebrow="Input Sources" items={sources} />
-          <PipelineRail label="Extract + normalize" />
+          {/* Background grid */}
+          <rect width="600" height="320" fill="url(#heroGrid)" />
 
-          <div className="relative z-10 mx-auto flex w-full max-w-[360px] items-center justify-center">
-            <div className="absolute h-44 w-44 rounded-full border border-accent-300/12 bg-accent-400/[0.035] shadow-[0_0_84px_-28px_rgba(52,211,153,0.75)]" />
-            <div className="absolute h-32 w-[92%] rounded-full bg-accent-400/[0.055] blur-3xl" />
-            <div className="relative flex h-32 w-full max-w-[210px] flex-col items-center justify-center rounded-[1.5rem] border border-accent-400/45 bg-[linear-gradient(180deg,rgba(8,13,24,0.98),rgba(10,22,31,0.98))] px-6 text-center shadow-[0_24px_80px_-32px_rgba(52,211,153,0.82),inset_0_1px_0_rgba(255,255,255,0.09)]">
-              <Database size={31} className="text-accent-300" />
-              <div className="mt-4 font-heading text-[1.2rem] font-semibold uppercase tracking-[0.12em] text-white">
-                Warehouse
-              </div>
-              <div className="mt-1 text-[0.66rem] uppercase tracking-[0.2em] text-slate-400">
-                Client-owned
-              </div>
-            </div>
-          </div>
+          {/* Source → Warehouse curved paths + traveling dots */}
+          {sourceNodes.map((s, i) => {
+            const d = `M ${s.x + 24} ${s.y} C ${(s.x + wh.x) / 2} ${s.y}, ${(s.x + wh.x) / 2} ${wh.y}, ${wh.x - 60} ${wh.y}`;
+            return (
+              <g key={`in-${i}`}>
+                <path d={d} stroke="url(#pathFlow)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                {!reduceMotion && (
+                  <circle r="3.2" fill="url(#flowDot)">
+                    <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6}s`} path={d} />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
 
-          <PipelineRail label="Apply KPI logic" />
-          <PipelineRow eyebrow="Output Apps" items={apps} />
-        </div>
+          {/* Warehouse → Apps curved paths + traveling dots */}
+          {appNodes.map((a, i) => {
+            const d = `M ${wh.x + 60} ${wh.y} C ${(wh.x + a.x) / 2} ${wh.y}, ${(wh.x + a.x) / 2} ${a.y}, ${a.x - 24} ${a.y}`;
+            return (
+              <g key={`out-${i}`}>
+                <path d={d} stroke="url(#pathFlow)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                {!reduceMotion && (
+                  <circle r="3.2" fill="url(#flowDot)">
+                    <animateMotion dur={`${3 + i * 0.4}s`} repeatCount="indefinite" begin={`${i * 0.6 + 1.5}s`} path={d} />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Source nodes (left) — labels render to the RIGHT, inward */}
+          {sourceNodes.map((s) => (
+            <NodeChip key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} Icon={s.icon} align="right" />
+          ))}
+
+          {/* Warehouse — central, larger, with pulsing ring */}
+          <g>
+            <circle cx={wh.x} cy={wh.y} r="78" fill="url(#whGlow)" />
+            {!reduceMotion && (
+              <circle cx={wh.x} cy={wh.y} r="60" fill="none" stroke="rgba(52,211,153,0.55)" strokeWidth="1.2">
+                <animate attributeName="r" from="60" to="86" dur="3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" from="0.7" to="0" dur="3s" repeatCount="indefinite" />
+              </circle>
+            )}
+            <rect
+              x={wh.x - 60}
+              y={wh.y - 38}
+              width="120"
+              height="76"
+              rx="14"
+              fill="rgba(8,13,24,0.96)"
+              stroke="rgba(52,211,153,0.55)"
+              strokeWidth="1.4"
+            />
+            <g transform={`translate(${wh.x - 11} ${wh.y - 22})`}>
+              <Database size={22} className="text-accent-300" />
+            </g>
+            <text
+              x={wh.x}
+              y={wh.y + 10}
+              textAnchor="middle"
+              fill="#f8fafc"
+              fontSize="13"
+              fontWeight="800"
+              fontFamily="var(--font-heading), ui-sans-serif, system-ui"
+              letterSpacing="0.14em"
+            >
+              WAREHOUSE
+            </text>
+            <text
+              x={wh.x}
+              y={wh.y + 26}
+              textAnchor="middle"
+              fill="#94a3b8"
+              fontSize="9"
+              fontWeight="700"
+              letterSpacing="0.2em"
+            >
+              CLIENT-OWNED
+            </text>
+          </g>
+
+          {/* App nodes (right) — labels render to the LEFT, inward */}
+          {appNodes.map((a) => (
+            <NodeChip key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} Icon={a.icon} align="left" />
+          ))}
+        </svg>
       </div>
 
-      {/* bottom micro info */}
+      {/* Bottom micro strip */}
       <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/[0.05] pt-3 text-[0.56rem] uppercase tracking-[0.18em] text-slate-500 sm:text-[0.62rem]">
         <span>Daily sync</span>
         <span>KPI logic</span>
@@ -115,142 +252,54 @@ function PipelineDiagram() {
   );
 }
 
-function PipelineFlowLines() {
-  const inboundPaths = [
-    "M 96 82 C 112 118, 204 108, 246 148",
-    "M 280 82 C 280 112, 280 126, 280 148",
-    "M 464 82 C 448 118, 356 108, 314 148",
-  ];
-  const outboundPaths = [
-    "M 246 208 C 204 248, 112 238, 96 274",
-    "M 280 208 C 280 230, 280 248, 280 274",
-    "M 314 208 C 356 248, 448 238, 464 274",
-  ];
-  const ports = [
-    [96, 82],
-    [280, 82],
-    [464, 82],
-    [246, 148],
-    [280, 148],
-    [314, 148],
-    [246, 208],
-    [280, 208],
-    [314, 208],
-    [96, 274],
-    [280, 274],
-    [464, 274],
-  ];
-
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 h-full w-full"
-      preserveAspectRatio="none"
-      viewBox="0 0 560 356"
-    >
-      <defs>
-        <linearGradient id="heroPipelineFlow" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#34d399" stopOpacity="0.76" />
-          <stop offset="48%" stopColor="#6ee7b7" stopOpacity="0.92" />
-          <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.78" />
-        </linearGradient>
-        <filter id="heroPipelineGlow" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="3.5" result="blur" />
-          <feColorMatrix
-            in="blur"
-            result="glow"
-            type="matrix"
-            values="0 0 0 0 0.20 0 0 0 0 0.83 0 0 0 0 0.60 0 0 0 0.82 0"
-          />
-          <feMerge>
-            <feMergeNode in="glow" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <marker
-          id="heroPipelineArrow"
-          markerHeight="7"
-          markerWidth="7"
-          orient="auto"
-          refX="5.5"
-          refY="3.5"
-        >
-          <path d="M 0 0 L 6 3.5 L 0 7 Z" fill="#6ee7b7" opacity="0.72" />
-        </marker>
-      </defs>
-
-      {[...inboundPaths, ...outboundPaths].map((path) => (
-        <path
-          key={`glow-${path}`}
-          d={path}
-          fill="none"
-          stroke="rgba(52,211,153,0.14)"
-          strokeLinecap="round"
-          strokeWidth="12"
-        />
-      ))}
-      {[...inboundPaths, ...outboundPaths].map((path) => (
-        <path
-          key={path}
-          d={path}
-          fill="none"
-          filter="url(#heroPipelineGlow)"
-          markerEnd="url(#heroPipelineArrow)"
-          stroke="url(#heroPipelineFlow)"
-          strokeLinecap="round"
-          strokeWidth="2.6"
-        />
-      ))}
-      {ports.map(([cx, cy]) => (
-        <g key={`${cx}-${cy}`} filter="url(#heroPipelineGlow)">
-          <circle cx={cx} cy={cy} fill="#07131f" r="5.5" />
-          <circle cx={cx} cy={cy} fill="#6ee7b7" opacity="0.88" r="3" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function PipelineRow({
-  eyebrow,
-  items,
+/* Reusable chip used for source + app nodes.
+ * align="right" → label sits to the right of the chip (sources on left side)
+ * align="left"  → label sits to the left  of the chip (apps on right side)
+ * Either way the label ends up pointing INWARD toward the warehouse. */
+function NodeChip({
+  x,
+  y,
+  label,
+  Icon,
+  align,
 }: {
-  eyebrow: string;
-  items: Array<{
-    label: string;
-    icon: ComponentType<{ size?: number; className?: string }>;
-  }>;
+  x: number;
+  y: number;
+  label: string;
+  Icon: ComponentType<{ size?: number; className?: string }>;
+  align: "left" | "right";
 }) {
+  const labelX = align === "right" ? x + 30 : x - 30;
+  const anchor = align === "right" ? "start" : "end";
   return (
-    <div className="relative z-10 rounded-[1.35rem] border border-white/[0.07] bg-slate-950/58 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
-      <div className="mb-3 text-center text-[0.55rem] uppercase tracking-[0.2em] text-slate-500">{eyebrow}</div>
-      <div className="grid grid-cols-3 gap-2">
-        {items.map(({ label, icon: Icon }) => (
-          <div
-            key={label}
-            className="flex min-h-[60px] flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.035] px-2 py-2 text-center"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-accent-400/30 bg-accent-500/10 text-accent-300">
-              <Icon size={18} />
-            </div>
-            <div className="mt-2 text-[0.72rem] font-semibold tracking-[0.03em] text-slate-100">
-              {label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PipelineRail({ label }: { label: string }) {
-  return (
-    <div className="relative z-10 mx-auto flex h-8 w-full max-w-[360px] items-center justify-center">
-      <div className="absolute bottom-0 top-0 w-px bg-gradient-to-b from-transparent via-accent-300/75 to-transparent" />
-      <div className="relative rounded-full border border-accent-300/25 bg-slate-950/95 px-2.5 py-1 text-[0.48rem] uppercase tracking-[0.14em] text-accent-200 shadow-[0_0_26px_-14px_rgba(52,211,153,0.9)]">
+    <g>
+      <circle cx={x} cy={y} r="32" fill="url(#chipGlow)" opacity="0.7" />
+      <rect
+        x={x - 22}
+        y={y - 22}
+        width="44"
+        height="44"
+        rx="12"
+        fill="rgba(11,17,32,0.96)"
+        stroke="rgba(52,211,153,0.45)"
+        strokeWidth="1.2"
+      />
+      <g transform={`translate(${x - 11} ${y - 11})`}>
+        <Icon size={22} className="text-accent-300" />
+      </g>
+      <text
+        x={labelX}
+        y={y + 5}
+        textAnchor={anchor}
+        fill="#cbd5e1"
+        fontSize="13"
+        fontWeight="700"
+        fontFamily="ui-sans-serif, system-ui"
+        letterSpacing="0.04em"
+      >
         {label}
-      </div>
-    </div>
+      </text>
+    </g>
   );
 }
 
