@@ -1,14 +1,19 @@
 import type { Service, NavLink, Stat, Testimonial } from "@/types";
 
 export const SITE_CONFIG = {
-  name: "A.D. Homes & Consulting",
-  businessName: "A.D. Homes & Consulting",
-  tagline: "Custom Data Platforms for Residential Homebuilders",
+  name: "AD ERP SYSTEMS",
+  businessName: "AD ERP SYSTEMS",
+  legalName: "AD ERP SYSTEMS",
+  tagline: "Custom Data Platforms for Residential Builders and Developers",
   description:
-    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder KPI logic, and deliver reporting systems, dashboards, and operational tools.",
+    "AD ERP SYSTEMS builds custom data platforms for residential builders and developers. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply residential operating KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
+  businessAddress: "2660 Almondwood Loop, Orlando, FL 32821, United States",
   email: "adurand@aderpsystems.com",
-  calendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
+  directCalendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
+  calendlyUrl:
+    process.env.NEXT_PUBLIC_CALENDLY_ROUTING_FORM_URL ||
+    "https://calendly.com/adurand-aderpsystems/30min",
 };
 
 export const NAV_LINKS: NavLink[] = [
@@ -51,7 +56,7 @@ export const SERVICES: Service[] = [
       "Warehouse SQL or dbt-style modeling",
       "Daily refresh scripts and validation checks",
       "Cost-conscious infrastructure design",
-      "Client-owned architecture and documentation",
+      "Architecture and handoff documentation",
     ],
   },
   {
@@ -119,7 +124,7 @@ export const SERVICES: Service[] = [
       "Exception center alerts by role or workflow",
       "Admin settings for pro forma and reference defaults",
       "Role-aware operational controls",
-      "Documentation for ownership and ongoing maintenance",
+      "Documentation for handoff and ongoing maintenance",
     ],
   },
 ];

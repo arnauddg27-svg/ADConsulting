@@ -29,16 +29,16 @@ export default function Footer() {
                     {SITE_CONFIG.name.toUpperCase()}
                   </div>
                   <div className="text-[0.68rem] uppercase tracking-[0.24em] text-slate-400">
-                    Custom Data Platforms for Residential Homebuilders
+                    Custom Data Platforms for Residential Builders & Developers
                   </div>
                 </div>
               </div>
 
               <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 md:text-[0.95rem]">
-                We build custom data platforms for residential homebuilders by
-                centralizing ERP, spreadsheet, finance, API, and export data in
-                a structured warehouse and turning it into reporting systems,
-                dashboards, and operational tools.
+                We build custom data platforms for residential builders and
+                developers by centralizing ERP, spreadsheet, finance, API, and
+                export data in a structured warehouse and turning it into
+                reporting systems, dashboards, and operational tools.
               </p>
 
               <Link
@@ -88,7 +88,9 @@ export default function Footer() {
                 </li>
                 <li className="flex items-start gap-3 text-slate-300">
                   <MapPin size={16} className="mt-0.5 text-accent-300" />
-                  {SITE_CONFIG.location}
+                  <span>
+                    {SITE_CONFIG.businessAddress || SITE_CONFIG.location}
+                  </span>
                 </li>
               </ul>
             </div>
@@ -96,9 +98,17 @@ export default function Footer() {
 
           <div className="relative mt-10 flex flex-col items-start justify-between gap-3 border-t border-white/[0.08] pt-6 text-[0.68rem] uppercase tracking-[0.18em] text-slate-500 md:flex-row md:items-center">
             <div>© {new Date().getFullYear()} {SITE_CONFIG.businessName}.</div>
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
-              Accepting new engagements
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Link href="/about/" className="transition-colors hover:text-accent-200">
+                About Us
+              </Link>
+              <Link href="/privacy/" className="transition-colors hover:text-accent-200">
+                Privacy Policy
+              </Link>
+              <span className="inline-flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
+                Accepting new engagements
+              </span>
             </div>
           </div>
         </div>
