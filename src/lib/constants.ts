@@ -1,12 +1,12 @@
 import type { Service, NavLink, Stat, Testimonial } from "@/types";
 
 export const SITE_CONFIG = {
-  name: "A.D. Homes & Consulting",
-  businessName: "A.D. Homes & Consulting",
-  legalName: "A.D. Homes & Consulting",
+  name: "AD ERP SYSTEMS",
+  businessName: "AD ERP SYSTEMS",
+  legalName: "AD ERP SYSTEMS",
   tagline: "Residential Builder & Developer Data Platforms",
   description:
-    "A.D. Homes & Consulting builds custom data platforms for residential homebuilders and residential real estate developers. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder and developer KPI logic, and deliver reporting systems, dashboards, and operational tools.",
+    "AD ERP SYSTEMS builds custom data platforms for residential homebuilders and residential real estate developers. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply builder and developer KPI logic, and deliver reporting systems, dashboards, and operational tools.",
   location: "North America (U.S. & Canada)",
   businessAddress: "2660 Almondwood Loop, Orlando, FL 32821, United States",
   email: "adurand@aderpsystems.com",
@@ -45,7 +45,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Warehouse",
     headline: "One cloud data foundation for KPI logic, filters, reporting, and auditability",
     description:
-      "Your data lands in a cloud warehouse you own, organized into raw and analytics layers. KPI logic lives in the warehouse so finance, construction, sales, and leadership all read the same numbers.",
+      "Your data lands in a cloud warehouse configured for your reporting needs, organized into raw and analytics layers. KPI logic lives in the warehouse so finance, construction, sales, and leadership all read the same numbers.",
     icon: "Layers",
     deliverables: [
       "Raw and analytics layers organized for speed and auditability",
@@ -53,7 +53,7 @@ export const SERVICES: Service[] = [
       "Modular SQL transformations under version control",
       "Scheduled refreshes and validation checks",
       "Cost-conscious infrastructure design",
-      "Client-owned architecture and documentation",
+      "Architecture and documentation for ongoing support",
     ],
   },
   {

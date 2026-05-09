@@ -6,7 +6,7 @@ import MarketingTracking from "@/components/analytics/MarketingTracking";
 import PageAmbient from "@/components/ui/PageAmbient";
 
 const siteUrl = "https://consulting.aderpsystems.com";
-const siteTitle = "A.D. Homes & Consulting | Residential Builder & Developer Data Platforms";
+const siteTitle = "AD ERP SYSTEMS | Residential Builder & Developer Data Platforms";
 const siteDescription =
   "Custom data platforms for residential homebuilders and residential real estate developers. We centralize ERP, spreadsheet, finance, API, and export data in a structured warehouse, apply builder and developer KPI logic, and deliver reporting systems, dashboards, and operational tools.";
 
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: siteUrl,
-    siteName: "A.D. Homes & Consulting",
+    siteName: "AD ERP SYSTEMS",
     title: siteTitle,
     description: siteDescription,
     images: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/images/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "A.D. Homes & Consulting - Residential Builder and Developer Data Platforms",
+        alt: "AD ERP SYSTEMS - Residential Builder and Developer Data Platforms",
       },
     ],
   },

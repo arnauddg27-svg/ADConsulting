@@ -4,9 +4,9 @@ import Container from "@/components/ui/Container";
 import { SITE_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | A.D. Homes & Consulting",
+  title: "Privacy Policy | AD ERP SYSTEMS",
   description:
-    "Privacy Policy for A.D. Homes & Consulting, including how website, contact, analytics, advertising, and booking data may be collected and managed.",
+    "Privacy Policy for AD ERP SYSTEMS, including how website, contact, analytics, advertising, and booking data may be collected and managed.",
 };
 
 const updatedDate = "May 9, 2026";

@@ -233,7 +233,7 @@ function PipelineDiagram() {
               fontWeight="700"
               letterSpacing="0.2em"
             >
-              CLIENT-OWNED
+              STRUCTURED
             </text>
           </g>
 
@@ -248,7 +248,7 @@ function PipelineDiagram() {
       <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/[0.05] pt-3 text-[0.56rem] uppercase tracking-[0.18em] text-slate-500 sm:text-[0.62rem]">
         <span>Daily sync</span>
         <span>KPI logic</span>
-        <span>Client-owned</span>
+        <span>Reporting apps</span>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import DemoPageClient from "@/components/demo/DemoPageClient";
 
 export const metadata: Metadata = {
-  title: "Sunshine Homes Demo | Builder Operations Platform — A.D. Homes & Consulting",
+  title: "Sunshine Homes Demo | Builder Operations Platform - AD ERP SYSTEMS",
   description:
     "Explore a full-featured builder operations dashboard for Sunshine Homes — lifecycle navigation, KPI tracking, construction pipeline, sales analytics, loan management, and cross-filtering.",
 };

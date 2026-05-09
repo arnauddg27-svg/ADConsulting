@@ -21,9 +21,9 @@ import { TiltCard } from "@/components/ui/TiltCard";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About | A.D. Homes & Consulting",
+  title: "About | AD ERP SYSTEMS",
   description:
-    "About A.D. Homes & Consulting, a firm that builds custom data platforms for residential builders and developers with practical, client-owned delivery.",
+    "About AD ERP SYSTEMS, a firm that builds custom data platforms for residential builders and developers with practical delivery.",
 };
 
 const credentials = [
@@ -56,8 +56,8 @@ const pillars = [
 const benefits = [
   {
     icon: <Shield size={20} />,
-    title: "Client Ownership",
-    desc: "Clients own their code, data, hosting, and infrastructure. The system stays with your team and can be expanded over time.",
+    title: "Practical Architecture",
+    desc: "Platforms are built around your source systems, data model, reporting needs, and ongoing support requirements.",
   },
   {
     icon: <Users size={20} />,
@@ -74,7 +74,7 @@ const benefits = [
 const compared = [
   { them: "Multi-industry delivery model", us: "Residential builder and developer specialization" },
   { them: "Framework-first implementation", us: "Scope tailored to your systems and reporting priorities" },
-  { them: "Limited platform ownership", us: "Client ownership of code, data, and hosting" },
+  { them: "Limited implementation transparency", us: "Clear architecture, documentation, and handoff" },
   { them: "Layered communication model", us: "Direct senior involvement throughout delivery" },
   { them: "Reporting outputs only", us: "Reporting systems with monitoring and admin controls" },
   { them: "Large fixed scopes", us: "Phased delivery aligned to operating priorities" },
@@ -183,7 +183,7 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow eyebrow-dot">Why Clients Choose Us</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Ownership, directness, and practical delivery
+              Directness, useful architecture, and practical delivery
             </h2>
             <div className="mt-10 grid gap-8 sm:grid-cols-3">
               {benefits.map((b) => (
@@ -212,7 +212,7 @@ export default function AboutPage() {
                   Delivery model differences
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
-                  The key differences are specialization, ownership, direct
+                  The key differences are specialization, direct
                   involvement, and practical reporting depth.
                 </p>
               </div>
@@ -223,7 +223,7 @@ export default function AboutPage() {
                     Typical Approach
                   </div>
                   <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
-                    A.D. Homes &amp; Consulting
+                    AD ERP SYSTEMS
                   </div>
                 </div>
                 {compared.map((row, i) => (
@@ -258,7 +258,7 @@ export default function AboutPage() {
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
                   Projects move from system review to working delivery in clear
-                  stages, with ownership kept on the client side throughout.
+                  stages, with documentation and support expectations defined.
                 </p>
                 <div className="mt-8">
                   <Link

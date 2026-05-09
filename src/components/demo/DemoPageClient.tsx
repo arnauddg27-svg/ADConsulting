@@ -38,7 +38,7 @@ export default function DemoPageClient() {
         className="fixed left-5 top-5 z-40 inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-black/45 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-200 backdrop-blur-xl transition-all hover:border-accent-400/40 hover:bg-black/65 hover:text-accent-200"
       >
         <ArrowLeft size={12} />
-        A.D. Homes
+        AD ERP SYSTEMS
       </Link>
 
       <section className="page-hero">
@@ -98,7 +98,7 @@ export default function DemoPageClient() {
 
       <CTABanner
         headline="Want a platform like this for your operation?"
-        description="We can map your current systems and design a reporting system built on your data, deployed to your infrastructure, and owned by your team."
+        description="We can map your current systems and design a reporting system built on your data, deployed in your operating environment, and ready for your team to use."
         primaryCTA={{
           label: "Book a Discovery Call",
           href: "/contact/",

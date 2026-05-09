@@ -38,7 +38,7 @@ const sourceSystems = [
 
 const heroProof = [
   "Built for residential builders and developers",
-  "Client-owned code, data, hosting, and infrastructure",
+  "Configured around your systems and reporting workflow",
   "Competitive project-based pricing",
 ];
 
@@ -81,8 +81,8 @@ const whatYouBuy = [
     body: "Per-job views, exception lists, admin controls, variance tracking, cost-to-complete views, and drilldowns behind every key metric.",
   },
   {
-    title: "A client-owned handoff",
-    body: "Your business owns the code, data, hosting, infrastructure, and documentation after delivery.",
+    title: "A documented handoff",
+    body: "Your team receives the platform, architecture notes, operating documentation, and support options after delivery.",
   },
 ];
 
@@ -139,7 +139,7 @@ const firstPhase = [
   },
   {
     title: "Build and hand off a working platform",
-    body: "Deliver the warehouse, dashboards, drilldowns, admin logic, and documentation in a client-owned environment.",
+    body: "Deliver the warehouse, dashboards, drilldowns, admin logic, and documentation in the agreed operating environment.",
   },
 ];
 
@@ -147,7 +147,7 @@ const fitSignals = [
   "You manage roughly 20-500+ homes, lots, or closings per year.",
   "Critical reports still depend on exports, manual cleanup, or linked spreadsheets.",
   "Your ERP has useful data, but it does not give leadership the operating view they need.",
-  "You want dashboards and tools your team owns, not a black-box reporting subscription.",
+  "You want dashboards and tools built around your workflow, not a generic reporting template.",
 ];
 
 const faq = [
@@ -167,9 +167,9 @@ const faq = [
       "Pricing is competitive and project-based. The first phase is scoped around the source systems, priority workflows, and dashboards that will create the most value without turning the project into an open-ended enterprise BI program.",
   },
   {
-    question: "Who owns the finished system?",
+    question: "What happens after the finished system is delivered?",
     answer:
-      "The client owns the code, data, hosting, and infrastructure. The build is designed so the platform can be maintained, extended, and audited without locking the business into a proprietary reporting tool.",
+      "The build is delivered with documentation, architecture notes, and support options so the platform can be maintained, extended, and audited without turning into a black box.",
   },
 ];
 
@@ -205,7 +205,7 @@ export default function BuilderDataPlatformLandingPage() {
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
                 We build competitively priced custom data platforms for
                 residential homebuilders and residential real estate developers.
-                The product is a client-owned
+                The product is a custom
                 reporting system: data extraction, a structured warehouse,
                 builder and developer KPI logic, dashboards, drilldowns, and
                 internal tools.
@@ -326,7 +326,7 @@ export default function BuilderDataPlatformLandingPage() {
         <Container>
           <SectionIntro
             title="What you are buying."
-            body="This is not a generic consulting report or a dashboard template. It is a custom data platform for residential builders and developers that your team can use, own, and expand."
+            body="This is not a generic consulting report or a dashboard template. It is a custom data platform for residential builders and developers that your team can use and expand."
           />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {whatYouBuy.map((item) => (
@@ -436,7 +436,7 @@ export default function BuilderDataPlatformLandingPage() {
                 <ShieldCheck size={22} />
               </div>
               <h2 className="mt-6 font-heading text-4xl leading-[0.95] tracking-[0.01em] text-slate-50">
-                You own the system.
+                Built around your operating environment.
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-200">
                 The code, warehouse, hosting, documentation, and infrastructure
