@@ -103,6 +103,9 @@ export default function Footer() {
               <Link href="/about/" className="transition-colors hover:text-accent-200">
                 About Us
               </Link>
+              <Link href="/founder/" className="transition-colors hover:text-accent-200">
+                Founder
+              </Link>
               <Link href="/privacy/" className="transition-colors hover:text-accent-200">
                 Privacy Policy
               </Link>
