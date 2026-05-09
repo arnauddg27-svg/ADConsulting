@@ -61,8 +61,8 @@ export default function ScheduleHeatmap({ filters, onFilterToggle }: ScheduleHea
                       {row.project}
                     </button>
                   </td>
-                  {row.weeks.map((intensity, index) => (
-                    <td key={index} className="p-1">
+                  {row.weeks.map((intensity, weekIdx) => (
+                    <td key={`${row.project}-w${weekIdx}`} className="p-1">
                       <div className={clsx("mx-auto h-6 w-full rounded", getCellColor(intensity))} />
                     </td>
                   ))}

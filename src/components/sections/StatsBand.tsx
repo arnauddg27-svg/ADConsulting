@@ -34,8 +34,8 @@ const stats = [
     prefix: "",
     value: 100,
     suffix: "%",
-    label: "Client-owned infrastructure",
-    detail: "Your cloud. Your data. Your code.",
+    label: "Deployed infrastructure",
+    detail: "Your cloud. Your data. Clear handoff.",
   },
 ];
 

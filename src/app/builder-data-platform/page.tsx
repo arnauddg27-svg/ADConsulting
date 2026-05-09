@@ -15,9 +15,9 @@ import Button from "@/components/ui/Button";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 
 export const metadata: Metadata = {
-  title: "Custom Data Platforms for Homebuilders | A.D. Homes & Consulting",
+  title: "Homebuilder Dashboards & ERP Reporting | AD ERP SYSTEMS",
   description:
-    "Centralize ERP, spreadsheet, finance, API, and export data into dashboards, reporting systems, and internal tools for residential homebuilders.",
+    "Custom data platforms for residential builders and developers. Centralize ERP, spreadsheet, finance, API, and export data into homebuilder dashboards, job cost reporting, WIP views, KPI logic, and internal tools.",
 };
 
 const sourceSystems = [
@@ -47,9 +47,16 @@ const offerBuckets = [
   },
 ];
 
+const searchIntentUseCases = [
+  "Homebuilder dashboards and KPI reporting",
+  "Builder ERP, spreadsheet, and export reporting",
+  "Construction WIP, job cost, and cost-to-complete views",
+  "Residential developer and land pipeline reporting",
+];
+
 const proofPoints = [
-  "Client-owned code, data, hosting, and infrastructure.",
-  "Built around residential builder workflows, not generic BI templates.",
+  "Deployed to your accounts with clear handoff documentation.",
+  "Built around residential builder and developer workflows, not generic BI templates.",
   "Designed for practical reporting releases instead of long discovery cycles.",
 ];
 
@@ -61,11 +68,11 @@ export default function BuilderDataPlatformLandingPage() {
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               <h1 className="max-w-5xl font-heading text-[3rem] leading-[0.92] tracking-[-0.02em] text-slate-50 sm:text-6xl md:text-7xl">
-                Custom data platforms for residential homebuilders.
+                Custom data platforms for residential builders and developers.
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
                 Centralize ERP, spreadsheet, finance, API, and export data into
-                one structured warehouse, then turn it into dashboards,
+                one structured warehouse, then use it for dashboards,
                 reporting systems, and internal tools your team can use.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -132,6 +139,26 @@ export default function BuilderDataPlatformLandingPage() {
 
       <section className="section-space pt-8">
         <Container>
+          <div className="mb-8 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-5 md:p-6">
+            <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+              <div>
+                <span className="eyebrow">Common Search Needs</span>
+                <h2 className="mt-3 font-heading text-3xl leading-none tracking-[0.02em] text-slate-50 md:text-4xl">
+                  Built for the reporting searches that usually start with ERP exports, job cost data, and disconnected dashboards.
+                </h2>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {searchIntentUseCases.map((useCase) => (
+                  <div
+                    key={useCase}
+                    className="rounded-2xl border border-accent-400/15 bg-accent-500/[0.06] px-4 py-3 text-sm font-semibold text-slate-200"
+                  >
+                    {useCase}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="grid gap-5 md:grid-cols-3">
             {offerBuckets.map(({ icon: Icon, title, body }) => (
               <Card key={title} padding="lg" hover>
@@ -158,11 +185,12 @@ export default function BuilderDataPlatformLandingPage() {
                 <ShieldCheck size={22} />
               </div>
               <h2 className="mt-6 font-heading text-4xl leading-none tracking-[0.02em] text-slate-50">
-                Built for builders who need cleaner operational visibility.
+                Built for builders and developers who need cleaner operational visibility.
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-300">
-                The strongest fit is a residential builder managing enough
-                volume that manual reporting, spreadsheet reconciliation, and
+                The strongest fit is a residential builder, residential
+                developer, or builder-developer operator managing enough volume
+                that manual reporting, spreadsheet reconciliation, and
                 inconsistent KPI logic are slowing down decisions.
               </p>
             </Card>

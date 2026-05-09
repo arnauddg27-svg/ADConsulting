@@ -44,7 +44,7 @@ export default function HeroShowcase() {
 
 /* ════════════════════════════════════════════════════════════
    PIPELINE DIAGRAM
-   Sources → Warehouse → Apps with traveling dots
+   Sources → Warehouse → Dashboard with traveling dots
    ════════════════════════════════════════════════════════════ */
 
 function PipelineDiagram() {
@@ -70,7 +70,7 @@ function PipelineDiagram() {
             Data Pipeline
           </div>
           <div className="mt-1 font-heading text-lg tracking-[-0.01em] text-slate-100">
-            Sources → Warehouse → Apps
+            Sources → Warehouse → Dashboard
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-accent-200">
@@ -217,7 +217,7 @@ function PipelineDiagram() {
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.66rem] uppercase tracking-[0.2em] text-slate-500">
         <span>Daily sync · 5:47 AM</span>
         <span>KPI logic · once</span>
-        <span>All datasets · client-owned</span>
+        <span>All datasets · controlled in your accounts</span>
       </div>
     </div>
   );

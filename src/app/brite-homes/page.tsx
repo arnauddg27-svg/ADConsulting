@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import BriteHomesDashboard from "@/components/demo/brite-homes/BriteHomesDashboard";
 
 export const metadata: Metadata = {
-  title: "Brite Homes Dashboard | Builder Operations Platform",
-  description: "Full-featured builder operations dashboard for Brite Homes connected to Microsoft Fabric.",
+  title: "Brite Homes Sample Dashboard | Residential Homebuilder Reporting System",
+  description: "Sample residential homebuilder reporting system for Brite Homes, connected to Microsoft Fabric and organized around operational decision-making.",
 };
 
 export default function BriteHomesPage() {
@@ -15,7 +15,7 @@ export default function BriteHomesPage() {
             Microsoft Fabric
           </span>
           <span className="text-sm text-slate-400">
-            Brite Homes — full lifecycle dashboard with 9 interactive views
+            Brite Homes sample — 9 interactive views for builder reporting workflows
           </span>
         </div>
         <BriteHomesDashboard />

@@ -26,7 +26,7 @@ const painPoints = [
   {
     icon: <AlertTriangle size={22} />,
     problem: "Generic dashboards often miss builder workflows end to end",
-    solution: "Client-owned reporting systems are tailored to your operating model",
+    solution: "Reporting systems are tailored to your operating model",
   },
 ];
 
@@ -42,9 +42,9 @@ export default function SocialProof() {
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">
             Most builders have the data they need — it&apos;s scattered across
-            ERPs, spreadsheets, finance systems, and exports. We centralize it
-            into one structured warehouse, apply KPI logic once, and deliver
-            reporting systems teams can act on.
+            ERPs, spreadsheets, finance systems, and exports. AD ERP SYSTEMS
+            centralizes it into one structured warehouse, applies KPI logic
+            once, and delivers reporting systems teams can act on.
           </p>
         </div>
 

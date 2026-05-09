@@ -258,6 +258,10 @@
     @apply relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-24;
   }
 
+  .btn-primary {
+    @apply inline-flex min-w-0 max-w-full items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-5 py-3 text-center text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40;
+  }
+
   .eyebrow {
     @apply inline-flex items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_-12px_rgba(16,185,129,0.3)];
   }

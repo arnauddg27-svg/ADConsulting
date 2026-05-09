@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import DemoPageClient from "@/components/demo/DemoPageClient";
 
 export const metadata: Metadata = {
-  title: "Sunshine Homes Demo | Builder Operations Platform — A.D. Homes & Consulting",
+  title: "Sample Dashboard | Custom Data Platforms for Residential Builders and Developers",
   description:
-    "Explore a full-featured builder operations dashboard for Sunshine Homes — lifecycle navigation, KPI tracking, construction pipeline, sales analytics, loan management, and cross-filtering.",
+    "Explore a sample reporting system built on centralized builder and developer data, showing how dashboards and operational tools support residential operating decisions.",
 };
 
 export default function DemoPage() {

@@ -53,12 +53,12 @@ export default function DashboardPreview() {
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
               <span className="eyebrow">Illustrative Example</span>
               <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-                Next.js dashboards built on your data.
+                Sample dashboards built on centralized builder data.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
                 Job profitability, pipeline status, exception flags, and schedule
-                pressure — delivered through interactive Next.js applications
-                connected to your cloud data warehouse.
+                pressure delivered through reporting systems and operational tools
+                connected to a structured data warehouse.
               </p>
               <p className="mt-2 text-xs italic text-slate-500">
                 Illustrative only. Every implementation is shaped around the

@@ -94,7 +94,7 @@ export default function Hero() {
               </p>
 
               <div className="home-hero-actions mt-7 flex min-w-0 flex-col gap-3 sm:flex-row">
-                <Button href="/contact/" size="lg" className="w-full sm:w-auto">
+                <Button href="/book/?source=home_hero" size="lg" className="w-full sm:w-auto">
                   Book a Discovery Call
                   <ArrowRight size={16} />
                 </Button>

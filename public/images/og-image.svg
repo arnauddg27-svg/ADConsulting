@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#070b13"/>
+  <circle cx="1030" cy="82" r="180" fill="#10b981" opacity="0.12"/>
+  <circle cx="190" cy="560" r="220" fill="#22d3ee" opacity="0.08"/>
+  <rect x="72" y="74" width="1056" height="482" rx="34" fill="#0b1120" stroke="#1e293b"/>
+  <text x="104" y="286" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="800" letter-spacing="2">
+    AD ERP SYSTEMS
+  </text>
+  <text x="106" y="374" fill="#34d399" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="500">
+    Custom data platforms for residential builders and developers
+  </text>
+  <text x="108" y="438" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="500">
+    Sources to warehouse to dashboard
+  </text>
+</svg>

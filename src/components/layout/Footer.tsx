@@ -35,14 +35,15 @@ export default function Footer() {
               </div>
 
               <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 md:text-[0.95rem]">
-                We build custom data platforms for residential builders and
-                developers by centralizing ERP, spreadsheet, finance, API, and
-                export data in a structured warehouse and turning it into
-                reporting systems, dashboards, and operational tools.
+                AD ERP SYSTEMS builds custom data platforms for residential
+                builders and developers by centralizing ERP, spreadsheet,
+                finance, API, and export data in a structured warehouse and
+                turning it into reporting systems, dashboards, and operational
+                tools.
               </p>
 
               <Link
-                href="/contact/"
+                href="/book/?source=footer_cta"
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-500/10 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-accent-200 transition-all hover:border-accent-400/60 hover:bg-accent-500/15"
               >
                 Book a Discovery Call
@@ -100,7 +101,10 @@ export default function Footer() {
             <div>© {new Date().getFullYear()} {SITE_CONFIG.businessName}.</div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <Link href="/about/" className="transition-colors hover:text-accent-200">
-                About Us
+                About
+              </Link>
+              <Link href="/founder/" className="transition-colors hover:text-accent-200">
+                Founder
               </Link>
               <Link href="/privacy/" className="transition-colors hover:text-accent-200">
                 Privacy Policy

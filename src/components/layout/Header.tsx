@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 
 function isActive(current: string, href: string) {
   const normalized = href.replace(/\/$/, "");
@@ -59,7 +59,7 @@ export default function Header() {
                 {SITE_CONFIG.name.toUpperCase()}
               </span>
               <span className="block text-[0.62rem] uppercase tracking-[0.24em] text-slate-400">
-                Custom Data Platforms for Residential Homebuilders
+                Custom Data Platforms for Residential Builders & Developers
               </span>
             </div>
           </Link>
@@ -84,9 +84,12 @@ export default function Header() {
                 );
               })}
             </nav>
-            <Button href="/contact/" size="sm">
+            <TrackedCalendlyLink
+              source="header_cta"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-4 py-2.5 text-center text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+            >
               Book a Discovery Call
-            </Button>
+            </TrackedCalendlyLink>
           </div>
 
           <details className="relative md:hidden">
@@ -96,13 +99,13 @@ export default function Header() {
             >
               <Menu size={20} />
             </summary>
-            <div className="absolute right-0 top-14 z-50 w-[min(92vw,22rem)] panel overflow-hidden p-6">
+            <div className="fixed left-5 right-5 top-24 z-50 panel overflow-hidden p-6 sm:left-auto sm:right-6 sm:w-[22rem]">
               <div className="mb-6 border-b border-white/[0.08] pb-5">
                 <div className="font-heading text-2xl tracking-[0.12em] text-slate-50">
-                  A.D. Homes &amp; Consulting
+                  AD ERP SYSTEMS
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Custom data platforms for residential homebuilders.
+                  Custom data platforms for residential builders and developers.
                 </p>
               </div>
               <nav className="flex flex-col gap-2">
@@ -124,9 +127,12 @@ export default function Header() {
                   );
                 })}
               </nav>
-              <Button href="/contact/" className="mt-6 w-full justify-center">
+              <TrackedCalendlyLink
+                source="mobile_menu_cta"
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-5 py-3 text-center text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+              >
                 Book a Discovery Call
-              </Button>
+              </TrackedCalendlyLink>
             </div>
           </details>
         </div>

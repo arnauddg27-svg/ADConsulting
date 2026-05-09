@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import {
   Shield,
   Zap,
@@ -8,10 +9,7 @@ import {
   Users,
   ArrowRight,
   CheckCircle2,
-  HardHat,
   Home,
-  MapPin,
-  Landmark,
   Building2,
   TrendingUp,
 } from "lucide-react";
@@ -20,18 +18,18 @@ import Container from "@/components/ui/Container";
 import CTABanner from "@/components/sections/CTABanner";
 
 export const metadata: Metadata = {
-  title: "About | A.D. Homes & Consulting",
+  title: "About | Custom Data Platforms for Residential Builders and Developers",
   description:
-    "About A.D. Homes & Consulting, a firm that builds custom data platforms for residential homebuilders with practical, client-owned delivery.",
+    "About AD ERP SYSTEMS, a firm that builds custom data platforms for residential builders and developers with practical delivery.",
 };
 
 const credentials = [
-  { icon: <HardHat size={18} />, label: "Residential development and construction operations" },
-  { icon: <Home size={18} />, label: "Builder ERP and spreadsheet reporting" },
-  { icon: <MapPin size={18} />, label: "Land, lot, and community pipeline oversight" },
-  { icon: <Landmark size={18} />, label: "Permitting, lending, and draw workflows" },
-  { icon: <Building2 size={18} />, label: "Construction cost and schedule reporting" },
-  { icon: <TrendingUp size={18} />, label: "Portfolio and executive reporting" },
+  { icon: <Database size={18} />, label: "ERP systems and source data mapping" },
+  { icon: <CheckCircle2 size={18} />, label: "Data cleanup, validation, and governance" },
+  { icon: <BarChart3 size={18} />, label: "Reporting automation and dashboard delivery" },
+  { icon: <TrendingUp size={18} />, label: "KPI definitions and metric documentation" },
+  { icon: <Building2 size={18} />, label: "Spreadsheet, database, and API workflows" },
+  { icon: <Home size={18} />, label: "Residential real estate development context" },
 ];
 
 const pillars = [
@@ -55,13 +53,13 @@ const pillars = [
 const benefits = [
   {
     icon: <Shield size={20} />,
-    title: "Client Ownership",
-    desc: "Clients own their code, data, hosting, and infrastructure. The system stays with your team and can be expanded over time.",
+    title: "Deployed to Your Accounts",
+    desc: "The platform is deployed to your cloud, data, and hosting environment with documentation your team can keep using.",
   },
   {
     icon: <Users size={20} />,
-    title: "Direct Working Model",
-    desc: "You work directly with the team designing and building your reporting system, which keeps communication clear and delivery focused.",
+    title: "Founder-Led Delivery",
+    desc: "You work directly with Arnaud Durand on discovery, data mapping, KPI logic, and implementation, which keeps communication clear and delivery accountable.",
   },
   {
     icon: <Zap size={20} />,
@@ -71,10 +69,10 @@ const benefits = [
 ];
 
 const compared = [
-  { them: "Multi-industry delivery model", us: "Residential homebuilder specialization" },
+  { them: "Multi-industry delivery model", us: "Residential builder and developer specialization" },
   { them: "Framework-first implementation", us: "Scope tailored to your systems and reporting priorities" },
-  { them: "Limited platform ownership", us: "Client ownership of code, data, and hosting" },
-  { them: "Layered communication model", us: "Direct senior involvement throughout delivery" },
+  { them: "Limited handoff clarity", us: "Deployment to your cloud, data, and hosting environment" },
+  { them: "Layered communication model", us: "Direct founder involvement throughout delivery" },
   { them: "Reporting outputs only", us: "Reporting systems with monitoring and admin controls" },
   { them: "Large fixed scopes", us: "Phased delivery aligned to operating priorities" },
 ];
@@ -89,14 +87,14 @@ export default function AboutPage() {
               <div>
                 <span className="eyebrow">About the Firm</span>
                 <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-                  Custom data platforms for residential homebuilders
+                  Custom data platforms for residential builders and developers
                 </h1>
                 <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  We help residential homebuilders centralize data from ERPs,
-                  spreadsheets, APIs, and other operating systems; move it into
-                  a structured warehouse; apply builder KPI logic; and deliver
-                  reporting systems, dashboards, and internal tools that support
-                  operational decision-making.
+                  AD ERP SYSTEMS helps residential builders and developers
+                  centralize data from ERPs, spreadsheets, APIs, and other
+                  operating systems; move it into a structured warehouse; apply
+                  builder KPI logic; and deliver reporting systems, dashboards,
+                  and internal tools that support operational decision-making.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -120,21 +118,21 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow">Industry Context</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Built around residential builder operations
+              Built around residential builder and developer operations
             </h2>
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               <p className="text-base leading-7 text-slate-400">
-                The firm is built around experience in residential development,
-                construction operations, and builder reporting. That background
-                informs how data is modeled, how KPI definitions are built, and
-                how reporting is organized for finance, construction,
-                development, and leadership teams.
+                The firm is built around experience as a technology manager and
+                data analyst for a top 200 residential builder. That background
+                is supported by an MBA focused on Finance and Operations &
+                Technology Management, and it informs how source data, KPI
+                definitions, and reporting workflows are structured.
               </p>
               <p className="text-base leading-7 text-slate-400">
-                The focus is practical system delivery: reliable extraction,
-                clean warehouse structure, builder workflows, and reporting
-                tools teams can use every week. The result is clearer visibility
-                and better decisions across the business.
+                Real estate development project experience adds practical
+                context around budgets, schedules, and project tracking. The
+                focus is practical system delivery: reliable data structure,
+                KPI logic, and reporting tools teams can use every week.
               </p>
             </div>
           </div>
@@ -144,7 +142,68 @@ export default function AboutPage() {
       <section className="section-space">
         <Container>
           <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">What We Build</span>
+            <div className="grid items-center gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+              <div className="relative mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:mx-auto">
+                <div className="absolute -inset-4 rounded-[2rem] border border-accent-400/10 bg-accent-500/[0.03] blur-2xl" />
+                <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-950">
+                    <Image
+                      src="/images/arnaud-durand.png"
+                      alt="Arnaud Durand"
+                      fill
+                      className="object-cover object-top"
+                      sizes="(min-width: 1024px) 256px, 58vw"
+                    />
+                  </div>
+                  <div className="px-2 pb-2 pt-4">
+                    <div className="font-heading text-lg tracking-[0.04em] text-slate-50">
+                      Arnaud Durand
+                    </div>
+                    <div className="mt-1 text-sm text-slate-400">
+                      Founder and data platform lead
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="min-w-0 text-center lg:text-left">
+                <span className="eyebrow mx-auto lg:mx-0">Founder-Led Practice</span>
+                <h2 className="mx-auto mt-4 max-w-3xl font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl lg:mx-0">
+                  Led with residential builder and developer operating context
+                </h2>
+                <div className="mx-auto mt-6 max-w-3xl space-y-4 text-center text-base leading-7 text-slate-400 lg:mx-0 lg:text-left">
+                  <p>
+                    AD ERP SYSTEMS is led by Arnaud Durand. The firm is intentionally
+                    direct: discovery, data mapping, KPI logic, dashboard design,
+                    and implementation are handled with clear founder involvement.
+                  </p>
+                  <p>
+                    Arnaud&apos;s background includes work as a technology manager
+                    and data analyst for a top 200 residential builder. He also
+                    holds an MBA focused on Finance and Operations & Technology
+                    Management. His real estate development project experience
+                    adds practical context around budgets, schedules, project
+                    tracking, and development decisions.
+                  </p>
+                </div>
+                <div className="mt-8 flex justify-center lg:justify-start">
+                  <Link
+                    href="/founder/"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.04] px-5 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-100 transition-all hover:border-accent-400/40 hover:bg-accent-500/10 hover:text-accent-100"
+                  >
+                    Read Founder Bio <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="section-space">
+        <Container>
+          <div className="reveal mx-auto max-w-5xl">
+            <span className="eyebrow">What Gets Built</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
               Three connected solution categories
             </h2>
@@ -176,7 +235,7 @@ export default function AboutPage() {
           <div className="reveal mx-auto max-w-5xl">
             <span className="eyebrow">Why Clients Choose Us</span>
             <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Ownership, directness, and practical delivery
+              Account-level deployment, directness, and practical delivery
             </h2>
             <div className="mt-10 grid gap-8 sm:grid-cols-3">
               {benefits.map((b) => (
@@ -205,7 +264,7 @@ export default function AboutPage() {
                   Delivery model differences
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
-                  The key differences are specialization, ownership, direct
+                  The key differences are specialization, deployment clarity, direct
                   involvement, and practical reporting depth.
                 </p>
               </div>
@@ -216,7 +275,7 @@ export default function AboutPage() {
                     Typical Approach
                   </div>
                   <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
-                    A.D. Homes &amp; Consulting
+                    AD ERP SYSTEMS
                   </div>
                 </div>
                 {compared.map((row, i) => (
@@ -251,11 +310,11 @@ export default function AboutPage() {
                 </h2>
                 <p className="mt-4 text-sm leading-6 text-slate-400">
                   Projects move from system review to working delivery in clear
-                  stages, with ownership kept on the client side throughout.
+                  stages, with deployment and handoff kept clear throughout.
                 </p>
                 <div className="mt-8">
                   <Link
-                    href="/contact/"
+                    href="/book/?source=about_process"
                     className="btn-primary inline-flex items-center gap-2"
                   >
                     Book a Discovery Call <ArrowRight size={16} />
@@ -268,7 +327,7 @@ export default function AboutPage() {
                   {
                     step: "01",
                     title: "Discovery Call",
-                    desc: "We review your current systems, reporting pain points, and operating priorities.",
+                    desc: "The first call reviews your current systems, reporting pain points, and operating priorities.",
                   },
                   {
                     step: "02",
@@ -278,7 +337,7 @@ export default function AboutPage() {
                   {
                     step: "03",
                     title: "Build & Deploy",
-                    desc: "We deliver extraction pipelines, warehouse models, KPI logic, dashboards, and internal tools in working increments.",
+                    desc: "Delivery covers extraction pipelines, warehouse models, KPI logic, dashboards, and internal tools in working increments.",
                   },
                   {
                     step: "04",
@@ -306,10 +365,10 @@ export default function AboutPage() {
 
       <CTABanner
         headline="Discuss your current systems and reporting needs."
-        description="We will review your ERP, spreadsheets, and reporting workflow, then outline a practical path to centralized builder data, reporting systems, and operational tools."
+        description="The first call reviews your ERP, spreadsheets, and reporting workflow, then outlines a practical path to centralized builder data, reporting systems, and operational tools."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=about_cta",
         }}
       />
     </>

@@ -19,19 +19,19 @@ import { SITE_CONFIG } from "@/lib/constants";
 const fitPoints = [
   "ERP, spreadsheet, finance, API, and export data live in too many places.",
   "Leadership needs cleaner visibility across land, permitting, construction, sales, and P&L.",
-  "The team wants a client-owned reporting system rather than another disconnected dashboard.",
+  "The team wants reporting built around its own systems, not another disconnected dashboard.",
 ];
 
 const firstCallSteps = [
   {
     title: "Review current systems",
     description:
-      "We identify the systems of record, manual reporting points, and where KPI definitions break down.",
+      "The first call identifies the systems of record, manual reporting points, and where KPI definitions break down.",
   },
   {
     title: "Prioritize the first phase",
     description:
-      "We narrow the scope to the reporting workflows with the clearest operational value.",
+      "The scope is narrowed to the reporting workflows with the clearest operational value.",
   },
   {
     title: "Outline practical next steps",
@@ -51,11 +51,11 @@ const faqs = [
   },
   {
     q: "What happens after the first call?",
-    a: "If there is a fit, we define the source systems, priority workflows, and first practical build phase so you can evaluate scope and cost clearly.",
+    a: "If there is a fit, the next step defines the source systems, priority workflows, and first practical build phase so you can evaluate scope and cost clearly.",
   },
   {
-    q: "Who owns the platform?",
-    a: "The client owns the code, data, hosting, and infrastructure. The goal is a system your business can keep using and improving.",
+    q: "Where is the platform deployed?",
+    a: "The platform can be deployed to your cloud, data, and hosting environment with documentation your business can keep using and improving.",
   },
 ];
 
@@ -84,9 +84,9 @@ export default function ContactPageClient() {
                 Book a 30-minute discovery call.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-200">
-                We will review your current reporting workflow, source systems,
-                and decision priorities to confirm whether a custom data
-                platform is the right fit.
+                The first call reviews your current reporting workflow, source
+                systems, and decision priorities to confirm whether a custom
+                data platform is the right fit.
               </p>
               <TrackedCalendlyLink
                 source="contact_hero"
@@ -154,7 +154,7 @@ export default function ContactPageClient() {
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin size={18} className="mt-0.5 text-accent-300" />
-                    <span>{SITE_CONFIG.location}</span>
+                    <span>{SITE_CONFIG.businessAddress || SITE_CONFIG.location}</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="mt-0.5 text-accent-300" />
@@ -212,9 +212,9 @@ export default function ContactPageClient() {
               Ready to review your current reporting setup?
             </h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-300 md:text-base">
-              Book the first call and we will walk through where your data lives,
-              which reports matter most, and what a realistic first release
-              could include.
+              Book the first call to walk through where your data lives, which
+              reports matter most, and what a realistic first release could
+              include.
             </p>
             <TrackedCalendlyLink
               source="contact_bottom"

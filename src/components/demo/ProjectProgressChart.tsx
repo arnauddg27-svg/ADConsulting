@@ -52,8 +52,7 @@ export default function ProjectProgressChart({ filters, onFilterToggle }: Projec
 
   const hasActiveFilter = filters.community || filters.status || filters.phase || filters.project;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderYAxisTick = (props: any) => {
+  const renderYAxisTick = (props: { x: string | number; y: string | number; payload: { value: string } }) => {
     const { x, y, payload } = props;
     return (
       <text

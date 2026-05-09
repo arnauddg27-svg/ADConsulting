@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 interface SHCrossTabProps {
   title?: string;
@@ -108,10 +108,9 @@ export default function SHCrossTab({
 
         {/* Data rows */}
         {rows.map((row, ri) => (
-          <>
+          <Fragment key={row}>
             {/* Row label (frozen column) */}
             <div
-              key={`rl-${row}`}
               className="sh-crosstab-row-label"
               onClick={onRowLabelClick ? () => onRowLabelClick(row) : undefined}
               role={onRowLabelClick ? "button" : undefined}
@@ -165,10 +164,10 @@ export default function SHCrossTab({
             })}
 
             {/* Row total */}
-            <div key={`rt-${row}`} className="sh-crosstab-cell sh-crosstab-row-total">
+            <div className="sh-crosstab-cell sh-crosstab-row-total">
               {rowTotals[row] ?? ""}
             </div>
-          </>
+          </Fragment>
         ))}
 
         {/* Totals row */}

@@ -1,8 +1,5 @@
 import Hero from "@/components/sections/Hero";
-import StatsBand from "@/components/sections/StatsBand";
-import SocialProof from "@/components/sections/SocialProof";
 import ServicesOverview from "@/components/sections/ServicesOverview";
-import DashboardPreview from "@/components/sections/DashboardPreview";
 import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import CTABanner from "@/components/sections/CTABanner";
 
@@ -10,15 +7,12 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <StatsBand />
       <ServicesOverview />
-      <SocialProof />
       <WhyChooseUs />
-      <DashboardPreview />
       <CTABanner
         headline="Start with a 30-minute discovery call."
-        description="We will walk through your current systems, identify where data breaks down, and outline the path to a centralized platform your team can run on."
-        primaryCTA={{ label: "Book a Discovery Call", href: "/contact/" }}
+        description="The call walks through your current systems, identifies where data breaks down, and outlines the path to a centralized platform your team can run on."
+        primaryCTA={{ label: "Book a Discovery Call", href: "/book/?source=home_cta" }}
       />
     </>
   );

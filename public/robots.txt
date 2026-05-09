@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://consulting.aderpsystems.com/sitemap.xml

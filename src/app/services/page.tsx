@@ -15,9 +15,9 @@ import CTABanner from "@/components/sections/CTABanner";
 import { SERVICES, PROCESS_STEPS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Services | Custom Data Platforms for Residential Homebuilders",
+  title: "Services | Custom Data Platforms for Residential Builders and Developers",
   description:
-    "Explore services for residential homebuilders: data infrastructure, operational reporting systems, and builder decision tools.",
+    "Explore services for residential builders and developers: data infrastructure, operational reporting systems, and decision tools.",
 };
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -36,13 +36,13 @@ export default function ServicesPage() {
       <section className="page-hero">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow">What We Build</span>
+            <span className="eyebrow">What Gets Built</span>
             <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-              Custom data platforms for residential homebuilders
+              Custom data platforms for residential builders and developers
             </h1>
             <p className="mt-6 text-lg leading-8 text-slate-300">
               Services are organized into three layers: data infrastructure,
-              operational reporting systems, and builder decision tools.
+              operational reporting systems, and decision tools.
             </p>
           </div>
         </Container>
@@ -134,10 +134,10 @@ export default function ServicesPage() {
 
       <CTABanner
         headline="Start with a discovery call."
-        description="We review your current systems and reporting needs, then outline a practical path to centralized builder data and working reporting."
+        description="The call reviews your current systems and reporting needs, then outlines a practical path to centralized builder and developer data and working reporting."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=services_cta",
         }}
       />
     </>
