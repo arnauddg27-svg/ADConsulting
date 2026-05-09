@@ -262,7 +262,7 @@ export default function AboutPage() {
                 </p>
                 <div className="mt-8">
                   <Link
-                    href="/contact/"
+                    href="/book/?source=about_process"
                     className="btn-primary inline-flex items-center gap-2"
                   >
                     Book a Discovery Call <ArrowRight size={16} />
@@ -316,7 +316,7 @@ export default function AboutPage() {
         description="We will review your ERP, spreadsheets, and reporting workflow, then outline a practical path to centralized builder data, reporting systems, and operational tools."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=about_cta",
         }}
       />
     </>

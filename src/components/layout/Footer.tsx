@@ -43,7 +43,7 @@ export default function Footer() {
               </p>
 
               <Link
-                href="/contact/"
+                href="/book/?source=footer_cta"
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-accent-400/30 bg-accent-500/10 px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-accent-200 transition-all hover:border-accent-400/60 hover:bg-accent-500/15"
               >
                 Book a Discovery Call

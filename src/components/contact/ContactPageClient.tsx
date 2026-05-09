@@ -80,7 +80,7 @@ export default function ContactPageClient() {
                     source="contact_primary"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-b-2 border-zinc-950/40 bg-gradient-to-t from-accent-600 to-accent-400 px-5 py-4 text-center text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-accent-500/30 ring-1 ring-inset ring-white/25 transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-accent-500/40 active:translate-y-0 active:brightness-95 sm:w-auto sm:px-6"
                   >
-                    Pick a time
+                    Check fit first
                     <ArrowRight size={16} />
                   </TrackedCalendlyLink>
                 </div>

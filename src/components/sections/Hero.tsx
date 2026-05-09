@@ -41,7 +41,7 @@ export default function Hero() {
             </p>
 
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button href="/contact/" size="md" className="whitespace-nowrap px-5 py-3">
+              <Button href="/book/?source=home_hero" size="md" className="whitespace-nowrap px-5 py-3">
                 Book a Discovery Call
                 <ArrowRight size={16} />
               </Button>

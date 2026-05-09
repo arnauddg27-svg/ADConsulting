@@ -101,7 +101,7 @@ export default function DemoPageClient() {
         description="We can map your current systems and design a reporting system built on your data, deployed in your operating environment, and ready for your team to use."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=demo_cta",
         }}
         secondaryCTA={{
           label: "View All Services",

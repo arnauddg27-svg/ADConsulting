@@ -73,7 +73,7 @@ export default function ServicesPage() {
                     {service.description}
                   </p>
 
-                  <Button href="/contact/" variant="outline" size="sm" className="mt-6">
+                  <Button href="/book/?source=services_card" variant="outline" size="sm" className="mt-6">
                     Discuss This
                     <ArrowRight size={14} />
                   </Button>
@@ -137,7 +137,7 @@ export default function ServicesPage() {
         description="We review your current systems and reporting needs, then outline a practical path to centralized builder data and working reporting."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=services_cta",
         }}
       />
     </>

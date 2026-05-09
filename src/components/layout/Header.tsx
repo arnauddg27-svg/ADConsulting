@@ -84,7 +84,7 @@ export default function Header() {
                 );
               })}
             </nav>
-            <Button href="/contact/" size="sm">
+            <Button href="/book/?source=header_cta" size="sm">
               Book a Discovery Call
             </Button>
           </div>
@@ -124,7 +124,7 @@ export default function Header() {
                   );
                 })}
               </nav>
-              <Button href="/contact/" className="mt-6 w-full justify-center">
+              <Button href="/book/?source=mobile_menu_cta" className="mt-6 w-full justify-center">
                 Book a Discovery Call
               </Button>
             </div>

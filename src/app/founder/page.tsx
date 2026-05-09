@@ -102,7 +102,7 @@ export default function FounderPage() {
                 </p>
                 <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
                   <Link
-                    href="/contact/"
+                    href="/book/?source=founder_hero"
                     className="btn-primary inline-flex items-center justify-center gap-2"
                   >
                     Book a Discovery Call <ArrowRight size={16} />
@@ -279,7 +279,7 @@ export default function FounderPage() {
         description="The first call is a practical review of your systems, current reporting gaps, and whether a custom builder data platform is the right fit."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/contact/",
+          href: "/book/?source=founder_cta",
         }}
       />
     </>
