@@ -98,7 +98,7 @@ function PipelineDiagram() {
           </radialGradient>
 
           {/* Path gradient */}
-          <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="pathGrad" gradientUnits="userSpaceOnUse" x1="80" y1="130" x2="520" y2="130">
             <stop offset="0%" stopColor="#34d399" stopOpacity="0.1" />
             <stop offset="50%" stopColor="#34d399" stopOpacity="0.6" />
             <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.4" />
