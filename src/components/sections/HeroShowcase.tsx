@@ -29,9 +29,9 @@ function usePrefersReducedMotion() {
 const showcasePanel =
   "relative h-full min-h-[440px] overflow-hidden rounded-[2rem] border border-white/[0.1] bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(7,11,19,0.95))] shadow-[0_36px_110px_-46px_rgba(0,0,0,0.82),inset_0_1px_0_rgba(255,255,255,0.06)] md:min-h-[500px]";
 
-export default function HeroShowcase() {
+export default function HeroShowcase({ className = "mt-7" }: { className?: string } = {}) {
   return (
-    <div className="reveal mt-7 grid items-stretch gap-5 lg:grid-cols-2">
+    <div className={["reveal grid items-stretch gap-5 lg:grid-cols-2", className].filter(Boolean).join(" ")}>
       <TiltCard
         className={`${showcasePanel} bg-[linear-gradient(135deg,rgba(21,80,67,0.34),rgba(15,23,42,0.72)_42%,rgba(7,11,19,0.96))] p-5 md:p-6`}
         tiltLimit={3}
