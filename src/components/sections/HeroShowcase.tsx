@@ -79,14 +79,14 @@ function PipelineDiagram() {
   // warehouse centered at x=300, apps at x=530 right. The viewBox
   // is intentionally not padded; chip + label both render inside.
   const sourcePositions = [
-    { x: 70, y: 70 },
-    { x: 70, y: 160 },
-    { x: 70, y: 250 },
+    { x: 70, y: 70, labelDy: -24 },
+    { x: 70, y: 160, labelDy: -24 },
+    { x: 70, y: 250, labelDy: 34 },
   ];
   const appPositions = [
-    { x: 530, y: 70 },
-    { x: 530, y: 160 },
-    { x: 530, y: 250 },
+    { x: 530, y: 70, labelDy: -24 },
+    { x: 530, y: 160, labelDy: -24 },
+    { x: 530, y: 250, labelDy: 34 },
   ];
   const wh = { x: 300, y: 160 };
   const sourceNodes = sources.map((s, i) => ({ ...s, ...sourcePositions[i] }));
@@ -187,7 +187,15 @@ function PipelineDiagram() {
 
           {/* Source nodes (left) — labels render to the RIGHT, inward */}
           {sourceNodes.map((s) => (
-            <NodeChip key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} Icon={s.icon} align="right" />
+            <NodeChip
+              key={`src-${s.label}`}
+              x={s.x}
+              y={s.y}
+              label={s.label}
+              labelDy={s.labelDy}
+              Icon={s.icon}
+              align="right"
+            />
           ))}
 
           {/* Warehouse — central, larger, with pulsing ring */}
@@ -239,7 +247,15 @@ function PipelineDiagram() {
 
           {/* App nodes (right) — labels render to the LEFT, inward */}
           {appNodes.map((a) => (
-            <NodeChip key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} Icon={a.icon} align="left" />
+            <NodeChip
+              key={`app-${a.label}`}
+              x={a.x}
+              y={a.y}
+              label={a.label}
+              labelDy={a.labelDy}
+              Icon={a.icon}
+              align="left"
+            />
           ))}
         </svg>
       </div>
@@ -262,12 +278,14 @@ function NodeChip({
   x,
   y,
   label,
+  labelDy,
   Icon,
   align,
 }: {
   x: number;
   y: number;
   label: string;
+  labelDy: number;
   Icon: ComponentType<{ size?: number; className?: string }>;
   align: "left" | "right";
 }) {
@@ -291,7 +309,7 @@ function NodeChip({
       </g>
       <text
         x={labelX}
-        y={y + 5}
+        y={y + labelDy}
         textAnchor={anchor}
         fill="#cbd5e1"
         fontSize="13"
