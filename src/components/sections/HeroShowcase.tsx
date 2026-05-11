@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Database, FileSpreadsheet, Cloud, BarChart3, Bell, LayoutGrid, Activity, TrendingUp } from "lucide-react";
-import { NumberTicker } from "@/components/magicui/number-ticker";
+import { ArrowDown, Database, FileSpreadsheet, Cloud, BarChart3, Bell, LayoutGrid, Activity, TrendingUp } from "lucide-react";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import TiltCard from "@/components/ui/TiltCard";
 
@@ -25,18 +24,18 @@ function usePrefersReducedMotion() {
  *  right column — live-looking dashboard mock (tickers, bars, sparkline)
  * Both tilt slightly toward cursor.
  */
-export default function HeroShowcase() {
+export default function HeroShowcase({ className = "mt-16" }: { className?: string }) {
   return (
-    <div className="reveal mt-16 grid gap-6 lg:grid-cols-[0.58fr_0.42fr]">
-      {/* ── Pipeline diagram ── */}
-      <TiltCard className="premium-panel relative overflow-hidden p-6 md:p-8" maxTilt={3}>
-        <PipelineDiagram />
-      </TiltCard>
-
+    <div className={["reveal grid gap-5 md:gap-6 lg:grid-cols-[0.58fr_0.42fr]", className].filter(Boolean).join(" ")}>
       {/* ── Live dashboard panel ── */}
-      <TiltCard className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-[linear-gradient(180deg,rgba(11,17,32,0.9),rgba(7,11,19,0.95))] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)]" maxTilt={4}>
+      <TiltCard className="relative order-1 overflow-hidden rounded-3xl border border-white/[0.1] bg-[linear-gradient(180deg,rgba(11,17,32,0.9),rgba(7,11,19,0.95))] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)] lg:order-2" maxTilt={4}>
         <BorderBeam size={140} duration={10} colorFrom="#34d399" colorTo="#22d3ee" />
         <LiveDashboardMock />
+      </TiltCard>
+
+      {/* ── Pipeline diagram ── */}
+      <TiltCard className="premium-panel relative order-2 overflow-hidden p-5 md:p-8 lg:order-1" maxTilt={3}>
+        <PipelineDiagram />
       </TiltCard>
     </div>
   );
@@ -44,36 +43,36 @@ export default function HeroShowcase() {
 
 /* ════════════════════════════════════════════════════════════
    PIPELINE DIAGRAM
-   Sources → Warehouse → Dashboard with traveling dots
+   Sources → Warehouse → Apps with traveling dots
    ════════════════════════════════════════════════════════════ */
 
 function PipelineDiagram() {
   const reduceMotion = usePrefersReducedMotion();
   // Node positions (viewBox 600 x 280)
   const sources = [
-    { x: 40, y: 50, label: "ERP", icon: Database },
-    { x: 40, y: 130, label: "Sheets", icon: FileSpreadsheet },
-    { x: 40, y: 210, label: "APIs", icon: Cloud },
+    { x: 40, y: 50, label: "ERP", icon: Database, labelDy: -18 },
+    { x: 40, y: 130, label: "Sheets", icon: FileSpreadsheet, labelDy: -16 },
+    { x: 40, y: 210, label: "APIs", icon: Cloud, labelDy: 24 },
   ];
   const warehouse = { x: 280, y: 130 };
   const apps = [
-    { x: 520, y: 50, label: "Dashboards", icon: LayoutGrid },
-    { x: 520, y: 130, label: "Reports", icon: BarChart3 },
-    { x: 520, y: 210, label: "Alerts", icon: Bell },
+    { x: 520, y: 50, label: "Dashboards", icon: LayoutGrid, labelDy: -18 },
+    { x: 520, y: 130, label: "Reports", icon: BarChart3, labelDy: -16 },
+    { x: 520, y: 210, label: "Alerts", icon: Bell, labelDy: 24 },
   ];
 
   return (
     <div className="relative">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <div className="text-[0.62rem] uppercase tracking-[0.24em] text-accent-300/80">
             Data Pipeline
           </div>
-          <div className="mt-1 font-heading text-lg tracking-[-0.01em] text-slate-100">
-            Sources → Warehouse → Dashboard
+          <div className="mt-1 whitespace-nowrap font-heading text-[0.95rem] tracking-[-0.01em] text-slate-100 sm:text-lg">
+            Sources → Warehouse → Apps
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-accent-200">
+        <div className="hidden items-center gap-2 rounded-full border border-accent-400/25 bg-accent-500/10 px-3 py-1 text-[0.62rem] uppercase tracking-[0.18em] text-accent-200 sm:flex">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-400" />
@@ -82,9 +81,13 @@ function PipelineDiagram() {
         </div>
       </div>
 
+      <div className="sm:hidden">
+        <MobilePipelineFlow />
+      </div>
+
       <svg
         viewBox="0 0 600 280"
-        className="h-auto w-full"
+        className="hidden h-auto w-full sm:block"
         style={{ maxHeight: 340 }}
       >
         <defs>
@@ -149,7 +152,7 @@ function PipelineDiagram() {
 
         {/* Source nodes */}
         {sources.map((s) => (
-          <Node key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} Icon={s.icon} align="left" />
+          <Node key={`src-${s.label}`} x={s.x} y={s.y} label={s.label} labelDy={s.labelDy} Icon={s.icon} align="left" />
         ))}
 
         {/* Warehouse node (bigger) */}
@@ -203,21 +206,67 @@ function PipelineDiagram() {
             fontSize="8"
             letterSpacing="0.16em"
           >
-            BIGQUERY · SNOWFLAKE
+            STRUCTURED
           </text>
         </g>
 
         {/* App nodes */}
         {apps.map((a) => (
-          <Node key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} Icon={a.icon} align="right" />
+          <Node key={`app-${a.label}`} x={a.x} y={a.y} label={a.label} labelDy={a.labelDy} Icon={a.icon} align="right" />
         ))}
       </svg>
 
       {/* bottom micro info */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.66rem] uppercase tracking-[0.2em] text-slate-500">
-        <span>Daily sync · 5:47 AM</span>
-        <span>KPI logic · once</span>
-        <span>All datasets · controlled in your accounts</span>
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.66rem] uppercase tracking-[0.16em] text-slate-500 sm:tracking-[0.2em]">
+        <span>Daily sync</span>
+        <span>KPI logic</span>
+        <span>Reporting apps</span>
+      </div>
+    </div>
+  );
+}
+
+function MobilePipelineFlow() {
+  const groups = [
+    { title: "Sources", items: ["ERP", "Sheets", "APIs"], Icon: Database },
+    { title: "Warehouse", items: ["Structured", "KPI logic"], Icon: Database },
+    { title: "Apps", items: ["Dashboards", "Reports", "Alerts"], Icon: LayoutGrid },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-white/[0.08] bg-[#080d17]/75 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="grid gap-2.5">
+        {groups.map(({ title, items, Icon }, index) => (
+          <div key={title} className="grid gap-2.5">
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-accent-400/25 bg-accent-500/15 text-accent-200">
+                  <Icon size={19} />
+                </div>
+                <div>
+                  <div className="text-[0.64rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
+                    {title}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {items.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[0.64rem] font-semibold text-slate-200"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {index < groups.length - 1 && (
+              <div className="flex justify-center text-accent-300/80">
+                <ArrowDown size={18} />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -232,17 +281,19 @@ function Node({
   x,
   y,
   label,
+  labelDy = 4,
   Icon,
   align,
 }: {
   x: number;
   y: number;
   label: string;
+  labelDy?: number;
   Icon: React.ComponentType<{ size?: number; className?: string }>;
   align: "left" | "right";
 }) {
-  const labelX = align === "left" ? x - 42 : x + 42;
-  const anchor = align === "left" ? "end" : "start";
+  const labelX = align === "left" ? x + 42 : x - 42;
+  const anchor = align === "left" ? "start" : "end";
 
   return (
     <g>
@@ -264,7 +315,7 @@ function Node({
       </g>
       <text
         x={labelX}
-        y={y + 4}
+        y={y + labelDy}
         textAnchor={anchor}
         fill="#cbd5e1"
         fontSize="11"
@@ -292,7 +343,7 @@ function LiveDashboardMock() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
         </div>
-        <div className="font-space-grotesk text-[0.6rem] uppercase tracking-[0.2em] text-slate-500">
+        <div className="hidden font-space-grotesk text-[0.6rem] uppercase tracking-[0.2em] text-slate-500 sm:block">
           builder.ops · dashboard
         </div>
         <div className="flex h-4 w-4 items-center justify-center">
@@ -319,10 +370,10 @@ function LiveDashboardMock() {
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-2.5">
         {[
-          { label: "Active Jobs", value: 142, prefix: "", suffix: "", tone: "text-slate-50" },
-          { label: "On-Time", value: 87, prefix: "", suffix: "%", tone: "text-accent-300" },
-          { label: "Avg Completion", value: 57, prefix: "", suffix: "%", tone: "text-cyan-400" },
-          { label: "WIP", value: 39.6, prefix: "$", suffix: "M", tone: "text-slate-50", decimals: 1 },
+          { label: "Active Jobs", value: "142", tone: "text-slate-50" },
+          { label: "On-Time", value: "87%", tone: "text-accent-300" },
+          { label: "Avg Completion", value: "57%", tone: "text-cyan-400" },
+          { label: "WIP", value: "$39.6M", tone: "text-slate-50" },
         ].map((kpi) => (
           <div
             key={kpi.label}
@@ -332,14 +383,7 @@ function LiveDashboardMock() {
               {kpi.label}
             </div>
             <div className={`mt-1.5 font-heading text-xl tabular-nums ${kpi.tone}`}>
-              {kpi.prefix}
-              <NumberTicker
-                value={kpi.value}
-                decimalPlaces={kpi.decimals ?? 0}
-                delay={0.2}
-                className="inline-block"
-              />
-              {kpi.suffix}
+              {kpi.value}
             </div>
           </div>
         ))}

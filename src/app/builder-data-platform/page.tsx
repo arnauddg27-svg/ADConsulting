@@ -5,45 +5,38 @@ import {
   BarChart3,
   CheckCircle2,
   Database,
-  Layers3,
   ShieldCheck,
+  Sparkles,
   Wrench,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
+import MouseSpotlight from "@/components/ui/MouseSpotlight";
+import HeroShowcase from "@/components/sections/HeroShowcase";
 
 export const metadata: Metadata = {
   title: "Homebuilder Dashboards & ERP Reporting | AD ERP SYSTEMS",
   description:
-    "Custom data platforms for residential builders and developers. Centralize ERP, spreadsheet, finance, API, and export data into homebuilder dashboards, job cost reporting, WIP views, KPI logic, and internal tools.",
+    "Dashboards built on your builder data, not a template. Centralize ERP data, spreadsheets, finance systems, APIs, and exports in a structured warehouse. Turn that data into dashboards your team can use.",
 };
-
-const sourceSystems = [
-  "ERP systems",
-  "Spreadsheets",
-  "Finance data",
-  "APIs",
-  "CSV and Excel exports",
-  "Operating systems",
-];
 
 const offerBuckets = [
   {
     icon: Database,
-    title: "Data Infrastructure",
-    body: "Extraction, ingestion, transformation, warehouse design, KPI logic, and centralized builder data.",
+    title: "Centralize the data",
+    body: "Bring ERP data, spreadsheets, finance-system exports, APIs, and operating files into a structured reporting warehouse.",
   },
   {
     icon: BarChart3,
-    title: "Operational Reporting",
-    body: "Dashboards across land, development, permitting, lending, construction, sales, backlog, and portfolio oversight.",
+    title: "Apply builder KPI logic",
+    body: "Define the calculations, statuses, date rules, and workflow logic that match how residential builders and developers actually operate.",
   },
   {
     icon: Wrench,
-    title: "Builder Decision Tools",
-    body: "Pro formas, budget-vs-actual analysis, cost-to-complete, variance tracking, exception monitoring, and internal apps.",
+    title: "Deliver usable reporting",
+    body: "Turn the warehouse into dashboards, recurring reports, alerts, drilldowns, and internal tools your team can use.",
   },
 ];
 
@@ -54,98 +47,94 @@ const searchIntentUseCases = [
   "Residential developer and land pipeline reporting",
 ];
 
-const proofPoints = [
-  "Deployed to your accounts with clear handoff documentation.",
-  "Built around residential builder and developer workflows, not generic BI templates.",
-  "Designed for practical reporting releases instead of long discovery cycles.",
-];
+const primaryCtaClass =
+  "group inline-flex min-w-0 max-w-full items-center justify-center gap-2 rounded-full border text-center font-semibold uppercase tracking-[0.08em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 cursor-pointer border-accent-500 bg-accent-500 text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 hover:bg-accent-400 hover:shadow-[0_24px_50px_-16px_rgba(16,185,129,0.6)] px-5 py-4 text-[0.66rem] sm:px-6 sm:text-[0.78rem] sm:tracking-[0.18em]";
 
 export default function BuilderDataPlatformLandingPage() {
   return (
     <>
-      <section className="page-hero pb-12 md:pb-16">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div>
-              <h1 className="max-w-5xl font-heading text-[3rem] leading-[0.92] tracking-[-0.02em] text-slate-50 sm:text-6xl md:text-7xl">
-                Custom data platforms for residential builders and developers.
+      <section className="relative overflow-hidden pb-8 pt-24 md:pb-16 md:pt-32">
+        <MouseSpotlight color="rgba(52, 211, 153, 0.14)" size={620} />
+
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="aurora-blob left-[-10%] top-[2%] h-[620px] w-[760px] bg-accent-500/[0.14]"
+            style={{ animation: "var(--animate-aurora)" }}
+          />
+          <div
+            className="aurora-blob right-[-12%] top-[12%] h-[520px] w-[620px] bg-indigo-500/[0.08]"
+            style={{ animation: "var(--animate-gradient-shift)", animationDelay: "-8s" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 82% 38% at 50% 0%, rgba(16,185,129,0.08), transparent 72%)",
+            }}
+          />
+        </div>
+
+        <Container className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-10 top-4 h-44 w-44 rounded-full bg-accent-400/20 blur-3xl md:-left-16 md:top-8 md:h-56 md:w-56"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-12 top-[24rem] h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl md:right-0 md:top-[16rem] md:h-64 md:w-64"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[18rem] h-56 w-56 -translate-x-1/2 rounded-full bg-accent-500/10 blur-[80px] md:top-[22rem] md:h-80 md:w-80"
+          />
+
+          <div className="relative z-10">
+            <div className="mx-auto max-w-6xl text-center">
+              <div className="mb-6 text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-accent-300">
+                Builder Data Platform
+              </div>
+              <h1 className="mx-auto max-w-6xl text-balance font-heading text-[2.65rem] leading-[0.96] tracking-[-0.025em] text-slate-50 sm:text-5xl lg:text-[5rem] lg:tracking-[-0.04em]">
+                Dashboards built on your data, not a template.
               </h1>
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
-                Centralize ERP, spreadsheet, finance, API, and export data into
-                one structured warehouse, then use it for dashboards,
-                reporting systems, and internal tools your team can use.
+              <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
+                Centralize your systems into a warehouse, apply
+                builder-specific KPI logic, and deliver reporting your team can
+                use.
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <TrackedCalendlyLink
-                  source="ad_landing_hero"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
-                >
-                  Book a Discovery Call
-                  <ArrowRight size={16} />
-                </TrackedCalendlyLink>
-                <Button href="/demo/" variant="secondary" size="lg">
-                  See Sample Dashboard
-                </Button>
-              </div>
-              <div className="mt-8 flex flex-wrap gap-3">
-                {proofPoints.map((point) => (
-                  <span key={point} className="badge-dash normal-case tracking-normal">
-                    <CheckCircle2 size={14} className="text-accent-300" />
-                    {point}
-                  </span>
-                ))}
-              </div>
             </div>
 
-            <div className="premium-panel p-5 md:p-7">
-              <div className="relative z-10 rounded-[1.5rem] border border-white/[0.08] bg-[#07111d]/80 p-5">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-                  <div>
-                    <div className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-accent-300">
-                      Builder Data Flow
-                    </div>
-                    <div className="mt-1 font-heading text-2xl text-slate-50">
-                      From scattered systems to working reporting
-                    </div>
-                  </div>
-                  <Layers3 className="text-accent-300" size={28} />
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {sourceSystems.map((system) => (
-                    <div key={system} className="rounded-2xl border border-white/[0.07] bg-white/[0.035] px-4 py-3 text-sm font-semibold text-slate-200">
-                      {system}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="my-6 h-px bg-gradient-to-r from-transparent via-accent-400/50 to-transparent" />
-
-                <div className="rounded-2xl border border-accent-400/20 bg-accent-500/[0.08] p-5">
-                  <div className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-300">
-                    Output
-                  </div>
-                  <div className="mt-3 grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
-                    <span>Dashboards</span>
-                    <span>KPI reporting</span>
-                    <span>Internal tools</span>
-                  </div>
-                </div>
-              </div>
+            <div className="mx-auto mt-7 flex min-w-0 max-w-3xl flex-col justify-center gap-3 sm:flex-row">
+              <TrackedCalendlyLink
+                source="ad_landing_hero"
+                className={`${primaryCtaClass} w-full sm:w-auto`}
+              >
+                Book a Discovery Call
+                <ArrowRight size={16} className="hidden sm:block" />
+              </TrackedCalendlyLink>
+              <Button href="/demo/" variant="secondary" size="lg" className="w-full sm:w-auto">
+                <Sparkles size={16} className="hidden text-accent-300 sm:block" />
+                Explore the Example
+                <ArrowRight size={16} className="hidden sm:block" />
+              </Button>
             </div>
+
+            <HeroShowcase className="mt-6 md:mt-8" />
           </div>
         </Container>
       </section>
 
-      <section className="section-space pt-8">
+      <section className="section-space pt-0 md:pt-12">
         <Container>
-          <div className="mb-8 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-5 md:p-6">
-            <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <div className="mb-8 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-5 md:p-7">
+            <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
               <div>
-                <span className="eyebrow">Common Search Needs</span>
-                <h2 className="mt-3 font-heading text-3xl leading-none tracking-[0.02em] text-slate-50 md:text-4xl">
-                  Built for the reporting searches that usually start with ERP exports, job cost data, and disconnected dashboards.
+                <h2 className="font-heading text-2xl leading-[1.05] tracking-[-0.01em] text-slate-50 sm:text-3xl md:text-4xl">
+                  Built for ERP exports, job cost data, and disconnected spreadsheets.
                 </h2>
+                <p className="mt-4 text-sm leading-7 text-slate-400 md:text-base">
+                  The work starts with the systems already in use, then maps the reporting
+                  layer around the decisions your team needs to make.
+                </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {searchIntentUseCases.map((useCase) => (
@@ -165,7 +154,7 @@ export default function BuilderDataPlatformLandingPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-400/25 bg-accent-500/15 text-accent-200">
                   <Icon size={22} />
                 </div>
-                <h2 className="mt-6 font-heading text-3xl leading-none tracking-[0.03em] text-slate-50">
+                <h2 className="mt-6 font-heading text-2xl leading-none tracking-[0.02em] text-slate-50 md:text-3xl">
                   {title}
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
@@ -184,14 +173,14 @@ export default function BuilderDataPlatformLandingPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-400/25 bg-accent-500/15 text-accent-200">
                 <ShieldCheck size={22} />
               </div>
-              <h2 className="mt-6 font-heading text-4xl leading-none tracking-[0.02em] text-slate-50">
-                Built for builders and developers who need cleaner operational visibility.
+              <h2 className="mt-6 font-heading text-3xl leading-[1.05] tracking-[0.01em] text-slate-50 md:text-4xl">
+                Best fit: builders and developers with real reporting friction.
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-300">
                 The strongest fit is a residential builder, residential
-                developer, or builder-developer operator managing enough volume
-                that manual reporting, spreadsheet reconciliation, and
-                inconsistent KPI logic are slowing down decisions.
+                developer, or builder-developer managing enough volume that
+                manual reporting, spreadsheet reconciliation, and inconsistent
+                KPI logic are slowing down decisions.
               </p>
             </Card>
 
@@ -219,22 +208,22 @@ export default function BuilderDataPlatformLandingPage() {
           <div className="premium-panel overflow-hidden p-7 md:p-10">
             <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <h2 className="max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
+                <h2 className="max-w-3xl font-heading text-3xl leading-[1.02] tracking-[-0.015em] text-slate-50 md:text-[3.4rem] md:leading-[0.98]">
                   See whether your current data can support better reporting.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 md:text-lg md:leading-8">
                   Book a 30-minute call to review your current systems, where
-                  reporting breaks down, and what a practical first build phase
-                  could include.
+                  reporting breaks down, and what a practical first reporting
+                  phase could include.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <TrackedCalendlyLink
                   source="ad_landing_bottom"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
+                  className={primaryCtaClass}
                 >
                   Book a Discovery Call
-                  <ArrowRight size={16} />
+                  <ArrowRight size={16} className="hidden sm:block" />
                 </TrackedCalendlyLink>
                 <Link
                   href="/contact/"
