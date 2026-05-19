@@ -3,7 +3,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   BarChart3,
-  CheckCircle2,
   CircleDollarSign,
   Clock3,
   ClipboardList,
@@ -199,7 +198,7 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-6"
+      className="relative mt-8 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -237,7 +236,7 @@ function KpiTile({
 
 function DashboardOnTablet() {
   return (
-    <div className="relative min-h-[34rem] overflow-hidden bg-black text-white md:min-h-[40rem]">
+    <div className="relative h-full overflow-hidden bg-black text-white">
       <div
         aria-hidden
         className="absolute inset-0 opacity-[0.14]"
@@ -256,71 +255,57 @@ function DashboardOnTablet() {
         className="absolute -right-24 bottom-8 h-80 w-80 rounded-full bg-[#62d7ff]/[0.12] blur-3xl"
       />
 
-      <div className="relative z-10 flex min-h-[34rem] flex-col md:min-h-[40rem]">
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 md:px-8">
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 md:px-6 md:py-4">
           <div>
-            <div className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#8bd7ff]/70">
+            <div className="text-[0.58rem] font-bold uppercase tracking-[0.22em] text-[#8bd7ff]/70">
               Builder operations dashboard
             </div>
-            <h3 className="mt-1 text-xl font-bold tracking-[-0.02em] md:text-2xl">
+            <h3 className="mt-0.5 text-lg font-bold tracking-[-0.02em] md:text-xl">
               Daily operating dashboard
             </h3>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[#24c18d]/35 bg-[#24c18d]/10 px-3 py-1.5 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+          <div className="flex items-center gap-2 rounded-full border border-[#24c18d]/35 bg-[#24c18d]/10 px-3 py-1.5 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
             <span className="h-2 w-2 rounded-full bg-[#24c18d]" />
             Sample data
           </div>
         </div>
 
-        <div className="grid flex-1 gap-4 p-4 md:grid-cols-[0.74fr_1.26fr] md:p-6">
-          <div className="flex flex-col gap-4">
-            <div className="rounded-3xl border border-[#24c18d]/22 bg-[#0d1824]/92 p-5">
-              <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
-                Today&apos;s focus
-              </p>
-              <h4 className="mt-2 text-2xl font-bold leading-tight md:text-3xl">
-                Jobs, costs, owners, and next actions.
-              </h4>
-              <p className="mt-3 text-sm leading-6 text-white/[0.52]">
-                Centralized data becomes clear KPIs, organized pipelines, and
-                owner follow-ups each department can use during the day.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {tabletKpis.map((kpi) => (
-                <KpiTile key={kpi.label} {...kpi} />
-              ))}
-            </div>
+        <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-5">
+          <div className="grid grid-cols-2 gap-2.5 md:gap-3">
+            {tabletKpis.slice(0, 4).map((kpi) => (
+              <KpiTile key={kpi.label} {...kpi} />
+            ))}
           </div>
 
-          <div className="grid gap-4">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.05] p-5">
+          <div className="flex flex-col gap-3 md:gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 md:p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
                     Organized pipelines
                   </p>
-                  <h4 className="mt-1 text-xl font-bold">Pipeline views</h4>
-                  <p className="mt-1 text-sm text-white/[0.42]">
-                    Daily dashboards by department
-                  </p>
+                  <h4 className="mt-1 text-base font-bold md:text-lg">
+                    Pipeline views by department
+                  </h4>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
+                <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
                   Sample
                 </span>
               </div>
 
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-x-5 gap-y-3 md:grid-cols-2">
                 {tabletPipelines.map((pipeline) => (
                   <div key={pipeline.label}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-bold text-white/[0.78]">{pipeline.label}</span>
+                    <div className="flex items-center justify-between text-xs md:text-sm">
+                      <span className="font-bold text-white/[0.78]">
+                        {pipeline.label}
+                      </span>
                       <span className="text-white/[0.42]">{pipeline.value}%</span>
                     </div>
-                    <div className="mt-2 h-2.5 rounded-full bg-white/[0.08]">
+                    <div className="mt-1.5 h-2 rounded-full bg-white/[0.08]">
                       <div
-                        className="h-2.5 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
+                        className="h-2 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
                         style={{ width: `${pipeline.value}%` }}
                       />
                     </div>
@@ -329,34 +314,33 @@ function DashboardOnTablet() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.05]">
-              <div className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] border-b border-white/10 px-5 py-3 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.35]">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
+              <div className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] border-b border-white/10 px-4 py-2.5 text-[0.52rem] font-bold uppercase tracking-[0.16em] text-white/[0.35]">
                 <span>Job</span>
                 <span>Signal</span>
                 <span>Owner</span>
                 <span>Status</span>
               </div>
               <div className="divide-y divide-white/10">
-                {tabletRows.map((row) => (
+                {tabletRows.slice(0, 2).map((row) => (
                   <div
                     key={row.job}
-                    className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] gap-3 px-5 py-4 text-sm"
+                    className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] items-center gap-3 px-4 py-3 text-xs md:text-sm"
                   >
                     <div>
                       <div className="font-bold">{row.job}</div>
-                      <div className="mt-0.5 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+                      <div className="mt-0.5 text-[0.5rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
                         {row.department}
                       </div>
                     </div>
-                    <div>
-                      <div className="font-bold text-white/[0.84]">{row.signal}</div>
-                      <div className="mt-1 text-xs text-white/[0.42]">{row.action}</div>
+                    <div className="font-bold text-white/[0.84]">{row.signal}</div>
+                    <div className="font-semibold text-white/[0.62]">
+                      {row.owner}
                     </div>
-                    <div className="font-semibold text-white/[0.62]">{row.owner}</div>
                     <div>
                       <span
                         className={cn(
-                          "inline-flex rounded-full border px-2.5 py-1 text-[0.55rem] font-bold uppercase tracking-[0.12em]",
+                          "inline-flex rounded-full border px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em]",
                           row.status === "Behind plan"
                             ? "border-[#f2c66d]/35 bg-[#f2c66d]/10 text-[#f2c66d]"
                             : row.status === "At risk"
@@ -370,20 +354,6 @@ function DashboardOnTablet() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {["Clear KPIs", "Detailed pipelines", "Daily decisions"].map(
-                (item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-bold text-white/[0.72]"
-                  >
-                    <CheckCircle2 size={15} className="text-[#8df2c8]" />
-                    {item}
-                  </div>
-                ),
-              )}
             </div>
           </div>
         </div>

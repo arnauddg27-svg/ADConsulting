@@ -142,7 +142,7 @@ interface ClientImprovementCardProps {
   metricLabel: string;
   proof: string;
   Icon: ComponentType<{ animate: boolean }>;
-  bars: number[];
+  chart: ChartKind;
   focus: string[];
   className?: string;
 }
@@ -156,7 +156,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metricLabel: "Cycle gain",
     proof: "Top-200 builder environment",
     Icon: ClockIcon,
-    bars: [42, 55, 48, 63, 70, 78, 88],
+    chart: "line",
     focus: ["Stage visibility", "Owner follow-up"],
   },
   {
@@ -167,7 +167,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metricLabel: "Over budget",
     proof: "ERP + spreadsheet workflows",
     Icon: CoinsIcon,
-    bars: [60, 58, 62, 59, 61, 60, 60],
+    chart: "gauge",
     focus: ["Cost movement", "Variance flags"],
   },
   {
@@ -178,25 +178,95 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metricLabel: "Fewer days on market",
     Icon: HouseIcon,
     proof: "Builder operations context",
-    bars: [80, 72, 66, 58, 50, 44, 38],
+    chart: "bars",
     focus: ["Inventory status", "Pricing follow-up"],
   },
 ];
 
-function MiniBars({ bars }: { bars: number[] }) {
-  const max = Math.max(...bars, 1);
+const viewport = { once: true, amount: 0.6 } as const;
+
+/* Chart 1: upward area + line that draws in (cut cycle time) */
+function LineChart({ animate }: { animate: boolean }) {
+  const line = "M2 42 L20 36 L38 38 L56 27 L74 20 L92 13 L116 5";
+  const area = `${line} L116 46 L2 46 Z`;
+  return (
+    <svg viewBox="0 0 118 48" className="h-12 w-full" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="ci-line-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5bbf98" stopOpacity="0.32" />
+          <stop offset="100%" stopColor="#5bbf98" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <motion.path
+        d={area}
+        fill="url(#ci-line-fill)"
+        initial={animate ? { opacity: 0 } : false}
+        whileInView={animate ? { opacity: 1 } : undefined}
+        viewport={viewport}
+        transition={{ duration: 0.6, delay: 0.5 }}
+      />
+      <motion.path
+        d={line}
+        stroke="#2f9e6f"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={animate ? { pathLength: 0 } : false}
+        whileInView={animate ? { pathLength: 1 } : undefined}
+        viewport={viewport}
+        transition={{ duration: 1.1, ease: "easeInOut" }}
+      />
+    </svg>
+  );
+}
+
+/* Chart 2: semicircle gauge sweeping to near-full (hold the budget) */
+function GaugeChart({ animate }: { animate: boolean }) {
+  const arc = "M8 44 A38 38 0 0 1 110 44";
+  return (
+    <svg viewBox="0 0 118 50" className="h-12 w-full" fill="none" aria-hidden>
+      <path d={arc} stroke="#dbe6ea" strokeWidth="7" strokeLinecap="round" />
+      <motion.path
+        d={arc}
+        stroke="#2f9e6f"
+        strokeWidth="7"
+        strokeLinecap="round"
+        initial={animate ? { pathLength: 0 } : { pathLength: 0.94 }}
+        whileInView={animate ? { pathLength: 0.94 } : undefined}
+        viewport={viewport}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+      />
+    </svg>
+  );
+}
+
+/* Chart 3: descending bars that grow in with a stagger (move inventory faster) */
+function DescendingBars({ animate }: { animate: boolean }) {
+  const bars = [86, 76, 66, 55, 46, 38];
   return (
     <div className="flex h-12 items-end gap-1.5" aria-hidden>
       {bars.map((value, i) => (
-        <div
+        <motion.div
           key={i}
-          className="flex-1 rounded-t-sm bg-gradient-to-t from-[#7fb8d3]/45 to-[#5bbf98]"
-          style={{ height: `${(value / max) * 100}%` }}
+          className="flex-1 origin-bottom rounded-t-sm bg-gradient-to-t from-[#7fb8d3]/45 to-[#5bbf98]"
+          style={{ height: `${value}%` }}
+          initial={animate ? { scaleY: 0 } : false}
+          whileInView={animate ? { scaleY: 1 } : undefined}
+          viewport={viewport}
+          transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
         />
       ))}
     </div>
   );
 }
+
+const CHARTS = {
+  line: LineChart,
+  gauge: GaugeChart,
+  bars: DescendingBars,
+} as const;
+
+type ChartKind = keyof typeof CHARTS;
 
 function ClientImprovementCard({
   title,
@@ -205,12 +275,13 @@ function ClientImprovementCard({
   metricLabel,
   proof,
   Icon,
-  bars,
+  chart,
   focus,
   className,
 }: ClientImprovementCardProps) {
   const reduceMotion = useReducedMotion();
   const animate = !reduceMotion;
+  const Chart = CHARTS[chart];
 
   return (
     <article className={cn("h-full", className)}>
@@ -247,7 +318,7 @@ function ClientImprovementCard({
             </div>
           </div>
           <div className="w-28 shrink-0">
-            <MiniBars bars={bars} />
+            <Chart animate={animate} />
           </div>
         </div>
 
