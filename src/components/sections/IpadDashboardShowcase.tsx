@@ -146,7 +146,7 @@ function ContainerScroll({
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-[54rem] items-center justify-center px-2 py-8 md:min-h-[68rem] md:px-8 md:py-16"
+      className="relative flex min-h-[42rem] items-center justify-center px-2 py-8 md:min-h-[56rem] md:px-8 md:py-16"
     >
       <div
         className="relative w-full"
@@ -185,7 +185,7 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative -mt-8 mx-auto h-[42rem] md:h-[52rem] w-full max-w-[28rem] md:max-w-[32rem] rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-4"
+      className="relative -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-6"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -258,7 +258,7 @@ function DashboardOnTablet() {
           </div>
         </div>
 
-        <div className="grid flex-1 gap-4 overflow-y-auto p-4 md:p-5">
+        <div className="grid flex-1 gap-4 p-4 md:grid-cols-[0.74fr_1.26fr] md:p-6">
           <div className="flex flex-col gap-4">
             <div className="rounded-3xl border border-[#24c18d]/22 bg-[#0d1824]/92 p-5">
               <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
