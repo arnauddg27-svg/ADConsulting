@@ -133,7 +133,7 @@ export default function GlassOperationsCards() {
   return (
     <section className="defer-section relative overflow-hidden border-b border-[#d9e1e6]/75 bg-transparent py-16 md:py-24">
       <Container className="relative z-10">
-        <div className="mb-9 max-w-3xl">
+        <div className="mx-auto mb-9 max-w-3xl text-center">
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[#2f5368]">
             Used across departments
           </p>

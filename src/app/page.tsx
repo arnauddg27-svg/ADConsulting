@@ -41,21 +41,21 @@ export const metadata: Metadata = {
 const workflowSteps = [
   {
     icon: Database,
-    title: "Centralize builder data so dashboards start from one source",
-    body: "ERP exports, spreadsheets, finance data, field updates, and operating files are brought together so each dashboard starts from one reliable source.",
-    output: "Source data ready",
+    title: "Centralize data from different systems",
+    body: "ERP exports, spreadsheets, finance data, and field updates land in one place so every report works off the same source.",
+    output: "Unified source",
   },
   {
     icon: BarChart3,
-    title: "Deliver dashboard KPIs and detailed pipelines by department",
-    body: "Builder-specific logic turns that data into scorecards, exception lists, and organized pipeline views for construction, finance, sales, permitting, and leadership.",
-    output: "KPIs and pipelines",
+    title: "Organize relevant data into KPI dashboards",
+    body: "Builder-specific logic turns the source data into KPIs and pipelines for construction, finance, sales, permitting, and leadership.",
+    output: "KPI dashboards",
   },
   {
     icon: LayoutDashboard,
-    title: "Use daily dashboards to improve cycle time and control cost",
-    body: "Construction, finance, sales, permitting, and leadership each get the daily view they need to improve cycle time and control cost.",
-    output: "Daily action",
+    title: "Use it daily and in leadership meetings",
+    body: "Each team checks their dashboard during the day. Leadership reviews the same numbers in weekly operating meetings.",
+    output: "Daily + weekly use",
   },
 ];
 
@@ -198,8 +198,7 @@ export default function Home() {
             </div>
 
             <div className="relative lg:pl-4">
-              <div className="absolute -inset-5 rounded-[2.4rem] bg-[radial-gradient(circle_at_16%_18%,rgba(32,68,98,0.16),transparent_34%),radial-gradient(circle_at_78%_80%,rgba(23,33,44,0.18),transparent_38%)]" />
-              <div className="relative mx-auto min-h-[34rem] max-w-[46rem] overflow-hidden rounded-[2.2rem] border border-[#cbd6dc] bg-[#17212c] text-white shadow-[0_38px_120px_-78px_rgba(23,33,44,0.78)]">
+              <div className="relative mx-auto min-h-[34rem] max-w-[46rem] overflow-hidden rounded-[2.2rem] border border-[#cbd6dc] bg-[#17212c] text-white shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
                 <img
                   src="https://images.unsplash.com/photo-1692229079965-d3ae0e25f3f7?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=78&w=1100"
                   alt="Residential homes under construction on a jobsite"
@@ -211,7 +210,7 @@ export default function Home() {
                   style={{ objectPosition: "center" }}
                 />
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,18,28,0.18)_0%,rgba(10,18,28,0.62)_48%,rgba(8,13,20,0.92)_100%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(255,255,255,0.22),transparent_30%),radial-gradient(circle_at_90%_78%,rgba(102,217,178,0.18),transparent_34%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(255,255,255,0.18),transparent_28%)]" />
 
                 <div className="relative flex min-h-[34rem] flex-col justify-between p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-4">
