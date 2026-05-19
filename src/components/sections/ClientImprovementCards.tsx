@@ -1,13 +1,139 @@
-import {
-  Clock,
-  CircleDollarSign,
-  KeyRound,
-  CheckCircle2,
-  type LucideIcon,
-} from "lucide-react";
+"use client";
+
+import { CheckCircle2 } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import type { ComponentType } from "react";
 
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
+
+const ACCENT = "#2f5368";
+const ACCENT_GREEN = "#2f9e6f";
+
+/* ── Animated icon 1: ticking clock (cycle time) ───────────────── */
+function ClockIcon({ animate }: { animate: boolean }) {
+  return (
+    <svg viewBox="0 0 40 40" className="h-6 w-6" fill="none" aria-hidden>
+      <circle cx="20" cy="20" r="14" stroke={ACCENT} strokeWidth="2.4" />
+      <circle cx="20" cy="20" r="1.8" fill={ACCENT} />
+      {/* hour hand */}
+      <motion.line
+        x1="20"
+        y1="20"
+        x2="20"
+        y2="13"
+        stroke={ACCENT}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        style={{ transformOrigin: "20px 20px" }}
+        animate={animate ? { rotate: 360 } : undefined}
+        transition={{ duration: 24, ease: "linear", repeat: Infinity }}
+      />
+      {/* minute hand */}
+      <motion.line
+        x1="20"
+        y1="20"
+        x2="27"
+        y2="20"
+        stroke={ACCENT_GREEN}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        style={{ transformOrigin: "20px 20px" }}
+        animate={animate ? { rotate: 360 } : undefined}
+        transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+      />
+    </svg>
+  );
+}
+
+/* ── Animated icon 2: stacked coins bobbing (budget) ───────────── */
+function CoinsIcon({ animate }: { animate: boolean }) {
+  const coins = [
+    { cy: 28, fill: false },
+    { cy: 22, fill: false },
+    { cy: 16, fill: true },
+  ];
+  return (
+    <svg viewBox="0 0 40 40" className="h-6 w-6" fill="none" aria-hidden>
+      {coins.map((coin, i) => (
+        <motion.g
+          key={i}
+          animate={animate ? { y: [0, -2, 0] } : undefined}
+          transition={{
+            duration: 2.4,
+            ease: "easeInOut",
+            repeat: Infinity,
+            delay: i * 0.22,
+          }}
+        >
+          <ellipse
+            cx="20"
+            cy={coin.cy}
+            rx="12"
+            ry="4.4"
+            stroke={coin.fill ? ACCENT_GREEN : ACCENT}
+            strokeWidth="2.4"
+            fill={coin.fill ? "rgba(47,158,111,0.12)" : "none"}
+          />
+          {coin.fill && (
+            <line
+              x1="20"
+              y1="12.4"
+              x2="20"
+              y2="19.6"
+              stroke={ACCENT_GREEN}
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+          )}
+        </motion.g>
+      ))}
+    </svg>
+  );
+}
+
+/* ── Animated icon 3: house with a drawing-in sold check (inventory) */
+function HouseIcon({ animate }: { animate: boolean }) {
+  return (
+    <svg viewBox="0 0 40 40" className="h-6 w-6" fill="none" aria-hidden>
+      {/* roof + walls */}
+      <path
+        d="M8 19 L20 9 L32 19"
+        stroke={ACCENT}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11 17.5 V31 H29 V17.5"
+        stroke={ACCENT}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* sold check that draws in on a loop */}
+      <motion.path
+        d="M16 24.5 L19 27.5 L25 21"
+        stroke={ACCENT_GREEN}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={false}
+        animate={
+          animate
+            ? { pathLength: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }
+            : { pathLength: 1, opacity: 1 }
+        }
+        transition={{
+          duration: 3,
+          ease: "easeInOut",
+          repeat: Infinity,
+          times: [0, 0.35, 0.8, 1],
+        }}
+      />
+    </svg>
+  );
+}
 
 interface ClientImprovementCardProps {
   title: string;
@@ -15,7 +141,7 @@ interface ClientImprovementCardProps {
   metric: string;
   metricLabel: string;
   proof: string;
-  icon: LucideIcon;
+  Icon: ComponentType<{ animate: boolean }>;
   bars: number[];
   focus: string[];
   className?: string;
@@ -29,7 +155,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metric: "15%",
     metricLabel: "Cycle gain",
     proof: "Top-200 builder environment",
-    icon: Clock,
+    Icon: ClockIcon,
     bars: [42, 55, 48, 63, 70, 78, 88],
     focus: ["Stage visibility", "Owner follow-up"],
   },
@@ -40,7 +166,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metric: "$0",
     metricLabel: "Over budget",
     proof: "ERP + spreadsheet workflows",
-    icon: CircleDollarSign,
+    Icon: CoinsIcon,
     bars: [60, 58, 62, 59, 61, 60, 60],
     focus: ["Cost movement", "Variance flags"],
   },
@@ -50,8 +176,8 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
       "Aging inventory and pricing follow-ups surfaced before homes sit too long.",
     metric: "20",
     metricLabel: "Fewer days on market",
+    Icon: HouseIcon,
     proof: "Builder operations context",
-    icon: KeyRound,
     bars: [80, 72, 66, 58, 50, 44, 38],
     focus: ["Inventory status", "Pricing follow-up"],
   },
@@ -78,11 +204,14 @@ function ClientImprovementCard({
   metric,
   metricLabel,
   proof,
-  icon: Icon,
+  Icon,
   bars,
   focus,
   className,
 }: ClientImprovementCardProps) {
+  const reduceMotion = useReducedMotion();
+  const animate = !reduceMotion;
+
   return (
     <article className={cn("h-full", className)}>
       <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-[#d7e0e5] bg-white p-6 shadow-[0_20px_60px_-50px_rgba(23,33,44,0.45)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9eb6c8]">
@@ -93,10 +222,10 @@ function ClientImprovementCard({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#d6e0e5] bg-[#f8fafc] text-[#2f5368]">
-              <Icon size={20} />
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#d6e0e5] bg-[#f8fafc]">
+              <Icon animate={animate} />
             </span>
-            <span className="text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#66727a]">
+            <span className="max-w-[8.5rem] text-[0.58rem] font-bold uppercase leading-tight tracking-[0.16em] text-[#66727a]">
               {proof}
             </span>
           </div>
