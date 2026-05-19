@@ -6,9 +6,12 @@
 > **⚠ Canonical reference has moved.** For the current authoritative KPI catalogue,
 > dashboard architecture, and 105-KPI validation system, see
 > **[`DASHBOARD_KPI_REFERENCE.md`](./DASHBOARD_KPI_REFERENCE.md)**.
+> For the current dashboard build SOP, KPI definition template, date-basis rules,
+> drilldown contract, and acceptance checklist, see
+> **[`DASHBOARD_BUILDING_SOP.md`](./DASHBOARD_BUILDING_SOP.md)**.
 > This playbook remains for governance narrative, onboarding context, and the
 > long-form operational framework.
-> This document is the single source of truth for all client engagements.
+> If this playbook conflicts with the SOP or KPI reference, the SOP and KPI reference win.
 
 ---
 

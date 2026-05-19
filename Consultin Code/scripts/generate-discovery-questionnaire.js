@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Generate a fillable PDF "Data Infrastructure Discovery Questionnaire"
- * that prospective clients fill out before a discovery call.
+ * that prospective clients fill out after the initial discovery call.
  *
  * Usage:
  *   node Consultin\ Code/scripts/generate-discovery-questionnaire.js
@@ -281,8 +281,8 @@ function drawCover(page, helv, helvBold) {
     "landscape, and operational pain before the discovery call. Fill out what",
     "you know — skip what you don't. We'll fill in the rest together.",
     "",
-    "Return completed PDF to arnauddg27@gmail.com or bring it to the call.",
-    "Estimated time: 25–40 minutes. Not every question applies to every builder.",
+    "Return completed PDF to adurand@aderpsystems.com after the initial call.",
+    "We'll use it to prepare a practical scope and quote. Estimated time: 25–40 minutes.",
   ];
   let yy = PAGE_H - 290;
   for (const line of intro) {

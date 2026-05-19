@@ -48,7 +48,57 @@ CRM_INGEST_WEBHOOK_SECRET=
 
 `CRM_INGEST_WEBHOOK_URL` is required in production. If it is missing, the webhook fails instead of accepting a Calendly booking and dropping the lead.
 
-## Calendly Setup
+## Calendly Routing Form Setup
+
+Create the public booking entry point through the website booking gate and Calendly Routing instead of sending visitors directly to the 30-minute meeting page.
+
+The website route `https://consulting.aderpsystems.com/book/` now asks the first qualification questions before revealing Calendly. Calendly Routing should still be configured with the same logic so direct routing-form links do not bypass qualification.
+
+1. Open Calendly.
+2. Go to Routing.
+3. Select New routing form.
+4. Choose Create a new form.
+5. Name the form:
+
+```text
+Consultation Request
+```
+
+6. Add these questions:
+
+| Question | Type | Answers |
+| --- | --- | --- |
+| Country | Radio button | United States, Canada, Other |
+| Company type | Radio button | Residential builder, Residential real estate developer, Residential land developer, Other |
+| Approx. homes or units per year | Radio button | Under 20, 20-99, 100-499, 500+, Not sure, Not applicable |
+| Current systems | Checkboxes | ERP, Spreadsheets, Finance system, APIs or exports, Operating tools, Not sure yet |
+| Company name | Short answer | |
+| Company website | Short answer | |
+| Business email | Email address | |
+| Phone number | Phone number | |
+| What are you looking to discuss? | Paragraph | |
+
+7. Set the routing logic:
+
+| Condition | Destination | Message |
+| --- | --- | --- |
+| Country = Other | Custom message | Thank you. At this time, we only schedule consultations for U.S. and Canada-based companies. |
+| Company type = Other | Custom message | Thank you. This calendar is for residential builders and developers. |
+| Approx. homes or units per year = Not applicable | Custom message | Thank you. This does not appear to be a fit for the discovery calendar. |
+| Country = United States or Canada, company type is residential builder/developer/land developer, and volume is not Not applicable | Event type | 30 Minute Meeting |
+
+8. Preview the form and test the main paths:
+   - Country = Other should show the U.S./Canada message.
+   - Company type = Other should show the residential builders/developers message.
+   - Volume = Not applicable should show the not-a-fit message.
+   - Qualified U.S./Canada builder/developer answers should show the 30 Minute Meeting booking page.
+9. Publish the form.
+10. Copy the published routing form share link.
+11. Set `NEXT_PUBLIC_CALENDLY_ROUTING_FORM_URL` in Vercel to the published routing form URL.
+
+The website uses `NEXT_PUBLIC_CALENDLY_ROUTING_FORM_URL` after the `/book/` qualification gate. If it is not set locally, the app falls back to the direct 30-minute link for development only.
+
+## Calendly Webhook Setup
 
 1. Open Calendly Developer settings.
 2. Create a webhook subscription.
@@ -88,15 +138,9 @@ invitee.canceled
 }
 ```
 
-## Recommended Calendly Questions
+## Recommended Calendly Event Questions
 
-Add these to the 30-minute meeting form so the CRM record is useful:
-
-- Company
-- Role/title
-- Homes closed or units managed per year
-- Current ERP or core systems
-- Main reporting problem
+Keep the 30-minute meeting form light because the Routing form now does the qualification work. If you need additional CRM detail, collect it in the Routing form first so disqualified visitors do not reach the booking page.
 
 ## QA Test
 

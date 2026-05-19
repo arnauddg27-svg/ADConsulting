@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,7 +16,10 @@
 
 # next.js
 /.next/
+**/.next/
+/.next.build-reset.*/
 /out/
+/out 2/
 
 # production
 /build
@@ -24,11 +28,15 @@
 .DS_Store
 *.pem
 .claude/
+.codex-temp/
+.playwright-mcp/
 .playwright-cli/
 .local/
 docs/
 !Consultin Code/docs/
 firebase-debug.log
+**/__pycache__/
+*.pyc
 
 # debug
 npm-debug.log*
@@ -38,6 +46,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# service account and private API keys
+*service-account*.json
+*sa-key*.json
+*-sa-key.json
+**/*credentials*.json
+**/*private-key*.json
 
 # vercel
 .vercel

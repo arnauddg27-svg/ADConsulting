@@ -25,7 +25,7 @@ export default function ServicesOverview() {
     <section className="section-space pt-8 md:pt-16">
       <Container>
         <div className="reveal mb-12 text-center md:mb-16">
-          <span className="eyebrow eyebrow-dot">What Gets Built</span>
+          <span className="eyebrow eyebrow-dot">What We Build</span>
           <h2 className="mx-auto mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 sm:text-5xl md:text-[3.4rem]">
             Data infrastructure, reporting,{" "}
             <span className="text-gradient">and decision tools.</span>

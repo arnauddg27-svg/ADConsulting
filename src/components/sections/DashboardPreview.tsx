@@ -51,14 +51,13 @@ export default function DashboardPreview() {
           />
           <div className="grid lg:grid-cols-[0.45fr_0.55fr]">
             <div className="flex flex-col justify-center p-8 md:p-10 lg:p-12">
-              <span className="eyebrow">Illustrative Example</span>
+              <span className="eyebrow eyebrow-dot">Illustrative Example</span>
               <h2 className="mt-5 font-heading text-4xl leading-[0.95] tracking-[-0.01em] text-slate-50 md:text-5xl">
-                Sample dashboards built on centralized builder data.
+                Dashboards built on your data, not a template.
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
-                Job profitability, pipeline status, exception flags, and schedule
-                pressure delivered through reporting systems and operational tools
-                connected to a structured data warehouse.
+                Job profitability, pipeline status, exception flags, schedule
+                pressure — interactive apps wired straight to your warehouse.
               </p>
               <p className="mt-2 text-xs italic text-slate-500">
                 Illustrative only. Every implementation is shaped around the
@@ -77,8 +76,8 @@ export default function DashboardPreview() {
                 ))}
               </div>
 
-              <Button href="/demo/" size="lg" className="mt-10 self-start">
-                Explore the Example
+              <Button href="/examples/" size="lg" className="mt-10 self-start">
+                View Example Dashboards
                 <ArrowRight size={16} />
               </Button>
             </div>

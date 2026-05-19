@@ -1,49 +1,12 @@
-import { AlertTriangle, ArrowRight, DollarSign, Layers, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import MouseSpotlight from "@/components/ui/MouseSpotlight";
-
-const heroModules = [
-  {
-    icon: <DollarSign size={20} />,
-    title: "Job profitability",
-    detail: "Budget vs. actuals, cost variances, and margin flags",
-  },
-  {
-    icon: <Layers size={20} />,
-    title: "Pipeline visibility",
-    detail: "Starts, phase tracking, backlog, and bottleneck status",
-  },
-  {
-    icon: <AlertTriangle size={20} />,
-    title: "Exception center",
-    detail: "Delayed work, stale data, and missing update alerts",
-  },
-  {
-    icon: <TrendingUp size={20} />,
-    title: "Operating rhythm",
-    detail: "KPIs, reports, and internal tools your team can use",
-  },
-];
-
-const heroKPIs = [
-  { label: "Active Jobs", value: "24" },
-  { label: "On-Time Rate", value: "87%" },
-  { label: "Budget Used", value: "$4.2M" },
-  { label: "Open Exceptions", value: "12" },
-];
-
-const completionRows = [
-  { name: "Lakewood Reserve", pct: 76 },
-  { name: "Winter Garden", pct: 88 },
-  { name: "Cypress Creek", pct: 64 },
-  { name: "Clermont Heights", pct: 45 },
-];
+import HeroShowcase from "@/components/sections/HeroShowcase";
 
 export default function Hero() {
   return (
-    <section className="home-hero relative overflow-hidden pb-10 pt-24 md:pb-16 md:pt-32">
-      <MouseSpotlight color="rgba(52, 211, 153, 0.16)" size={620} />
+    <section className="relative overflow-hidden pb-12 pt-[11rem] md:pb-16 md:pt-[11.75rem]">
+      {/* Mouse spotlight is handled globally by <PageAmbient> in layout. */}
 
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
@@ -64,145 +27,40 @@ export default function Hero() {
       </div>
 
       <Container className="relative">
-        <div className="animate-rise-in panel relative w-full max-w-full overflow-hidden">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-[inherit] border border-accent-400/20"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-16 top-10 h-40 w-40 rounded-full bg-accent-400/20 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-12 bottom-8 h-44 w-44 rounded-full bg-cyan-400/10 blur-3xl"
-          />
+        <div className="animate-rise-in">
+          <div className="mx-auto max-w-5xl text-center">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-accent-300">
+              Builder data platform
+            </p>
+            <h1 className="mx-auto mt-4 max-w-[62rem] font-heading text-[3.25rem] leading-[0.95] tracking-[-0.045em] text-white sm:text-6xl lg:text-[5.2rem] xl:text-[5.85rem]">
+              Dashboards built on your data, not a template.
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+              Centralize your systems into a warehouse, apply builder-specific KPI logic,
+              and deliver reporting your team can use.
+            </p>
 
-          <div className="home-hero-grid grid min-w-0 lg:min-h-[640px] lg:grid-cols-[0.46fr_0.54fr]">
-            <div className="relative flex min-w-0 flex-col justify-center p-7 md:p-10 lg:p-12">
-              <span className="eyebrow eyebrow-dot max-w-full justify-start sm:w-auto">
-                Illustrative Example
-              </span>
-
-              <h1 className="home-hero-title mt-6 max-w-2xl text-balance font-heading text-[2.45rem] leading-[0.95] tracking-[-0.025em] text-slate-50 sm:text-6xl lg:text-[4.8rem] lg:tracking-[-0.035em]">
-                Dashboards built on your data, not a template.
-              </h1>
-
-              <p className="home-hero-copy mt-5 max-w-xl text-base leading-7 text-slate-300 md:text-lg">
-                Centralize your systems, apply operating logic, and turn the data
-                into dashboards, reporting, and internal tools.
-              </p>
-
-              <div className="home-hero-actions mt-7 flex min-w-0 flex-col gap-3 sm:flex-row">
-                <Button href="/book/?source=home_hero" size="lg" className="w-full sm:w-auto">
-                  Book a Discovery Call
-                  <ArrowRight size={16} />
-                </Button>
-                <Button href="/demo/" variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Explore the Example
-                </Button>
-              </div>
-
-              <div
-                className="home-hero-flow mt-5 flex max-w-xl flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400"
-                aria-label="Data platform flow"
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button href="/book/?source=home_hero" size="md" className="whitespace-nowrap px-5 py-3">
+                Book a Discovery Call
+                <ArrowRight size={16} />
+              </Button>
+              <Button
+                href="/examples/"
+                variant="outline"
+                size="md"
+                className="relative isolate overflow-hidden whitespace-nowrap border-accent-200/70 bg-[linear-gradient(135deg,rgba(52,211,153,0.24),rgba(34,211,238,0.13),rgba(99,102,241,0.16))] px-5 py-3 text-accent-50 shadow-[0_0_0_1px_rgba(110,231,183,0.18),0_22px_62px_-18px_rgba(52,211,153,0.95),inset_0_1px_0_rgba(255,255,255,0.16)] before:absolute before:inset-[-180%] before:-z-10 before:animate-[spin_3.4s_linear_infinite] before:bg-[conic-gradient(from_90deg,transparent_0deg,transparent_80deg,rgba(167,243,208,0.55)_120deg,rgba(34,211,238,0.2)_145deg,transparent_190deg)] after:absolute after:inset-[1px] after:-z-10 after:rounded-full after:bg-[linear-gradient(135deg,rgba(8,13,24,0.84),rgba(12,74,58,0.76),rgba(8,13,24,0.88))] hover:-translate-y-1 hover:scale-[1.025] hover:border-accent-100 hover:bg-accent-500/25 hover:text-white hover:shadow-[0_0_36px_-8px_rgba(52,211,153,1),0_28px_74px_-24px_rgba(34,211,238,0.95)]"
               >
-                <span>Sources</span>
-                <span className="text-accent-300">→</span>
-                <span>Warehouse</span>
-                <span className="text-accent-300">→</span>
-                <span>Dashboard</span>
-              </div>
-
-              <p className="home-hero-note mt-3 max-w-xl text-xs italic leading-5 text-slate-500">
-                Illustrative only. Every implementation is shaped around actual data,
-                workflows, and operating questions.
-              </p>
-
-              <div className="home-hero-modules mt-8 grid gap-4 sm:grid-cols-2">
-                {heroModules.map((module) => (
-                  <div key={module.title} className="flex items-start gap-3">
-                    <div className="mt-0.5 text-accent-300">{module.icon}</div>
-                    <div>
-                      <div className="text-sm font-semibold text-slate-100">
-                        {module.title}
-                      </div>
-                      <div className="mt-1 text-xs leading-5 text-slate-400">
-                        {module.detail}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="home-hero-preview relative min-w-0 border-t border-white/[0.08] bg-[#080e18] p-5 md:p-8 lg:border-l lg:border-t-0 lg:p-10">
-              <div className="home-hero-preview-inner flex h-full min-w-0 flex-col justify-center rounded-[1.5rem] border border-white/[0.08] bg-white/[0.025] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:p-7">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
-                  <div className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                    Operating Overview
-                  </div>
-                  <span className="badge-dash max-w-full text-accent-100">Illustrative Example</span>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                  {heroKPIs.map((kpi) => (
-                    <div
-                      key={kpi.label}
-                      className="rounded-[1.15rem] border border-white/[0.07] bg-white/[0.035] p-4"
-                    >
-                      <div className="text-[0.62rem] uppercase tracking-[0.18em] text-slate-500">
-                        {kpi.label}
-                      </div>
-                      <div className="mt-3 font-heading text-2xl text-slate-50 md:text-3xl">
-                        {kpi.value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="home-hero-preview-completion mt-6 rounded-[1.35rem] border border-white/[0.07] bg-white/[0.035] p-5">
-                  <div className="text-[0.64rem] uppercase tracking-[0.18em] text-slate-500">
-                    Project Completion by Community
-                  </div>
-
-                  <div className="mt-5 space-y-4">
-                    {completionRows.map((row) => (
-                      <div key={row.name}>
-                        <div className="flex justify-between gap-3 text-sm">
-                          <span className="text-slate-300">{row.name}</span>
-                          <span className="text-slate-500">{row.pct}%</span>
-                        </div>
-                        <div className="mt-2 h-2.5 rounded-full bg-white/[0.07]">
-                          <div
-                            className="h-2.5 rounded-full bg-gradient-to-r from-accent-600 to-accent-300"
-                            style={{ width: `${row.pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="home-hero-preview-footer mt-5 grid gap-3 text-xs text-slate-400 sm:grid-cols-3">
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
-                    Daily sync
-                    <div className="mt-1 font-semibold text-slate-200">5:47 AM</div>
-                  </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
-                    KPI logic
-                    <div className="mt-1 font-semibold text-slate-200">Builder-specific</div>
-                  </div>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
-                    Output
-                    <div className="mt-1 font-semibold text-slate-200">
-                      Dashboards + tools
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <Sparkles size={15} className="text-accent-200" />
+                <span>View Example Dashboards</span>
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-0.5"
+                />
+              </Button>
             </div>
           </div>
+          <HeroShowcase />
         </div>
       </Container>
     </section>

@@ -1,8 +1,12 @@
 "use client";
 
+import { SITE_CONFIG } from "@/lib/constants";
+
 type TrackingWindow = Window & {
   dataLayer?: unknown[];
   gtag?: (...args: unknown[]) => void;
+  fbq?: (...args: unknown[]) => void;
+  lintrk?: (event: "track", options: { conversion_id?: string }) => void;
 };
 
 interface TrackedCalendlyLinkProps {
@@ -11,7 +15,10 @@ interface TrackedCalendlyLinkProps {
   source: string;
 }
 
-const bookingGateUrl = "/book/";
+const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
+const googleAdsBookCallLabel = process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOK_CALL_LABEL;
+const linkedInBookCallConversionId =
+  process.env.NEXT_PUBLIC_LINKEDIN_BOOK_CALL_CONVERSION_ID;
 
 export default function TrackedCalendlyLink({
   children,
@@ -23,23 +30,40 @@ export default function TrackedCalendlyLink({
 
     trackingWindow.dataLayer = trackingWindow.dataLayer || [];
     trackingWindow.dataLayer.push({
-      event: "booking_gate_start",
+      event: "book_call_click",
       event_category: "lead",
       event_label: source,
-      destination: bookingGateUrl,
+      destination: SITE_CONFIG.calendlyUrl,
     });
 
-    trackingWindow.gtag?.("event", "booking_gate_start", {
+    trackingWindow.gtag?.("event", "generate_lead", {
       event_category: "booking",
       event_label: source,
     });
-  };
 
-  const href = `${bookingGateUrl}?source=${encodeURIComponent(source)}`;
+    if (googleAdsId && googleAdsBookCallLabel) {
+      trackingWindow.gtag?.("event", "conversion", {
+        send_to: `${googleAdsId}/${googleAdsBookCallLabel}`,
+      });
+    }
+
+    trackingWindow.fbq?.("track", "Lead", {
+      content_name: "Book a discovery call",
+      content_category: "booking",
+    });
+
+    if (linkedInBookCallConversionId) {
+      trackingWindow.lintrk?.("track", {
+        conversion_id: linkedInBookCallConversionId,
+      });
+    }
+  };
 
   return (
     <a
-      href={href}
+      href={SITE_CONFIG.calendlyUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       onClick={handleClick}
       className={className}
     >

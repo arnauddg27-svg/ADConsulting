@@ -1,6 +1,6 @@
 # Client Onboarding Runbook
 
-**Operational playbook — 2026-04-23.** Step-by-step sequence to stand up a new builder client on the platform. Companion to `DASHBOARD_KPI_REFERENCE.md`.
+**Operational playbook - 2026-04-30.** Step-by-step sequence to stand up a new builder client on the platform. Companion to `DASHBOARD_KPI_REFERENCE.md` and `DASHBOARD_BUILDING_SOP.md`.
 
 Total elapsed time: **4–8 weeks** from kickoff to first live dashboard.
 
@@ -73,6 +73,7 @@ For every dashboard KPI in `DASHBOARD_KPI_REFERENCE.md` §2, mark one of:
 - `ready` — all required fields present, >80% non-null
 - `partial` — fields present but <80% populated OR one derived field missing (we can compute)
 - `blocked` — core field missing; cannot ship without source data change
+- `renamed` - source data supports a related metric, but the dashboard label must be changed to match the actual logic
 
 Use the template:
 ```markdown
@@ -86,14 +87,31 @@ Use the template:
 | Total WIP | blocked | wip_balance column missing; need ERP export |
 ```
 
-### 2.3 First nightly validation
+### 2.3 Fill `kpi_logic.md`
+Before UI build starts, create `clients/acme_homes/kpi_logic.md` and define every `ready`, `partial`, and `renamed` KPI using the template in `DASHBOARD_BUILDING_SOP.md`.
+
+Required for each KPI:
+
+- Business question.
+- Grain.
+- Numerator and denominator.
+- Date basis.
+- Source tables or mart views.
+- Filters.
+- Drilldown row scope.
+- Validation check.
+- Edge cases.
+
+Hard rule: if the logic uses `start_date`, the chart cannot be labeled as completions. If the logic uses `contract_date`, the chart cannot be labeled as closed deals.
+
+### 2.4 First nightly validation
 Enable `scripts/daily-quality-check.js` for the new client. First run expect 30–40% PASS, rest ERROR (schema drift). Work down the ERROR list in day 2–5.
 
 ---
 
 ## Phase 3 — Weeks 3–5: Dashboard build
 
-Gate: all ready/partial KPIs rendering in the dashboard.
+Gate: all `ready`, approved `partial`, and `renamed` KPIs render in the dashboard with labels that match the actual logic.
 
 ### 3.1 Pick the tab set
 Based on assessment:
@@ -103,7 +121,16 @@ Based on assessment:
 
 Blocked domains get their tab hidden.
 
-### 3.2 Copy + prune `dashboard-shell.js`
+### 3.2 Confirm dashboard vs pipeline split
+
+Before editing the shell, mark each planned view as one of:
+
+- **Dashboard** - summary cards, charts, exception panels, and operational decision views.
+- **Pipeline** - spreadsheet-style roster tables, fixed headers, frozen key columns, column filters, and row drilldowns.
+
+Do not place full rosters on dashboard tabs. If a dashboard chart needs detail, use a click-through drawer or link to the matching pipeline tab.
+
+### 3.3 Copy + prune `dashboard-shell.js`
 ```bash
 cp clients/brite_homes/components/dashboard-shell.js \
    clients/acme_homes/components/dashboard-shell.js
@@ -112,18 +139,29 @@ Then:
 1. Remove hidden-tab sections from the SECTIONS array
 2. Update client name in ShellBar
 3. Wire `onCityClick` / `onCommunityClick` / `onStatusClick` to drawer categories
-4. Confirm drill-downs land in `SHDrawer` with correct `detail.type`
+4. Confirm drilldowns pass `domain`, `metric`, `dateBasis`, `series`, `period`, and exact row scope
+5. Confirm all year, quarter, and month values are clickable when they represent grouped data
 
-### 3.3 Build `dashboard-data.js`
+### 3.4 Build `dashboard-data.js`
 One function per tab, each returns the shape the shell expects. Reference implementations in `clients/brite_homes/lib/dashboard-data.js`.
 
 Cache heavy queries with `revalidate = 86400` (24h). Nightly sync refreshes data.
 
-### 3.4 Smoke test every click
+Shared data-layer rules:
+
+- KPI cards, charts, and drawers must use the same helper or mart view.
+- Monthly spend charts require spend snapshots, invoice dates, draw dates, or accounting dates. Do not group full job costs by job start month and label it monthly spend.
+- Closed-deal charts must use close date. Contract-activity charts may use contract date.
+- Completion charts must use CO/completion date. Start/activity charts may use start date.
+- Status charts must include every normalized status or document why a status is excluded.
+
+### 3.5 Smoke test every click
 Checklist:
 - [ ] Every KPI card click opens drawer with populated rows
 - [ ] Every bar/donut segment click opens drawer
 - [ ] Every table row click opens drawer with detail card
+- [ ] Every timeline point opens rows for the clicked metric, series, and period
+- [ ] Every year/quarter/month cell opens the matching rows
 - [ ] City / Entity / Community filters cascade to every chart
 - [ ] Time period filter (month/quarter/year/all) re-scopes KPIs
 - [ ] Breadcrumb shows active filters and clears correctly
@@ -131,8 +169,22 @@ Checklist:
 - [ ] Day/night toggle doesn't lose filter state
 - [ ] Pipeline tabs scroll horizontally (frozen first column)
 - [ ] Pro Forma drawer (Audits) shows full P&L for any job
+- [ ] Empty drawers show honest empty states, not fallback rows
+- [ ] Drawer titles and subtitles show metric, row count, active filters, and date basis
 
-### 3.5 Deploy to staging
+### 3.6 SOP audit
+
+Run the acceptance checklist in `DASHBOARD_BUILDING_SOP.md` before staging.
+
+Minimum evidence to save in `handoff.md`:
+
+- Reconciliation notes for each dashboard tab.
+- Any `partial`, `renamed`, or excluded KPI and why.
+- Known data gaps.
+- Date-basis decisions.
+- Drilldown limitations, if any.
+
+### 3.7 Deploy to staging
 ```bash
 vercel --env production deploy clients/acme_homes
 ```
@@ -204,9 +256,11 @@ Gate: client using dashboard daily; legacy spreadsheets retired.
 
 - [ ] `clients/acme_homes/` fully populated
 - [ ] Production dashboard live at `acme.aderpsystems.com`
-- [ ] `kpi_assessment.md` complete, all ready/partial KPIs in UI
+- [ ] `kpi_assessment.md` complete, all `ready`, approved `partial`, and `renamed` KPIs in UI
+- [ ] `kpi_logic.md` complete for every shipped KPI
 - [ ] `kpi_overrides.yaml` tuned with client-specific thresholds
 - [ ] Nightly sync + quality check running (`reports/acme_homes/` populated daily)
+- [ ] Dashboard SOP checklist completed
 - [ ] Client team has SSO access
 - [ ] 3 recorded walkthroughs posted
 - [ ] Legacy weekly reports retired

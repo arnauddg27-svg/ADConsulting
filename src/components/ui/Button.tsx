@@ -37,7 +37,7 @@ export default function Button({
   type = "button",
 }: ButtonProps) {
   const classes = clsx(
-    "group inline-flex min-w-0 max-w-full items-center justify-center gap-2 rounded-full border text-center font-semibold uppercase tracking-[0.18em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 cursor-pointer",
+    "group inline-flex items-center justify-center gap-2 rounded-full border text-center font-semibold uppercase tracking-[0.18em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 cursor-pointer",
     variants[variant],
     sizes[size],
     className

@@ -3,6 +3,8 @@
 > **⚠ Canonical reference has moved.** For the current authoritative dashboard
 > architecture, shared primitives, and KPI catalogue, see
 > **[`DASHBOARD_KPI_REFERENCE.md`](./DASHBOARD_KPI_REFERENCE.md)**.
+> For the current build process, KPI definition template, drilldown contract,
+> and acceptance checklist, see **[`DASHBOARD_BUILDING_SOP.md`](./DASHBOARD_BUILDING_SOP.md)**.
 > This file is the long-form narrative build guide; the canonical reference has
 > the up-to-date component inventory, filter wiring, and drawer categories.
 
@@ -15,10 +17,13 @@ This document describes the step-by-step process for building `dashboard-shell.j
 Before building the shell, you must have completed:
 
 1. **Warehouse Audit** -- table profiling with row counts, column completeness, and type checks
-2. **KPI Assessment** -- `clients/{client}/kpi_assessment.md` exists with each KPI scored as `ready`, `partial`, or `blocked`
-3. **BigQuery Connection** -- `.env.local` configured with service account credentials, project ID, and dataset names
-4. **Schema Type Check** -- All columns used in queries have verified types (see "Gotcha: Google Sheets Type Propagation" below)
-5. **XLSX Import** (if applicable) -- `import_xlsx_to_bq.js` configured and run for any xlsx-sourced tables
+2. **KPI Assessment** -- `clients/{client}/kpi_assessment.md` exists with each KPI scored as `ready`, `partial`, `blocked`, or `renamed`
+3. **KPI Logic Registry** -- `clients/{client}/kpi_logic.md` defines grain, numerator, denominator, date basis, filters, drilldown scope, and validation check for every shipped KPI
+4. **BigQuery Connection** -- `.env.local` configured with service account credentials, project ID, and dataset names
+5. **Schema Type Check** -- All columns used in queries have verified types (see "Gotcha: Google Sheets Type Propagation" below)
+6. **XLSX Import** (if applicable) -- `import_xlsx_to_bq.js` configured and run for any xlsx-sourced tables
+
+Hard rule: do not start shell/UI work until the KPI logic registry is complete for the tabs being built. If a metric does not have a confirmed date basis and drilldown row scope, the UI label must be renamed or the KPI must be blocked.
 
 ---
 
@@ -65,7 +70,7 @@ Open `clients/{client}/kpi_assessment.md`. Map KPI domains to sections and tabs:
 |---------|--------|-----------|-------------|
 | **Land** | `land` | Dashboard | Land acquisition tables exist (`land_acquisition_active`, etc.) |
 | **Permitting** | `permitting` | Dashboard | Milestones roster has permitting-phase jobs |
-| **Loans** | `loans` | Dashboard | Loan data available (LN-xx KPIs `ready` or `partial`) |
+| **Loans** | `loans` | Dashboard | Loan data available (LN-xx KPIs `ready` or approved `partial`) |
 | **Construction** | `constructionDash` | Dashboard | Always -- aggregates headline KPIs + analytics |
 | **Construction** | `constructionPipeline` | Pipeline | CP-01 + completion_pct available |
 | **Construction** | `constructionCycle` | Cycle Time | CP-05, CP-06 milestone dates available |
@@ -144,6 +149,7 @@ Rules:
 - `title`: appears as h2 in the tab header
 - `desc`: one-line description below the title
 - Sections render as **collapsible headers** in the sidebar; tabs are nested buttons within each section
+- Every tab must have a declared purpose: dashboard summary, pipeline roster, cycle analysis, cost analysis, or audit detail. Do not create duplicate tabs that show the same rows with different labels.
 
 ---
 
@@ -290,7 +296,7 @@ return {
 };
 ```
 
-### 2e: Build the fallback
+### 2e: Build the unavailable-data return shape
 
 Always implement `buildUnavailableDashboard()` that returns the same shape with all zeros/empty arrays. The catch block calls this when BigQuery is unreachable.
 
@@ -449,6 +455,8 @@ Tabs in the lifecycle-based nav are **wrapper components** that compose one or m
 - `tone`: optional -- "good", "watch", "alert" for color coding
 - `onClick`: makes the card clickable (triggers drill-down or filter)
 - `active`: highlights the card when its drill-down is open
+- The card's click drawer must use the same helper/view as the displayed value; card count and drawer row count must reconcile.
+- Avoid labels broader than the logic. For example, use "Contract Activity" when using contract date, not "Closed Deals"; use "Starts" when using start date, not "Completions".
 
 ### Panel Rules
 
@@ -469,9 +477,12 @@ Cross-filtering on dashboard tabs:
 - Chart clicks (donut segments, bar clicks) set page-level filters (city, community, stage)
 - Breadcrumb bar shows active filters with per-dimension clear
 - Toggle behavior: clicking the same value deselects it
+- Timeline and crosstab clicks must pass metric, series, period, date basis, and exact row scope to the drawer.
+- Do not show fallback rows when a click returns no records; show an honest empty state with the active filter summary.
 
 Drill-through on pipeline tabs:
 - Row clicks open a side drawer with job-level details
+- Column header filters must be available on every visible pipeline column unless the column is purely decorative.
 
 ### SpreadsheetTable Component
 
@@ -562,6 +573,22 @@ function DrillDownTable({ drill, setFilters, onClose }) {
 ```
 
 Each tab manages its own `drillDown` state, which can be a string key (e.g., "total", "active") or an object (e.g., `{ type: "stage", value: "Framing" }`).
+
+Current standard: use an object payload rather than a bare string for new work.
+
+```js
+{
+  domain: "construction",
+  metric: "active_jobs",
+  dateBasis: "as_of",
+  series: "community",
+  value: "Sunshine Ridge",
+  period: { year: 2026, quarter: 1, month: null },
+  rowScope: "active construction jobs in selected community",
+}
+```
+
+The drawer title, subtitle, row filtering, and empty state should all be derived from this payload.
 
 ### 3e: Wire up the Main Shell
 
@@ -662,7 +689,7 @@ DASHBOARD_CLIENT_NAME=Client Name
 
 ### `lib/bigquery.js` defaults
 
-Update the fallback values in `dashboardConfig()` to match the new client:
+Update the environment defaults in `dashboardConfig()` to match the new client:
 
 ```js
 const martsDataset = process.env.BIGQUERY_MARTS_DATASET || "{client}_marts";
@@ -896,7 +923,7 @@ The Audits and Sales Dashboard tabs share configurable defaults (contingency, co
 
 ```
 [ ] Warehouse audit complete (table profiles with row counts + column completeness)
-[ ] KPI assessment scored (ready/partial/blocked per KPI)
+[ ] KPI assessment scored (`ready` / `partial` / `blocked` / `renamed` per KPI)
 [ ] BigQuery schema types verified for all numeric columns
 [ ] XLSX import script configured (if client provides xlsx data)
 [ ] SECTIONS/TABS array defined (7 lifecycle sections, 12 tabs max)

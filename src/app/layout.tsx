@@ -3,32 +3,26 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MarketingTracking from "@/components/analytics/MarketingTracking";
-
+import PageAmbient from "@/components/ui/PageAmbient";
 
 const siteUrl = "https://consulting.aderpsystems.com";
-const siteTitle = "AD ERP SYSTEMS | Custom Data Platforms for Residential Builders and Developers";
+const siteTitle = "AD ERP SYSTEMS | Builder Operations Reporting";
 const siteDescription =
-  "Custom data platforms for residential builders and developers. AD ERP SYSTEMS centralizes ERP, spreadsheet, finance, API, and export data in a structured warehouse, applies residential operating KPI logic, and delivers reporting systems, dashboards, and operational tools.";
+  "Operating reports for residential builders and developers that help reduce overruns, improve cycle times, protect margin, and catch variances before they become losses.";
 
 export const metadata: Metadata = {
   title: siteTitle,
   description: siteDescription,
   keywords: [
-    "residential homebuilder data platform",
-    "residential developer data platform",
-    "custom data platforms for residential homebuilders",
-    "custom data platforms for residential developers",
-    "builder ERP data extraction",
-    "centralized builder data",
-    "builder reporting systems",
-    "builder dashboards",
-    "homebuilder dashboard",
-    "homebuilder reporting",
-    "builder ERP reporting",
-    "construction WIP reporting",
-    "residential developer reporting",
-    "real estate development dashboard",
-    "construction data warehouse",
+    "residential builder operating reports",
+    "homebuilder schedule reporting",
+    "builder budget variance reporting",
+    "construction margin protection",
+    "construction cycle time reporting",
+    "builder operational performance improvement",
+    "residential construction reporting",
+    "construction variance control",
+    "builder accountability reporting",
     "cost to complete analysis",
   ],
   metadataBase: new URL(siteUrl),
@@ -44,7 +38,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/images/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "AD ERP SYSTEMS - Custom Data Platforms for Residential Builders and Developers",
+        alt: "AD ERP SYSTEMS - Builder Operations Reporting",
       },
     ],
   },
@@ -77,6 +71,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <MarketingTracking />
         <div className="relative min-h-screen overflow-x-hidden">
+          <PageAmbient />
           <Header />
           <main>{children}</main>
           <Footer />

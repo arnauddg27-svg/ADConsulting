@@ -4,23 +4,20 @@ export const SITE_CONFIG = {
   name: "AD ERP SYSTEMS",
   businessName: "AD ERP SYSTEMS",
   legalName: "AD ERP SYSTEMS",
-  tagline: "Custom Data Platforms for Residential Builders and Developers",
+  tagline: "Builder Reporting for Schedule, Budget, and Margin",
   description:
-    "AD ERP SYSTEMS builds custom data platforms for residential builders and developers. We centralize ERP, spreadsheet, finance, API, and export data into a structured warehouse, apply residential operating KPI logic, and deliver reporting systems, dashboards, and operational tools.",
+    "AD ERP SYSTEMS helps residential builders and developers improve schedule visibility, variance control, and margin protection with daily dashboards built from the systems they already use.",
   location: "North America (U.S. & Canada)",
   businessAddress: "2660 Almondwood Loop, Orlando, FL 32821, United States",
   email: "adurand@aderpsystems.com",
-  directCalendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
-  calendlyUrl:
-    process.env.NEXT_PUBLIC_CALENDLY_ROUTING_FORM_URL ||
-    "https://calendly.com/adurand-aderpsystems/30min",
+  calendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
 };
 
 export const NAV_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services/" },
   { label: "About", href: "/about/" },
-  { label: "Sample", href: "/demo/" },
+  { label: "Sample", href: "/examples/" },
   { label: "Contact", href: "/contact/" },
 ];
 
@@ -31,7 +28,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Data Extraction",
     headline: "Pull data out of Buildertrend, Hyphen, Sage, JME, Sheets, and exports automatically",
     description:
-      "Every platform starts with extraction. We map the builder's actual systems of record, set up the right connectors or import scripts, and automate the movement of ERP, spreadsheet, and operational data into a structure the business can trust.",
+      "Every operating review starts with extraction. We map the builder or developer's actual systems of record, set up the right connectors or import scripts, and automate the movement of ERP, spreadsheet, and operational data into a structure the business can trust.",
     icon: "Wrench",
     deliverables: [
       "ERP extraction strategy by source system",
@@ -48,32 +45,32 @@ export const SERVICES: Service[] = [
     shortTitle: "Warehouse",
     headline: "One cloud data foundation for KPI logic, filters, reporting, and auditability",
     description:
-      "We centralize the builder's data in BigQuery, Snowflake, or Microsoft Fabric with separate raw and mart layers. KPI logic lives in the warehouse so the numbers stay consistent across finance, construction, sales, and leadership.",
+      "Your data lands in a cloud warehouse configured for your reporting needs, organized into raw and analytics layers. KPI logic lives in the warehouse so finance, construction, sales, and leadership all read the same numbers.",
     icon: "Layers",
     deliverables: [
-      "Raw and mart datasets organized for speed and auditability",
+      "Raw and analytics layers organized for speed and auditability",
       "Pre-computed KPI and filter tables",
-      "Warehouse SQL or dbt-style modeling",
-      "Daily refresh scripts and validation checks",
+      "Modular SQL transformations under version control",
+      "Scheduled refreshes and validation checks",
       "Cost-conscious infrastructure design",
-      "Architecture and handoff documentation",
+      "Architecture and documentation for ongoing support",
     ],
   },
   {
     id: "builder-ops",
     title: "Reporting Systems & Dashboards",
     shortTitle: "Reporting Systems",
-    headline: "Interactive reporting systems built for builder workflows",
+    headline: "Interactive reporting systems built for builder and developer workflows",
     description:
-      "We build reporting systems teams can use daily. Instead of static BI tabs, you get drill-downs, operating views, and workflow-oriented tools that support operational decisions.",
+      "We build reporting systems teams can use daily. Instead of static BI tabs, you get drill-downs, operating reviews, and workflow-oriented tools that support operational decisions.",
     icon: "TrendingUp",
     deliverables: [
-      "Interactive Next.js dashboards and operating views",
+      "Interactive web dashboards and operating reviews",
       "Drill-downs by city, community, job, or superintendent",
       "Spreadsheet-grade pipeline tables",
       "Executive and department-level visibility",
       "Responsive layouts for desktop review and field use",
-      "Production-ready deployment and walkthroughs",
+      "Production deployment and team walkthroughs",
     ],
   },
   {
@@ -99,7 +96,7 @@ export const SERVICES: Service[] = [
     shortTitle: "Pro Forma",
     headline: "Configurable job-level financial views that catch margin erosion before closing",
     description:
-      "Builders need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
+      "Builder and developer teams need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
     icon: "DollarSign",
     deliverables: [
       "Per-job pro forma P&L views",
@@ -114,9 +111,9 @@ export const SERVICES: Service[] = [
     id: "data-quality",
     title: "Data Quality Monitor & Admin Controls",
     shortTitle: "Admin Tools",
-    headline: "Freshness checks, exception alerts, and controlled admin tools to keep the platform reliable",
+    headline: "Freshness checks, exception alerts, and controlled admin tools to keep reporting reliable",
     description:
-      "A builder platform only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
+      "Reporting only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
     icon: "AlertTriangle",
     deliverables: [
       "Data freshness indicators and sync health checks",
@@ -124,7 +121,7 @@ export const SERVICES: Service[] = [
       "Exception center alerts by role or workflow",
       "Admin settings for pro forma and reference defaults",
       "Role-aware operational controls",
-      "Documentation for handoff and ongoing maintenance",
+      "Documentation for responsibility and ongoing maintenance",
     ],
   },
 ];

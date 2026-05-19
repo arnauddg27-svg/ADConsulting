@@ -159,10 +159,10 @@ export default function BookingQualifier() {
         <div className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
             <span className="eyebrow">Discovery Call</span>
-            <h1 className="mt-6 max-w-3xl font-heading text-5xl leading-[0.92] tracking-[0.03em] text-slate-50 sm:text-6xl">
+            <h1 className="mt-6 max-w-3xl font-heading text-5xl leading-[0.92] tracking-[-0.015em] text-[#17212c] sm:text-6xl">
               Confirm fit before choosing a time.
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 md:text-lg">
+            <p className="mt-6 max-w-xl text-base leading-8 text-[#58636b] md:text-lg">
               AD ERP SYSTEMS works with residential builders and
               developers in the U.S. and Canada that need reporting built from
               real operating data.
@@ -176,9 +176,9 @@ export default function BookingQualifier() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm font-semibold text-slate-200"
+                  className="flex items-center gap-3 rounded-xl border border-[#d9e0e4] bg-white/[0.72] px-4 py-3 text-sm font-semibold text-[#476173]"
                 >
-                  <CheckCircle2 size={18} className="shrink-0 text-accent-300" />
+                  <CheckCircle2 size={18} className="shrink-0 text-[#4f8d76]" />
                   {item}
                 </div>
               ))}
@@ -248,7 +248,7 @@ export default function BookingQualifier() {
                   {systemOptions.map((option) => (
                     <label
                       key={option.value}
-                      className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-accent-400/45 hover:bg-white/[0.055]"
+                      className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-[#d9e0e4] bg-white/[0.72] px-4 py-3 text-sm font-semibold text-[#476173] transition-colors hover:border-[#6f9fb4] hover:bg-white"
                     >
                       <input
                         type="checkbox"
@@ -316,7 +316,7 @@ export default function BookingQualifier() {
 
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#17212c] bg-[#17212c] px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_44px_-28px_rgba(23,33,44,0.68)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#243344]"
               >
                 Check Fit
                 <ListChecks size={16} />
@@ -344,10 +344,10 @@ export default function BookingQualifier() {
                     />
                   )}
                   <div>
-                    <h2 className="font-heading text-3xl tracking-[0.03em] text-slate-50">
+                    <h2 className="font-heading text-3xl tracking-[-0.015em] text-[#17212c]">
                       {isQualified ? "This looks like a fit." : "Do not book yet."}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-300">
+                    <p className="mt-3 text-sm leading-7 text-[#58636b]">
                       {isQualified
                         ? "Choose a time for a 30-minute discovery call."
                         : "This calendar is for residential builders and developers in the U.S. or Canada with operating data to centralize. If that describes your company, adjust the answers above."}
@@ -358,7 +358,7 @@ export default function BookingQualifier() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={handleCalendarClick}
-                        className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-accent-500 bg-accent-500 px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_40px_-20px_rgba(16,185,129,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-400"
+                        className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#17212c] bg-[#17212c] px-6 py-4 text-[0.78rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_20px_44px_-28px_rgba(23,33,44,0.68)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#243344]"
                       >
                         Continue to Calendar
                         <ArrowRight size={16} />

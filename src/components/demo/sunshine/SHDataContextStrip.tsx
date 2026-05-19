@@ -10,13 +10,24 @@ interface SHDataContextStripProps {
 
 export default function SHDataContextStrip({ scopeLabel, rows, filterCount, asOf = "Mar 25, 2026", dateBasis }: SHDataContextStripProps) {
   return (
-    <div className="sh-data-context">
-      <span className="sh-data-context-label">Data Context</span>
-      <span className="sh-data-context-scope"><strong>{scopeLabel}</strong></span>
-      <span>Rows: <strong>{rows.toLocaleString()}</strong></span>
-      <span>Filters: <strong>{filterCount}</strong></span>
-      {dateBasis && <span className="sh-data-context-secondary">Date basis: <strong>{dateBasis}</strong></span>}
-      <span className="sh-data-context-secondary">As of: <strong>{asOf}</strong></span>
+    <div
+      style={{
+        marginBottom: 10,
+        padding: "6px 10px",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 12,
+        borderRadius: 6,
+        border: "1px solid var(--sh-border)",
+        background: "var(--sh-bg-surface)",
+      }}
+    >
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "var(--sh-text-muted)", textTransform: "uppercase" }}>Data Context</span>
+      <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}><strong style={{ color: "var(--sh-text-primary)" }}>{scopeLabel}</strong></span>
+      <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Rows: <strong style={{ color: "var(--sh-text-primary)" }}>{rows.toLocaleString()}</strong></span>
+      <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Filters: <strong style={{ color: "var(--sh-text-primary)" }}>{filterCount}</strong></span>
+      {dateBasis && <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>Date basis: <strong style={{ color: "var(--sh-text-primary)" }}>{dateBasis}</strong></span>}
+      <span style={{ fontSize: 11, color: "var(--sh-text-secondary)" }}>As of: <strong style={{ color: "var(--sh-text-primary)" }}>{asOf}</strong></span>
     </div>
   );
 }

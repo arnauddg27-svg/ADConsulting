@@ -1,376 +1,296 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Link from "next/link";
 import {
-  Shield,
-  Zap,
+  ArrowRight,
+  BarChart3,
+  Building2,
+  CheckCircle2,
   Code2,
   Database,
-  BarChart3,
-  Users,
-  ArrowRight,
-  CheckCircle2,
+  HardHat,
   Home,
-  Building2,
+  Landmark,
+  MapPin,
+  Shield,
   TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react";
-import Link from "next/link";
+
+import {
+  BlueprintCTA,
+  BlueprintHero,
+  BlueprintPage,
+  BlueprintPanel,
+} from "@/components/marketing/Blueprint";
 import Container from "@/components/ui/Container";
-import CTABanner from "@/components/sections/CTABanner";
+import { liquidActionClass } from "@/lib/buttonStyles";
 
 export const metadata: Metadata = {
-  title: "About | Custom Data Platforms for Residential Builders and Developers",
+  title: "About | AD ERP SYSTEMS",
   description:
-    "About AD ERP SYSTEMS, a firm that builds custom data platforms for residential builders and developers with practical delivery.",
+    "About AD ERP SYSTEMS, a builder reporting firm focused on residential construction data, operating dashboards, and client-owned reporting systems.",
 };
 
 const credentials = [
-  { icon: <Database size={18} />, label: "ERP systems and source data mapping" },
-  { icon: <CheckCircle2 size={18} />, label: "Data cleanup, validation, and governance" },
-  { icon: <BarChart3 size={18} />, label: "Reporting automation and dashboard delivery" },
-  { icon: <TrendingUp size={18} />, label: "KPI definitions and metric documentation" },
-  { icon: <Building2 size={18} />, label: "Spreadsheet, database, and API workflows" },
-  { icon: <Home size={18} />, label: "Residential real estate development context" },
+  { icon: HardHat, label: "Residential construction operations" },
+  { icon: Home, label: "Builder ERP and spreadsheet reporting" },
+  { icon: MapPin, label: "Land, lot, and community pipelines" },
+  { icon: Landmark, label: "Permitting, lending, and draw workflows" },
+  { icon: Building2, label: "Construction cost and schedule reporting" },
+  { icon: TrendingUp, label: "Portfolio and executive review" },
 ];
 
 const pillars = [
   {
-    icon: <Database size={22} />,
-    title: "Data Infrastructure",
-    desc: "Extraction, ingestion, transformation, and warehouse design to centralize ERP, spreadsheet, API, and operating data in one structured model.",
+    icon: Database,
+    title: "Data infrastructure",
+    desc: "Extraction, validation, transformation, and warehouse design for ERP, spreadsheet, API, and operating data.",
   },
   {
-    icon: <BarChart3 size={22} />,
-    title: "Operational Reporting",
-    desc: "Reporting systems and builder dashboards across land, development, permitting, lending and draws, construction, sales, and portfolio oversight.",
+    icon: BarChart3,
+    title: "Operating reporting",
+    desc: "Daily views across land, permitting, draws, construction, sales, warranty, and leadership review.",
   },
   {
-    icon: <Code2 size={22} />,
-    title: "Builder Decision Tools",
-    desc: "Pro formas, budget-vs-actual analysis, cost-to-complete, variance tracking, at-risk job flagging, sync monitoring, admin controls, and internal apps.",
+    icon: Code2,
+    title: "Decision tools",
+    desc: "Pro formas, cost-to-complete reviews, at-risk flags, sync monitors, admin controls, and internal apps.",
   },
 ];
 
 const benefits = [
   {
-    icon: <Shield size={20} />,
-    title: "Deployed to Your Accounts",
-    desc: "The platform is deployed to your cloud, data, and hosting environment with documentation your team can keep using.",
+    icon: Shield,
+    title: "Client-owned systems",
+    desc: "Your team owns the code, data, hosting, and reporting infrastructure after handoff.",
   },
   {
-    icon: <Users size={20} />,
-    title: "Founder-Led Delivery",
-    desc: "You work directly with Arnaud Durand on discovery, data mapping, KPI logic, and implementation, which keeps communication clear and delivery accountable.",
+    icon: Users,
+    title: "Direct working model",
+    desc: "You work directly with the people designing the data model and operating views.",
   },
   {
-    icon: <Zap size={20} />,
-    title: "Practical Delivery",
-    desc: "Clear scope, practical milestones, and working releases focused on visibility, reporting quality, and day-to-day operational decisions.",
+    icon: Zap,
+    title: "Practical delivery",
+    desc: "Scope is organized around the first reports your team can actually use in daily operations.",
   },
 ];
 
 const compared = [
-  { them: "Multi-industry delivery model", us: "Residential builder and developer specialization" },
-  { them: "Framework-first implementation", us: "Scope tailored to your systems and reporting priorities" },
-  { them: "Limited handoff clarity", us: "Deployment to your cloud, data, and hosting environment" },
-  { them: "Layered communication model", us: "Direct founder involvement throughout delivery" },
-  { them: "Reporting outputs only", us: "Reporting systems with monitoring and admin controls" },
-  { them: "Large fixed scopes", us: "Phased delivery aligned to operating priorities" },
+  { them: "Generic BI implementation", us: "Residential builder reporting focus" },
+  { them: "Template-first dashboards", us: "Logic matched to your source systems" },
+  { them: "Vendor-owned platform", us: "Client ownership of code, data, and hosting" },
+  { them: "Static reporting outputs", us: "Dashboards with alerts, monitoring, and admin controls" },
+  { them: "Large fixed scope", us: "Phased delivery around operating priorities" },
+];
+
+const process = [
+  {
+    step: "01",
+    title: "Discovery call",
+    desc: "Review current systems, reporting pain points, and the operating decisions that need better visibility.",
+  },
+  {
+    step: "02",
+    title: "Architecture and scope",
+    desc: "Define source systems, warehouse approach, KPI logic, dashboard priorities, timeline, and cost.",
+  },
+  {
+    step: "03",
+    title: "Build and deploy",
+    desc: "Deliver extraction pipelines, warehouse models, KPI logic, dashboards, and tools in working increments.",
+  },
+  {
+    step: "04",
+    title: "Handoff and support",
+    desc: "Deploy to your accounts with documentation, training, and optional support for ongoing reporting needs.",
+  },
 ];
 
 export default function AboutPage() {
   return (
-    <>
-      <section className="page-hero">
-        <Container>
-          <div className="mx-auto max-w-5xl">
-            <div className="grid items-center gap-10 lg:grid-cols-2">
-              <div>
-                <span className="eyebrow">About the Firm</span>
-                <h1 className="mt-6 font-heading text-5xl leading-[0.92] tracking-[-0.01em] text-slate-50 sm:text-6xl">
-                  Custom data platforms for residential builders and developers
-                </h1>
-                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-                  AD ERP SYSTEMS helps residential builders and developers
-                  centralize data from ERPs, spreadsheets, APIs, and other
-                  operating systems; move it into a structured warehouse; apply
-                  builder KPI logic; and deliver reporting systems, dashboards,
-                  and internal tools that support operational decision-making.
-                </p>
+    <BlueprintPage>
+      <BlueprintHero
+        eyebrow="About AD ERP SYSTEMS"
+        title="Builder reporting built around residential operations."
+        description="We help residential builders turn scattered ERP, spreadsheet, finance, and field data into daily operating views for schedule, budget, margin, and owner follow-up."
+      >
+        <BlueprintPanel className="p-5 md:p-6">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {credentials.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-start gap-3 rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 px-4 py-3"
+              >
+                <Icon size={18} className="mt-0.5 shrink-0 text-[#35647f]" />
+                <span className="text-sm font-semibold leading-5 text-[#40515d]">
+                  {label}
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                {credentials.map((c) => (
-                  <div
-                    key={c.label}
-                    className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-                  >
-                    <div className="mt-0.5 shrink-0 text-accent-300">{c.icon}</div>
-                    <span className="text-sm leading-5 text-slate-300">{c.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-        </Container>
-      </section>
+        </BlueprintPanel>
+      </BlueprintHero>
 
-      <section className="section-space pt-0">
+      <section className="pb-16 md:pb-24">
         <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">Industry Context</span>
-            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Built around residential builder and developer operations
-            </h2>
-            <div className="mt-6 grid gap-6 lg:grid-cols-2">
-              <p className="text-base leading-7 text-slate-400">
-                The firm is built around experience as a technology manager and
-                data analyst for a top 200 residential builder. That background
-                is supported by an MBA focused on Finance and Operations &
-                Technology Management, and it informs how source data, KPI
-                definitions, and reporting workflows are structured.
+          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+            <div>
+              <p className="inline-flex rounded-full border border-[#c9d4da] bg-white/88 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#2f5368]">
+                Industry context
               </p>
-              <p className="text-base leading-7 text-slate-400">
-                Real estate development project experience adds practical
-                context around budgets, schedules, and project tracking. The
-                focus is practical system delivery: reliable data structure,
-                KPI logic, and reporting tools teams can use every week.
+              <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+                Built for the way builder teams review work.
+              </h2>
+            </div>
+            <div className="grid gap-5 text-base leading-8 text-[#58636b] md:text-lg">
+              <p>
+                Builder reporting breaks when schedule updates, cost movement,
+                owner follow-up, and stale inventory live in separate exports.
+                AD ERP SYSTEMS maps those sources into one operating layer.
+              </p>
+              <p>
+                The work is practical: clean data flow, clear exception logic,
+                dashboards by department, and a handoff model that keeps the
+                platform on the client side.
               </p>
             </div>
           </div>
         </Container>
       </section>
 
-      <section className="section-space">
+      <section className="pb-16 md:pb-24">
         <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <div className="grid items-center gap-10 lg:grid-cols-[0.7fr_1.3fr]">
-              <div className="relative mx-auto w-full max-w-[14rem] sm:max-w-[16rem] lg:mx-auto">
-                <div className="absolute -inset-4 rounded-[2rem] border border-accent-400/10 bg-accent-500/[0.03] blur-2xl" />
-                <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
-                  <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-950">
-                    <Image
-                      src="/images/arnaud-durand.png"
-                      alt="Arnaud Durand"
-                      fill
-                      className="object-cover object-top"
-                      sizes="(min-width: 1024px) 256px, 58vw"
-                    />
-                  </div>
-                  <div className="px-2 pb-2 pt-4">
-                    <div className="font-heading text-lg tracking-[0.04em] text-slate-50">
-                      Arnaud Durand
-                    </div>
-                    <div className="mt-1 text-sm text-slate-400">
-                      Founder and data platform lead
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="min-w-0 text-center lg:text-left">
-                <span className="eyebrow mx-auto lg:mx-0">Founder-Led Practice</span>
-                <h2 className="mx-auto mt-4 max-w-3xl font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl lg:mx-0">
-                  Led with residential builder and developer operating context
-                </h2>
-                <div className="mx-auto mt-6 max-w-3xl space-y-4 text-center text-base leading-7 text-slate-400 lg:mx-0 lg:text-left">
-                  <p>
-                    AD ERP SYSTEMS is led by Arnaud Durand. The firm is intentionally
-                    direct: discovery, data mapping, KPI logic, dashboard design,
-                    and implementation are handled with clear founder involvement.
-                  </p>
-                  <p>
-                    Arnaud&apos;s background includes work as a technology manager
-                    and data analyst for a top 200 residential builder. He also
-                    holds an MBA focused on Finance and Operations & Technology
-                    Management. His real estate development project experience
-                    adds practical context around budgets, schedules, project
-                    tracking, and development decisions.
-                  </p>
-                </div>
-                <div className="mt-8 flex justify-center lg:justify-start">
-                  <Link
-                    href="/founder/"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.04] px-5 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-100 transition-all hover:border-accent-400/40 hover:bg-accent-500/10 hover:text-accent-100"
-                  >
-                    Read Founder Bio <ArrowRight size={15} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="section-space">
-        <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">What Gets Built</span>
-            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Three connected solution categories
-            </h2>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-400">
-              Each engagement combines centralized builder data, operational
-              reporting systems, and decision tools used by teams managing
-              communities, jobs, costs, sales, and portfolio performance.
+          <div className="mb-10 max-w-4xl">
+            <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+              What we build
             </p>
-
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
-              {pillars.map((p) => (
-                <div key={p.title} className="glow-card p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-accent-400/20 bg-accent-500/10 text-accent-200">
-                    {p.icon}
-                  </div>
-                  <h3 className="mt-4 font-heading text-lg tracking-[-0.01em] text-slate-50">
-                    {p.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{p.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="section-space">
-        <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <span className="eyebrow">Why Clients Choose Us</span>
-            <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-              Account-level deployment, directness, and practical delivery
+            <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+              Three connected layers, one review rhythm.
             </h2>
-            <div className="mt-10 grid gap-8 sm:grid-cols-3">
-              {benefits.map((b) => (
-                <div key={b.title} className="flex flex-col">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent-400/20 bg-accent-500/10 text-accent-200">
-                    {b.icon}
-                  </div>
-                  <h3 className="mt-4 font-heading text-base tracking-[-0.01em] text-slate-50">
-                    {b.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{b.desc}</p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {pillars.map(({ icon: Icon, title, desc }) => (
+              <BlueprintPanel key={title} className="p-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
+                  <Icon size={22} />
                 </div>
-              ))}
-            </div>
+                <h3 className="mt-5 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
+                  {title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[#58636b]">
+                  {desc}
+                </p>
+              </BlueprintPanel>
+            ))}
           </div>
         </Container>
       </section>
 
-      <section className="section-space">
+      <section className="pb-16 md:pb-24">
         <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
-              <div>
-                <span className="eyebrow">Comparison</span>
-                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  Delivery model differences
-                </h2>
-                <p className="mt-4 text-sm leading-6 text-slate-400">
-                  The key differences are specialization, deployment clarity, direct
-                  involvement, and practical reporting depth.
-                </p>
-              </div>
-
-              <div className="overflow-hidden rounded-2xl border border-white/[0.06]">
-                <div className="grid grid-cols-2 border-b border-white/[0.06] bg-white/[0.02]">
-                  <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Typical Approach
-                  </div>
-                  <div className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-accent-300">
-                    AD ERP SYSTEMS
-                  </div>
-                </div>
-                {compared.map((row, i) => (
-                  <div
-                    key={row.them}
-                    className={`grid grid-cols-2 border-b border-white/[0.04] ${
-                      i % 2 === 0 ? "" : "bg-white/[0.015]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-500">
-                      <span className="text-slate-600">&times;</span> {row.them}
-                    </div>
-                    <div className="flex items-center gap-2 px-6 py-4 text-sm text-slate-200">
-                      <CheckCircle2 size={14} className="shrink-0 text-accent-400" /> {row.us}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="section-space">
-        <Container>
-          <div className="reveal mx-auto max-w-5xl">
-            <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr]">
-              <div>
-                <span className="eyebrow">Process</span>
-                <h2 className="mt-4 font-heading text-3xl tracking-[-0.01em] text-slate-50 sm:text-4xl">
-                  How engagements work
-                </h2>
-                <p className="mt-4 text-sm leading-6 text-slate-400">
-                  Projects move from system review to working delivery in clear
-                  stages, with deployment and handoff kept clear throughout.
-                </p>
-                <div className="mt-8">
-                  <Link
-                    href="/book/?source=about_process"
-                    className="btn-primary inline-flex items-center gap-2"
-                  >
-                    Book a Discovery Call <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                {[
-                  {
-                    step: "01",
-                    title: "Discovery Call",
-                    desc: "The first call reviews your current systems, reporting pain points, and operating priorities.",
-                  },
-                  {
-                    step: "02",
-                    title: "Architecture & Scope",
-                    desc: "You receive a practical scope covering data sources, warehouse approach, reporting deliverables, timeline, and cost.",
-                  },
-                  {
-                    step: "03",
-                    title: "Build & Deploy",
-                    desc: "Delivery covers extraction pipelines, warehouse models, KPI logic, dashboards, and internal tools in working increments.",
-                  },
-                  {
-                    step: "04",
-                    title: "Handoff & Support",
-                    desc: "Everything is deployed to your accounts with documentation and training. Ongoing support is optional.",
-                  },
-                ].map((s) => (
-                  <div key={s.step} className="flex gap-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent-400/20 bg-accent-500/10 font-heading text-sm text-accent-300">
-                      {s.step}
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                Delivery model
+              </p>
+              <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+                Ownership, directness, and practical scope.
+              </h2>
+              <div className="mt-7 grid gap-4">
+                {benefits.map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d5dde2] bg-[#edf5f1] text-[#356b54]">
+                      <Icon size={18} />
                     </div>
                     <div>
-                      <h3 className="font-heading text-base tracking-[-0.01em] text-slate-50">
-                        {s.title}
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-400">{s.desc}</p>
+                      <h3 className="font-bold text-[#17212c]">{title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-[#58636b]">
+                        {desc}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            <BlueprintPanel className="overflow-hidden">
+              <div className="grid grid-cols-2 border-b border-[#d5dde2] bg-[#f7f9fb]">
+                <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#6f8190]">
+                  Typical approach
+                </div>
+                <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#35647f]">
+                  AD ERP SYSTEMS
+                </div>
+              </div>
+              {compared.map((row) => (
+                <div key={row.them} className="grid grid-cols-2 border-b border-[#d5dde2]/70 last:border-b-0">
+                  <div className="px-5 py-4 text-sm font-semibold leading-6 text-[#7a8791]">
+                    {row.them}
+                  </div>
+                  <div className="flex items-start gap-2 px-5 py-4 text-sm font-bold leading-6 text-[#40515d]">
+                    <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[#356b54]" />
+                    {row.us}
+                  </div>
+                </div>
+              ))}
+            </BlueprintPanel>
           </div>
         </Container>
       </section>
 
-      <CTABanner
-        headline="Discuss your current systems and reporting needs."
-        description="The first call reviews your ERP, spreadsheets, and reporting workflow, then outlines a practical path to centralized builder data, reporting systems, and operational tools."
-        primaryCTA={{
+      <section className="pb-16 md:pb-24">
+        <Container>
+          <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                Process
+              </p>
+              <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+                From discovery call to production handoff.
+              </h2>
+            </div>
+            <Link
+              href="/book/?source=about_process"
+              className={liquidActionClass({ tone: "secondary", size: "sm" })}
+            >
+              <span>Book a Discovery Call</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {process.map((step) => (
+              <BlueprintPanel key={step.step} className="p-6">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#c9d4da] bg-[#edf5f1] font-heading text-sm font-bold text-[#356b54]">
+                  {step.step}
+                </div>
+                <h3 className="mt-5 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[#58636b]">
+                  {step.desc}
+                </p>
+              </BlueprintPanel>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <BlueprintCTA
+        title="Review the reporting setup you have now."
+        description="We will look at your ERP exports, spreadsheets, and operating reports, then outline the first dashboard your team can use."
+        primary={{
           label: "Book a Discovery Call",
           href: "/book/?source=about_cta",
         }}
+        secondary={{
+          label: "View Services",
+          href: "/services/",
+        }}
       />
-    </>
+    </BlueprintPage>
   );
 }

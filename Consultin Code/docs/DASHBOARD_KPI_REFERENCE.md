@@ -1,6 +1,6 @@
 # Dashboard & KPI Reference
 
-**Canonical source of truth** — 2026-04-23
+**Canonical source of truth** - 2026-04-30
 
 This document consolidates the dashboard architecture, the KPI catalogue, and the data model for builder operations platforms. It reflects what is actually implemented today in:
 
@@ -8,6 +8,10 @@ This document consolidates the dashboard architecture, the KPI catalogue, and th
 - **Client dashboards** — `clients/brite_homes/`, `clients/fsp/` (per-client Next.js apps)
 - **KPI validation** — `config/kpi_thresholds.yaml` + `scripts/daily-quality-check.js` (105-KPI nightly check)
 - **Canonical BigQuery schema** — `sql/canonical_schema.sql`
+
+Companion process standard:
+
+- **Dashboard building SOP** - [`DASHBOARD_BUILDING_SOP.md`](./DASHBOARD_BUILDING_SOP.md) defines the build sequence, KPI definition template, date-basis rules, drilldown contract, validation checklist, and definition of done.
 
 When the older docs (`KPI_GUIDE.md`, `KPI_LIST.md`, `KPI_MASTER_REFERENCE.md`, `DASHBOARD_SHELL_BUILD_GUIDE.md`, `DASHBOARD_DESIGN_SYSTEM.md`, `DATA_DASHBOARD_PLAYBOOK.md`) conflict with this one, **this one wins**. Older docs remain for historical reference and deeper narrative.
 
@@ -31,7 +35,7 @@ Builder operations platforms run **three layers** of KPIs. Keep them separated �
 
 ### Layer C — Per-client KPI assessment (what the engagement sells)
 
-Manual markdown file produced during discovery, scoring each Layer-A KPI as `ready`, `partial`, or `blocked` based on the client's data availability.
+Manual markdown file produced during discovery, scoring each Layer-A KPI as `ready`, `partial`, `blocked`, or `renamed` based on the client's data availability and the exact metric the source data can support.
 
 **Implementation:** `clients/{client}/kpi_assessment.md`.
 
@@ -211,6 +215,26 @@ Thresholds target Sun Belt production builders doing **50–500 homes/year**. De
 
 Adjust thresholds per client by overriding `kpi_thresholds.yaml` entries in `clients/{client}/kpi_overrides.yaml` (supported but optional).
 
+### Layer-A KPI implementation standard
+
+Before a dashboard KPI is built, it must have a definition in `clients/{client}/kpi_logic.md` using the template in `DASHBOARD_BUILDING_SOP.md`.
+
+Minimum required definition fields:
+
+| Field | Required standard |
+|---|---|
+| Business question | What decision the KPI supports |
+| Grain | The row-level unit being counted or summed |
+| Numerator / denominator | Exact formula, including divide-by-zero behavior |
+| Date basis | The date field used for grouping and filtering |
+| Source tables/views | Canonical table, mart view, or helper function |
+| Filters | City, entity, community, status, year, quarter, month behavior |
+| Drilldown row scope | Exact records that should appear when clicked |
+| Validation check | How the KPI reconciles to source rows |
+| Readiness | `ready`, `partial`, `blocked`, or `renamed` |
+
+Do not ship a KPI card, chart, timeline, or crosstab if the label is broader than the logic. Rename the visual or block the KPI until the source data supports it.
+
 ---
 
 ## 4. Data model (canonical schema)
@@ -308,7 +332,7 @@ clients/{client}/
   app/
     page.js              # getDashboardData() caller, revalidate = 86400
     globals.css          # Mostly shared, occasional client tweaks
-  kpi_assessment.md      # Which KPIs are ready/partial/blocked
+  kpi_assessment.md      # Which KPIs are ready/partial/blocked/renamed
   kpi_overrides.yaml     # (optional) threshold overrides for validation
 ```
 
@@ -319,15 +343,17 @@ Three files change per client (`bigquery.js` defaults, `dashboard-data.js`, `das
 ## 6. Build sequence for a new client
 
 1. **Warehouse audit** — profile tables, row counts, column completeness
-2. **KPI assessment** — score every Layer-A KPI (ready / partial / blocked)
-3. **Ingest to canonical schema** — land raw in `{dataset}_raw`, transform to `{dataset}_marts` following `sql/canonical_schema.sql`
-4. **Wire BigQuery connection** — `.env.local` + service account
-5. **Register client** — add to `config/clients.yaml` and run `scripts/scaffold-client.js`
-6. **First nightly run** — enable `daily-quality-check.js` — expect most PASS, some ERROR while schema shakes out
-7. **Build dashboard-data.js** — one query per tab, returning the shape the shell expects
-8. **Build dashboard-shell.js** — copy from `clients/brite_homes/` and prune tabs for blocked domains
-9. **Smoke test** — load every tab, click every drill-down, verify drawers populate
-10. **Client review** — screenshare, calibrate thresholds, adjust copy
+2. **KPI assessment** - score every Layer-A KPI (`ready` / `partial` / `blocked` / `renamed`)
+3. **KPI logic registry** - define each metric in `clients/{client}/kpi_logic.md`
+4. **Ingest to canonical schema** — land raw in `{dataset}_raw`, transform to `{dataset}_marts` following `sql/canonical_schema.sql`
+5. **Wire BigQuery connection** — `.env.local` + service account
+6. **Register client** — add to `config/clients.yaml` and run `scripts/scaffold-client.js`
+7. **First nightly run** — enable `daily-quality-check.js` — expect most PASS, some ERROR while schema shakes out
+8. **Build dashboard-data.js** — one query per tab, returning the shape the shell expects
+9. **Build dashboard-shell.js** — copy from `clients/brite_homes/` and prune tabs for blocked domains
+10. **Smoke test** — load every tab, click every drill-down, verify drawers populate
+11. **SOP audit** - run the acceptance checklist in `DASHBOARD_BUILDING_SOP.md`
+12. **Client review** — screenshare, calibrate thresholds, adjust copy
 
 ---
 
@@ -364,7 +390,7 @@ Dashboard supports `data-sh-mode="day" | "night"`. Light mode swaps surfaces and
 A few invariants worth writing down. Easy to violate by accident.
 
 - **Never display NaN, Infinity, or "N/A%"** — `fmtPct` guards these; never bypass it.
-- **Never show blank drill-downs** — if a record isn't found, drawer shows a "Not Found / may have been filtered out" fallback row. Already implemented in `SHDrawer`.
+- **Never show irrelevant drilldowns** - if a click has no matching records, the drawer shows an honest empty state with the active scope and filters. Do not fill the drawer with broad fallback rows.
 - **Never divide by zero** — KPI functions (`getConstructionKPIs`, `getSalesKPIs`, etc.) are expected to guard. Every `X / Y` should have a paired `Y > 0 ? ... : 0`.
 - **Never mutate filters inside chart click handlers** — use the `onXClick` props that bubble up to `SunshineDashboard` state.
 - **Never hard-code communities, cities, stages, or lenders** — derive from the data.
@@ -388,7 +414,8 @@ A few invariants worth writing down. Easy to violate by accident.
 | Client onboarding | `Consultin Code/docs/CLIENT_ONBOARDING_GUIDE.md` |
 | Legacy KPI narrative | `Consultin Code/docs/KPI_GUIDE.md`, `KPI_LIST.md`, `KPI_MASTER_REFERENCE.md` |
 | Legacy shell narrative | `Consultin Code/docs/DASHBOARD_SHELL_BUILD_GUIDE.md`, `DASHBOARD_DESIGN_SYSTEM.md`, `DATA_DASHBOARD_PLAYBOOK.md` |
+| Dashboard building SOP | `Consultin Code/docs/DASHBOARD_BUILDING_SOP.md` |
 
 ---
 
-*Last updated 2026-04-23. When this document and any legacy doc conflict, trust this one.*
+*Last updated 2026-04-30. When this document and any legacy doc conflict, trust this one for KPI definitions and `DASHBOARD_BUILDING_SOP.md` for build process.*

@@ -96,10 +96,10 @@ export default function DemoPageClient() {
 
       <CTABanner
         headline="Want a platform like this for your operation?"
-        description="AD ERP SYSTEMS can map your current systems and design a reporting system built on your data and deployed to your infrastructure."
+        description="We can map your current systems and design a reporting system built on your data and deployed to your infrastructure."
         primaryCTA={{
           label: "Book a Discovery Call",
-          href: "/book/?source=demo_cta",
+          href: "/contact/",
         }}
         secondaryCTA={{
           label: "View All Services",

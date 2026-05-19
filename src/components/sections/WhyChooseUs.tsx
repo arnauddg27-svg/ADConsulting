@@ -10,7 +10,7 @@ const reasons = [
   {
     icon: <Building2 size={22} />,
     title: "Builder-specific data scope",
-    body: "Reporting is designed around residential builder and developer workflows, not generic templates.",
+    body: "We design around residential builder workflows, not generic reporting templates.",
   },
   {
     icon: <Wrench size={22} />,
@@ -19,13 +19,13 @@ const reasons = [
   },
   {
     icon: <GraduationCap size={22} />,
-    title: "Deployed to your accounts",
-    body: "Code, warehouse, hosting, and data stay in your environment with clear documentation and handoff.",
+    title: "Client ownership by default",
+    body: "Code, warehouse, hosting, and data stay in your accounts so your team keeps full control.",
   },
   {
     icon: <MapPin size={22} />,
     title: "Practical delivery model",
-    body: "Direct founder involvement, phased delivery, and a faster path from discovery to working reporting.",
+    body: "Direct senior involvement, phased delivery, and a faster path from discovery to working reporting.",
   },
 ];
 
@@ -40,14 +40,14 @@ export default function WhyChooseUs() {
       <Container>
         <div className="reveal grid gap-12 lg:grid-cols-[0.42fr_0.58fr] lg:items-center lg:gap-16">
           <div>
-            <span className="eyebrow eyebrow-dot">Why This Model</span>
+            <span className="eyebrow eyebrow-dot">Why Us</span>
             <h2 className="mt-6 max-w-lg font-heading text-4xl leading-[0.98] tracking-[-0.015em] text-slate-50 md:text-[3.4rem]">
-              Why builders and developers{" "}
+              Why homebuilders{" "}
               <span className="text-gradient">choose this model.</span>
             </h2>
             <p className="mt-6 text-base leading-7 text-slate-300 md:text-[1.05rem] md:leading-8">
-              The approach is focused on clarity and handoff: one centralized
-              data foundation, reporting built for residential operations, and tools
+              The approach is focused on clarity and ownership: one centralized
+              data foundation, reporting built for builder workflows, and tools
               teams can use to run operations with better visibility.
             </p>
 

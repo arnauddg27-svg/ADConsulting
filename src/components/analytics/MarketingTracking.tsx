@@ -12,7 +12,7 @@ export default function MarketingTracking() {
   return (
     <>
       {gtmId && (
-        <Script id="google-tag-manager" strategy="afterInteractive">
+        <Script id="google-tag-manager" strategy="lazyOnload">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -27,10 +27,10 @@ export default function MarketingTracking() {
         <>
           <Script
             id="google-gtag-loader"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             src={`https://www.googletagmanager.com/gtag/js?id=${gtagBaseId}`}
           />
-          <Script id="google-gtag-config" strategy="afterInteractive">
+          <Script id="google-gtag-config" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -43,7 +43,7 @@ export default function MarketingTracking() {
       )}
 
       {metaPixelId && (
-        <Script id="meta-pixel" strategy="afterInteractive">
+        <Script id="meta-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -60,7 +60,7 @@ export default function MarketingTracking() {
       )}
 
       {linkedInPartnerId && (
-        <Script id="linkedin-insight-tag" strategy="afterInteractive">
+        <Script id="linkedin-insight-tag" strategy="lazyOnload">
           {`
             _linkedin_partner_id = "${linkedInPartnerId}";
             window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];

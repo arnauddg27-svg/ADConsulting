@@ -11,9 +11,9 @@ import SHDataContextStrip from "./SHDataContextStrip";
 import type { DrillDetail } from "./SHDrawer";
 import {
   jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs,
-  matchFilters, SECTIONS,
+  matchFilters,
 } from "@/lib/sunshine-homes-data";
-import type { SHTab, SHDashboardFilters, SHSection } from "@/types/sunshine-homes";
+import type { SHTab, SHDashboardFilters } from "@/types/sunshine-homes";
 
 /* Lazy-load all tabs — only the active tab's code is fetched */
 const ConstructionDashboardTab = lazy(() => import("./tabs/ConstructionDashboardTab"));
@@ -61,7 +61,6 @@ export default function SunshineDashboard() {
   const [drawerDetail, setDrawerDetail] = useState<DrillDetail | null>(null);
   const [mode, setMode] = useState<"night" | "day">("night");
   const [isFullPage, setIsFullPage] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Backward compatibility: if an old state points to the removed land-subdivisions tab, send users to land pipeline.
   useEffect(() => {
@@ -190,17 +189,6 @@ export default function SunshineDashboard() {
     return "Dashboard";
   }, [activeTab]);
 
-  const activeSection = useMemo(
-    () => SECTIONS.find((section) => section.tabs.some((tab) => tab.id === activeTab)),
-    [activeTab]
-  );
-
-  const handleSectionChange = (sectionId: SHSection) => {
-    const section = SECTIONS.find((item) => item.id === sectionId);
-    const firstTab = section?.tabs[0]?.id;
-    if (firstTab) setActiveTab(firstTab);
-  };
-
   const onDrill = useCallback((detail: DrillDetail) => {
     const labelMetric = detail.label.split("—")[0]?.trim() || detail.type;
     const scopedCount = detail.scopedJobCodes?.length;
@@ -302,80 +290,7 @@ export default function SunshineDashboard() {
           onToggleMode={() => setMode(prev => prev === "night" ? "day" : "night")}
           onToggleFullPage={() => setIsFullPage(prev => !prev)}
         />
-        <div className="sh-mobile-nav" aria-label="Dashboard categories">
-          <label className="sh-mobile-nav-label" htmlFor="sh-mobile-section-select">Category</label>
-          <select
-            id="sh-mobile-section-select"
-            className="sh-mobile-section-select"
-            value={activeSection?.id ?? ""}
-            onChange={(event) => handleSectionChange(event.target.value as SHSection)}
-          >
-            {SECTIONS.map((section) => (
-              <option key={section.id} value={section.id}>
-                {section.label}
-              </option>
-            ))}
-          </select>
-          {activeSection && (
-            <label className="sh-mobile-view-label" htmlFor="sh-mobile-view-select">View</label>
-          )}
-          {activeSection && (
-            <select
-              id="sh-mobile-view-select"
-              className="sh-mobile-tab-select"
-              value={activeTab}
-              onChange={(event) => setActiveTab(event.target.value as SHTab)}
-            >
-              {activeSection.tabs.map((tab) => (
-                <option key={tab.id} value={tab.id}>
-                  {tab.label}
-                </option>
-              ))}
-            </select>
-          )}
-          <div className="sh-mobile-section-row" role="tablist" aria-label="Dashboard categories">
-            {SECTIONS.map((section) => (
-              <button
-                key={section.id}
-                type="button"
-                role="tab"
-                aria-selected={activeSection?.id === section.id}
-                className={`sh-mobile-section ${activeSection?.id === section.id ? "active" : ""}`}
-                onClick={() => handleSectionChange(section.id)}
-              >
-                {section.label}
-              </button>
-            ))}
-          </div>
-          {activeSection && (
-            <div className="sh-mobile-tab-row" aria-label={`${activeSection.label} views`}>
-              {activeSection.tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={`sh-mobile-tab ${activeTab === tab.id ? "active" : ""}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          )}
-          <button
-            type="button"
-            className={`sh-mobile-filter-toggle ${mobileFiltersOpen ? "active" : ""}`}
-            onClick={() => setMobileFiltersOpen((open) => !open)}
-            aria-expanded={mobileFiltersOpen}
-            aria-controls="sh-filter-bar"
-          >
-            Filters{filterCount ? ` (${filterCount})` : ""}
-          </button>
-        </div>
-        <FilterBar
-          filters={filters}
-          onChange={setFilters}
-          className={mobileFiltersOpen ? "is-open" : ""}
-        />
+        <FilterBar filters={filters} onChange={setFilters} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
           <SHDataContextStrip scopeLabel={contextMeta.scopeLabel} rows={contextMeta.rows} filterCount={filterCount} dateBasis={contextMeta.dateBasis} />

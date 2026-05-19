@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import DemoPageClient from "@/components/demo/DemoPageClient";
+import DemoDashboardClient from "./DemoDashboardClient";
 
 export const metadata: Metadata = {
-  title: "Sample Dashboard | Custom Data Platforms for Residential Builders and Developers",
+  title: "Sample Dashboard | AD ERP SYSTEMS",
   description:
-    "Explore a sample reporting system built on centralized builder and developer data, showing how dashboards and operational tools support residential operating decisions.",
+    "Explore a full-screen sample builder operations dashboard with lifecycle navigation, KPI tracking, construction pipeline, sales analytics, loan management, and cross-filtering.",
 };
 
 export default function DemoPage() {
-  return (
-    <div>
-      <DemoPageClient />
-    </div>
-  );
+  return <DemoDashboardClient />;
 }
