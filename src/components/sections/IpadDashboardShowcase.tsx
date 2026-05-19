@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   CheckCircle2,
@@ -15,7 +15,6 @@ import {
   type MotionValue,
   useReducedMotion,
   useScroll,
-  useSpring,
   useTransform,
 } from "motion/react";
 
@@ -117,47 +116,41 @@ function ContainerScroll({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 88%", "end 36%"],
-  });
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 170,
-    damping: 32,
-    mass: 0.32,
-    restDelta: 0.0005,
-  });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: containerRef });
 
   const rotate = useTransform(
-    smoothProgress,
-    [0, 0.32, 0.58, 1],
-    shouldReduceMotion ? [0, 0, 0, 0] : [3.25, 0.7, 0, 0],
+    scrollYProgress,
+    [0, 1],
+    shouldReduceMotion ? [0, 0] : [20, 0],
   );
   const scale = useTransform(
-    smoothProgress,
-    [0, 0.34, 0.62, 1],
-    shouldReduceMotion ? [1, 1, 1, 1] : [0.972, 0.992, 1, 1],
+    scrollYProgress,
+    [0, 1],
+    shouldReduceMotion ? [1, 1] : isMobile ? [0.7, 0.9] : [1.05, 1],
   );
   const translate = useTransform(
-    smoothProgress,
-    [0, 0.5, 1],
-    shouldReduceMotion ? [0, 0, 0] : [12, -8, -18],
-  );
-  const cardY = useTransform(
-    smoothProgress,
-    [0, 0.36, 0.66],
-    shouldReduceMotion ? [0, 0, 0] : [32, 8, 0],
+    scrollYProgress,
+    [0, 1],
+    shouldReduceMotion ? [0, 0] : [0, -100],
   );
 
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-[54rem] items-center justify-center px-2 py-14 sm:min-h-[62rem] md:px-8"
-      style={{ contain: "layout paint style" }}
+      className="relative flex min-h-[60rem] items-center justify-center px-2 py-10 md:min-h-[80rem] md:px-8 md:py-40"
     >
       <div
         className="relative w-full"
-        style={{ perspective: "1300px", transformStyle: "preserve-3d" }}
+        style={{ perspective: "1000px" }}
       >
         <motion.div
           style={{ translateY: translate }}
@@ -165,17 +158,9 @@ function ContainerScroll({
         >
           {titleComponent}
         </motion.div>
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 72, scale: 0.985 }}
-          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.22, margin: "0px 0px -12% 0px" }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="transform-gpu"
-        >
-          <TabletCard rotate={rotate} scale={scale} y={cardY}>
-            {children}
-          </TabletCard>
-        </motion.div>
+        <TabletCard rotate={rotate} scale={scale}>
+          {children}
+        </TabletCard>
       </div>
     </div>
   );
@@ -184,12 +169,10 @@ function ContainerScroll({
 function TabletCard({
   rotate,
   scale,
-  y,
   children,
 }: {
   rotate: MotionValue<number>;
   scale: MotionValue<number>;
-  y: MotionValue<number>;
   children: ReactNode;
 }) {
   return (
@@ -198,27 +181,13 @@ function TabletCard({
       style={{
         rotateX: rotate,
         scale,
-        y,
         willChange: "transform",
-        transformOrigin: "center 18%",
-        transformStyle: "preserve-3d",
-        backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
         boxShadow:
-          "0 18px 30px rgba(23,33,44,0.18), 0 60px 90px rgba(23,33,44,0.15), 0 120px 120px rgba(23,33,44,0.08)",
+          "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative mx-auto mt-8 w-full max-w-[60rem] transform-gpu rounded-[2.25rem] border border-[#31404a] bg-[#111922] p-2 shadow-2xl sm:mt-10 sm:p-3 md:rounded-[2.75rem] md:p-4"
+      className="relative -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-6"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-10 rounded-[3rem] bg-[radial-gradient(circle_at_50%_8%,rgba(139,215,255,0.22),transparent_34%),radial-gradient(circle_at_50%_100%,rgba(36,193,141,0.18),transparent_36%)] opacity-70 blur-2xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[2.25rem] bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.16)_42%,transparent_58%)] opacity-55 md:rounded-[2.75rem]"
-      />
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#07111b] md:rounded-[2rem]">
-        <div className="absolute left-1/2 top-2 z-20 hidden h-1.5 w-24 -translate-x-1/2 rounded-full bg-white/[0.14] md:block" />
+      <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
       </div>
     </motion.div>
