@@ -146,7 +146,7 @@ function ContainerScroll({
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-[60rem] items-center justify-center px-2 py-10 md:min-h-[80rem] md:px-8 md:py-40"
+      className="relative flex min-h-[42rem] items-center justify-center px-2 py-8 md:min-h-[56rem] md:px-8 md:py-16"
     >
       <div
         className="relative w-full"
