@@ -23,7 +23,7 @@ export default function Footer() {
   if (hideOnRoute) return null;
 
   const footerClass = isLightMarketing
-    ? "relative overflow-hidden border-t border-[#d9e0e4] bg-[#f7f9fb] text-[#17212c]"
+    ? "relative overflow-hidden border-t border-[#d9e0e4]/60 text-[#17212c]"
     : "relative overflow-hidden border-t border-white/[0.06] bg-[#060a12] text-slate-50";
 
   const gridImage = isLightMarketing

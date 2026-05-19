@@ -144,16 +144,11 @@ export default function AboutPage() {
                 Built for the way builder teams review work.
               </h2>
             </div>
-            <div className="grid gap-5 text-base leading-8 text-[#58636b] md:text-lg">
+            <div className="text-base leading-8 text-[#58636b] md:text-lg">
               <p>
-                Builder reporting breaks when schedule updates, cost movement,
-                owner follow-up, and stale inventory live in separate exports.
-                AD ERP SYSTEMS maps those sources into one operating layer.
-              </p>
-              <p>
-                The work is practical: clean data flow, clear exception logic,
-                dashboards by department, and a handoff model that keeps the
-                platform on the client side.
+                Builder reporting breaks when schedule, cost, and owner
+                follow-up live in separate exports. AD ERP SYSTEMS maps those
+                sources into one operating layer your team can review every day.
               </p>
             </div>
           </div>
@@ -237,44 +232,6 @@ export default function AboutPage() {
                 </div>
               ))}
             </BlueprintPanel>
-          </div>
-        </Container>
-      </section>
-
-      <section className="pb-16 md:pb-24">
-        <Container>
-          <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
-              <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
-                Process
-              </p>
-              <h2 className="mt-4 max-w-3xl font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-                From discovery call to production handoff.
-              </h2>
-            </div>
-            <Link
-              href="/book/?source=about_process"
-              className={liquidActionClass({ tone: "secondary", size: "sm" })}
-            >
-              <span>Book a Discovery Call</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {process.map((step) => (
-              <BlueprintPanel key={step.step} className="p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#c9d4da] bg-[#edf5f1] font-heading text-sm font-bold text-[#356b54]">
-                  {step.step}
-                </div>
-                <h3 className="mt-5 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
-                  {step.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#58636b]">
-                  {step.desc}
-                </p>
-              </BlueprintPanel>
-            ))}
           </div>
         </Container>
       </section>

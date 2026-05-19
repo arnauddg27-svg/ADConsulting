@@ -90,40 +90,6 @@ export const SERVICES: Service[] = [
       "Property management and portfolio reporting where needed",
     ],
   },
-  {
-    id: "pro-forma",
-    title: "Per-Job Pro Forma & Audit Tools",
-    shortTitle: "Pro Forma",
-    headline: "Configurable job-level financial views that catch margin erosion before closing",
-    description:
-      "Builder and developer teams need more than community-level summaries. We build per-job financial tools that combine cost, pricing, contingency, and operational data into usable views for underwriting, audits, and margin protection.",
-    icon: "DollarSign",
-    deliverables: [
-      "Per-job pro forma P&L views",
-      "Budget vs. actual and variance analysis",
-      "Configurable cost defaults and assumptions",
-      "At-risk job and exception flagging",
-      "Audit-ready calculations and reference tables",
-      "Inline-edit admin settings where appropriate",
-    ],
-  },
-  {
-    id: "data-quality",
-    title: "Data Quality Monitor & Admin Controls",
-    shortTitle: "Admin Tools",
-    headline: "Freshness checks, exception alerts, and controlled admin tools to keep reporting reliable",
-    description:
-      "Reporting only stays useful if the data stays clean. We add monitoring, exception logic, and practical admin controls so missing records, stale syncs, and broken assumptions surface quickly instead of lingering in the background.",
-    icon: "AlertTriangle",
-    deliverables: [
-      "Data freshness indicators and sync health checks",
-      "Column coverage and completeness monitoring",
-      "Exception center alerts by role or workflow",
-      "Admin settings for pro forma and reference defaults",
-      "Role-aware operational controls",
-      "Documentation for responsibility and ongoing maintenance",
-    ],
-  },
 ];
 
 export const STATS: Stat[] = [];

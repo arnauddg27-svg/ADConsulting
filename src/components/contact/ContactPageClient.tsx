@@ -121,21 +121,6 @@ export default function ContactPageClient() {
                 ))}
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                {[
-                  { icon: Database, label: "Centralized builder data" },
-                  { icon: BarChart3, label: "Dashboards and reporting" },
-                  { icon: Wrench, label: "Internal operating tools" },
-                ].map(({ icon: Icon, label }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-3 rounded-[1rem] border border-[#d5dde2] bg-white px-4 py-3 text-sm font-bold text-[#40515d]"
-                  >
-                    <Icon size={18} className="text-[#35647f]" />
-                    {label}
-                  </div>
-                ))}
-              </div>
             </BlueprintPanel>
 
             <div className="space-y-5">
@@ -178,41 +163,6 @@ export default function ContactPageClient() {
                 </div>
               </BlueprintPanel>
             </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="pb-16 md:pb-24">
-        <Container>
-          <div className="mx-auto mb-10 max-w-3xl text-center">
-            <p className="inline-flex rounded-full border border-[#c9d4da] bg-white/88 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#2f5368]">
-              FAQ
-            </p>
-            <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] sm:text-5xl">
-              Questions teams ask before the first call.
-            </h2>
-            <p className="mt-5 text-base leading-7 text-[#58636b] md:text-lg">
-              If the bottleneck is extraction, data quality, reporting design,
-              or workflow alignment, that is what the first conversation clarifies.
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            {faqs.map((faq) => (
-              <BlueprintPanel key={faq.q} className="p-6 md:p-7">
-                <div className="flex items-start gap-4">
-                  <ShieldCheck size={22} className="mt-1 shrink-0 text-[#35647f]" />
-                  <div>
-                    <h3 className="font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
-                      {faq.q}
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-[#58636b] md:text-base">
-                      {faq.a}
-                    </p>
-                  </div>
-                </div>
-              </BlueprintPanel>
-            ))}
           </div>
         </Container>
       </section>

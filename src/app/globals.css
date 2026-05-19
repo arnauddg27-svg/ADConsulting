@@ -331,32 +331,16 @@
   }
 
   .blueprint-frame {
-    position: absolute;
-    inset: 7rem clamp(1rem, 7vw, 8rem) 4rem;
-    pointer-events: none;
-    border: 1px solid rgba(41, 76, 103, 0.09);
-    border-radius: 1.5rem;
+    display: none;
   }
 
   .blueprint-frame::before,
   .blueprint-frame::after {
-    content: "";
-    position: absolute;
-    border-color: rgba(41, 76, 103, 0.11);
+    display: none;
   }
 
-  .blueprint-frame::before {
-    left: 13%;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid;
-  }
-
-  .blueprint-frame::after {
-    left: 0;
-    right: 0;
-    top: 18%;
-    border-top: 1px solid;
+  .blueprint-frame-disabled::before {
+    display: none;
   }
 
   .section-space {
