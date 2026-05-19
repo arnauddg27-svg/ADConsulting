@@ -135,6 +135,44 @@ export default function AboutPage() {
 
       <section className="pb-16 md:pb-24">
         <Container>
+          <BlueprintPanel className="overflow-hidden">
+            <div className="grid items-stretch gap-0 md:grid-cols-[0.9fr_1.1fr]">
+              <div className="relative min-h-[20rem] bg-[#eef3f6]">
+                <img
+                  src="/images/arnaud-durand.png"
+                  alt="Arnaud Durand, founder of AD ERP SYSTEMS"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="p-6 md:p-10">
+                <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                  Founder
+                </p>
+                <h2 className="mt-4 font-heading text-3xl leading-[1.05] tracking-[-0.03em] text-[#17212c] md:text-4xl">
+                  Arnaud Durand
+                </h2>
+                <p className="mt-5 text-base leading-8 text-[#58636b] md:text-lg">
+                  I started AD ERP SYSTEMS after seeing the same problem across
+                  residential builders: the data needed to run the business was
+                  spread across ERPs, spreadsheets, and field updates that never
+                  lined up. I build the reporting layer that pulls those sources
+                  together into daily operating views teams actually use.
+                </p>
+                <p className="mt-4 text-base leading-8 text-[#58636b] md:text-lg">
+                  You work directly with me through the project — discovery,
+                  build, and handoff — so scope stays practical and the system
+                  stays on your side at the end.
+                </p>
+              </div>
+            </div>
+          </BlueprintPanel>
+        </Container>
+      </section>
+
+      <section className="pb-16 md:pb-24">
+        <Container>
           <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
             <div>
               <p className="inline-flex rounded-full border border-[#c9d4da] bg-white/88 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#2f5368]">

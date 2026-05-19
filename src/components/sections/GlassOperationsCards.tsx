@@ -19,7 +19,7 @@ interface GlassOperationsCardProps {
 
 const operationCards = [
   {
-    title: "Construction sees work slipping sooner",
+    title: "Catch slipping work early",
     excerpt:
       "A construction dashboard keeps stage dates, closeout blockers, crew follow-ups, and delayed starts in one daily pipeline.",
     image:
@@ -32,7 +32,7 @@ const operationCards = [
     tags: ["Stages", "Closeouts"],
   },
   {
-    title: "Finance sees cost movement by job",
+    title: "Track cost movement by job",
     excerpt:
       "A finance dashboard ties budget changes, cost-to-complete movement, draws, and variance flags back to the jobs that need attention.",
     image:
@@ -45,7 +45,7 @@ const operationCards = [
     tags: ["Variance", "Draws"],
   },
   {
-    title: "Leadership sees one daily operating picture",
+    title: "One daily operating picture",
     excerpt:
       "Leadership sees KPIs, owners, next actions, and pipeline health without waiting for another spreadsheet rollup.",
     image:

@@ -177,23 +177,18 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="mt-8 grid max-w-2xl gap-2 sm:grid-cols-2">
-                {reviewSignals.slice(0, 2).map((signal) => (
-                  <div
-                    key={signal.label}
-                    className="rounded-[1.1rem] border border-[#d8e1e6] bg-white/[0.64] p-4 shadow-[0_20px_54px_-44px_rgba(23,33,44,0.42)] backdrop-blur"
-                  >
-                    <p className="text-[0.58rem] font-bold uppercase tracking-[0.18em] text-[#35647f]">
-                      {signal.label}
-                    </p>
-                    <p className="mt-2 text-base font-bold text-[#17212c]">
-                      {signal.value}
-                    </p>
-                    <p className="mt-1 text-sm leading-5 text-[#66727a]">
-                      {signal.detail}
-                    </p>
-                  </div>
-                ))}
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                {["4–6 week delivery", "Turnkey, client-owned system"].map(
+                  (chip) => (
+                    <span
+                      key={chip}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#d8e1e6] bg-white/[0.7] px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[#2f5368] shadow-[0_14px_40px_-32px_rgba(23,33,44,0.4)] backdrop-blur"
+                    >
+                      <CheckCircle2 size={14} className="text-[#4b9876]" />
+                      {chip}
+                    </span>
+                  ),
+                )}
               </div>
             </div>
 
@@ -460,8 +455,11 @@ export default function Home() {
                         What gets clarified on the call
                       </h3>
                     </div>
-                    <span className="rounded-full border border-white/[0.12] bg-black/[0.18] px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/[0.72]">
-                      30 min
+                    <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-full border border-white/[0.12] bg-black/[0.18] text-center leading-none text-white/[0.72]">
+                      <span className="text-base font-bold">30</span>
+                      <span className="mt-0.5 text-[0.5rem] font-bold uppercase tracking-[0.16em]">
+                        min
+                      </span>
                     </span>
                   </div>
 

@@ -100,27 +100,26 @@ export default function ContactPageClient() {
 
       <section className="pb-16 md:pb-24">
         <Container>
-          <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="grid items-start gap-6 lg:grid-cols-[1.08fr_0.92fr]">
             <BlueprintPanel className="p-6 md:p-8">
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid auto-rows-fr gap-4 sm:grid-cols-3">
                 {firstCallSteps.map((step, index) => (
                   <div
                     key={step.title}
-                    className="rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 p-5"
+                    className="flex h-full flex-col rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 p-5"
                   >
                     <div className="text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#35647f]">
                       Step {index + 1}
                     </div>
-                    <h3 className="mt-4 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
+                    <h3 className="mt-4 font-heading text-xl leading-tight tracking-[-0.03em] text-[#17212c]">
                       {step.title}
                     </h3>
-                    <p className="mt-4 text-sm leading-6 text-[#58636b]">
+                    <p className="mt-3 text-sm leading-6 text-[#58636b]">
                       {step.description}
                     </p>
                   </div>
                 ))}
               </div>
-
             </BlueprintPanel>
 
             <div className="space-y-5">
