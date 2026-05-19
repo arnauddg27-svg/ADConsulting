@@ -15,6 +15,7 @@ import {
   type MotionValue,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTransform,
 } from "motion/react";
 
@@ -125,22 +126,35 @@ function ContainerScroll({
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const { scrollYProgress } = useScroll({ target: containerRef });
+  // Track the card across the whole time it's on screen (enters from the
+  // bottom -> leaves at the top) so there's a long, smooth scroll range.
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+  // Spring-smooth the raw progress for buttery motion instead of step-by-step.
+  const progress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 28,
+    restDelta: 0.001,
+  });
 
+  // Tilt + scale ease from "entering" (progress ~0.12) to "centered"
+  // (progress ~0.55), then hold flat (useTransform clamps past the range).
   const rotate = useTransform(
-    scrollYProgress,
-    [0, 1],
-    shouldReduceMotion ? [0, 0] : [20, 0],
+    progress,
+    [0.12, 0.55],
+    shouldReduceMotion ? [0, 0] : [22, 0],
   );
   const scale = useTransform(
-    scrollYProgress,
-    [0, 1],
-    shouldReduceMotion ? [1, 1] : isMobile ? [0.7, 0.9] : [1.05, 1],
+    progress,
+    [0.12, 0.55],
+    shouldReduceMotion ? [1, 1] : isMobile ? [0.86, 1] : [0.92, 1],
   );
   const translate = useTransform(
-    scrollYProgress,
-    [0, 1],
-    shouldReduceMotion ? [0, 0] : [0, -100],
+    progress,
+    [0.12, 0.6],
+    shouldReduceMotion ? [0, 0] : [60, -10],
   );
 
   return (
