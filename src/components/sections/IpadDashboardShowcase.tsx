@@ -219,7 +219,7 @@ function KpiTile({
   icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex items-start justify-between gap-3">
         <p className="text-[0.56rem] font-bold uppercase tracking-[0.18em] text-white/[0.42]">
           {label}
@@ -239,7 +239,7 @@ function DashboardOnTablet() {
     <div className="relative h-full overflow-hidden bg-black text-white">
       <div
         aria-hidden
-        className="absolute inset-0 opacity-[0.14]"
+        className="absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage:
             "linear-gradient(90deg, rgba(139,215,255,0.32) 1px, transparent 1px), linear-gradient(rgba(139,215,255,0.24) 1px, transparent 1px)",
@@ -279,7 +279,7 @@ function DashboardOnTablet() {
           </div>
 
           <div className="flex flex-col gap-3 md:gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 md:p-5">
+            <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 md:p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
@@ -314,7 +314,7 @@ function DashboardOnTablet() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1620]">
               <div className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] border-b border-white/10 px-4 py-2.5 text-[0.52rem] font-bold uppercase tracking-[0.16em] text-white/[0.35]">
                 <span>Job</span>
                 <span>Signal</span>
