@@ -167,29 +167,25 @@ export default function AboutPage() {
 
       <section className="pb-16 md:pb-24">
         <Container>
-          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-            <div>
-              <p className="inline-flex rounded-full border border-[#c9d4da] bg-white/88 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#2f5368]">
-                Industry context
-              </p>
-              <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-                Built around how builders actually work.
-              </h2>
-            </div>
-            <div className="text-base leading-8 text-[#58636b] md:text-lg">
-              <p>
-                Builder reporting breaks when schedule, cost, and owner
-                follow-up live in separate exports. AD ERP SYSTEMS maps those
-                sources into one operating layer your team can review every day.
-              </p>
-            </div>
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="inline-flex rounded-full border border-[#c9d4da] bg-white/88 px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#2f5368]">
+              Industry context
+            </p>
+            <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+              Built around how builders actually work.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-[#58636b] md:text-lg">
+              Builder reporting breaks when schedule, cost, and owner follow-up
+              live in separate exports. AD ERP SYSTEMS maps those sources into
+              one operating layer your team can review every day.
+            </p>
           </div>
         </Container>
       </section>
 
       <section className="pb-16 md:pb-24">
         <Container>
-          <div className="mb-10 max-w-4xl">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
             <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
               What we build
             </p>

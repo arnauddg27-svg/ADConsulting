@@ -6,6 +6,7 @@ import {
   CircleDollarSign,
   Clock3,
   ClipboardList,
+  Home,
   LayoutDashboard,
   type LucideIcon,
 } from "lucide-react";
@@ -26,54 +27,54 @@ const tabletKpis = [
   {
     label: "Active jobs",
     value: "142",
-    note: "11 need action",
+    note: "across 8 communities",
     icon: LayoutDashboard,
   },
   {
-    label: "Cycle time",
-    value: "64d",
-    note: "avg cycle time",
-    icon: Clock3,
+    label: "Avg completion",
+    value: "68%",
+    note: "across active jobs",
+    icon: BarChart3,
   },
   {
     label: "Budget variance",
     value: "$284K",
-    note: "flagged early",
+    note: "flagged this month",
     icon: CircleDollarSign,
   },
   {
-    label: "Follow-ups",
+    label: "Owner follow-ups",
     value: "38",
-    note: "owner assigned",
+    note: "assigned & due",
     icon: ClipboardList,
   },
   {
     label: "Aging permits",
     value: "12",
-    note: "over target",
+    note: "over 60 days",
     icon: Clock3,
   },
   {
-    label: "Pipeline views",
-    value: "8",
-    note: "by department",
-    icon: BarChart3,
+    label: "Closings QTD",
+    value: "27",
+    note: "this quarter",
+    icon: Home,
   },
 ];
 
 const tabletRows = [
   {
     job: "Lot 184",
-    department: "Construction",
-    signal: "Stage date slipping",
+    department: "Sunshine Ridge",
+    signal: "Framing 4 days behind",
     owner: "Construction PM",
     action: "Confirm crew date",
     status: "Behind plan",
   },
   {
     job: "Lot 231",
-    department: "Finance",
-    signal: "Cost movement",
+    department: "Emerald Bay",
+    signal: "Cost-to-complete up 6%",
     owner: "Finance",
     action: "Review variance",
     status: "Review",
@@ -96,16 +97,16 @@ const tabletRows = [
   },
 ];
 
+// Active jobs by construction stage — sums to the 142 active-jobs KPI.
 const tabletPipelines = [
-  { label: "Land", value: 72 },
-  { label: "Permitting", value: 48 },
-  { label: "Construction", value: 86 },
-  { label: "Draws", value: 61 },
-  { label: "Sales", value: 64 },
-  { label: "Purchasing", value: 69 },
-  { label: "Closeout", value: 52 },
-  { label: "Warranty", value: 37 },
+  { label: "Permit", value: 18 },
+  { label: "Foundation", value: 26 },
+  { label: "Framing", value: 34 },
+  { label: "MEP / Drywall", value: 28 },
+  { label: "Finishes", value: 22 },
+  { label: "Closing", value: 14 },
 ];
+const pipelineMax = Math.max(...tabletPipelines.map((p) => p.value));
 
 function ContainerScroll({
   titleComponent,
@@ -287,10 +288,10 @@ function DashboardOnTablet() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
-                    Organized pipelines
+                    Construction pipeline
                   </p>
                   <h4 className="mt-1 text-base font-bold md:text-lg">
-                    Pipeline views by department
+                    Active jobs by stage
                   </h4>
                 </div>
                 <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
@@ -305,12 +306,14 @@ function DashboardOnTablet() {
                       <span className="font-bold text-white/[0.78]">
                         {pipeline.label}
                       </span>
-                      <span className="text-white/[0.42]">{pipeline.value}%</span>
+                      <span className="text-white/[0.42]">
+                        {pipeline.value} jobs
+                      </span>
                     </div>
                     <div className="mt-1.5 h-2 rounded-full bg-white/[0.08]">
                       <div
                         className="h-2 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
-                        style={{ width: `${pipeline.value}%` }}
+                        style={{ width: `${(pipeline.value / pipelineMax) * 100}%` }}
                       />
                     </div>
                   </div>

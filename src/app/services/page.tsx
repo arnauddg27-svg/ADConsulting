@@ -54,59 +54,57 @@ export default function ServicesPage() {
 
             return (
               <BlueprintPanel key={service.id} className="overflow-hidden p-6 md:p-8 lg:p-10">
-                <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
-                        <Icon size={26} />
-                      </div>
-                      <span className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#6f8190]">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
+                <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
+                      <Icon size={26} />
                     </div>
-
-                    <p className="mt-7 text-[0.64rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
-                      {service.shortTitle}
-                    </p>
-                    <h2 className="mt-3 max-w-2xl font-heading text-4xl leading-[0.98] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-                      {service.title}
-                    </h2>
-                    <p className="mt-5 max-w-2xl text-base leading-7 text-[#58636b] md:text-lg">
-                      {service.description}
-                    </p>
-
-                    <Link
-                      href={`/book/?source=services_${service.id}`}
-                      className={liquidActionClass({
-                        tone: "secondary",
-                        size: "sm",
-                        className: "mt-7",
-                      })}
-                    >
-                      <span>Discuss this</span>
-                      <ArrowRight size={14} />
-                    </Link>
+                    <span className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#6f8190]">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                   </div>
 
-                  <div>
-                    <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
-                      What you get
-                    </p>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      {service.deliverables.map((deliverable) => (
-                        <div
-                          key={deliverable}
-                          className="flex min-h-[5.25rem] items-start gap-3 rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 px-4 py-3.5"
-                        >
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
-                            <Check size={12} strokeWidth={3} />
-                          </span>
-                          <span className="text-sm font-semibold leading-6 text-[#40515d]">
-                            {deliverable}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                  <p className="mt-6 text-[0.64rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                    {service.shortTitle}
+                  </p>
+                  <h2 className="mt-3 font-heading text-4xl leading-[1] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+                    {service.title}
+                  </h2>
+                  <p className="mt-5 text-base leading-7 text-[#58636b] md:text-lg">
+                    {service.description}
+                  </p>
+
+                  <Link
+                    href={`/book/?source=services_${service.id}`}
+                    className={liquidActionClass({
+                      tone: "secondary",
+                      size: "sm",
+                      className: "mt-7",
+                    })}
+                  >
+                    <span>Discuss this</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+
+                <div className="mt-10 border-t border-[#e1e6e8] pt-8">
+                  <p className="text-center text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                    What you get
+                  </p>
+                  <div className="mx-auto mt-5 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {service.deliverables.map((deliverable) => (
+                      <div
+                        key={deliverable}
+                        className="flex h-full flex-col items-center gap-2.5 rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 px-4 py-5 text-center"
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                          <Check size={13} strokeWidth={3} />
+                        </span>
+                        <span className="text-sm font-semibold leading-6 text-[#40515d]">
+                          {deliverable}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </BlueprintPanel>

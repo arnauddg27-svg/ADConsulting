@@ -108,68 +108,64 @@ export default function ContactPageClient() {
               A short call to find the first dashboard.
             </h2>
           </div>
-          <div className="grid items-start gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <BlueprintPanel className="p-6 md:p-8">
-              <div className="grid auto-rows-fr gap-4 sm:grid-cols-3">
-                {firstCallSteps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="flex h-full flex-col rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 p-5"
+          <div className="mx-auto grid max-w-3xl auto-rows-fr gap-4 sm:grid-cols-3">
+            {firstCallSteps.map((step, index) => (
+              <div
+                key={step.title}
+                className="flex h-full flex-col rounded-[1.1rem] border border-[#d5dde2] bg-white/82 p-5 shadow-[0_24px_70px_-58px_rgba(23,33,44,0.42)]"
+              >
+                <div className="text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#35647f]">
+                  Step {index + 1}
+                </div>
+                <h3 className="mt-4 font-heading text-xl leading-tight tracking-[-0.03em] text-[#17212c]">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-[#58636b]">
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mx-auto mt-6 grid max-w-5xl items-start gap-5 lg:grid-cols-2">
+            <BlueprintPanel className="p-6 md:p-7">
+              <h2 className="font-heading text-2xl tracking-[-0.03em] text-[#17212c]">
+                Contact details
+              </h2>
+              <div className="mt-5 space-y-4 text-sm font-semibold text-[#40515d]">
+                <div className="flex items-start gap-3">
+                  <Mail size={18} className="mt-0.5 text-[#35647f]" />
+                  <a
+                    href={`mailto:${SITE_CONFIG.email}`}
+                    className="hover:text-[#17212c]"
                   >
-                    <div className="text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#35647f]">
-                      Step {index + 1}
-                    </div>
-                    <h3 className="mt-4 font-heading text-xl leading-tight tracking-[-0.03em] text-[#17212c]">
-                      {step.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-[#58636b]">
-                      {step.description}
-                    </p>
+                    {SITE_CONFIG.email}
+                  </a>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin size={18} className="mt-0.5 text-[#35647f]" />
+                  <span>{SITE_CONFIG.location}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Clock size={18} className="mt-0.5 text-[#35647f]" />
+                  <span>Response within 24 hours</span>
+                </div>
+              </div>
+            </BlueprintPanel>
+
+            <BlueprintPanel className="p-6 md:p-7">
+              <h2 className="font-heading text-2xl tracking-[-0.03em] text-[#17212c]">
+                Strong fit if...
+              </h2>
+              <div className="mt-5 space-y-4">
+                {fitPoints.map((point) => (
+                  <div key={point} className="flex items-start gap-3 text-sm font-semibold leading-6 text-[#58636b]">
+                    <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#356b54]" />
+                    <span>{point}</span>
                   </div>
                 ))}
               </div>
             </BlueprintPanel>
-
-            <div className="space-y-5">
-              <BlueprintPanel className="p-6 md:p-7">
-                <h2 className="font-heading text-3xl tracking-[-0.04em] text-[#17212c]">
-                  Contact details
-                </h2>
-                <div className="mt-6 space-y-4 text-sm font-semibold text-[#40515d]">
-                  <div className="flex items-start gap-3">
-                    <Mail size={18} className="mt-0.5 text-[#35647f]" />
-                    <a
-                      href={`mailto:${SITE_CONFIG.email}`}
-                      className="hover:text-[#17212c]"
-                    >
-                      {SITE_CONFIG.email}
-                    </a>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin size={18} className="mt-0.5 text-[#35647f]" />
-                    <span>{SITE_CONFIG.location}</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Clock size={18} className="mt-0.5 text-[#35647f]" />
-                    <span>Response within 24 hours</span>
-                  </div>
-                </div>
-              </BlueprintPanel>
-
-              <BlueprintPanel className="p-6 md:p-7">
-                <h3 className="font-heading text-3xl tracking-[-0.04em] text-[#17212c]">
-                  Strong fit if...
-                </h3>
-                <div className="mt-6 space-y-4">
-                  {fitPoints.map((point) => (
-                    <div key={point} className="flex items-start gap-3 text-sm font-semibold leading-6 text-[#58636b]">
-                      <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#356b54]" />
-                      <span>{point}</span>
-                    </div>
-                  ))}
-                </div>
-              </BlueprintPanel>
-            </div>
           </div>
         </Container>
       </section>

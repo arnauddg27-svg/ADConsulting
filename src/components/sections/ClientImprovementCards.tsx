@@ -153,7 +153,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     description:
       "Stalled stages and aging follow-ups flagged early so teams can move work faster.",
     metric: "15%",
-    metricLabel: "Cycle gain",
+    metricLabel: "Cycle time reduction",
     proof: "Top-200 builder environment",
     Icon: ClockIcon,
     chart: "area",
@@ -193,10 +193,11 @@ function ChartFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/* Chart 1: smooth upward area sparkline with an endpoint dot (cut cycle time) */
+/* Chart 1: smooth downward area sparkline = cycle time getting shorter
+   (cut cycle time). Endpoint dot sits at the low/right end. */
 function AreaChart({ animate, id }: { animate: boolean; id: string }) {
   const line =
-    "M4 64 C 44 60 64 56 104 50 C 150 43 178 33 224 25 C 262 18 286 13 316 8";
+    "M4 12 C 44 16 64 20 104 28 C 150 37 178 47 224 54 C 262 60 286 66 316 70";
   const area = `${line} L316 76 L4 76 Z`;
   return (
     <ChartFrame>
@@ -236,7 +237,7 @@ function AreaChart({ animate, id }: { animate: boolean; id: string }) {
         />
       </svg>
       <motion.span
-        className="absolute right-4 top-2.5 h-2.5 w-2.5 rounded-full bg-[#2f9e6f] ring-4 ring-[#2f9e6f]/15"
+        className="absolute bottom-3.5 right-4 h-2.5 w-2.5 rounded-full bg-[#2f9e6f] ring-4 ring-[#2f9e6f]/15"
         initial={animate ? { scale: 0, opacity: 0 } : false}
         animate={animate ? { scale: 1, opacity: 1 } : undefined}
         transition={{ delay: 1, type: "spring", stiffness: 300, damping: 18 }}
