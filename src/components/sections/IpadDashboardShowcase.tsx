@@ -5,14 +5,16 @@ import {
   BarChart3,
   CircleDollarSign,
   Clock3,
-  ClipboardList,
   Home,
   LayoutDashboard,
+  Percent,
   type LucideIcon,
 } from "lucide-react";
 import {
+  animate,
   motion,
   type MotionValue,
+  useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useSpring,
@@ -23,101 +25,138 @@ import Container from "@/components/ui/Container";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { cn } from "@/lib/utils";
 
-const tabletKpis = [
+type Kpi = {
+  label: string;
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  note: string;
+  icon: LucideIcon;
+  tone?: "good" | "neutral";
+};
+
+// Six exec metrics weighted to the three pillars the dashboard tracks:
+// milestone progress, cycle time, and budget.
+const tabletKpis: Kpi[] = [
   {
-    label: "Active jobs",
-    value: "142",
-    note: "across 8 communities",
-    icon: LayoutDashboard,
+    label: "Avg cycle time",
+    value: 7.9,
+    decimals: 1,
+    suffix: " mo",
+    note: "vs 8.5 mo target",
+    icon: Clock3,
+    tone: "good",
   },
   {
     label: "Avg completion",
-    value: "68%",
-    note: "across active jobs",
+    value: 71,
+    suffix: "%",
+    note: "across 138 active jobs",
     icon: BarChart3,
+    tone: "neutral",
   },
   {
     label: "Budget variance",
-    value: "$284K",
-    note: "flagged this month",
+    value: 310,
+    prefix: "$",
+    suffix: "K",
+    note: "under budget · to date",
     icon: CircleDollarSign,
+    tone: "good",
   },
   {
-    label: "Owner follow-ups",
-    value: "38",
-    note: "assigned & due",
-    icon: ClipboardList,
+    label: "Avg margin",
+    value: 24.6,
+    decimals: 1,
+    suffix: "%",
+    note: "gross at closeout",
+    icon: Percent,
+    tone: "good",
   },
   {
-    label: "Aging permits",
-    value: "12",
-    note: "over 60 days",
-    icon: Clock3,
+    label: "Active jobs",
+    value: 138,
+    note: "across 8 communities",
+    icon: LayoutDashboard,
+    tone: "neutral",
   },
   {
     label: "Closings QTD",
-    value: "27",
+    value: 27,
     note: "this quarter",
     icon: Home,
+    tone: "neutral",
   },
 ];
 
-const tabletRows = [
-  {
-    job: "Lot 184",
-    department: "Sunshine Ridge",
-    signal: "Framing 4 days behind",
-    owner: "Construction PM",
-    action: "Confirm crew date",
-    status: "Behind plan",
-  },
-  {
-    job: "Lot 231",
-    department: "Emerald Bay",
-    signal: "Cost-to-complete up 6%",
-    owner: "Finance",
-    action: "Review variance",
-    status: "Review",
-  },
-  {
-    job: "Lot 097",
-    department: "Permitting",
-    signal: "Approval pending",
-    owner: "Permit lead",
-    action: "Resolve approval",
-    status: "At risk",
-  },
-  {
-    job: "Lot 142",
-    department: "Sales",
-    signal: "Inventory aging",
-    owner: "Sales",
-    action: "Update pricing",
-    status: "Review",
-  },
+// Milestone progress: active jobs by construction stage (sums to 138).
+// Stage colors follow the real sample-dashboard teal -> blue ramp.
+const milestoneStages = [
+  { label: "Permit", value: 9, color: "#0f766e" },
+  { label: "Foundation", value: 17, color: "#0d9488" },
+  { label: "Framing", value: 31, color: "#14b8a6" },
+  { label: "MEP / Drywall", value: 34, color: "#22d3ee" },
+  { label: "Finishes", value: 28, color: "#3b82f6" },
+  { label: "Closing", value: 19, color: "#1e40af" },
 ];
+const stageMax = Math.max(...milestoneStages.map((s) => s.value));
 
-// Active jobs by construction stage — sums to the 142 active-jobs KPI.
-const tabletPipelines = [
-  { label: "Permit", value: 18 },
-  { label: "Foundation", value: 26 },
-  { label: "Framing", value: 34 },
-  { label: "MEP / Drywall", value: 28 },
-  { label: "Finishes", value: 22 },
-  { label: "Closing", value: 14 },
-];
-const pipelineMax = Math.max(...tabletPipelines.map((p) => p.value));
+// Cycle-time tracking: avg days-to-complete by quarter, trending toward goal.
+const cycleTrend = [262, 257, 251, 246, 242, 238];
+const CYCLE_GOAL = 240;
+const cycleDrop = cycleTrend[0] - cycleTrend[cycleTrend.length - 1];
+
+function CountUp({
+  value,
+  prefix = "",
+  suffix = "",
+  decimals = 0,
+  run,
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  run: boolean;
+}) {
+  const reduce = useReducedMotion();
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!run) return;
+    if (reduce) {
+      setDisplay(value);
+      return;
+    }
+    const controls = animate(0, value, {
+      duration: 1.1,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => setDisplay(v),
+    });
+    return () => controls.stop();
+  }, [run, value, reduce]);
+
+  return (
+    <span>
+      {prefix}
+      {display.toFixed(decimals)}
+      {suffix}
+    </span>
+  );
+}
 
 function ContainerScroll({
   titleComponent,
   children,
 }: {
   titleComponent: ReactNode;
-  children: ReactNode;
+  children: (revealed: boolean) => ReactNode;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
@@ -138,6 +177,20 @@ function ContainerScroll({
     damping: 28,
     restDelta: 0.001,
   });
+
+  // Bring the dashboard data "alive" as the card tilts into view.
+  useMotionValueEvent(progress, "change", (v) => {
+    if (v > 0.4) setRevealed(true);
+  });
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      setRevealed(true);
+      return;
+    }
+    // Fallback so the data always animates in even if scroll events are sparse.
+    const t = setTimeout(() => setRevealed(true), 1600);
+    return () => clearTimeout(t);
+  }, [shouldReduceMotion]);
 
   // Tilt + scale ease from "entering" (progress ~0.12) to "centered"
   // (progress ~0.55), then hold flat (useTransform clamps past the range).
@@ -162,10 +215,7 @@ function ContainerScroll({
       ref={containerRef}
       className="relative flex min-h-[42rem] items-center justify-center px-2 py-8 md:min-h-[56rem] md:px-8 md:py-16"
     >
-      <div
-        className="relative w-full"
-        style={{ perspective: "1000px" }}
-      >
+      <div className="relative w-full" style={{ perspective: "1000px" }}>
         <motion.div
           style={{ translateY: translate }}
           className="mx-auto max-w-4xl text-center"
@@ -173,7 +223,7 @@ function ContainerScroll({
           {titleComponent}
         </motion.div>
         <TabletCard rotate={rotate} scale={scale}>
-          {children}
+          {children(revealed)}
         </TabletCard>
       </div>
     </div>
@@ -209,37 +259,244 @@ function TabletCard({
 }
 
 function KpiTile({
-  label,
-  value,
-  note,
-  icon: Icon,
+  kpi,
+  index,
+  revealed,
 }: {
-  label: string;
-  value: string;
-  note: string;
-  icon: LucideIcon;
+  kpi: Kpi;
+  index: number;
+  revealed: boolean;
 }) {
+  const reduce = useReducedMotion();
+  const Icon = kpi.icon;
+  const good = kpi.tone === "good";
+
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 12 }}
+      animate={
+        revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }
+      }
+      transition={{
+        duration: 0.5,
+        delay: reduce ? 0 : 0.05 + index * 0.07,
+        ease: "easeOut",
+      }}
+      className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+    >
       <div className="flex items-center justify-between gap-2">
         <p className="text-[0.5rem] font-bold uppercase tracking-[0.16em] text-white/[0.42]">
-          {label}
+          {kpi.label}
         </p>
-        <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]">
+        <span
+          className={cn(
+            "flex h-6 w-6 items-center justify-center rounded-lg border",
+            good
+              ? "border-[#24c18d]/25 bg-[#24c18d]/10 text-[#8df2c8]"
+              : "border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]",
+          )}
+        >
           <Icon size={13} />
         </span>
       </div>
       <div className="mt-2.5 text-2xl font-bold leading-none text-white">
-        {value}
+        <CountUp
+          value={kpi.value}
+          prefix={kpi.prefix}
+          suffix={kpi.suffix}
+          decimals={kpi.decimals}
+          run={revealed}
+        />
       </div>
       <p className="mt-1.5 text-[0.7rem] font-semibold text-white/[0.45]">
-        {note}
+        {kpi.note}
       </p>
+    </motion.div>
+  );
+}
+
+function MilestoneBars({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 md:p-5">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+            Construction milestones
+          </p>
+          <h4 className="mt-1 text-base font-bold md:text-lg">
+            Active jobs by stage
+          </h4>
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
+          71% avg complete
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-x-5 gap-y-3 md:grid-cols-2">
+        {milestoneStages.map((stage, i) => {
+          const pct = (stage.value / stageMax) * 100;
+          return (
+            <div key={stage.label}>
+              <div className="flex items-center justify-between text-xs md:text-sm">
+                <span className="font-bold text-white/[0.78]">
+                  {stage.label}
+                </span>
+                <span className="text-white/[0.42]">{stage.value} jobs</span>
+              </div>
+              <div className="mt-1.5 h-2 rounded-full bg-white/[0.08]">
+                <motion.div
+                  className="h-2 rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${stage.color}, #8bd7ff)`,
+                  }}
+                  initial={reduce ? false : { width: "0%" }}
+                  animate={{ width: revealed || reduce ? `${pct}%` : "0%" }}
+                  transition={{
+                    duration: 0.9,
+                    delay: reduce ? 0 : 0.2 + i * 0.08,
+                    ease: "easeOut",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function DashboardOnTablet() {
+function CycleTrend({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  const n = cycleTrend.length;
+  const W = 200;
+  const H = 60;
+  const padX = 3;
+  const top = 6;
+  const bot = 52;
+  const minV = 230;
+  const maxV = 268;
+  const x = (i: number) => padX + (i / (n - 1)) * (W - padX * 2);
+  const y = (v: number) => bot - ((v - minV) / (maxV - minV)) * (bot - top);
+  const pts = cycleTrend.map((d, i) => `${x(i).toFixed(1)} ${y(d).toFixed(1)}`);
+  const line = `M ${pts.join(" L ")}`;
+  const area = `${line} L ${x(n - 1).toFixed(1)} ${H} L ${x(0).toFixed(1)} ${H} Z`;
+  const goalY = y(CYCLE_GOAL);
+
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+            Cycle time
+          </p>
+          <h4 className="mt-1 text-sm font-bold md:text-base">
+            Avg days to complete
+          </h4>
+        </div>
+        <span className="rounded-full border border-[#24c18d]/30 bg-[#24c18d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#8df2c8]">
+          ▼ {cycleDrop}d
+        </span>
+      </div>
+
+      <div className="relative mt-3 flex-1">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none"
+          className="h-14 w-full md:h-16"
+          fill="none"
+          aria-hidden
+        >
+          <defs>
+            <linearGradient id="cycle-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#24c18d" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#24c18d" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <line
+            x1="0"
+            y1={goalY}
+            x2={W}
+            y2={goalY}
+            stroke="#8bd7ff"
+            strokeOpacity="0.4"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+          <motion.path
+            d={area}
+            fill="url(#cycle-fill)"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: revealed || reduce ? 1 : 0 }}
+            transition={{ duration: 0.7, delay: reduce ? 0 : 0.5 }}
+          />
+          <motion.path
+            d={line}
+            stroke="#24c18d"
+            strokeWidth="2.5"
+            vectorEffect="non-scaling-stroke"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={reduce ? false : { pathLength: 0 }}
+            animate={{ pathLength: revealed || reduce ? 1 : 0 }}
+            transition={{ duration: 1, ease: "easeInOut", delay: reduce ? 0 : 0.3 }}
+          />
+        </svg>
+      </div>
+
+      <div className="mt-2 flex items-center justify-between text-[0.6rem] font-semibold text-white/[0.42]">
+        <span>7.9 mo avg</span>
+        <span>goal {CYCLE_GOAL}d</span>
+      </div>
+    </div>
+  );
+}
+
+function BudgetPanel({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  const actualPct = 98.4;
+
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+            Budget tracking
+          </p>
+          <h4 className="mt-1 text-sm font-bold md:text-base">
+            Actual vs budget
+          </h4>
+        </div>
+        <span className="rounded-full border border-[#24c18d]/30 bg-[#24c18d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#8df2c8]">
+          ▼ $310K under
+        </span>
+      </div>
+
+      <div className="mt-4 flex-1">
+        <div className="flex items-center justify-between text-[0.62rem] font-semibold text-white/[0.5]">
+          <span>Actual to date</span>
+          <span className="text-white/[0.82]">$18.89M</span>
+        </div>
+        <div className="mt-1.5 h-2.5 rounded-full bg-white/[0.08]">
+          <motion.div
+            className="h-2.5 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
+            initial={reduce ? false : { width: "0%" }}
+            animate={{ width: revealed || reduce ? `${actualPct}%` : "0%" }}
+            transition={{ duration: 1, ease: "easeOut", delay: reduce ? 0 : 0.4 }}
+          />
+        </div>
+        <div className="mt-1.5 flex items-center justify-between text-[0.58rem] font-semibold text-white/[0.38]">
+          <span>Budget $19.2M</span>
+          <span>24.6% avg margin</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardOnTablet({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
   return (
     <div className="relative h-full overflow-hidden bg-black text-white">
       <div
@@ -271,96 +528,27 @@ function DashboardOnTablet() {
             </h3>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-[#24c18d]/35 bg-[#24c18d]/10 px-3 py-1.5 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
-            <span className="h-2 w-2 rounded-full bg-[#24c18d]" />
+            <motion.span
+              className="h-2 w-2 rounded-full bg-[#24c18d]"
+              animate={reduce ? undefined : { opacity: [1, 0.35, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
             Sample data
           </div>
         </div>
 
         <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-5">
           <div className="grid grid-cols-2 gap-2.5 md:gap-3">
-            {tabletKpis.map((kpi) => (
-              <KpiTile key={kpi.label} {...kpi} />
+            {tabletKpis.map((kpi, i) => (
+              <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
             ))}
           </div>
 
           <div className="flex flex-col gap-3 md:gap-4">
-            <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 md:p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
-                    Construction pipeline
-                  </p>
-                  <h4 className="mt-1 text-base font-bold md:text-lg">
-                    Active jobs by stage
-                  </h4>
-                </div>
-                <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
-                  Sample
-                </span>
-              </div>
-
-              <div className="mt-4 grid gap-x-5 gap-y-3 md:grid-cols-2">
-                {tabletPipelines.map((pipeline) => (
-                  <div key={pipeline.label}>
-                    <div className="flex items-center justify-between text-xs md:text-sm">
-                      <span className="font-bold text-white/[0.78]">
-                        {pipeline.label}
-                      </span>
-                      <span className="text-white/[0.42]">
-                        {pipeline.value} jobs
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-2 rounded-full bg-white/[0.08]">
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
-                        style={{ width: `${(pipeline.value / pipelineMax) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1620]">
-              <div className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] border-b border-white/10 px-4 py-2.5 text-[0.52rem] font-bold uppercase tracking-[0.16em] text-white/[0.35]">
-                <span>Job</span>
-                <span>Signal</span>
-                <span>Owner</span>
-                <span>Status</span>
-              </div>
-              <div className="divide-y divide-white/10">
-                {tabletRows.slice(0, 2).map((row) => (
-                  <div
-                    key={row.job}
-                    className="grid grid-cols-[0.7fr_1.1fr_0.9fr_0.7fr] items-center gap-3 px-4 py-3 text-xs md:text-sm"
-                  >
-                    <div>
-                      <div className="font-bold">{row.job}</div>
-                      <div className="mt-0.5 text-[0.5rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
-                        {row.department}
-                      </div>
-                    </div>
-                    <div className="font-bold text-white/[0.84]">{row.signal}</div>
-                    <div className="font-semibold text-white/[0.62]">
-                      {row.owner}
-                    </div>
-                    <div>
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full border px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em]",
-                          row.status === "Behind plan"
-                            ? "border-[#f2c66d]/35 bg-[#f2c66d]/10 text-[#f2c66d]"
-                            : row.status === "At risk"
-                              ? "border-[#f37b7b]/35 bg-[#f37b7b]/10 text-[#f37b7b]"
-                              : "border-[#8df2c8]/35 bg-[#8df2c8]/10 text-[#8df2c8]",
-                        )}
-                      >
-                        {row.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <MilestoneBars revealed={revealed} />
+            <div className="grid flex-1 grid-cols-2 gap-3 md:gap-4">
+              <CycleTrend revealed={revealed} />
+              <BudgetPanel revealed={revealed} />
             </div>
           </div>
         </div>
@@ -383,17 +571,17 @@ export default function IpadDashboardShowcase() {
                 Daily dashboard preview
               </AnimatedGradientText>
               <h2 className="mx-auto mt-5 max-w-4xl font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-6xl">
-                Daily dashboard views for every department.
+                Milestone progress, cycle time, and budget in one view.
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#58636b]">
-                KPI cards, detailed pipelines, and next-action queues stay in
-                one place for construction, finance, sales, permitting,
-                purchasing, warranty, and leadership.
+                A daily operating dashboard that tracks construction milestones,
+                cycle-time trends, and budget variance — the signals that decide
+                whether jobs close on time and on margin.
               </p>
             </div>
           }
         >
-          <DashboardOnTablet />
+          {(revealed) => <DashboardOnTablet revealed={revealed} />}
         </ContainerScroll>
       </Container>
     </section>
