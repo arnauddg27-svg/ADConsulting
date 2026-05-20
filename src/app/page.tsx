@@ -137,14 +137,16 @@ const ctaClass =
   liquidActionClass({
     tone: "primary",
     size: "lg",
-    className: "w-full sm:w-auto sm:px-7 sm:text-[0.76rem] sm:tracking-[0.16em]",
+    className:
+      "w-full shrink-0 sm:w-auto sm:px-6 sm:text-[0.72rem] sm:tracking-[0.12em]",
   });
 
 const secondaryCtaClass =
   liquidActionClass({
     tone: "secondary",
     size: "lg",
-    className: "w-full sm:w-auto sm:px-7 sm:text-[0.76rem] sm:tracking-[0.16em]",
+    className:
+      "w-full shrink-0 sm:w-auto sm:px-6 sm:text-[0.72rem] sm:tracking-[0.12em]",
   });
 
 export default function Home() {
@@ -167,7 +169,7 @@ export default function Home() {
                 into daily operating views that show which jobs are slipping,
                 which costs moved, and who needs to act next.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <TrackedCalendlyLink source="home_light_hero" className={ctaClass}>
                   <span>Book a Discovery Call</span>
                   <ArrowRight size={16} />
@@ -237,15 +239,19 @@ export default function Home() {
                         {heroConstructionStats.map((stat) => (
                           <div
                             key={stat.label}
-                            className="rounded-2xl border border-white/[0.16] bg-[#0a1420]/[0.62] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_44px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+                            className="relative overflow-hidden rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#0c1a28]/75 to-[#060d16]/85 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_46px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#8bd7ff]/40 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_28px_56px_-28px_rgba(0,0,0,0.95),0_0_22px_-6px_rgba(139,215,255,0.4)]"
                           >
-                            <p className="text-[0.5rem] font-bold uppercase tracking-[0.18em] text-white/[0.55]">
+                            <span
+                              aria-hidden
+                              className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#24c18d]/0 via-[#8bd7ff]/70 to-[#24c18d]/0"
+                            />
+                            <p className="text-[0.5rem] font-bold uppercase tracking-[0.18em] text-white/[0.6]">
                               {stat.label}
                             </p>
                             <p className="mt-2 text-2xl font-bold leading-none tracking-[-0.02em] text-white">
                               {stat.value}
                             </p>
-                            <p className="mt-1 text-[0.56rem] font-semibold uppercase tracking-[0.12em] text-[#8bd7ff]/70">
+                            <p className="mt-1 text-[0.56rem] font-semibold uppercase tracking-[0.12em] text-[#8bd7ff]/75">
                               {stat.unit}
                             </p>
                           </div>

@@ -99,10 +99,10 @@ export default function ServicesPage() {
                           key={deliverable}
                           className={glassTileClass({
                             className:
-                              "flex min-h-[5.25rem] items-start gap-3 px-4 py-3.5",
+                              "flex min-h-[5.25rem] items-center justify-center gap-2.5 px-4 py-3.5 text-center",
                           })}
                         >
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
                             <Check size={12} strokeWidth={3} />
                           </span>
                           <span className="text-sm font-semibold leading-6 text-[#40515d]">

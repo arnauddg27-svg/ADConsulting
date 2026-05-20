@@ -374,22 +374,44 @@ function MilestoneBars({ revealed }: { revealed: boolean }) {
   );
 }
 
+function smoothPath(pts: { x: number; y: number }[]) {
+  if (pts.length < 2) return "";
+  const d = [`M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d.push(
+      `C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)} ${cp2x.toFixed(1)} ${cp2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`,
+    );
+  }
+  return d.join(" ");
+}
+
 function CycleTrend({ revealed }: { revealed: boolean }) {
   const reduce = useReducedMotion();
   const n = cycleTrend.length;
   const W = 200;
   const H = 60;
-  const padX = 3;
-  const top = 6;
-  const bot = 52;
-  const minV = 144;
-  const maxV = 180;
+  const padX = 6;
+  const top = 8;
+  const bot = 54;
+  const minV = 143;
+  const maxV = 181;
   const x = (i: number) => padX + (i / (n - 1)) * (W - padX * 2);
   const y = (v: number) => bot - ((v - minV) / (maxV - minV)) * (bot - top);
-  const pts = cycleTrend.map((d, i) => `${x(i).toFixed(1)} ${y(d).toFixed(1)}`);
-  const line = `M ${pts.join(" L ")}`;
-  const area = `${line} L ${x(n - 1).toFixed(1)} ${H} L ${x(0).toFixed(1)} ${H} Z`;
-  const goalY = y(CYCLE_GOAL);
+  const pts = cycleTrend.map((d, i) => ({ x: x(i), y: y(d) }));
+  const last = pts[n - 1];
+  const line = smoothPath(pts);
+  const area = `${line} L ${last.x.toFixed(1)} ${H} L ${pts[0].x.toFixed(1)} ${H} Z`;
+  const goalPct = (y(CYCLE_GOAL) / H) * 100;
+  const lastLeftPct = (last.x / W) * 100;
+  const lastTopPct = (last.y / H) * 100;
 
   return (
     <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
@@ -408,53 +430,76 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
       </div>
 
       <div className="relative mt-3 flex-1">
+        {/* target / goal line */}
+        <div
+          className="pointer-events-none absolute inset-x-0 border-t border-dashed border-[#8bd7ff]/35"
+          style={{ top: `${goalPct}%` }}
+        />
+        <span
+          className="pointer-events-none absolute right-0 -translate-y-1/2 rounded bg-[#0d1620] px-1 text-[0.46rem] font-bold uppercase tracking-[0.12em] text-[#8bd7ff]/55"
+          style={{ top: `${goalPct}%` }}
+        >
+          Target
+        </span>
+
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
-          className="h-14 w-full md:h-16"
+          className="h-full w-full"
           fill="none"
           aria-hidden
         >
           <defs>
             <linearGradient id="cycle-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#24c18d" stopOpacity="0.28" />
+              <stop offset="0%" stopColor="#24c18d" stopOpacity="0.34" />
               <stop offset="100%" stopColor="#24c18d" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <line
-            x1="0"
-            y1={goalY}
-            x2={W}
-            y2={goalY}
-            stroke="#8bd7ff"
-            strokeOpacity="0.4"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
           <motion.path
             d={area}
             fill="url(#cycle-fill)"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: revealed || reduce ? 1 : 0 }}
-            transition={{ duration: 0.7, delay: reduce ? 0 : 0.5 }}
+            transition={{ duration: 0.7, delay: reduce ? 0 : 0.55 }}
           />
           <motion.path
             d={line}
             stroke="#24c18d"
-            strokeWidth="2.5"
+            strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             strokeLinecap="round"
             strokeLinejoin="round"
+            style={{ filter: "drop-shadow(0 2px 6px rgba(36,193,141,0.45))" }}
             initial={reduce ? false : { pathLength: 0 }}
             animate={{ pathLength: revealed || reduce ? 1 : 0 }}
-            transition={{ duration: 1, ease: "easeInOut", delay: reduce ? 0 : 0.3 }}
+            transition={{ duration: 1.1, ease: "easeInOut", delay: reduce ? 0 : 0.3 }}
           />
         </svg>
+
+        {/* current value marker (sits below target = good) */}
+        <motion.span
+          className="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#24c18d] shadow-[0_0_12px_rgba(36,193,141,0.85)] ring-4 ring-[#24c18d]/20"
+          style={{ left: `${lastLeftPct}%`, top: `${lastTopPct}%` }}
+          initial={reduce ? false : { scale: 0, opacity: 0 }}
+          animate={
+            revealed || reduce
+              ? { scale: 1, opacity: 1 }
+              : { scale: 0, opacity: 0 }
+          }
+          transition={{
+            delay: reduce ? 0 : 1.2,
+            type: "spring",
+            stiffness: 320,
+            damping: 18,
+          }}
+        />
       </div>
 
       <div className="mt-2 flex items-center justify-between text-[0.6rem] font-semibold text-white/[0.42]">
-        <span>4.9 mo avg</span>
-        <span>goal {CYCLE_GOAL}d</span>
+        <span>
+          <span className="text-[#8df2c8]">149d now</span> · 4.9 mo
+        </span>
+        <span>target {CYCLE_GOAL}d</span>
       </div>
     </div>
   );
