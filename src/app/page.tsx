@@ -239,7 +239,7 @@ export default function Home() {
                         {heroConstructionStats.map((stat) => (
                           <div
                             key={stat.label}
-                            className="relative overflow-hidden rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#0c1a28]/75 to-[#060d16]/85 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_46px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#8bd7ff]/40 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_28px_56px_-28px_rgba(0,0,0,0.95),0_0_22px_-6px_rgba(139,215,255,0.4)]"
+                            className="relative overflow-hidden rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#0c1a28]/75 to-[#060d16]/85 p-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_46px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#8bd7ff]/40 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_28px_56px_-28px_rgba(0,0,0,0.95),0_0_22px_-6px_rgba(139,215,255,0.4)]"
                           >
                             <span
                               aria-hidden
