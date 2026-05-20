@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
-  ArrowRight,
   BarChart3,
   Building2,
   CheckCircle2,
-  Code2,
   Database,
   HardHat,
   Home,
@@ -44,18 +41,13 @@ const credentials = [
 const pillars = [
   {
     icon: Database,
-    title: "Data infrastructure",
-    desc: "Extraction, validation, transformation, and warehouse design for ERP, spreadsheet, API, and operating data.",
+    title: "A central data warehouse",
+    desc: "We pull your ERP, spreadsheet, finance, and field data into one cloud warehouse with builder KPI logic — so finance, construction, sales, and leadership all read the same numbers.",
   },
   {
     icon: BarChart3,
-    title: "Operating reporting",
-    desc: "Daily views across land, permitting, draws, construction, sales, warranty, and leadership review.",
-  },
-  {
-    icon: Code2,
-    title: "Decision tools",
-    desc: "Pro formas, cost-to-complete reviews, at-risk flags, sync monitors, admin controls, and internal apps.",
+    title: "Dashboards on top of it",
+    desc: "Daily dashboards and pipelines built on that warehouse — schedule, budget, margin, and owner follow-up your team can actually review every day.",
   },
 ];
 
@@ -116,15 +108,20 @@ export default function AboutPage() {
         title="Builder reporting built around residential operations."
         description="We help residential builders turn scattered ERP, spreadsheet, finance, and field data into daily operating views for schedule, budget, margin, and owner follow-up."
       >
-        <BlueprintPanel className="p-5 md:p-6">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <BlueprintPanel className="p-6 md:p-7">
+          <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+            Where we focus
+          </p>
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
             {credentials.map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-start gap-3 rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 px-4 py-3"
+                className="flex items-center gap-3 rounded-xl border border-[#e1e7ea] bg-[#f7f9fb]/70 px-3.5 py-3"
               >
-                <Icon size={18} className="mt-0.5 shrink-0 text-[#35647f]" />
-                <span className="text-sm font-semibold leading-5 text-[#40515d]">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#d5dde2] bg-white text-[#35647f]">
+                  <Icon size={17} />
+                </span>
+                <span className="text-sm font-semibold leading-5 text-[#3a4750]">
                   {label}
                 </span>
               </div>
@@ -190,20 +187,20 @@ export default function AboutPage() {
               What we build
             </p>
             <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-              Three connected layers, one review rhythm.
+              A data warehouse, and the dashboards on top.
             </h2>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
             {pillars.map(({ icon: Icon, title, desc }) => (
-              <BlueprintPanel key={title} className="p-6">
+              <BlueprintPanel key={title} className="p-7 md:p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
                   <Icon size={22} />
                 </div>
                 <h3 className="mt-5 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
                   {title}
                 </h3>
-                <p className="mt-3 text-sm leading-7 text-[#58636b]">
+                <p className="mt-3 text-base leading-7 text-[#58636b]">
                   {desc}
                 </p>
               </BlueprintPanel>
@@ -219,7 +216,7 @@ export default function AboutPage() {
               Delivery model
             </p>
             <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-              Ownership, directness, and practical scope.
+              How we work with you.
             </h2>
           </div>
 
