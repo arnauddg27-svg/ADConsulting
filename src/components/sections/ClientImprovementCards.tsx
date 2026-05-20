@@ -2,7 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { ComponentType } from "react";
+import { useId, type ComponentType, type ReactNode } from "react";
 
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
@@ -156,7 +156,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metricLabel: "Cycle gain",
     proof: "Top-200 builder environment",
     Icon: ClockIcon,
-    chart: "line",
+    chart: "area",
     focus: ["Stage visibility", "Owner follow-up"],
   },
   {
@@ -167,7 +167,7 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
     metricLabel: "Over budget",
     proof: "ERP + spreadsheet workflows",
     Icon: CoinsIcon,
-    chart: "gauge",
+    chart: "donut",
     focus: ["Cost movement", "Variance flags"],
   },
   {
@@ -183,87 +183,134 @@ const clientImprovementCards: ClientImprovementCardProps[] = [
   },
 ];
 
-const viewport = { once: true, amount: 0.6 } as const;
+const GREEN = "#2f9e6f";
 
-/* Chart 1: upward area + line that draws in (cut cycle time) */
-function LineChart({ animate }: { animate: boolean }) {
-  const line = "M2 42 L20 36 L38 38 L56 27 L74 20 L92 13 L116 5";
-  const area = `${line} L116 46 L2 46 Z`;
+function ChartFrame({ children }: { children: ReactNode }) {
   return (
-    <svg viewBox="0 0 118 48" className="h-12 w-full" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="ci-line-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#5bbf98" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="#5bbf98" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <motion.path
-        d={area}
-        fill="url(#ci-line-fill)"
-        initial={animate ? { opacity: 0 } : false}
-        whileInView={animate ? { opacity: 1 } : undefined}
-        viewport={viewport}
-        transition={{ duration: 0.6, delay: 0.5 }}
-      />
-      <motion.path
-        d={line}
-        stroke="#2f9e6f"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        initial={animate ? { pathLength: 0 } : false}
-        whileInView={animate ? { pathLength: 1 } : undefined}
-        viewport={viewport}
-        transition={{ duration: 1.1, ease: "easeInOut" }}
-      />
-    </svg>
-  );
-}
-
-/* Chart 2: semicircle gauge sweeping to near-full (hold the budget) */
-function GaugeChart({ animate }: { animate: boolean }) {
-  const arc = "M8 44 A38 38 0 0 1 110 44";
-  return (
-    <svg viewBox="0 0 118 50" className="h-12 w-full" fill="none" aria-hidden>
-      <path d={arc} stroke="#dbe6ea" strokeWidth="7" strokeLinecap="round" />
-      <motion.path
-        d={arc}
-        stroke="#2f9e6f"
-        strokeWidth="7"
-        strokeLinecap="round"
-        initial={animate ? { pathLength: 0 } : { pathLength: 0.94 }}
-        whileInView={animate ? { pathLength: 0.94 } : undefined}
-        viewport={viewport}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-      />
-    </svg>
-  );
-}
-
-/* Chart 3: descending bars that grow in with a stagger (move inventory faster) */
-function DescendingBars({ animate }: { animate: boolean }) {
-  const bars = [86, 76, 66, 55, 46, 38];
-  return (
-    <div className="flex h-12 items-end gap-1.5" aria-hidden>
-      {bars.map((value, i) => (
-        <motion.div
-          key={i}
-          className="flex-1 origin-bottom rounded-t-sm bg-gradient-to-t from-[#7fb8d3]/45 to-[#5bbf98]"
-          style={{ height: `${value}%` }}
-          initial={animate ? { scaleY: 0 } : false}
-          whileInView={animate ? { scaleY: 1 } : undefined}
-          viewport={viewport}
-          transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
-        />
-      ))}
+    <div className="relative h-24 w-full overflow-hidden rounded-2xl border border-[#e1e9ed] bg-[linear-gradient(180deg,#fbfdfe,#f3f8fa)] px-4 py-3">
+      {children}
     </div>
   );
 }
 
+/* Chart 1: smooth upward area sparkline with an endpoint dot (cut cycle time) */
+function AreaChart({ animate, id }: { animate: boolean; id: string }) {
+  const line =
+    "M4 64 C 44 60 64 56 104 50 C 150 43 178 33 224 25 C 262 18 286 13 316 8";
+  const area = `${line} L316 76 L4 76 Z`;
+  return (
+    <ChartFrame>
+      <svg
+        viewBox="0 0 320 80"
+        preserveAspectRatio="none"
+        className="h-full w-full"
+        fill="none"
+        aria-hidden
+      >
+        <defs>
+          <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GREEN} stopOpacity="0.26" />
+            <stop offset="100%" stopColor={GREEN} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[20, 40, 60].map((y) => (
+          <line key={y} x1="0" y1={y} x2="320" y2={y} stroke="#000" strokeOpacity="0.04" strokeWidth="1" />
+        ))}
+        <motion.path
+          d={area}
+          fill={`url(#${id}-fill)`}
+          initial={animate ? { opacity: 0 } : false}
+          animate={animate ? { opacity: 1 } : undefined}
+          transition={{ duration: 0.7, delay: 0.45 }}
+        />
+        <motion.path
+          d={line}
+          stroke={GREEN}
+          strokeWidth="3"
+          vectorEffect="non-scaling-stroke"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={animate ? { pathLength: 0 } : false}
+          animate={animate ? { pathLength: 1 } : undefined}
+          transition={{ duration: 1.1, ease: "easeInOut" }}
+        />
+      </svg>
+      <motion.span
+        className="absolute right-4 top-2.5 h-2.5 w-2.5 rounded-full bg-[#2f9e6f] ring-4 ring-[#2f9e6f]/15"
+        initial={animate ? { scale: 0, opacity: 0 } : false}
+        animate={animate ? { scale: 1, opacity: 1 } : undefined}
+        transition={{ delay: 1, type: "spring", stiffness: 300, damping: 18 }}
+      />
+    </ChartFrame>
+  );
+}
+
+/* Chart 2: full donut ring sweeping to complete, with a center check (hold the budget) */
+function DonutChart({ animate, id }: { animate: boolean; id: string }) {
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  return (
+    <ChartFrame>
+      <div className="flex h-full items-center gap-4">
+        <div className="relative h-[4.5rem] w-[4.5rem] shrink-0">
+          <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90">
+            <circle cx="40" cy="40" r={r} fill="none" stroke="#dbe6ea" strokeWidth="8" />
+            <motion.circle
+              cx="40"
+              cy="40"
+              r={r}
+              fill="none"
+              stroke={GREEN}
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={c}
+              initial={animate ? { strokeDashoffset: c } : { strokeDashoffset: 0 }}
+              animate={animate ? { strokeDashoffset: 0 } : undefined}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center">
+            <CheckCircle2 size={22} className="text-[#2f9e6f]" />
+          </span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold leading-tight text-[#17212c]">
+            On budget
+          </p>
+          <p className="mt-0.5 text-xs leading-4 text-[#66727a]">
+            Variance held to plan
+          </p>
+        </div>
+      </div>
+    </ChartFrame>
+  );
+}
+
+/* Chart 3: clean descending bars that grow in with a stagger (move inventory faster) */
+function BarsChart({ animate }: { animate: boolean; id: string }) {
+  const bars = [92, 80, 70, 58, 48, 38];
+  return (
+    <ChartFrame>
+      <div className="flex h-full items-end gap-2">
+        {bars.map((value, i) => (
+          <motion.div
+            key={i}
+            className="flex-1 origin-bottom rounded-md bg-gradient-to-t from-[#7fb8d3] to-[#5bbf98]"
+            style={{ height: `${value}%` }}
+            initial={animate ? { scaleY: 0 } : false}
+            animate={animate ? { scaleY: 1 } : undefined}
+            transition={{ duration: 0.5, delay: i * 0.07, ease: "easeOut" }}
+          />
+        ))}
+      </div>
+    </ChartFrame>
+  );
+}
+
 const CHARTS = {
-  line: LineChart,
-  gauge: GaugeChart,
-  bars: DescendingBars,
+  area: AreaChart,
+  donut: DonutChart,
+  bars: BarsChart,
 } as const;
 
 type ChartKind = keyof typeof CHARTS;
@@ -282,6 +329,8 @@ function ClientImprovementCard({
   const reduceMotion = useReducedMotion();
   const animate = !reduceMotion;
   const Chart = CHARTS[chart];
+  const rawId = useId();
+  const chartId = `ci-${rawId.replace(/:/g, "")}`;
 
   return (
     <article className={cn("h-full", className)}>
@@ -305,21 +354,20 @@ function ClientImprovementCard({
           </span>
         </div>
 
-        <div className="mt-6 flex items-end justify-between gap-4">
-          <div>
-            <div className="font-heading text-[3.2rem] font-semibold leading-none tracking-[-0.06em] text-[#17212c]">
-              {metric}
-              <sup className="ml-1 align-super text-xl leading-none text-[#2f5368]">
-                *
-              </sup>
-            </div>
-            <div className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#2f5368]">
-              {metricLabel}
-            </div>
+        <div className="mt-6 flex items-baseline gap-3">
+          <div className="font-heading text-[3.2rem] font-semibold leading-none tracking-[-0.06em] text-[#17212c]">
+            {metric}
+            <sup className="ml-1 align-super text-xl leading-none text-[#2f5368]">
+              *
+            </sup>
           </div>
-          <div className="w-28 shrink-0">
-            <Chart animate={animate} />
+          <div className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#2f5368]">
+            {metricLabel}
           </div>
+        </div>
+
+        <div className="mt-5">
+          <Chart animate={animate} id={chartId} />
         </div>
 
         <h3 className="mt-6 text-[1.25rem] font-bold leading-snug tracking-[-0.02em] text-[#17212c]">

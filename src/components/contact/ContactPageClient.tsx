@@ -100,6 +100,14 @@ export default function ContactPageClient() {
 
       <section className="pb-16 md:pb-24">
         <Container>
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+              What to expect
+            </p>
+            <h2 className="mt-4 font-heading text-3xl leading-[1.05] tracking-[-0.03em] text-[#17212c] md:text-4xl">
+              A short call to find the first dashboard.
+            </h2>
+          </div>
           <div className="grid items-start gap-6 lg:grid-cols-[1.08fr_0.92fr]">
             <BlueprintPanel className="p-6 md:p-8">
               <div className="grid auto-rows-fr gap-4 sm:grid-cols-3">

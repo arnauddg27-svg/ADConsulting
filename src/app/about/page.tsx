@@ -135,35 +135,29 @@ export default function AboutPage() {
 
       <section className="pb-16 md:pb-24">
         <Container>
-          <BlueprintPanel className="overflow-hidden">
-            <div className="grid items-stretch gap-0 md:grid-cols-[0.9fr_1.1fr]">
-              <div className="relative min-h-[20rem] bg-[#eef3f6]">
-                <img
-                  src="/images/arnaud-durand.png"
-                  alt="Arnaud Durand, founder of AD ERP SYSTEMS"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="p-6 md:p-10">
+          <BlueprintPanel className="p-6 md:p-8">
+            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">
+              <img
+                src="/images/arnaud-durand.png"
+                alt="Arnaud Durand, founder of AD ERP SYSTEMS"
+                className="h-36 w-36 shrink-0 rounded-2xl border border-[#d5dde2] object-cover object-top shadow-[0_18px_44px_-32px_rgba(23,33,44,0.45)] md:h-44 md:w-44"
+                loading="lazy"
+                decoding="async"
+              />
+              <div>
                 <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
                   Founder
                 </p>
-                <h2 className="mt-4 font-heading text-3xl leading-[1.05] tracking-[-0.03em] text-[#17212c] md:text-4xl">
+                <h2 className="mt-3 font-heading text-3xl leading-[1.05] tracking-[-0.03em] text-[#17212c] md:text-4xl">
                   Arnaud Durand
                 </h2>
-                <p className="mt-5 text-base leading-8 text-[#58636b] md:text-lg">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[#58636b] md:text-lg md:leading-8">
                   I started AD ERP SYSTEMS after seeing the same problem across
-                  residential builders: the data needed to run the business was
-                  spread across ERPs, spreadsheets, and field updates that never
-                  lined up. I build the reporting layer that pulls those sources
-                  together into daily operating views teams actually use.
-                </p>
-                <p className="mt-4 text-base leading-8 text-[#58636b] md:text-lg">
-                  You work directly with me through the project — discovery,
-                  build, and handoff — so scope stays practical and the system
-                  stays on your side at the end.
+                  residential builders: the data to run the business was spread
+                  across ERPs, spreadsheets, and field updates that never lined
+                  up. I build the reporting layer that pulls those sources into
+                  daily operating views teams actually use — and you work
+                  directly with me through discovery, build, and handoff.
                 </p>
               </div>
             </div>
@@ -179,7 +173,7 @@ export default function AboutPage() {
                 Industry context
               </p>
               <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-                Built for the way builder teams review work.
+                Built around how builders actually work.
               </h2>
             </div>
             <div className="text-base leading-8 text-[#58636b] md:text-lg">
@@ -224,53 +218,48 @@ export default function AboutPage() {
 
       <section className="pb-16 md:pb-24">
         <Container>
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
-                Delivery model
-              </p>
-              <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
-                Ownership, directness, and practical scope.
-              </h2>
-              <div className="mt-7 grid gap-4">
-                {benefits.map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#d5dde2] bg-[#edf5f1] text-[#356b54]">
-                      <Icon size={18} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-[#17212c]">{title}</h3>
-                      <p className="mt-1 text-sm leading-6 text-[#58636b]">
-                        {desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+              Delivery model
+            </p>
+            <h2 className="mt-4 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-5xl">
+              Ownership, directness, and practical scope.
+            </h2>
+          </div>
+
+          <div className="mb-8 grid gap-5 md:grid-cols-3">
+            {benefits.map(({ icon: Icon, title, desc }) => (
+              <BlueprintPanel key={title} className="p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d5dde2] bg-[#edf5f1] text-[#356b54]">
+                  <Icon size={18} />
+                </div>
+                <h3 className="mt-4 font-bold text-[#17212c]">{title}</h3>
+                <p className="mt-1 text-sm leading-6 text-[#58636b]">{desc}</p>
+              </BlueprintPanel>
+            ))}
+          </div>
+
+          <BlueprintPanel className="mx-auto max-w-4xl overflow-hidden">
+            <div className="grid grid-cols-2 border-b border-[#d5dde2] bg-[#f7f9fb]">
+              <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#6f8190]">
+                Typical approach
+              </div>
+              <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#35647f]">
+                AD ERP SYSTEMS
               </div>
             </div>
-
-            <BlueprintPanel className="overflow-hidden">
-              <div className="grid grid-cols-2 border-b border-[#d5dde2] bg-[#f7f9fb]">
-                <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#6f8190]">
-                  Typical approach
+            {compared.map((row) => (
+              <div key={row.them} className="grid grid-cols-2 border-b border-[#d5dde2]/70 last:border-b-0">
+                <div className="px-5 py-4 text-sm font-semibold leading-6 text-[#7a8791]">
+                  {row.them}
                 </div>
-                <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#35647f]">
-                  AD ERP SYSTEMS
+                <div className="flex items-start gap-2 px-5 py-4 text-sm font-bold leading-6 text-[#40515d]">
+                  <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[#356b54]" />
+                  {row.us}
                 </div>
               </div>
-              {compared.map((row) => (
-                <div key={row.them} className="grid grid-cols-2 border-b border-[#d5dde2]/70 last:border-b-0">
-                  <div className="px-5 py-4 text-sm font-semibold leading-6 text-[#7a8791]">
-                    {row.them}
-                  </div>
-                  <div className="flex items-start gap-2 px-5 py-4 text-sm font-bold leading-6 text-[#40515d]">
-                    <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[#356b54]" />
-                    {row.us}
-                  </div>
-                </div>
-              ))}
-            </BlueprintPanel>
-          </div>
+            ))}
+          </BlueprintPanel>
         </Container>
       </section>
 

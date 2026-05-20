@@ -219,17 +219,21 @@ function KpiTile({
   icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[0.56rem] font-bold uppercase tracking-[0.18em] text-white/[0.42]">
+    <div className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[0.5rem] font-bold uppercase tracking-[0.16em] text-white/[0.42]">
           {label}
         </p>
-        <Icon size={17} className="text-[#8bd7ff]" />
+        <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]">
+          <Icon size={13} />
+        </span>
       </div>
-      <div className="mt-3 text-3xl font-bold leading-none text-white">
+      <div className="mt-2.5 text-2xl font-bold leading-none text-white">
         {value}
       </div>
-      <p className="mt-2 text-xs font-semibold text-white/[0.45]">{note}</p>
+      <p className="mt-1.5 text-[0.7rem] font-semibold text-white/[0.45]">
+        {note}
+      </p>
     </div>
   );
 }
@@ -273,7 +277,7 @@ function DashboardOnTablet() {
 
         <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-5">
           <div className="grid grid-cols-2 gap-2.5 md:gap-3">
-            {tabletKpis.slice(0, 4).map((kpi) => (
+            {tabletKpis.map((kpi) => (
               <KpiTile key={kpi.label} {...kpi} />
             ))}
           </div>
