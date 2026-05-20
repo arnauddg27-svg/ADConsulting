@@ -18,6 +18,7 @@ import { AnimatedGradientText } from "@/components/magicui/animated-gradient-tex
 import GlassOperationsCards from "@/components/sections/GlassOperationsCards";
 import ClientImprovementCards from "@/components/sections/ClientImprovementCards";
 import { liquidActionClass } from "@/lib/buttonStyles";
+import { glassTileClass } from "@/lib/cardStyles";
 
 const IpadDashboardShowcase = dynamic(
   () => import("@/components/sections/IpadDashboardShowcase"),
@@ -281,7 +282,9 @@ export default function Home() {
             {reviewSignals.map((signal) => (
               <div
                 key={`strip-${signal.label}`}
-                className="flex items-start gap-3 rounded-[1rem] bg-white/[0.42] p-3 backdrop-blur"
+                className={glassTileClass({
+                  className: "flex items-start gap-3 p-3",
+                })}
               >
                 <CheckCircle2 className="mt-0.5 shrink-0 text-[#35647f]" size={17} />
                 <div>
@@ -318,7 +321,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-[1.35rem] border border-[#d8dedc] bg-white shadow-[0_28px_86px_-68px_rgba(23,33,44,0.42)]">
+            <div className="overflow-hidden rounded-[1.5rem] border border-[#d4dee4] bg-white shadow-[0_2px_4px_-2px_rgba(23,33,44,0.06),0_30px_70px_-44px_rgba(23,33,44,0.42)]">
               <div className="flex items-center justify-between border-b border-[#e1e6e8] bg-[#17212c] px-5 py-4 text-white sm:px-6">
                 <div>
                   <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-[#d7eaf5]">

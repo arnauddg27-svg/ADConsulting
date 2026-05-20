@@ -16,6 +16,7 @@ import {
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import Container from "@/components/ui/Container";
 import { liquidActionClass } from "@/lib/buttonStyles";
+import { glassPanelClass } from "@/lib/cardStyles";
 import { SITE_CONFIG } from "@/lib/constants";
 
 const firstCallSteps = [
@@ -138,7 +139,7 @@ export default function ContactPageClient() {
             </h2>
           </div>
 
-          <ul className="mx-auto mt-8 max-w-2xl divide-y divide-[#e1e6e8] rounded-[1.4rem] border border-[#d5dde2] bg-white/80 px-6 shadow-[0_32px_100px_-76px_rgba(23,33,44,0.5)] backdrop-blur-md">
+          <ul className={glassPanelClass("mx-auto mt-8 max-w-2xl divide-y divide-[#e1e6e8] px-6")}>
             {fitPoints.map((point) => (
               <li
                 key={point}

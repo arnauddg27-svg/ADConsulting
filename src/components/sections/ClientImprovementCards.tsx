@@ -335,7 +335,7 @@ function ClientImprovementCard({
 
   return (
     <article className={cn("h-full", className)}>
-      <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-[#d7e0e5] bg-white p-6 shadow-[0_20px_60px_-50px_rgba(23,33,44,0.45)] transition duration-300 hover:-translate-y-0.5 hover:border-[#9eb6c8]">
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-[#d4dee4] bg-gradient-to-br from-white/96 via-white/90 to-[#eef4f7]/82 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.92),0_2px_4px_-2px_rgba(23,33,44,0.06),0_28px_64px_-46px_rgba(23,33,44,0.42)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-0.5 hover:border-[#c6d3da] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.96),0_30px_72px_-44px_rgba(23,33,44,0.5)]">
         <div
           aria-hidden
           className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#7fb8d3] via-[#5bbf98] to-[#17212c] opacity-75"

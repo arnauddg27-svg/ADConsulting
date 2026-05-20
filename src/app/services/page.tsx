@@ -20,6 +20,7 @@ import {
 } from "@/components/marketing/Blueprint";
 import Container from "@/components/ui/Container";
 import { liquidActionClass } from "@/lib/buttonStyles";
+import { glassTileClass } from "@/lib/cardStyles";
 import { PROCESS_STEPS, SERVICES } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -92,7 +93,10 @@ export default function ServicesPage() {
                     {service.deliverables.map((deliverable) => (
                       <div
                         key={deliverable}
-                        className="flex h-full items-center justify-center gap-2.5 rounded-xl border border-[#d5dde2] bg-[#f7f9fb]/82 px-3.5 py-3 text-center"
+                        className={glassTileClass({
+                          className:
+                            "flex h-full items-center justify-center gap-2.5 px-3.5 py-3 text-center",
+                        })}
                       >
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
                           <Check size={11} strokeWidth={3} />

@@ -21,7 +21,7 @@ import {
   BlueprintPanel,
 } from "@/components/marketing/Blueprint";
 import Container from "@/components/ui/Container";
-import { liquidActionClass } from "@/lib/buttonStyles";
+import { glassTileClass } from "@/lib/cardStyles";
 
 export const metadata: Metadata = {
   title: "About | AD ERP SYSTEMS",
@@ -116,7 +116,9 @@ export default function AboutPage() {
             {credentials.map(({ icon: Icon, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 rounded-xl border border-[#e1e7ea] bg-[#f7f9fb]/70 px-3.5 py-3"
+                className={glassTileClass({
+                  className: "flex items-center gap-3 px-3.5 py-3",
+                })}
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#d5dde2] bg-white text-[#35647f]">
                   <Icon size={17} />
