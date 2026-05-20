@@ -41,10 +41,10 @@ type Kpi = {
 const tabletKpis: Kpi[] = [
   {
     label: "Avg cycle time",
-    value: 7.9,
+    value: 4.9,
     decimals: 1,
     suffix: " mo",
-    note: "vs 8.5 mo target",
+    note: "vs 5.5 mo target",
     icon: Clock3,
     tone: "good",
   },
@@ -103,9 +103,16 @@ const milestoneStages = [
 const stageMax = Math.max(...milestoneStages.map((s) => s.value));
 
 // Cycle-time tracking: avg days-to-complete by quarter, trending toward goal.
-const cycleTrend = [262, 257, 251, 246, 242, 238];
-const CYCLE_GOAL = 240;
+const cycleTrend = [177, 170, 163, 156, 152, 149];
+const CYCLE_GOAL = 167;
 const cycleDrop = cycleTrend[0] - cycleTrend[cycleTrend.length - 1];
+
+// Budget tracking per job — flagged variance vs budget.
+const budgetByJob = [
+  { job: "Lot 184", community: "Sunshine Ridge", variance: "$6K", over: false },
+  { job: "Lot 231", community: "Emerald Bay", variance: "$14K", over: true },
+  { job: "Lot 097", community: "Palm Coast", variance: "$2K", over: false },
+];
 
 function CountUp({
   value,
@@ -333,7 +340,7 @@ function MilestoneBars({ revealed }: { revealed: boolean }) {
         </span>
       </div>
 
-      <div className="mt-4 grid gap-x-5 gap-y-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-x-5 gap-y-2.5 md:grid-cols-2">
         {milestoneStages.map((stage, i) => {
           const pct = (stage.value / stageMax) * 100;
           return (
@@ -375,8 +382,8 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
   const padX = 3;
   const top = 6;
   const bot = 52;
-  const minV = 230;
-  const maxV = 268;
+  const minV = 144;
+  const maxV = 180;
   const x = (i: number) => padX + (i / (n - 1)) * (W - padX * 2);
   const y = (v: number) => bot - ((v - minV) / (maxV - minV)) * (bot - top);
   const pts = cycleTrend.map((d, i) => `${x(i).toFixed(1)} ${y(d).toFixed(1)}`);
@@ -446,7 +453,7 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
       </div>
 
       <div className="mt-2 flex items-center justify-between text-[0.6rem] font-semibold text-white/[0.42]">
-        <span>7.9 mo avg</span>
+        <span>4.9 mo avg</span>
         <span>goal {CYCLE_GOAL}d</span>
       </div>
     </div>
@@ -455,7 +462,6 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
 
 function BudgetPanel({ revealed }: { revealed: boolean }) {
   const reduce = useReducedMotion();
-  const actualPct = 98.4;
 
   return (
     <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
@@ -464,32 +470,53 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
           <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
             Budget tracking
           </p>
-          <h4 className="mt-1 text-sm font-bold md:text-base">
-            Actual vs budget
-          </h4>
+          <h4 className="mt-1 text-sm font-bold md:text-base">Variance by job</h4>
         </div>
         <span className="rounded-full border border-[#24c18d]/30 bg-[#24c18d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#8df2c8]">
-          ▼ $310K under
+          ▼ $310K total
         </span>
       </div>
 
-      <div className="mt-4 flex-1">
-        <div className="flex items-center justify-between text-[0.62rem] font-semibold text-white/[0.5]">
-          <span>Actual to date</span>
-          <span className="text-white/[0.82]">$18.89M</span>
-        </div>
-        <div className="mt-1.5 h-2.5 rounded-full bg-white/[0.08]">
+      <div className="mt-3 flex flex-1 flex-col divide-y divide-white/[0.07]">
+        {budgetByJob.map((row, i) => (
           <motion.div
-            className="h-2.5 rounded-full bg-gradient-to-r from-[#24c18d] to-[#8bd7ff]"
-            initial={reduce ? false : { width: "0%" }}
-            animate={{ width: revealed || reduce ? `${actualPct}%` : "0%" }}
-            transition={{ duration: 1, ease: "easeOut", delay: reduce ? 0 : 0.4 }}
-          />
-        </div>
-        <div className="mt-1.5 flex items-center justify-between text-[0.58rem] font-semibold text-white/[0.38]">
-          <span>Budget $19.2M</span>
-          <span>24.6% avg margin</span>
-        </div>
+            key={row.job}
+            className="flex items-center justify-between gap-3 py-1.5"
+            initial={reduce ? false : { opacity: 0, y: 6 }}
+            animate={
+              revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }
+            }
+            transition={{
+              duration: 0.45,
+              delay: reduce ? 0 : 0.4 + i * 0.12,
+              ease: "easeOut",
+            }}
+          >
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white/[0.84] md:text-sm">
+                {row.job}
+              </div>
+              <div className="mt-0.5 text-[0.5rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+                {row.community}
+              </div>
+            </div>
+            <span
+              className={cn(
+                "shrink-0 rounded-full border px-2 py-0.5 text-[0.56rem] font-bold",
+                row.over
+                  ? "border-[#f2c66d]/35 bg-[#f2c66d]/10 text-[#f2c66d]"
+                  : "border-[#24c18d]/35 bg-[#24c18d]/10 text-[#8df2c8]",
+              )}
+            >
+              {row.over ? "▲" : "▼"} {row.variance} {row.over ? "over" : "under"}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.4]">
+        <span>3 of 138 flagged</span>
+        <span>24.6% avg margin</span>
       </div>
     </div>
   );
@@ -537,14 +564,14 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
           </div>
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-5">
+        <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
           <div className="grid grid-cols-2 gap-2.5 md:gap-3">
             {tabletKpis.map((kpi, i) => (
               <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
             ))}
           </div>
 
-          <div className="flex flex-col gap-3 md:gap-4">
+          <div className="flex flex-col gap-3">
             <MilestoneBars revealed={revealed} />
             <div className="grid flex-1 grid-cols-2 gap-3 md:gap-4">
               <CycleTrend revealed={revealed} />

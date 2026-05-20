@@ -105,9 +105,9 @@ const heroDashboardItems: Array<{
 ];
 
 const heroConstructionStats = [
-  { label: "Stage risk", value: "11 jobs" },
-  { label: "Cost variance", value: "$284K" },
-  { label: "Owner actions", value: "38" },
+  { label: "Stage risk", value: "11", unit: "jobs behind" },
+  { label: "Cost variance", value: "$284K", unit: "flagged" },
+  { label: "Owner actions", value: "38", unit: "due now" },
 ];
 
 const reviewSignals = [
@@ -237,13 +237,16 @@ export default function Home() {
                         {heroConstructionStats.map((stat) => (
                           <div
                             key={stat.label}
-                            className="rounded-2xl border border-white/[0.14] bg-black/[0.32] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md"
+                            className="rounded-2xl border border-white/[0.16] bg-[#0a1420]/[0.62] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_20px_44px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl"
                           >
-                            <p className="text-[0.54rem] font-bold uppercase tracking-[0.16em] text-white/[0.48]">
+                            <p className="text-[0.5rem] font-bold uppercase tracking-[0.18em] text-white/[0.55]">
                               {stat.label}
                             </p>
-                            <p className="mt-1 text-xl font-bold leading-none text-white">
+                            <p className="mt-2 text-2xl font-bold leading-none tracking-[-0.02em] text-white">
                               {stat.value}
+                            </p>
+                            <p className="mt-1 text-[0.56rem] font-semibold uppercase tracking-[0.12em] text-[#8bd7ff]/70">
+                              {stat.unit}
                             </p>
                           </div>
                         ))}
