@@ -15,6 +15,7 @@ import {
 import Container from "@/components/ui/Container";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { ShineBorder } from "@/components/magicui/shine-border";
 import GlassOperationsCards from "@/components/sections/GlassOperationsCards";
 import ClientImprovementCards from "@/components/sections/ClientImprovementCards";
 import { liquidActionClass } from "@/lib/buttonStyles";
@@ -196,7 +197,14 @@ export default function Home() {
             </div>
 
             <div className="relative lg:pl-4">
-              <div className="relative mx-auto min-h-[34rem] max-w-[46rem] overflow-hidden rounded-[2.2rem] border border-[#cbd6dc] bg-[#17212c] text-white shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
+              <ShineBorder
+                borderRadius={36}
+                borderWidth={2}
+                duration={12}
+                color={["#24c18d", "#8bd7ff", "#24c18d"]}
+                className="mx-auto max-w-[46rem]"
+              >
+              <div className="relative min-h-[34rem] overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#17212c] text-white shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
                 <img
                   src="https://images.unsplash.com/photo-1692229079965-d3ae0e25f3f7?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=78&w=1100"
                   alt="Residential homes under construction on a jobsite"
@@ -227,7 +235,7 @@ export default function Home() {
                         Construction operations dashboard
                       </p>
                       <h3 className="mt-3 max-w-xl text-4xl font-bold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl">
-                        Track budget as the job progresses.
+                        Track your data as the job progresses.
                       </h3>
                       <p className="mt-4 max-w-lg text-sm font-semibold leading-6 text-white/[0.72]">
                         Stage dates, cost movement, and owner follow-up stay
@@ -284,6 +292,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              </ShineBorder>
             </div>
           </div>
 
