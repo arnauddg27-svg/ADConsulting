@@ -339,13 +339,14 @@ function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
 
   return (
     <article
+      role="listitem"
       className={`relative flex min-h-[8.75rem] flex-col overflow-hidden rounded-[1.25rem] border p-3.5 shadow-[0_18px_54px_-42px_rgba(0,0,0,0.85)] ${tone.card}`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
       <div className="flex items-start justify-between gap-3">
-        <p className="max-w-[7.5rem] text-[0.58rem] font-bold uppercase tracking-[0.13em] text-[#94adc1]">
+        <h3 className="max-w-[7.5rem] text-[0.58rem] font-bold uppercase tracking-[0.13em] text-[#94adc1]">
           {kpi.label}
-        </p>
+        </h3>
         <span
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 ${tone.icon}`}
         >
@@ -506,15 +507,23 @@ export default function MobileKpiDashboard() {
           ref={scrollRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[#8ea7bb]">
+          <div
+            className="mb-3 flex items-center justify-between"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <h2 className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[#8ea7bb]">
               {filterHeadings[active]}
-            </p>
+            </h2>
             <span className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-500">
               {visibleKpis.length} metrics
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div
+            className="grid grid-cols-2 gap-3"
+            role="list"
+            aria-label={`${filterHeadings[active]}, ${visibleKpis.length} metrics`}
+          >
             {visibleKpis.map((kpi, index) => (
               <KpiCard key={kpi.label} kpi={kpi} index={index} />
             ))}
