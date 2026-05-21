@@ -269,10 +269,12 @@ function KpiTile({
   kpi,
   index,
   revealed,
+  className,
 }: {
   kpi: Kpi;
   index: number;
   revealed: boolean;
+  className?: string;
 }) {
   const reduce = useReducedMotion();
   const Icon = kpi.icon;
@@ -289,7 +291,10 @@ function KpiTile({
         delay: reduce ? 0 : 0.05 + index * 0.07,
         ease: "easeOut",
       }}
-      className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+      className={cn(
+        "flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+        className,
+      )}
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-[0.5rem] font-bold uppercase tracking-[0.16em] text-white/[0.42]">
@@ -609,14 +614,20 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
           </div>
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-3 p-3 md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
-          <div className="grid grid-cols-2 gap-2.5 md:gap-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
+          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
             {tabletKpis.map((kpi, i) => (
-              <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
+              <KpiTile
+                key={kpi.label}
+                kpi={kpi}
+                index={i}
+                revealed={revealed}
+                className={i >= 4 ? "hidden md:flex" : undefined}
+              />
             ))}
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="hidden flex-col gap-3 md:flex">
             <MilestoneBars revealed={revealed} />
             <div className="grid flex-1 grid-cols-2 gap-3 md:gap-4">
               <CycleTrend revealed={revealed} />

@@ -236,19 +236,19 @@ export default function AboutPage() {
 
           <BlueprintPanel className="mx-auto max-w-4xl overflow-hidden">
             <div className="grid grid-cols-2 border-b border-[#d5dde2] bg-[#f7f9fb]">
-              <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#6f8190]">
+              <div className="px-3.5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#6f8190] sm:px-5">
                 Typical approach
               </div>
-              <div className="px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#35647f]">
+              <div className="px-3.5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-[#35647f] sm:px-5">
                 AD ERP SYSTEMS
               </div>
             </div>
             {compared.map((row) => (
               <div key={row.them} className="grid grid-cols-2 border-b border-[#d5dde2]/70 last:border-b-0">
-                <div className="px-5 py-4 text-sm font-semibold leading-6 text-[#7a8791]">
+                <div className="px-3.5 py-4 text-sm font-semibold leading-6 text-[#7a8791] sm:px-5">
                   {row.them}
                 </div>
-                <div className="flex items-start gap-2 px-5 py-4 text-sm font-bold leading-6 text-[#40515d]">
+                <div className="flex items-start gap-2 px-3.5 py-4 text-sm font-bold leading-6 text-[#40515d] sm:px-5">
                   <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[#356b54]" />
                   {row.us}
                 </div>
