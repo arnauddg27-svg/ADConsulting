@@ -12,7 +12,10 @@ import { animate, motion, useReducedMotion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
+  ArrowDownRight,
   ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
   Building2,
   CalendarDays,
   CircleDollarSign,
@@ -245,6 +248,38 @@ const STATUS_LABEL: Record<DashboardTone, string> = {
   risk: "At risk",
 };
 
+type TrendDirection = "up" | "down" | "flat";
+
+// Recent movement of each metric (sample data). Direction is shown as a shape
+// (arrow), never color alone; the status word/color carries the good/bad
+// judgment, so a down arrow on a risk card reads as "improving but still flagged".
+const KPI_TREND: Record<string, TrendDirection> = {
+  "Active jobs": "up",
+  "On schedule": "up",
+  "Cycle time": "down",
+  "Budget used": "up",
+  "Cost variance": "up",
+  "Starts this week": "down",
+  "Closings due": "flat",
+  "Permits aging": "up",
+  "Selections late": "up",
+  "Draws ready": "up",
+  "Margin review": "flat",
+  "Open flags": "down",
+  "Inventory homes": "up",
+  "Punch list": "up",
+  "Warranty items": "flat",
+};
+
+const TREND_META: Record<
+  TrendDirection,
+  { Icon: LucideIcon; label: string }
+> = {
+  up: { Icon: ArrowUpRight, label: "Trending up" },
+  down: { Icon: ArrowDownRight, label: "Trending down" },
+  flat: { Icon: ArrowRight, label: "Holding steady" },
+};
+
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -297,6 +332,8 @@ function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
   const Icon = kpi.icon;
   const tone = toneClasses(kpi.tone);
   const status = STATUS_LABEL[kpi.tone];
+  const trend = TREND_META[KPI_TREND[kpi.label] ?? "flat"];
+  const TrendIcon = trend.Icon;
   const reduce = useReducedMotion();
   const delay = Math.min(index, 7) * 0.05;
 
@@ -318,8 +355,10 @@ function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
       <div className="mt-3.5 text-[1.85rem] font-bold leading-none tracking-[-0.05em]">
         <CountUpValue value={kpi.value} delay={delay} />
       </div>
-      <p className="mt-1.5 text-xs font-medium leading-4 text-slate-400">
-        {kpi.detail}
+      <p className="mt-1.5 flex items-start gap-1.5 text-xs font-medium leading-4 text-slate-400">
+        <TrendIcon size={13} aria-hidden className={`mt-px shrink-0 ${tone.text}`} />
+        <span className="sr-only">{trend.label}, </span>
+        <span>{kpi.detail}</span>
       </p>
       <div className="mt-auto flex items-center gap-2.5 pt-4">
         <span
