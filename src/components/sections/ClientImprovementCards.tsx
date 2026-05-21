@@ -1,8 +1,8 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
-import { useId, type ComponentType, type ReactNode } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
+import { useId, useRef, type ComponentType, type ReactNode } from "react";
 
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
@@ -195,7 +195,7 @@ function ChartFrame({ children }: { children: ReactNode }) {
 
 /* Chart 1: smooth downward area sparkline = cycle time getting shorter
    (cut cycle time). Endpoint dot sits at the low/right end. */
-function AreaChart({ animate, id }: { animate: boolean; id: string }) {
+function AreaChart({ play, reduce, id }: { play: boolean; reduce: boolean; id: string }) {
   const line =
     "M4 12 C 44 16 64 20 104 28 C 150 37 178 47 224 54 C 262 60 286 66 316 70";
   const area = `${line} L316 76 L4 76 Z`;
@@ -220,9 +220,9 @@ function AreaChart({ animate, id }: { animate: boolean; id: string }) {
         <motion.path
           d={area}
           fill={`url(#${id}-fill)`}
-          initial={animate ? { opacity: 0 } : false}
-          animate={animate ? { opacity: 1 } : undefined}
-          transition={{ duration: 0.7, delay: 0.45 }}
+          initial={reduce ? false : { opacity: 0 }}
+          animate={play || reduce ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.7, delay: reduce ? 0 : 0.45 }}
         />
         <motion.path
           d={line}
@@ -231,23 +231,23 @@ function AreaChart({ animate, id }: { animate: boolean; id: string }) {
           vectorEffect="non-scaling-stroke"
           strokeLinecap="round"
           strokeLinejoin="round"
-          initial={animate ? { pathLength: 0 } : false}
-          animate={animate ? { pathLength: 1 } : undefined}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
+          initial={reduce ? false : { pathLength: 0 }}
+          animate={play || reduce ? { pathLength: 1 } : { pathLength: 0 }}
+          transition={{ duration: 1.1, ease: "easeInOut", delay: reduce ? 0 : 0.1 }}
         />
       </svg>
       <motion.span
         className="absolute bottom-3.5 right-4 h-2.5 w-2.5 rounded-full bg-[#2f9e6f] ring-4 ring-[#2f9e6f]/15"
-        initial={animate ? { scale: 0, opacity: 0 } : false}
-        animate={animate ? { scale: 1, opacity: 1 } : undefined}
-        transition={{ delay: 1, type: "spring", stiffness: 300, damping: 18 }}
+        initial={reduce ? false : { scale: 0, opacity: 0 }}
+        animate={play || reduce ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+        transition={{ delay: reduce ? 0 : 1, type: "spring", stiffness: 300, damping: 18 }}
       />
     </ChartFrame>
   );
 }
 
 /* Chart 2: full donut ring sweeping to complete, with a center check (hold the budget) */
-function DonutChart({ animate, id }: { animate: boolean; id: string }) {
+function DonutChart({ play, reduce }: { play: boolean; reduce: boolean; id: string }) {
   const r = 30;
   const c = 2 * Math.PI * r;
   return (
@@ -265,8 +265,8 @@ function DonutChart({ animate, id }: { animate: boolean; id: string }) {
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={c}
-              initial={animate ? { strokeDashoffset: c } : { strokeDashoffset: 0 }}
-              animate={animate ? { strokeDashoffset: 0 } : undefined}
+              initial={reduce ? false : { strokeDashoffset: c }}
+              animate={play || reduce ? { strokeDashoffset: 0 } : { strokeDashoffset: c }}
               transition={{ duration: 1.2, ease: "easeOut" }}
             />
           </svg>
@@ -288,7 +288,7 @@ function DonutChart({ animate, id }: { animate: boolean; id: string }) {
 }
 
 /* Chart 3: clean descending bars that grow in with a stagger (move inventory faster) */
-function BarsChart({ animate }: { animate: boolean; id: string }) {
+function BarsChart({ play, reduce }: { play: boolean; reduce: boolean; id: string }) {
   const bars = [92, 80, 70, 58, 48, 38];
   return (
     <ChartFrame>
@@ -298,9 +298,9 @@ function BarsChart({ animate }: { animate: boolean; id: string }) {
             key={i}
             className="flex-1 origin-bottom rounded-md bg-gradient-to-t from-[#7fb8d3] to-[#5bbf98]"
             style={{ height: `${value}%` }}
-            initial={animate ? { scaleY: 0 } : false}
-            animate={animate ? { scaleY: 1 } : undefined}
-            transition={{ duration: 0.5, delay: i * 0.07, ease: "easeOut" }}
+            initial={reduce ? false : { scaleY: 0 }}
+            animate={play || reduce ? { scaleY: 1 } : { scaleY: 0 }}
+            transition={{ duration: 0.5, delay: reduce ? 0 : i * 0.07, ease: "easeOut" }}
           />
         ))}
       </div>
@@ -327,14 +327,15 @@ function ClientImprovementCard({
   focus,
   className,
 }: ClientImprovementCardProps) {
+  const ref = useRef<HTMLElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
   const reduceMotion = useReducedMotion();
-  const animate = !reduceMotion;
   const Chart = CHARTS[chart];
   const rawId = useId();
   const chartId = `ci-${rawId.replace(/:/g, "")}`;
 
   return (
-    <article className={cn("h-full", className)}>
+    <article ref={ref} className={cn("h-full", className)}>
       <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-[#d4dee4] bg-gradient-to-br from-white/96 via-white/90 to-[#eef4f7]/82 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.92),0_2px_4px_-2px_rgba(23,33,44,0.06),0_28px_64px_-46px_rgba(23,33,44,0.42)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-0.5 hover:border-[#c6d3da] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.96),0_30px_72px_-44px_rgba(23,33,44,0.5)]">
         <div
           aria-hidden
@@ -344,7 +345,7 @@ function ClientImprovementCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#d6e0e5] bg-[#f8fafc]">
-              <Icon animate={animate} />
+              <Icon animate={inView && !reduceMotion} />
             </span>
             <span className="max-w-[8.5rem] text-[0.58rem] font-bold uppercase leading-tight tracking-[0.16em] text-[#66727a]">
               {proof}
@@ -368,7 +369,7 @@ function ClientImprovementCard({
         </div>
 
         <div className="mt-5">
-          <Chart animate={animate} id={chartId} />
+          <Chart play={inView} reduce={!!reduceMotion} id={chartId} />
         </div>
 
         <h3 className="mt-6 text-[1.25rem] font-bold leading-snug tracking-[-0.02em] text-[#17212c]">
@@ -394,7 +395,7 @@ function ClientImprovementCard({
 
 export default function ClientImprovementCards() {
   return (
-    <section className="defer-section relative overflow-hidden border-b border-[#d9e1e6]/75 bg-transparent py-14 md:py-20">
+    <section className="relative overflow-hidden border-b border-[#d9e1e6]/75 bg-transparent py-14 md:py-20">
       <Container className="relative z-10">
         <div className="mx-auto mb-10 max-w-3xl text-center md:mb-14">
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[#2f5368]">
