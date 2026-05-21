@@ -235,7 +235,7 @@ export default function Home() {
                         Construction operations dashboard
                       </p>
                       <h3 className="mt-3 max-w-xl text-4xl font-bold leading-[0.98] tracking-[-0.045em] text-white sm:text-5xl">
-                        Track your data as the job progresses.
+                        Track every job from permit to closing.
                       </h3>
                       <p className="mt-4 max-w-lg text-sm font-semibold leading-6 text-white/[0.72]">
                         Stage dates, cost movement, and owner follow-up stay
