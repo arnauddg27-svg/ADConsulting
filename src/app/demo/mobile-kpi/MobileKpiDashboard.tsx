@@ -202,7 +202,7 @@ const filterHeadings: Record<FilterKey, string> = {
 // Inset focus ring: the chip row scrolls horizontally, which makes its
 // overflow-y compute to `auto` and clip an outset ring.
 const CHIP_BASE =
-  "shrink-0 cursor-pointer rounded-full border px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] transition active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8df0ce]";
+  "shrink-0 cursor-pointer touch-manipulation rounded-full border px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] transition active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8df0ce]";
 
 function kpisForFilter(key: FilterKey): Kpi[] {
   if (key === "today") return kpis;
@@ -369,7 +369,7 @@ export default function MobileKpiDashboard() {
   }
 
   return (
-    <div className="relative h-[100dvh] overflow-hidden bg-[#07111d] text-white sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-8">
+    <div className="relative h-[100dvh] overflow-hidden bg-[#07111d] text-white [-webkit-tap-highlight-color:transparent] sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-8">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-35"
@@ -395,7 +395,7 @@ export default function MobileKpiDashboard() {
           <div className="flex items-center justify-between gap-4">
             <Link
               href="/examples/"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#78e0c0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1421]"
+              className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#78e0c0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1421]"
               aria-label="Back to dashboard examples"
             >
               <ArrowLeft size={18} />
@@ -463,7 +463,10 @@ export default function MobileKpiDashboard() {
           </div>
         </div>
 
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <div
+          ref={scrollRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[#8ea7bb]">
               {filterHeadings[active]}
