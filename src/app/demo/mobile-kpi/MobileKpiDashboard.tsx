@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { animate, motion, useReducedMotion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
@@ -225,17 +232,67 @@ function toneClasses(tone: DashboardTone) {
   };
 }
 
-function KpiCard({ kpi }: { kpi: Kpi }) {
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+type ParsedValue = {
+  prefix: string;
+  target: number;
+  suffix: string;
+  decimals: number;
+};
+
+function parseValue(value: string): ParsedValue | null {
+  const match = value.match(/^(\D*?)(-?\d+(?:\.\d+)?)(\D*)$/);
+  if (!match) return null;
+  const [, prefix, numStr, suffix] = match;
+  const decimals = numStr.includes(".") ? numStr.split(".")[1].length : 0;
+  return { prefix, target: Number.parseFloat(numStr), suffix, decimals };
+}
+
+function formatValue(parsed: ParsedValue, current: number): string {
+  return `${parsed.prefix}${current.toFixed(parsed.decimals)}${parsed.suffix}`;
+}
+
+// Counts the numeric portion of a KPI value up from zero on mount. The server
+// (and no-JS / reduced-motion) render the final value so the dashboard is never
+// shown empty; the layout effect overwrites it before paint to avoid a flash.
+function CountUpValue({ value, delay = 0 }: { value: string; delay?: number }) {
+  const reduce = useReducedMotion();
+  const parsed = useMemo(() => parseValue(value), [value]);
+  const [display, setDisplay] = useState(value);
+
+  useIsoLayoutEffect(() => {
+    if (!parsed || reduce) {
+      setDisplay(value);
+      return;
+    }
+    setDisplay(formatValue(parsed, 0));
+    const controls = animate(0, parsed.target, {
+      duration: 0.9,
+      delay,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (latest) => setDisplay(formatValue(parsed, latest)),
+    });
+    return () => controls.stop();
+  }, [parsed, value, reduce, delay]);
+
+  return <span className="tabular-nums">{display}</span>;
+}
+
+function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
   const Icon = kpi.icon;
   const tone = toneClasses(kpi.tone);
+  const reduce = useReducedMotion();
+  const delay = Math.min(index, 7) * 0.05;
 
   return (
     <article
-      className={`relative overflow-hidden rounded-[1.25rem] border p-3.5 shadow-[0_18px_54px_-42px_rgba(0,0,0,0.85)] ${tone.card}`}
+      className={`relative flex min-h-[8.75rem] flex-col overflow-hidden rounded-[1.25rem] border p-3.5 shadow-[0_18px_54px_-42px_rgba(0,0,0,0.85)] ${tone.card}`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
       <div className="flex items-start justify-between gap-3">
-        <p className="max-w-[7.5rem] text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#8ea7bb]">
+        <p className="max-w-[7.5rem] text-[0.58rem] font-bold uppercase tracking-[0.13em] text-[#94adc1]">
           {kpi.label}
         </p>
         <span
@@ -244,24 +301,28 @@ function KpiCard({ kpi }: { kpi: Kpi }) {
           <Icon size={16} />
         </span>
       </div>
-      <div className="mt-3.5 text-[1.85rem] font-bold tracking-[-0.05em]">
-        {kpi.value}
+      <div className="mt-3.5 text-[1.85rem] font-bold leading-none tracking-[-0.05em]">
+        <CountUpValue value={kpi.value} delay={delay} />
       </div>
-      <p className="mt-1 min-h-8 text-xs font-medium leading-4 text-slate-400">
+      <p className="mt-1.5 text-xs font-medium leading-4 text-slate-400">
         {kpi.detail}
       </p>
-      <div
-        className="mt-4 h-1.5 rounded-full bg-white/[0.08]"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={kpi.progress}
-        aria-label={`${kpi.label} progress`}
-      >
+      <div className="mt-auto pt-4">
         <div
-          className={`h-1.5 rounded-full bg-gradient-to-r ${tone.bar}`}
-          style={{ width: `${kpi.progress}%` }}
-        />
+          className="h-1.5 overflow-hidden rounded-full bg-white/[0.08]"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={kpi.progress}
+          aria-label={`${kpi.label} progress`}
+        >
+          <motion.div
+            className={`h-1.5 rounded-full bg-gradient-to-r ${tone.bar}`}
+            initial={reduce ? false : { width: 0 }}
+            animate={{ width: `${kpi.progress}%` }}
+            transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
       </div>
     </article>
   );
@@ -350,29 +411,35 @@ export default function MobileKpiDashboard() {
             </div>
           </div>
 
-          <nav
-            aria-label="Dashboard review filters"
-            className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {filterDefs.map(({ key, label }) => {
-              const selected = active === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => selectFilter(key)}
-                  aria-pressed={selected}
-                  className={
-                    selected
-                      ? "shrink-0 cursor-pointer rounded-full border border-[#78e0c0]/30 bg-[#78e0c0]/14 px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8df0ce] transition"
-                      : "shrink-0 cursor-pointer rounded-full border border-white/10 bg-white/[0.035] px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-400 transition hover:border-white/20 hover:text-slate-200"
-                  }
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="relative -mx-5 mt-4">
+            <nav
+              aria-label="Dashboard review filters"
+              className="flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {filterDefs.map(({ key, label }) => {
+                const selected = active === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => selectFilter(key)}
+                    aria-pressed={selected}
+                    className={
+                      selected
+                        ? "shrink-0 cursor-pointer rounded-full border border-[#78e0c0]/30 bg-[#78e0c0]/14 px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8df0ce] transition"
+                        : "shrink-0 cursor-pointer rounded-full border border-white/10 bg-white/[0.035] px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-400 transition hover:border-white/20 hover:text-slate-200"
+                    }
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </nav>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0b1421] to-transparent"
+            />
+          </div>
         </div>
 
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
@@ -385,8 +452,8 @@ export default function MobileKpiDashboard() {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {visibleKpis.map((kpi) => (
-              <KpiCard key={kpi.label} kpi={kpi} />
+            {visibleKpis.map((kpi, index) => (
+              <KpiCard key={kpi.label} kpi={kpi} index={index} />
             ))}
           </div>
         </div>
