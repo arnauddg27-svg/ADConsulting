@@ -243,7 +243,7 @@ export default function Home() {
                         move every day.
                       </p>
 
-                      <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                      <div className="mt-5 grid grid-cols-3 gap-1.5 sm:gap-2">
                         {heroConstructionStats.map((stat) => (
                           <div
                             key={stat.label}
@@ -256,7 +256,7 @@ export default function Home() {
                             <p className="text-[0.5rem] font-bold uppercase tracking-[0.18em] text-white/[0.6]">
                               {stat.label}
                             </p>
-                            <p className="mt-2 text-2xl font-bold leading-none tracking-[-0.02em] text-white">
+                            <p className="mt-2 text-xl font-bold leading-none tracking-[-0.02em] text-white sm:text-2xl">
                               {stat.value}
                             </p>
                             <p className="mt-1 text-[0.56rem] font-semibold uppercase tracking-[0.12em] text-[#8bd7ff]/75">
