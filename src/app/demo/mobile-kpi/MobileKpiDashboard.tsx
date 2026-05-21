@@ -199,6 +199,11 @@ const filterHeadings: Record<FilterKey, string> = {
   owners: "Follow-up KPIs",
 };
 
+// Inset focus ring: the chip row scrolls horizontally, which makes its
+// overflow-y compute to `auto` and clip an outset ring.
+const CHIP_BASE =
+  "shrink-0 cursor-pointer rounded-full border px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] transition active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#8df0ce]";
+
 function kpisForFilter(key: FilterKey): Kpi[] {
   if (key === "today") return kpis;
   return kpis.filter((kpi) => kpi.tags.includes(key));
@@ -385,12 +390,12 @@ export default function MobileKpiDashboard() {
         className="pointer-events-none absolute bottom-[-18rem] right-[-18rem] h-[36rem] w-[36rem] rounded-full bg-[#1d6a58]/16 blur-3xl"
       />
 
-      <section className="relative mx-auto flex h-full w-full max-w-[430px] flex-col overflow-hidden border-white/10 bg-[#0b1421] shadow-[0_42px_130px_-54px_rgba(0,0,0,0.95)] sm:h-[820px] sm:max-h-[calc(100dvh-4rem)] sm:rounded-[2rem] sm:border">
+      <section className="relative mx-auto flex h-full w-full flex-col overflow-hidden border-white/10 bg-[#0b1421] shadow-[0_42px_130px_-54px_rgba(0,0,0,0.95)] sm:h-[820px] sm:max-h-[calc(100dvh-4rem)] sm:max-w-[430px] sm:rounded-[2rem] sm:border">
         <div className="border-b border-white/10 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="flex items-center justify-between gap-4">
             <Link
               href="/examples/"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition hover:bg-white/[0.08] hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#78e0c0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1421]"
               aria-label="Back to dashboard examples"
             >
               <ArrowLeft size={18} />
@@ -440,11 +445,11 @@ export default function MobileKpiDashboard() {
                     type="button"
                     onClick={() => selectFilter(key)}
                     aria-pressed={selected}
-                    className={
+                    className={`${CHIP_BASE} ${
                       selected
-                        ? "shrink-0 cursor-pointer rounded-full border border-[#78e0c0]/30 bg-[#78e0c0]/14 px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#8df0ce] transition"
-                        : "shrink-0 cursor-pointer rounded-full border border-white/10 bg-white/[0.035] px-3.5 py-2.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-400 transition hover:border-white/20 hover:text-slate-200"
-                    }
+                        ? "border-[#78e0c0]/30 bg-[#78e0c0]/14 text-[#8df0ce]"
+                        : "border-white/10 bg-white/[0.035] text-slate-400 hover:border-white/20 hover:text-slate-200"
+                    }`}
                   >
                     {label}
                   </button>
