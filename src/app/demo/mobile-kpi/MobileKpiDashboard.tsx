@@ -232,6 +232,14 @@ function toneClasses(tone: DashboardTone) {
   };
 }
 
+// Status conveyed as a word (not color alone) so it survives color-blindness
+// and screen readers — the dashboard's whole job is triage.
+const STATUS_LABEL: Record<DashboardTone, string> = {
+  good: "On track",
+  watch: "Watch",
+  risk: "At risk",
+};
+
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -283,6 +291,7 @@ function CountUpValue({ value, delay = 0 }: { value: string; delay?: number }) {
 function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
   const Icon = kpi.icon;
   const tone = toneClasses(kpi.tone);
+  const status = STATUS_LABEL[kpi.tone];
   const reduce = useReducedMotion();
   const delay = Math.min(index, 7) * 0.05;
 
@@ -307,14 +316,21 @@ function KpiCard({ kpi, index }: { kpi: Kpi; index: number }) {
       <p className="mt-1.5 text-xs font-medium leading-4 text-slate-400">
         {kpi.detail}
       </p>
-      <div className="mt-auto pt-4">
+      <div className="mt-auto flex items-center gap-2.5 pt-4">
+        <span
+          className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[0.55rem] font-bold uppercase tracking-[0.1em] ${tone.text}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-r ${tone.bar}`} />
+          {status}
+        </span>
         <div
-          className="h-1.5 overflow-hidden rounded-full bg-white/[0.08]"
+          className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.08]"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={kpi.progress}
-          aria-label={`${kpi.label} progress`}
+          aria-valuetext={`${status}, ${kpi.progress}%`}
+          aria-label={`${kpi.label} status`}
         >
           <motion.div
             className={`h-1.5 rounded-full bg-gradient-to-r ${tone.bar}`}
