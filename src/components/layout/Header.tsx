@@ -81,8 +81,8 @@ export default function Header() {
     : "flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
   const mobileSummaryClass = isLightMarketing
-    ? "inline-flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border border-[#d9e0e4] bg-white text-[#17212c] shadow-[0_10px_28px_-22px_rgba(23,33,44,0.45)] [&::-webkit-details-marker]:hidden"
-    : "inline-flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-slate-200 [&::-webkit-details-marker]:hidden";
+    ? "inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-[#d9e0e4] bg-white text-[#17212c] shadow-[0_10px_28px_-22px_rgba(23,33,44,0.45)] [&::-webkit-details-marker]:hidden"
+    : "inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-slate-200 [&::-webkit-details-marker]:hidden";
 
   const mobilePanelClass = isLightMarketing
     ? "absolute right-0 top-14 z-50 w-[min(92vw,22rem)] overflow-hidden rounded-[1.5rem] border border-[#d9e0e4] bg-white p-6 shadow-[0_24px_70px_-44px_rgba(23,33,44,0.5)]"

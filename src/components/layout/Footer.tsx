@@ -114,12 +114,12 @@ export default function Footer() {
             <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
               Explore
             </h3>
-            <ul className="mt-5 space-y-3">
+            <ul className="mt-4 space-y-1">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`group inline-flex items-center gap-1.5 text-sm font-bold transition-colors ${linkText}`}
+                    className={`group inline-flex items-center gap-1.5 py-2 text-sm font-bold transition-colors ${linkText}`}
                   >
                     {link.label}
                     <ArrowUpRight
@@ -151,7 +151,7 @@ export default function Footer() {
                 <Mail size={16} className="mt-0.5 text-[#35647f]" />
                 <a
                   href={`mailto:${SITE_CONFIG.email}`}
-                  className={`transition-colors ${hoverMetaText}`}
+                  className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}
                 >
                   {SITE_CONFIG.email}
                 </a>
@@ -170,13 +170,13 @@ export default function Footer() {
         >
           <div>© {new Date().getFullYear()} {SITE_CONFIG.businessName}.</div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <Link href="/about/" className={`transition-colors ${hoverMetaText}`}>
+            <Link href="/about/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
               About Us
             </Link>
-            <Link href="/founder/" className={`transition-colors ${hoverMetaText}`}>
+            <Link href="/founder/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
               Founder
             </Link>
-            <Link href="/privacy/" className={`transition-colors ${hoverMetaText}`}>
+            <Link href="/privacy/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
               Privacy Policy
             </Link>
             <span className="inline-flex items-center gap-2">
