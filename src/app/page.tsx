@@ -199,8 +199,8 @@ export default function Home() {
             <div className="relative lg:pl-4">
               <ShineBorder
                 borderRadius={36}
-                borderWidth={2}
-                duration={12}
+                borderWidth={3}
+                duration={8}
                 color={["#24c18d", "#8bd7ff", "#24c18d"]}
                 className="mx-auto max-w-[46rem]"
               >
