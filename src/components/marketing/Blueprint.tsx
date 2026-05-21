@@ -116,7 +116,7 @@ export function BlueprintCTA({
   return (
     <section className={cn("pb-20 md:pb-28", className)}>
       <Container>
-        <div className="relative overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-gradient-to-br from-[#1c2a3a] to-[#141f2b] p-7 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_42px_130px_-82px_rgba(23,33,44,0.78)] md:p-10">
+        <div className="relative transform-gpu overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-gradient-to-br from-[#1c2a3a] to-[#141f2b] p-7 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_42px_130px_-82px_rgba(23,33,44,0.78)] transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-white/[0.14] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_56px_150px_-76px_rgba(23,33,44,0.9)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:p-10">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-[0.16]"
