@@ -266,7 +266,7 @@ export default function SunshineDashboard() {
    * below the site header (z-50). This is the only reliable cross-browser
    * way to guarantee the fullpage shell covers the whole viewport. */
   const shellMarkup = (
-    <div className="sh-dashboard" data-sh-mode={mode} data-sh-fullpage={isFullPage ? "true" : "false"}>
+    <div className="sh-dashboard sh-dashboard--fill" data-sh-mode={mode} data-sh-fullpage={isFullPage ? "true" : "false"}>
       {isFullPage && (
         <>
           <div
