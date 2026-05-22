@@ -28,6 +28,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
   const longReview = permits.filter(p => (p.status === "in-review" || p.status === "pending") && p.daysInReview > 30).length;
   const rejected = permits.filter(p => p.status === "rejected").length;
   const pending = permits.filter(p => p.status === "pending").length;
+  const envFlags = permits.filter(p => p.gopherTortoise || p.treeSurvey || (p.floodZone != null && p.floodZone !== "X")).length;
 
   return (
     <>
@@ -42,6 +43,7 @@ export default function PermittingPipelineTab({ permits, onDrill }: Props) {
           { label: "In Review > 30d", value: String(longReview), tone: longReview >= 12 ? "alert" : longReview >= 6 ? "watch" : "good" },
           { label: "Rejected Permits", value: String(rejected), tone: rejected >= 6 ? "alert" : rejected >= 3 ? "watch" : "good" },
           { label: "Pending Queue", value: String(pending), tone: pending >= 18 ? "watch" : "good" },
+          { label: "Env. Flags", value: String(envFlags), tone: envFlags >= 16 ? "alert" : envFlags >= 8 ? "watch" : "good" },
         ]}
       />
 

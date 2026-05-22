@@ -212,7 +212,7 @@ export default function LoansDashboardTab({ loans, onCommunityClick, onCityClick
           />
         </SHPanel>
         <SHPanel kicker="Expiration" title="Days Until Expiration">
-          <SHHistogram buckets={expirationBuckets} onBucketClick={bucket => onDrill({ type: "loan-metric", value: bucket, label: `Expiration ${bucket}` })} />
+          <SHHistogram semantic buckets={expirationBuckets} onBucketClick={bucket => onDrill({ type: "loan-metric", value: bucket, label: `Expiration ${bucket}` })} />
         </SHPanel>
       </div>
 

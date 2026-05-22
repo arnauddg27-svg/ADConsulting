@@ -42,6 +42,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
   const expiring60 = loans.filter(l => l.daysUntilExpiration <= 60).length;
   const highRate = loans.filter(l => l.interestRate >= 7.25).length;
   const drawOver85 = loans.filter(l => l.drawPct >= 85).length;
+  const highLtv = loans.filter(l => (l.ltvPct ?? 0) >= 80).length;
 
   return (
     <>
@@ -56,6 +57,7 @@ export default function LoansPipelineTab({ loans, onDrill }: Props) {
           { label: "Expiring < 60d", value: String(expiring60), tone: expiring60 >= 12 ? "alert" : expiring60 >= 6 ? "watch" : "good" },
           { label: "Rate >= 7.25%", value: String(highRate), tone: highRate >= 20 ? "alert" : highRate >= 10 ? "watch" : "good" },
           { label: "Draw >= 85%", value: String(drawOver85), tone: drawOver85 >= 24 ? "watch" : "good" },
+          { label: "LTV >= 80%", value: String(highLtv), tone: highLtv >= 18 ? "alert" : highLtv >= 9 ? "watch" : "good" },
         ]}
       />
 

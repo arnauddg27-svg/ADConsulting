@@ -150,7 +150,7 @@ export default function AuditsDashboardTab({ audits, onCommunityClick, onCityCli
           <SHDonutChart segments={costBreakdown} onSegmentClick={label => onDrill({ type: "audit-cost", value: label, label })} />
         </SHPanel>
         <SHPanel kicker="PL-03" title="Net Margin Distribution">
-          <SHDonutChart segments={marginBuckets} onSegmentClick={label => onDrill({ type: "margin-bucket", value: label, label })} />
+          <SHDonutChart semantic segments={marginBuckets} onSegmentClick={label => onDrill({ type: "margin-bucket", value: label, label })} />
         </SHPanel>
       </div>
 

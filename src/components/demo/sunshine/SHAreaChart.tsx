@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePaletteColors } from "./chartPalette";
 
 interface DataPoint {
   label: string;
@@ -17,14 +18,22 @@ interface SHAreaChartProps {
   formatY?: (v: number) => string;
   height?: number;
   onPointClick?: (label: string, index: number, series?: "value" | "value2" | "all") => void;
+  /** Set when the trend colors carry meaning (good/bad) and must NOT be
+   *  recolored by the active palette. */
+  semantic?: boolean;
 }
 
 export default function SHAreaChart({
-  data, color = "#14b8a6", color2 = "#3b82f6",
+  data, color: colorProp = "#14b8a6", color2: color2Prop = "#3b82f6",
   label1 = "Actual", label2 = "Planned",
-  formatY, height = 160, onPointClick,
+  formatY, height = 160, onPointClick, semantic,
 }: SHAreaChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
+  // Trend lines follow the active palette (primary + secondary), so a single
+  // metric reads in the same family as every other chart. No palette → original.
+  const palCols = usePaletteColors(2);
+  const color = palCols && !semantic ? palCols[0] : colorProp;
+  const color2 = palCols && !semantic ? palCols[1] : color2Prop;
 
   const allValues = data.flatMap(d => [d.value, d.value2 ?? 0]);
   const positiveValues = allValues.filter(v => v > 0);

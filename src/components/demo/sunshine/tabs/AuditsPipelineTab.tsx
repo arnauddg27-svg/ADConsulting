@@ -17,6 +17,7 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
   const profitable = audits.filter(a => a.netMargin > 0).length;
   const lowMargin = audits.filter(a => a.netMargin >= 0 && a.netMargin < 10).length;
   const highContingency = audits.filter(a => a.contingency > 3500).length;
+  const lossMaking = audits.filter(a => a.netMargin < 0).length;
 
   return (
     <>
@@ -31,6 +32,7 @@ export default function AuditsPipelineTab({ audits, onDrill }: Props) {
           { label: "Profitable Jobs", value: `${profitable}/${audits.length}`, tone: profitable === audits.length ? "good" : "watch", onClick: () => onDrill({ type: "audit-cost", value: "total-profit", label: "Profitable Audited Jobs" }) },
           { label: "Margin Watch (<10%)", value: String(lowMargin), tone: lowMargin >= 12 ? "watch" : "good", onClick: () => onDrill({ type: "margin-bucket", value: "0–10%", label: "Margin Watch — 0–10%" }) },
           { label: "Contingency Watch", value: String(highContingency), tone: highContingency >= 14 ? "watch" : "good", onClick: () => onDrill({ type: "audit-cost", value: "contingency-watch", label: "Contingency Watch" }) },
+          { label: "Loss-Making (<0%)", value: String(lossMaking), tone: lossMaking >= 3 ? "alert" : lossMaking >= 1 ? "watch" : "good", onClick: () => onDrill({ type: "margin-bucket", value: "< 0%", label: "Loss-Making Jobs (<0%)" }) },
         ]}
       />
 

@@ -161,6 +161,7 @@ export default function PropertyMgmtDashboardTab({ units, onCommunityClick, onCi
       <div className="sh-panels-row">
         <SHPanel kicker="Occupancy" title="Units by Status">
           <SHDonutChart
+            semantic
             segments={byOccupancy}
             onSegmentClick={label => {
               const map: Record<string, string> = { "Leased": "leased", "Vacant": "vacant", "Make ready": "make-ready", "Eviction": "eviction", "Notice to vacate": "notice-to-vacate" };

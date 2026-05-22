@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePaletteColors } from "./chartPalette";
 
 interface Bucket {
   bucket: string;
@@ -11,11 +12,16 @@ interface Bucket {
 interface SHHistogramProps {
   buckets: Bucket[];
   onBucketClick?: (bucket: string) => void;
+  /** Set when bar colors carry meaning (status / risk) and must NOT be
+   *  recolored by the active palette. */
+  semantic?: boolean;
 }
 
-export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps) {
+export default function SHHistogram({ buckets, onBucketClick, semantic }: SHHistogramProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const counts = buckets.map(b => b.count);
+  const palCols = usePaletteColors(buckets.length);
+  const data = palCols && !semantic ? buckets.map((b, i) => ({ ...b, color: palCols[i] })) : buckets;
+  const counts = data.map(b => b.count);
   const max = Math.max(...counts, 1);
   // Amplify visual contrast for non-zero buckets without drawing fake bars for empty slices.
   const nonZero = counts.filter(c => c > 0);
@@ -24,7 +30,7 @@ export default function SHHistogram({ buckets, onBucketClick }: SHHistogramProps
 
   return (
     <div className="sh-histogram">
-      {buckets.map((b, i) => {
+      {data.map((b, i) => {
         const pct = b.count === 0 ? 0 : 25 + ((b.count - min) / range) * 75;
         const isHovered = hovered === i;
         return (

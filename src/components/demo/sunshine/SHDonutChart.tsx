@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePaletteColors, hexToRgba } from "./chartPalette";
 
 interface Segment {
   label: string;
@@ -13,11 +14,16 @@ interface SHDonutChartProps {
   size?: number;
   thickness?: number;
   onSegmentClick?: (label: string) => void;
+  /** Set when segment colors carry meaning (status / risk) and must NOT be
+   *  recolored by the active palette. */
+  semantic?: boolean;
 }
 
-export default function SHDonutChart({ segments, size = 140, thickness = 20, onSegmentClick }: SHDonutChartProps) {
+export default function SHDonutChart({ segments, size = 140, thickness = 20, onSegmentClick, semantic }: SHDonutChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
-  const total = segments.reduce((s, seg) => s + seg.value, 0);
+  const palCols = usePaletteColors(segments.length);
+  const segs = palCols && !semantic ? segments.map((s, i) => ({ ...s, color: palCols[i] })) : segments;
+  const total = segs.reduce((s, seg) => s + seg.value, 0);
   if (total === 0) return null;
 
   const r = (size - thickness) / 2;
@@ -26,7 +32,7 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
   const gapAngle = 0.02; // small gap between segments
 
   let offset = 0;
-  const arcs = segments.map((seg, i) => {
+  const arcs = segs.map((seg, i) => {
     const pct = seg.value / total;
     const dash = Math.max(0, pct * circumference - gapAngle * circumference);
     const gap = circumference - dash;
@@ -35,13 +41,13 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
     return arc;
   });
 
-  const hoveredSeg = hovered !== null ? segments[hovered] : null;
+  const hoveredSeg = hovered !== null ? segs[hovered] : null;
 
   return (
     <div className="sh-donut-wrapper">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: "drop-shadow(0 0 12px rgba(20, 184, 166, 0.15))" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ filter: `drop-shadow(0 0 12px ${hexToRgba(palCols ? palCols[0] : "#14b8a6", 0.15)})` }}>
         <defs>
-          {segments.map((seg, i) => (
+          {segs.map((seg, i) => (
             <linearGradient key={i} id={`donut-grad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={seg.color} stopOpacity="1" />
               <stop offset="100%" stopColor={seg.color} stopOpacity="0.65" />
@@ -96,7 +102,7 @@ export default function SHDonutChart({ segments, size = 140, thickness = 20, onS
       </svg>
 
       <div className="sh-donut-legend">
-        {segments.map((seg, i) => (
+        {segs.map((seg, i) => (
           <div
             key={seg.label}
             className="sh-donut-legend-item"

@@ -1,0 +1,188 @@
+/* ─────────────────────────────────────────────────────────────
+   shadcn-style SKIN + palette set for the Sunshine dashboard.
+
+   Scoped entirely under `.sh-dashboard[data-sh-skin="shadcn"]`, so it ONLY
+   affects an instance that opts in (the /demo-shadcn test route). The live
+   /demo never sets data-sh-skin, so it stays byte-for-byte unchanged.
+
+   The dashboard is built on the --sh-* token layer + class system, so
+   re-defining the tokens re-skins the entire chrome at once. A `data-sh-palette`
+   attribute selects the accent/surface family; the switcher on /demo-shadcn
+   flips it live. Data-viz charts keep their colored series (shadcn-appropriate).
+
+   Palettes: slate (default) · carbon · indigo · vivid · mono.
+   warning (amber) + danger (red) stay semantic across every palette.
+   ───────────────────────────────────────────────────────────── */
+
+/* ════ Shared + DEFAULT palette (Blue / slate) — dark ════ */
+.sh-dashboard[data-sh-skin="shadcn"] {
+  --sh-bg-shell: #020617;
+  --sh-bg-surface: #0d1526;
+  --sh-bg-surface-raised: #18213a;
+  --sh-bg-hover: #232f4a;
+
+  --sh-text-primary: #f8fafc;
+  --sh-text-secondary: #94a3b8;
+  --sh-text-muted: #64748b;
+
+  --sh-accent: #60a5fa;
+  --sh-accent-dim: rgba(96, 165, 250, 0.16);
+  --sh-warning: #fbbf24;
+  --sh-warning-dim: rgba(251, 191, 36, 0.14);
+  --sh-danger: #f87171;
+  --sh-danger-dim: rgba(248, 113, 113, 0.13);
+
+  --sh-border: #1e293b;
+  --sh-border-dim: rgba(148, 163, 184, 0.13);
+
+  /* --sh-chart-3 is reused for section kickers; the chart components hardcode
+     their own series colors, so the other chart tokens are mostly cosmetic. */
+  --sh-chart-1: #60a5fa;
+  --sh-chart-2: #38bdf8;
+  --sh-chart-3: #60a5fa;
+  --sh-chart-4: #818cf8;
+  --sh-chart-5: #22d3ee;
+  --sh-chart-6: #a78bfa;
+
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ════ Shared + DEFAULT palette (Blue / slate) — light (Day mode) ════ */
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-mode="day"] {
+  --sh-bg-shell: #f1f5f9;
+  --sh-bg-surface: #ffffff;
+  --sh-bg-surface-raised: #f8fafc;
+  --sh-bg-hover: #eef2f7;
+
+  --sh-text-primary: #0f172a;
+  --sh-text-secondary: #475569;
+  --sh-text-muted: #64748b;
+
+  --sh-accent: #2563eb;
+  --sh-accent-dim: rgba(37, 99, 235, 0.12);
+  --sh-warning: #d97706;
+  --sh-warning-dim: rgba(217, 119, 6, 0.12);
+  --sh-danger: #dc2626;
+  --sh-danger-dim: rgba(220, 38, 38, 0.1);
+
+  --sh-border: #e2e8f0;
+  --sh-border-dim: rgba(15, 23, 42, 0.07);
+
+  --sh-chart-3: #2563eb;
+}
+
+/* ════ Per-theme chrome — each theme re-tints the whole dashboard (surfaces,
+   text, accent, borders), not just the charts. Slate is the base block above.
+   Dark = primary; each has a matching light (Day mode) variant. ════ */
+
+/* ── Carbon (IBM near-black) ── */
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="carbon"] {
+  --sh-bg-shell: #0a0a0c; --sh-bg-surface: #161619; --sh-bg-surface-raised: #202024; --sh-bg-hover: #2a2a30;
+  --sh-text-primary: #f4f4f5; --sh-text-secondary: #a1a1aa; --sh-text-muted: #71717a;
+  --sh-accent: #4589ff; --sh-accent-dim: rgba(69, 137, 255, 0.16);
+  --sh-border: #2a2a30; --sh-border-dim: rgba(255, 255, 255, 0.07);
+}
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="carbon"][data-sh-mode="day"] {
+  --sh-bg-shell: #f4f4f5; --sh-bg-surface: #ffffff; --sh-bg-surface-raised: #fafafa; --sh-bg-hover: #f0f0f2;
+  --sh-text-primary: #18181b; --sh-text-secondary: #52525b; --sh-text-muted: #71717a;
+  --sh-accent: #0f62fe; --sh-accent-dim: rgba(15, 98, 254, 0.12);
+  --sh-border: #e4e4e7; --sh-border-dim: rgba(0, 0, 0, 0.07);
+}
+
+/* ── Indigo (deep indigo-tinted) ── */
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="indigo"] {
+  --sh-bg-shell: #0a0a1f; --sh-bg-surface: #14132e; --sh-bg-surface-raised: #1e1c40; --sh-bg-hover: #2a2658;
+  --sh-text-primary: #ece9ff; --sh-text-secondary: #a5a0c8; --sh-text-muted: #726c96;
+  --sh-accent: #818cf8; --sh-accent-dim: rgba(129, 140, 248, 0.16);
+  --sh-border: #2a2552; --sh-border-dim: rgba(165, 160, 200, 0.14);
+}
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="indigo"][data-sh-mode="day"] {
+  --sh-bg-shell: #f3f3fb; --sh-bg-surface: #ffffff; --sh-bg-surface-raised: #faf9ff; --sh-bg-hover: #eeedfa;
+  --sh-text-primary: #1e1b3a; --sh-text-secondary: #5b5680; --sh-text-muted: #807aa0;
+  --sh-accent: #4f46e5; --sh-accent-dim: rgba(79, 70, 229, 0.12);
+  --sh-border: #e4e2f5; --sh-border-dim: rgba(30, 27, 58, 0.07);
+}
+
+/* ── Vivid (neutral chrome, bright charts) ── */
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="vivid"] {
+  --sh-bg-shell: #0a0a0f; --sh-bg-surface: #15151c; --sh-bg-surface-raised: #1f1f28; --sh-bg-hover: #2a2a36;
+  --sh-text-primary: #fafafa; --sh-text-secondary: #a1a1aa; --sh-text-muted: #71717a;
+  --sh-accent: #27aeef; --sh-accent-dim: rgba(39, 174, 239, 0.16);
+  --sh-border: #27272e; --sh-border-dim: rgba(255, 255, 255, 0.07);
+}
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="vivid"][data-sh-mode="day"] {
+  --sh-bg-shell: #f4f4f5; --sh-bg-surface: #ffffff; --sh-bg-surface-raised: #fafafa; --sh-bg-hover: #f0f0f1;
+  --sh-text-primary: #18181b; --sh-text-secondary: #52525b; --sh-text-muted: #71717a;
+  --sh-accent: #0284c7; --sh-accent-dim: rgba(2, 132, 199, 0.12);
+  --sh-border: #e4e4e7; --sh-border-dim: rgba(0, 0, 0, 0.07);
+}
+
+/* ── Mono (neutral zinc, near-white accent) ── */
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="mono"] {
+  --sh-bg-shell: #09090b; --sh-bg-surface: #131316; --sh-bg-surface-raised: #1b1b1f; --sh-bg-hover: #26262b;
+  --sh-text-primary: #fafafa; --sh-text-secondary: #a1a1aa; --sh-text-muted: #71717a;
+  --sh-accent: #e4e4e7; --sh-accent-dim: rgba(228, 228, 231, 0.12);
+  --sh-border: #27272a; --sh-border-dim: rgba(255, 255, 255, 0.07);
+}
+.sh-dashboard[data-sh-skin="shadcn"][data-sh-palette="mono"][data-sh-mode="day"] {
+  --sh-bg-shell: #f4f4f5; --sh-bg-surface: #ffffff; --sh-bg-surface-raised: #fafafa; --sh-bg-hover: #f4f4f5;
+  --sh-text-primary: #18181b; --sh-text-secondary: #52525b; --sh-text-muted: #71717a;
+  --sh-accent: #18181b; --sh-accent-dim: rgba(24, 24, 27, 0.08);
+  --sh-border: #e4e4e7; --sh-border-dim: rgba(0, 0, 0, 0.07);
+}
+
+/* ════ Shared shadcn component refinements ════ */
+
+/* Slightly larger radii + softer shadows = the shadcn card feel. */
+.sh-dashboard[data-sh-skin="shadcn"] .sh-kpi-card,
+.sh-dashboard[data-sh-skin="shadcn"] .sh-panel {
+  border-radius: 12px;
+}
+.sh-dashboard[data-sh-skin="shadcn"] .sh-kpi-card:hover {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+}
+.sh-dashboard[data-sh-skin="shadcn"] .sh-kpi-card::before {
+  opacity: 0.85;
+}
+
+/* Status pills → shadcn badge style (the base hardcodes the old rgba bg). */
+.sh-dashboard[data-sh-skin="shadcn"] .sh-pill {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.sh-dashboard[data-sh-skin="shadcn"] .sh-pill-good {
+  background: var(--sh-accent-dim);
+  color: var(--sh-accent);
+  border-color: color-mix(in srgb, var(--sh-accent) 28%, transparent);
+}
+.sh-dashboard[data-sh-skin="shadcn"] .sh-pill-watch {
+  background: var(--sh-warning-dim);
+  color: var(--sh-warning);
+  border-color: color-mix(in srgb, var(--sh-warning) 28%, transparent);
+}
+.sh-dashboard[data-sh-skin="shadcn"] .sh-pill-alert {
+  background: var(--sh-danger-dim);
+  color: var(--sh-danger);
+  border-color: color-mix(in srgb, var(--sh-danger) 30%, transparent);
+}
+
+/* Inputs / chips → shadcn control surfaces. */
+.sh-dashboard[data-sh-skin="shadcn"] .sh-filter-select,
+.sh-dashboard[data-sh-skin="shadcn"] .sh-bar-btn,
+.sh-dashboard[data-sh-skin="shadcn"] .sh-time-toggle,
+.sh-dashboard[data-sh-skin="shadcn"] .sh-filter-chip {
+  border-radius: 8px;
+}
+
+/* Roster table: the thead underline is inlined as a teal rgba in the
+   component; neutralize it to a clean border. */
+.sh-dashboard[data-sh-skin="shadcn"] .sh-main thead th {
+  border-bottom: 1px solid var(--sh-border) !important;
+}
+
+/* Native form controls pick up the accent. */
+.sh-dashboard[data-sh-skin="shadcn"] {
+  accent-color: var(--sh-accent);
+}

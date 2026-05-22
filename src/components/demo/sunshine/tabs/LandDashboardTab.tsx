@@ -126,7 +126,7 @@ export default function LandDashboardTab({ deals, onCommunityClick, onCityClick,
 
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Deal Status Distribution">
-          <SHDonutChart segments={byStatus} onSegmentClick={label => {
+          <SHDonutChart semantic segments={byStatus} onSegmentClick={label => {
             const map: Record<string, string> = { "Closed": "closed", "Under Contract": "under-contract", "Cancelled": "cancelled" };
             onStatusClick(map[label] ?? label.toLowerCase());
             onDrill({ type: "land-status", value: label, label });

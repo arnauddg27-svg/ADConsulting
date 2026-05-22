@@ -12,6 +12,7 @@ import {
   trendValues,
   fmtN,
   isActiveJob,
+  STAGES,
 } from "@/lib/sunshine-homes-data";
 
 import SHKpiCard from "../SHKpiCard";
@@ -21,6 +22,7 @@ import SHHistogram from "../SHHistogram";
 import SHStackedCycleBar from "../SHStackedCycleBar";
 import SHMultiLineChart from "../SHMultiLineChart";
 import SHSparklineCards from "../SHSparklineCards";
+import { usePaletteColors } from "../chartPalette";
 
 interface Props {
   jobs: SHJob[];
@@ -29,6 +31,7 @@ interface Props {
 }
 
 export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }: Props) {
+  const palCols = usePaletteColors(STAGES.length);
   const completedJobs = jobs.filter(j => j.coDate);
   const avgCycleDays = completedJobs.length
     ? completedJobs.reduce((s, j) => s + j.totalCycleDays, 0) / completedJobs.length
@@ -62,6 +65,21 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
     data: cycleTrend.map(t => ({ x: t.period, y: Math.round(t.avgDays / 30.44 * 10) / 10 })),
   }];
 
+  // Palette-aware phase colors. Map each construction phase to the active
+  // palette by its canonical STAGES index, so the same phase reads as the same
+  // color across the pipeline + stacked-bar charts. No palette → original.
+  const phaseColor = (phase: string): string | null => {
+    if (!palCols) return null;
+    const idx = (STAGES as readonly string[]).indexOf(phase);
+    return palCols[(idx >= 0 ? idx : 0) % palCols.length];
+  };
+  const phaseDays = palCols
+    ? actualPhaseDays.map(p => ({ ...p, color: phaseColor(p.phase) ?? p.color }))
+    : actualPhaseDays;
+  const cityPhases = palCols
+    ? cycleByCity.map(c => ({ ...c, phases: c.phases.map(p => ({ ...p, color: phaseColor(p.phase) ?? p.color })) }))
+    : cycleByCity;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -81,7 +99,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
       {/* Phase duration bar + histogram */}
       <div className="sh-panels-row">
         <SHPanel kicker="Phase Analysis" title="Average Phase Durations">
-          <SHCycleTimePipeline phases={actualPhaseDays} onPhaseClick={(phase) => onDrill({ type: "stage", value: phase, label: `${phase} Phase Jobs` })} />
+          <SHCycleTimePipeline phases={phaseDays} onPhaseClick={(phase) => onDrill({ type: "stage", value: phase, label: `${phase} Phase Jobs` })} />
         </SHPanel>
         <SHPanel kicker="Distribution" title="Cycle Time Distribution">
           <SHHistogram buckets={actualCycleDistribution} onBucketClick={(bucket) => onDrill({ type: "cycle-bucket", value: bucket, label: `Cycle Time Bucket — ${bucket}` })} />
@@ -92,7 +110,7 @@ export default function ConstructionCycleTimeTab({ jobs, onDrill, onCityClick }:
       <div className="sh-panels-row single">
         <SHPanel kicker="CP-11" title="Cycle Time by City — Phase Breakdown">
           <SHStackedCycleBar
-            cities={cycleByCity}
+            cities={cityPhases}
             onPhaseClick={(city) => onCityClick ? onCityClick(city) : onDrill({ type: "community", value: city, label: city })}
           />
         </SHPanel>

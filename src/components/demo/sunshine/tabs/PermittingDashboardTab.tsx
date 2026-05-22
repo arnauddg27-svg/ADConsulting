@@ -129,7 +129,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
 
       <div className="sh-panels-row">
         <SHPanel kicker="Status" title="Permits by Status">
-          <SHDonutChart segments={byStatus} onSegmentClick={label => {
+          <SHDonutChart semantic segments={byStatus} onSegmentClick={label => {
             const map: Record<string, string> = { "Approved": "approved", "In Review": "in-review", "Pending": "pending", "Rejected": "rejected" };
             onStatusClick(map[label] ?? label.toLowerCase());
             onDrill({ type: "permit-status", value: label, label });
@@ -180,7 +180,7 @@ export default function PermittingDashboardTab({ permits, onCommunityClick, onCi
 
       <div className="sh-panels-row">
         <SHPanel kicker="Distribution" title="Cycle Time Distribution">
-          <SHHistogram buckets={cycleTimeBuckets} onBucketClick={bucket => onDrill({ type: "permit-cycle-bucket", value: bucket, label: `Cycle Time ${bucket}` })} />
+          <SHHistogram semantic buckets={cycleTimeBuckets} onBucketClick={bucket => onDrill({ type: "permit-cycle-bucket", value: bucket, label: `Cycle Time ${bucket}` })} />
         </SHPanel>
         <SHPanel kicker="Performance" title="Avg Cycle Time by City (days)">
           <SHRankedBars

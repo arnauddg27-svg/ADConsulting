@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePaletteColors, hexToRgba } from "./chartPalette";
 
 interface SHCrossTabProps {
   title?: string;
@@ -30,6 +31,11 @@ export default function SHCrossTab({
   const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null);
   const [hoveredColHeader, setHoveredColHeader] = useState<string | null>(null);
 
+  // Heatmap cells take the active palette's primary hue; no palette (live
+  // /demo) keeps the original teal so it stays byte-for-byte unchanged.
+  const palCols = usePaletteColors(1);
+  const heatHex = palCols ? palCols[0] : null;
+
   // Compute max value for intensity coloring
   const allValues: number[] = [];
   rows.forEach(r => cols.forEach(c => {
@@ -43,9 +49,9 @@ export default function SHCrossTab({
   const cellIntensity = (value: number | undefined): string => {
     if (!value || value <= 0) return "transparent";
     const ratio = Math.min(value / maxVal, 1);
-    // Teal intensity: from very dim to medium
+    // Intensity from very dim to medium, in the active palette's hue.
     const alpha = 0.05 + ratio * 0.25;
-    return `rgba(20, 184, 166, ${alpha})`;
+    return heatHex ? hexToRgba(heatHex, alpha) : `rgba(20, 184, 166, ${alpha})`;
   };
 
   if (rows.length === 0 || cols.length === 0) {
@@ -140,7 +146,7 @@ export default function SHCrossTab({
                   className={`sh-crosstab-cell ${hasValue && onCellClick ? "interactive" : ""}`}
                   style={{
                     background: isHovered
-                      ? "rgba(20, 184, 166, 0.15)"
+                      ? (heatHex ? hexToRgba(heatHex, 0.15) : "rgba(20, 184, 166, 0.15)")
                       : cellIntensity(value),
                     boxShadow: isHovered ? "inset 0 0 0 1px var(--sh-accent)" : "none",
                     transition: "all 0.12s",

@@ -98,6 +98,12 @@ export default function ConstructionPipelineTab({ jobs, onDrill, onStageClick }:
             tone: healthyProgressJobs >= Math.round(jobs.length * 0.8) ? "good" : healthyProgressJobs >= Math.round(jobs.length * 0.65) ? "watch" : "alert",
             onClick: () => onDrill({ type: "job", value: "healthy-progress", label: "Healthy-Progress Construction Jobs" }),
           },
+          {
+            label: "Closing Stage",
+            value: `${fmtN(closingCount)} (${pct(closingCount)}%)`,
+            tone: closingCount >= Math.round(jobs.length * 0.1) ? "good" : "watch",
+            onClick: () => onDrill({ type: "stage", value: "Closing", label: "Closing-Stage Jobs" }),
+          },
         ]}
       />
 

@@ -30,6 +30,7 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
   const cancelled = sales.filter(s => s.status === "cancelled").length;
   const agingPending = sales.filter(s => s.status === "pending" && Math.round((new Date("2026-03-25").getTime() - new Date(s.contractDate).getTime()) / 86400000) > 120).length;
   const staleActive = sales.filter(s => s.status === "active" && Math.round((new Date("2026-03-25").getTime() - new Date(s.contractDate).getTime()) / 86400000) > 180).length;
+  const lowMargin = sales.filter(s => { const job = jobs.find(j => j.jobCode === s.jobCode); return job ? job.marginPct < 20 : false; }).length;
 
   return (
     <>
@@ -44,6 +45,7 @@ export default function SalesPipelineTab({ sales, onDrill }: Props) {
           { label: "Pending > 120d", value: String(agingPending), tone: agingPending >= 8 ? "alert" : agingPending >= 4 ? "watch" : "good" },
           { label: "Cancelled Contracts", value: String(cancelled), tone: cancelled >= 6 ? "alert" : cancelled >= 3 ? "watch" : "good" },
           { label: "Active > 180d", value: String(staleActive), tone: staleActive >= 10 ? "alert" : staleActive >= 5 ? "watch" : "good" },
+          { label: "Margin < 20%", value: String(lowMargin), tone: lowMargin >= 8 ? "alert" : lowMargin >= 4 ? "watch" : "good" },
         ]}
       />
 

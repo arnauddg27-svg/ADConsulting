@@ -11,14 +11,7 @@ import SHRankedBars from "../SHRankedBars";
 import SHHistogram from "../SHHistogram";
 import SHAreaChart from "../SHAreaChart";
 import SHCrossTab from "../SHCrossTab";
-
-const STAGE_COLORS: Record<string, string> = {
-  "Permit": "#0f766e", "Foundation": "#0d9488", "Framing": "#14b8a6",
-  "MEP / Drywall": "#22d3ee", "Finishes": "#3b82f6", "Closing": "#1e40af",
-};
-
-// Teal-blue palette for histogram and job-type donut
-const TEAL_BLUE_PALETTE = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"];
+import { useChartRamp } from "../chartPalette";
 
 const STAGE_ORDER = ["Permit", "Foundation", "Framing", "MEP / Drywall", "Finishes", "Closing"];
 
@@ -38,8 +31,11 @@ interface Props {
 }
 
 export default function ConstructionDashboardTab({ jobs, onCommunityClick, onStageClick, onStatusClick, onTabChange, onDrill, drillYear, drillQuarter, drillMonth, onYearClick, onQuarterClick, onMonthClick }: Props) {
+  const TEAL_BLUE_PALETTE = useChartRamp(["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6"]);
+  const stageRamp = useChartRamp(["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6", "#1e40af"]);
+  const STAGE_COLORS: Record<string, string> = Object.fromEntries(STAGE_ORDER.map((s, i) => [s, stageRamp[i]]));
   const kpis = getConstructionKPIs(jobs);
-  const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? "#14b8a6" }));
+  const byStage = getJobsByStage(jobs).map(s => ({ ...s, color: STAGE_COLORS[s.label] ?? stageRamp[2] }));
   const byCommunity = getCommunityBreakdown(jobs);
   const jobTrend = useMemo(() => buildQuarterTrend(jobs, j => j.startDate, () => 1, { cumulative: false, maxPoints: 8 }), [jobs]);
   const completionTrend = useMemo(() => buildQuarterAverageTrend(jobs, j => j.startDate, j => j.completionPct, { maxPoints: 8 }), [jobs]);

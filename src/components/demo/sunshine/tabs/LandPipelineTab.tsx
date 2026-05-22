@@ -17,6 +17,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
   const cancelled = deals.filter(d => d.status === "cancelled").length;
   const agingUnderContract = deals.filter(d => d.status === "under-contract" && Math.round((new Date("2026-03-25").getTime() - new Date(d.contractDate).getTime()) / 86400000) > 120).length;
   const lowYield = deals.filter(d => (d.roiPct ?? 0) < 22).length;
+  const highRisk = deals.filter(d => (d.riskScore ?? 0) >= 65).length;
 
   return (
     <>
@@ -31,6 +32,7 @@ export default function LandPipelineTab({ deals, onDrill }: Props) {
           { label: "Under Contract > 120d", value: String(agingUnderContract), tone: agingUnderContract >= 4 ? "alert" : agingUnderContract >= 2 ? "watch" : "good" },
           { label: "Cancelled Deals", value: String(cancelled), tone: cancelled >= 3 ? "alert" : cancelled >= 1 ? "watch" : "good" },
           { label: "Low Yield Parcels", value: String(lowYield), tone: lowYield >= 6 ? "watch" : "good" },
+          { label: "Risk >= 65", value: String(highRisk), tone: highRisk >= 5 ? "alert" : highRisk >= 2 ? "watch" : "good" },
         ]}
       />
 

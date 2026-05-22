@@ -3,8 +3,8 @@
 import type { SHJob } from "@/types/sunshine-homes";
 import { STAGES, fmt$ } from "@/lib/sunshine-homes-data";
 import type { DrillDetail } from "./SHDrawer";
+import { useChartRamp } from "./chartPalette";
 
-const STAGE_COLORS = ["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6", "#1e40af"];
 const STAGE_ICONS = ["📋", "🏗️", "🪵", "⚡", "🎨", "🔑"];
 const STAGE_PCT = ["10%", "20%", "35%", "60%", "80%", "100%"];
 
@@ -23,6 +23,7 @@ interface SHPipelineBoardProps {
 }
 
 export default function SHPipelineBoard({ jobs, onDrill, onStageClick }: SHPipelineBoardProps) {
+  const STAGE_COLORS = useChartRamp(["#0f766e", "#0d9488", "#14b8a6", "#22d3ee", "#3b82f6", "#1e40af"]);
   const phaseFlow = (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: 14 }}>
       {STAGES.map((stage, i) => {

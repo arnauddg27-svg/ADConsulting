@@ -8,6 +8,7 @@ import RailNav from "./RailNav";
 import FilterBar from "./FilterBar";
 import SHDrawer from "./SHDrawer";
 import SHDataContextStrip from "./SHDataContextStrip";
+import { ChartPaletteContext, type ChartPalette } from "./chartPalette";
 import type { DrillDetail } from "./SHDrawer";
 import {
   jobs, sales, loans, landDeals, permits, propertyUnits, subdivisions, auditJobs,
@@ -55,7 +56,7 @@ const EMPTY_FILTERS: SHDashboardFilters = {
   timePeriod: "all",
 };
 
-export default function SunshineDashboard() {
+export default function SunshineDashboard({ skin, palette }: { skin?: string; palette?: string } = {}) {
   const [activeTab, setActiveTab] = useState<SHTab>("construction-dashboard");
   const [filters, setFilters] = useState<SHDashboardFilters>(EMPTY_FILTERS);
   const [drawerDetail, setDrawerDetail] = useState<DrillDetail | null>(null);
@@ -266,7 +267,8 @@ export default function SunshineDashboard() {
    * below the site header (z-50). This is the only reliable cross-browser
    * way to guarantee the fullpage shell covers the whole viewport. */
   const shellMarkup = (
-    <div className="sh-dashboard sh-dashboard--fill" data-sh-mode={mode} data-sh-fullpage={isFullPage ? "true" : "false"}>
+    <ChartPaletteContext.Provider value={palette as ChartPalette | undefined}>
+    <div className="sh-dashboard sh-dashboard--fill" data-sh-mode={mode} data-sh-skin={skin} data-sh-palette={palette} data-sh-fullpage={isFullPage ? "true" : "false"}>
       {isFullPage && (
         <>
           <div
@@ -301,6 +303,7 @@ export default function SunshineDashboard() {
         <SHDrawer detail={drawerDetail} onClose={closeDrawer} filters={filters} />
       </div>
     </div>
+    </ChartPaletteContext.Provider>
   );
 
   if (isFullPage && typeof document !== "undefined") {

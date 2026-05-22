@@ -8,6 +8,8 @@ export interface SSColumn {
   width: string;
   frozen?: boolean;
   mono?: boolean;
+  /** Retained for API compatibility. Pipeline rosters render every column
+   *  center-aligned (header label, filter, and cells), so this is not applied. */
   align?: "left" | "right";
   render?: (row: Record<string, unknown>) => React.ReactNode;
 }
@@ -51,10 +53,48 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
     };
   });
 
+  // Manual column resizing — drag the right edge of any header to resize.
+  // A width override persists for the session; double-click a handle to reset
+  // that column to its computed default. All width-derived values below
+  // (colgroup, frozen-column offsets, totals) read through getWidth so frozen
+  // panes stay perfectly aligned while resizing.
+  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+  const [resizingKey, setResizingKey] = useState<string | null>(null);
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
+  const MIN_COL_WIDTH = 56;
+  const getWidth = (c: { key: string; width: string }) => colWidths[c.key] ?? widthToPx(c.width);
+  const resetColumn = (key: string) =>
+    setColWidths((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  const startResize = (e: React.PointerEvent, key: string, startWidth: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizingKey(key);
+    const startX = e.clientX;
+    const onMove = (ev: PointerEvent) => {
+      const next = Math.max(MIN_COL_WIDTH, Math.round(startWidth + (ev.clientX - startX)));
+      setColWidths((prev) => ({ ...prev, [key]: next }));
+    };
+    const onUp = () => {
+      setResizingKey(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
   const frozenColumns = normalizedColumns.filter((c) => c.frozen);
   const scrollColumns = normalizedColumns.filter((c) => !c.frozen);
-  const frozenWidth = frozenColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
-  const scrollMinWidth = scrollColumns.reduce((sum, c) => sum + widthToPx(c.width), 0);
+  const frozenWidth = frozenColumns.reduce((sum, c) => sum + getWidth(c), 0);
+  const scrollMinWidth = scrollColumns.reduce((sum, c) => sum + getWidth(c), 0);
 
   // Render every column in ONE table (frozen first), so rows can never drift
   // out of vertical alignment. Frozen columns use position: sticky + a
@@ -63,7 +103,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const frozenCount = frozenColumns.length;
   const totalWidth = frozenWidth + scrollMinWidth;
   const frozenLeft = frozenColumns.reduce<number[]>((acc, _c, idx) => {
-    acc.push(idx === 0 ? 0 : acc[idx - 1] + widthToPx(frozenColumns[idx - 1].width));
+    acc.push(idx === 0 ? 0 : acc[idx - 1] + getWidth(frozenColumns[idx - 1]));
     return acc;
   }, []);
 
@@ -103,7 +143,11 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
   const visibleRows = filteredRows.slice(0, maxRows);
 
   const rowBg = (i: number) => {
-    if (hoveredRow === i) return "rgba(20,184,166,0.04)";
+    // The hover highlight MUST be opaque: frozen (sticky) cells paint over the
+    // horizontally-scrolling columns, so a translucent hover background lets the
+    // scrolling cells' content bleed through the frozen Deal Name / City columns.
+    // color-mix keeps the same subtle teal tint but stays fully opaque.
+    if (hoveredRow === i) return "color-mix(in srgb, rgb(20, 184, 166) 8%, var(--sh-bg-surface))";
     return i % 2 === 0 ? "var(--sh-bg-surface)" : "var(--sh-bg-surface-raised)";
   };
 
@@ -128,6 +172,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
       <span
         style={{
           display: "block",
+          textAlign: "center",
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -144,6 +189,8 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
         style={{
           width: "100%",
           height: 20,
+          textAlign: "center",
+          textAlignLast: "center",
           borderRadius: 4,
           border: "1px solid var(--sh-border)",
           background: "var(--sh-bg-surface)",
@@ -195,7 +242,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
         >
           <colgroup>
             {orderedColumns.map((c) => (
-              <col key={c.key} style={{ width: widthToPx(c.width) }} />
+              <col key={c.key} style={{ width: getWidth(c) }} />
             ))}
             <col />
           </colgroup>
@@ -214,7 +261,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
                       color: "var(--sh-text-muted)",
-                      textAlign: c.align ?? "left",
+                      textAlign: "center",
                       whiteSpace: "nowrap",
                       position: "sticky",
                       top: 0,
@@ -229,6 +276,45 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                     }}
                   >
                     {headerContent(c)}
+                    <span
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label={`Resize ${c.label} column`}
+                      title="Drag to resize · double-click to reset"
+                      onPointerDown={(e) => startResize(e, c.key, getWidth(c))}
+                      onClick={(e) => e.stopPropagation()}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        resetColumn(c.key);
+                      }}
+                      onMouseEnter={() => setHoverKey(c.key)}
+                      onMouseLeave={() => setHoverKey(null)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        width: 9,
+                        height: "100%",
+                        cursor: "col-resize",
+                        touchAction: "none",
+                        userSelect: "none",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        zIndex: 3,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 2,
+                          height: "100%",
+                          background:
+                            resizingKey === c.key || hoverKey === c.key
+                              ? "var(--sh-accent)"
+                              : "transparent",
+                          transition: "background 0.12s",
+                        }}
+                      />
+                    </span>
                   </th>
                 );
               })}
@@ -265,7 +351,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-                        textAlign: c.align,
+                        textAlign: "center",
                         fontFamily: c.mono ? '"SF Mono", "Fira Code", monospace' : undefined,
                         fontSize: c.mono ? 10 : undefined,
                         borderBottom: "1px solid var(--sh-border-dim)",
@@ -279,7 +365,7 @@ export default function SHSpreadsheetTable({ columns, rows, maxRows = 20, onRowC
                         verticalAlign: "middle",
                       }}
                     >
-                      <span title={rawText(row, c.key)} style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
+                      <span title={rawText(row, c.key)} style={{ display: "block", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", lineHeight: "18px" }}>
                         {c.render ? c.render(row) : rawText(row, c.key)}
                       </span>
                     </td>

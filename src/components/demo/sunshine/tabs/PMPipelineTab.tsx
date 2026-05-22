@@ -17,6 +17,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
   const delinquent = units.filter(u => u.delinquentAmount > 0).length;
   const vacantOrTurn = units.filter(u => u.occupancy === "vacant" || u.occupancy === "make-ready").length;
   const seriousLate = units.filter(u => u.daysPastDue >= 30).length;
+  const evictionNotice = units.filter(u => u.occupancy === "eviction" || u.occupancy === "notice-to-vacate").length;
 
   return (
     <>
@@ -31,6 +32,7 @@ export default function PMPipelineTab({ units, onDrill }: Props) {
           { label: "Delinquent Units", value: String(delinquent), tone: delinquent >= 10 ? "alert" : delinquent >= 5 ? "watch" : "good" },
           { label: "Vacant / Turn Units", value: String(vacantOrTurn), tone: vacantOrTurn >= 12 ? "watch" : "good" },
           { label: "30+ Days Late", value: String(seriousLate), tone: seriousLate >= 6 ? "alert" : seriousLate >= 3 ? "watch" : "good" },
+          { label: "Eviction / Notice", value: String(evictionNotice), tone: evictionNotice >= 8 ? "alert" : evictionNotice >= 4 ? "watch" : "good" },
         ]}
       />
 

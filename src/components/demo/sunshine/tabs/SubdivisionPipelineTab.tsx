@@ -6,6 +6,7 @@ import { fmt$, fmtN, fmtPct } from "@/lib/sunshine-homes-data";
 import SHPanel from "../SHPanel";
 import SHSpreadsheetTable from "../SHSpreadsheetTable";
 import SHPill from "../SHPill";
+import SHExceptionSummary from "../SHExceptionSummary";
 
 function LotBar({ sold, construction, completed, remaining, total }: { sold: number; construction: number; completed: number; remaining: number; total: number }) {
   const pctSold = (sold / total) * 100;
@@ -28,6 +29,11 @@ interface Props {
 }
 
 export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props) {
+  const inPlanning = subdivisions.filter(s => s.status === "pre-development" || s.status === "planning").length;
+  const lowMargin = subdivisions.filter(s => s.profitMarginPct < 15).length;
+  const slowAbsorption = subdivisions.filter(s => s.monthsOfInventory > 18).length;
+  const infraGaps = subdivisions.filter(s => s.status === "active" && !s.infraComplete).length;
+
   return (
     <>
       <div className="sh-tab-header">
@@ -35,6 +41,15 @@ export default function SubdivisionPipelineTab({ subdivisions, onDrill }: Props)
         <h2 className="sh-tab-title">Subdivision Pipeline</h2>
         <p className="sh-tab-desc">Development projects with lot inventory, infrastructure status, and absorption metrics. Click any row for details.</p>
       </div>
+
+      <SHExceptionSummary
+        items={[
+          { label: "In Planning", value: String(inPlanning), tone: inPlanning >= 5 ? "watch" : "good" },
+          { label: "Margin < 15%", value: String(lowMargin), tone: lowMargin >= 3 ? "alert" : lowMargin >= 1 ? "watch" : "good" },
+          { label: "Slow Absorption (>18mo)", value: String(slowAbsorption), tone: slowAbsorption >= 3 ? "alert" : slowAbsorption >= 1 ? "watch" : "good" },
+          { label: "Infra Incomplete", value: String(infraGaps), tone: infraGaps >= 3 ? "alert" : infraGaps >= 1 ? "watch" : "good" },
+        ]}
+      />
 
       <div className="sh-panels-row single">
         <SHPanel kicker="Roster" title="Subdivision Roster">

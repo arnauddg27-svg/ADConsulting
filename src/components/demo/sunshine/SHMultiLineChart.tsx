@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePaletteColors } from "./chartPalette";
 
 interface DataPoint {
   x: string;
@@ -19,18 +20,29 @@ interface SHMultiLineChartProps {
   height?: number;
   formatY?: (v: number) => string;
   onPointClick?: (lineLabel: string, x: string, y: number) => void;
+  /** Set when line colors carry meaning and must NOT be recolored by the
+   *  active palette. */
+  semantic?: boolean;
 }
 
 export default function SHMultiLineChart({
-  lines,
+  lines: linesProp,
   goalLine,
   height = 180,
   formatY,
   onPointClick,
+  semantic,
 }: SHMultiLineChartProps) {
   const [hovered, setHovered] = useState<{ line: number; point: number } | null>(null);
+  // Each series takes the next color from the active palette, so multi-line
+  // trends read as one designed set. No palette (live /demo) → original colors.
+  const palCols = usePaletteColors(linesProp.length);
 
-  if (lines.length === 0 || lines[0].data.length === 0) return null;
+  if (linesProp.length === 0 || linesProp[0].data.length === 0) return null;
+
+  const lines = palCols && !semantic
+    ? linesProp.map((l, i) => ({ ...l, color: palCols[i % palCols.length] }))
+    : linesProp;
 
   // Compute bounds across all lines
   const allY = lines.flatMap(l => l.data.map(d => d.y));

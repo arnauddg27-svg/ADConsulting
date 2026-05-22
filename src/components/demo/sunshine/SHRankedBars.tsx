@@ -1,5 +1,7 @@
 "use client";
 
+import { usePaletteColors, hexToRgba } from "./chartPalette";
+
 interface RankedItem {
   label: string;
   value: number;
@@ -39,6 +41,8 @@ const DEFAULT_GLOWS = [
 ];
 
 export default function SHRankedBars({ items, formatValue, onBarClick, showRank }: SHRankedBarsProps) {
+  const palCols = usePaletteColors(items.length);
+
   if (items.length === 0) {
     return (
       <div style={{ padding: "20px 12px", fontSize: 11, color: "var(--sh-text-muted)", textAlign: "center" }}>
@@ -54,10 +58,14 @@ export default function SHRankedBars({ items, formatValue, onBarClick, showRank 
       {items.map((item, i) => {
         const pct = (item.value / max) * 100;
         const paletteIdx = i % DEFAULT_GRADIENTS.length;
-        const gradient = item.status ? STATUS_GRADIENTS[item.status] : DEFAULT_GRADIENTS[paletteIdx];
+        const c = palCols ? palCols[i % palCols.length] : null;
+        const c2 = palCols ? palCols[(i + 1) % palCols.length] : null;
+        const gradient = item.status
+          ? (item.status === "good" && c ? `linear-gradient(90deg, ${c}, ${c2})` : STATUS_GRADIENTS[item.status])
+          : (c ? `linear-gradient(90deg, ${c}, ${c2})` : DEFAULT_GRADIENTS[paletteIdx]);
         const glow = item.status
-          ? (item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : "rgba(20, 184, 166, 0.3)")
-          : DEFAULT_GLOWS[paletteIdx];
+          ? (item.status === "alert" ? "rgba(244,106,106,0.3)" : item.status === "watch" ? "rgba(239,181,98,0.3)" : (c ? hexToRgba(c, 0.3) : "rgba(20, 184, 166, 0.3)"))
+          : (c ? hexToRgba(c, 0.35) : DEFAULT_GLOWS[paletteIdx]);
         return (
           <div
             key={item.label}
