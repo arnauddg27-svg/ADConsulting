@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
+
 type ShellBarProps = {
   mode: "night" | "day";
   isFullPage: boolean;
@@ -15,7 +17,14 @@ export default function ShellBar({
 }: ShellBarProps) {
   return (
     <div className="sh-bar">
-      <span className="sh-bar-brand">Sunshine Homes</span>
+      <div className="sh-bar-left">
+        {/* Full navigation back to the marketing site (exits the dashboard). */}
+        <a href="/" className="sh-bar-back" aria-label="Back to AD ERP Systems site">
+          <ArrowLeft size={14} aria-hidden />
+          <span className="sh-bar-back-label">Back to site</span>
+        </a>
+        <span className="sh-bar-brand">Sunshine Homes</span>
+      </div>
       <div className="sh-bar-controls">
         <button
           type="button"

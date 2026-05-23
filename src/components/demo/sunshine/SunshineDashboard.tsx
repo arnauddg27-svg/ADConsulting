@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import "./sunshine-tokens.css";
 import ShellBar from "./ShellBar";
 import RailNav from "./RailNav";
+import MobileNav from "./MobileNav";
 import FilterBar from "./FilterBar";
 import SHDrawer from "./SHDrawer";
 import SHDataContextStrip from "./SHDataContextStrip";
@@ -62,6 +63,7 @@ export default function SunshineDashboard({ skin, palette }: { skin?: string; pa
   const [drawerDetail, setDrawerDetail] = useState<DrillDetail | null>(null);
   const [mode, setMode] = useState<"night" | "day">("night");
   const [isFullPage, setIsFullPage] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Backward compatibility: if an old state points to the removed land-subdivisions tab, send users to land pipeline.
   useEffect(() => {
@@ -292,7 +294,8 @@ export default function SunshineDashboard({ skin, palette }: { skin?: string; pa
           onToggleMode={() => setMode(prev => prev === "night" ? "day" : "night")}
           onToggleFullPage={() => setIsFullPage(prev => !prev)}
         />
-        <FilterBar filters={filters} onChange={setFilters} />
+        <MobileNav activeTab={activeTab} onTabChange={setActiveTab} filtersOpen={filtersOpen} onToggleFilters={() => setFiltersOpen(prev => !prev)} filterCount={filterCount} />
+        <FilterBar filters={filters} onChange={setFilters} className={filtersOpen ? "is-open" : ""} />
         <RailNav activeTab={activeTab} onTabChange={setActiveTab} />
         <div className="sh-main">
           <SHDataContextStrip scopeLabel={contextMeta.scopeLabel} rows={contextMeta.rows} filterCount={filterCount} dateBasis={contextMeta.dateBasis} />

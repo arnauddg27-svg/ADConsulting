@@ -6,9 +6,10 @@ import type { SHDashboardFilters } from "@/types/sunshine-homes";
 interface FilterBarProps {
   filters: SHDashboardFilters;
   onChange: (filters: SHDashboardFilters) => void;
+  className?: string;
 }
 
-export default function FilterBar({ filters, onChange }: FilterBarProps) {
+export default function FilterBar({ filters, onChange, className }: FilterBarProps) {
   const set = (key: keyof SHDashboardFilters, value: string | null) =>
     onChange({ ...filters, [key]: value });
   const years = [2021, 2022, 2023, 2024, 2025, 2026];
@@ -35,7 +36,7 @@ export default function FilterBar({ filters, onChange }: FilterBarProps) {
   const hasAny = filters.city || filters.entity || filters.community || filters.stage || filters.status || filters.drillYear || filters.drillQuarter || filters.drillMonth || filters.timePeriod !== "all";
 
   return (
-    <div className="sh-filter-bar">
+    <div id="sh-filter-bar" className={`sh-filter-bar ${className ?? ""}`}>
       <select
         className={`sh-filter-select ${filters.city ? "active" : ""}`}
         value={filters.city ?? ""}
