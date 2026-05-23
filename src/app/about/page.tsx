@@ -137,7 +137,7 @@ export default function AboutPage() {
           <BlueprintPanel className="p-6 md:p-8">
             <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">
               <img
-                src="/images/arnaud-durand.png"
+                src="/images/arnaud-durand.webp"
                 alt="Arnaud Durand, founder of AD ERP SYSTEMS"
                 className="h-36 w-36 shrink-0 rounded-2xl border border-[#d5dde2] object-cover object-top shadow-[0_18px_44px_-32px_rgba(23,33,44,0.45)] md:h-44 md:w-44"
                 loading="lazy"

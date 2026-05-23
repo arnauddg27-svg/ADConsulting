@@ -16,8 +16,6 @@ import Container from "@/components/ui/Container";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { ShineBorder } from "@/components/magicui/shine-border";
-import GlassOperationsCards from "@/components/sections/GlassOperationsCards";
-import ClientImprovementCards from "@/components/sections/ClientImprovementCards";
 import { liquidActionClass } from "@/lib/buttonStyles";
 import { glassTileClass } from "@/lib/cardStyles";
 
@@ -32,6 +30,16 @@ const IpadDashboardShowcase = dynamic(
       </section>
     ),
   },
+);
+
+// Below-the-fold animated sections — code-split so their client JS loads after
+// the initial page is interactive (still server-rendered, so no SEO/CLS loss).
+const GlassOperationsCards = dynamic(
+  () => import("@/components/sections/GlassOperationsCards"),
+);
+
+const ClientImprovementCards = dynamic(
+  () => import("@/components/sections/ClientImprovementCards"),
 );
 
 export const metadata: Metadata = {
