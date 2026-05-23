@@ -38,9 +38,9 @@ type Kpi = {
   tone?: "good" | "neutral" | "warn";
 };
 
-// Eight exec metrics across the four pillars the dashboard tracks:
-// schedule, milestone progress, budget, and margin. The first six render on
-// mobile (2x3); the last two are desktop-only context.
+// Eight exec metrics across the pillars the dashboard tracks: schedule,
+// milestone progress, budget, and margin. The first four render on mobile
+// (a clean 2x2); the rest are desktop-only context.
 const tabletKpis: Kpi[] = [
   {
     label: "Avg cycle time",
@@ -52,27 +52,12 @@ const tabletKpis: Kpi[] = [
     tone: "good",
   },
   {
-    label: "On-time starts",
-    value: 92,
-    suffix: "%",
-    note: "starts hit schedule",
-    icon: CalendarCheck,
-    tone: "good",
-  },
-  {
     label: "Avg completion",
     value: 71,
     suffix: "%",
     note: "138 active jobs",
     icon: BarChart3,
     tone: "neutral",
-  },
-  {
-    label: "At-risk jobs",
-    value: 11,
-    note: "behind plan",
-    icon: TriangleAlert,
-    tone: "warn",
   },
   {
     label: "Budget variance",
@@ -91,6 +76,21 @@ const tabletKpis: Kpi[] = [
     note: "gross at closeout",
     icon: Percent,
     tone: "good",
+  },
+  {
+    label: "On-time starts",
+    value: 92,
+    suffix: "%",
+    note: "starts hit schedule",
+    icon: CalendarCheck,
+    tone: "good",
+  },
+  {
+    label: "At-risk jobs",
+    value: 11,
+    note: "behind plan",
+    icon: TriangleAlert,
+    tone: "warn",
   },
   {
     label: "Active jobs",
@@ -274,7 +274,7 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative mt-8 mx-auto h-[46rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
+      className="relative mt-8 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -316,7 +316,7 @@ function KpiTile({
         ease: "easeOut",
       }}
       className={cn(
-        "flex flex-col rounded-xl border border-white/10 bg-[#0d1620] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:p-3.5",
+        "flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:p-3.5",
         className,
       )}
     >
@@ -655,21 +655,16 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
-          <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:auto-rows-auto md:gap-3">
+          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
             {tabletKpis.map((kpi, i) => (
               <KpiTile
                 key={kpi.label}
                 kpi={kpi}
                 index={i}
                 revealed={revealed}
-                className={i >= 6 ? "hidden md:flex" : undefined}
+                className={i >= 4 ? "hidden md:flex" : undefined}
               />
             ))}
-          </div>
-
-          {/* Mobile-only chart so the iPad reads as a real dashboard on phones */}
-          <div className="min-h-0 flex-1 md:hidden">
-            <MilestoneBars revealed={revealed} compact />
           </div>
 
           <div className="hidden flex-col gap-3 md:flex">
