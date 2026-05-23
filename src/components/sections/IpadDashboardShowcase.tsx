@@ -274,7 +274,7 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative mt-8 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
+      className="relative mt-8 mx-auto h-[34rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -382,7 +382,7 @@ function MilestoneBars({
         className={cn(
           "grid",
           compact
-            ? "mt-3 flex-1 content-between gap-y-2"
+            ? "mt-3 flex-1 grid-cols-2 content-between gap-x-4 gap-y-2.5"
             : "mt-4 gap-x-5 gap-y-2.5 md:grid-cols-2",
         )}
       >
@@ -390,7 +390,12 @@ function MilestoneBars({
           const pct = (stage.value / stageMax) * 100;
           return (
             <div key={stage.label}>
-              <div className="flex items-center justify-between text-xs md:text-sm">
+              <div
+                className={cn(
+                  "flex items-center justify-between",
+                  compact ? "text-[0.7rem]" : "text-xs md:text-sm",
+                )}
+              >
                 <span className="font-bold text-white/[0.78]">
                   {stage.label}
                 </span>
@@ -655,7 +660,7 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
-          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
+          <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
             {tabletKpis.map((kpi, i) => (
               <KpiTile
                 key={kpi.label}
@@ -665,6 +670,11 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
                 className={i >= 4 ? "hidden md:flex" : undefined}
               />
             ))}
+          </div>
+
+          {/* Mobile-only graph so the iPad reads as a real dashboard on phones */}
+          <div className="min-h-0 flex-1 md:hidden">
+            <MilestoneBars revealed={revealed} compact />
           </div>
 
           <div className="hidden flex-col gap-3 md:flex">

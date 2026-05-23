@@ -1,23 +1,29 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-  Database,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
+import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 
-import {
-  BlueprintCTA,
-  BlueprintHero,
-  BlueprintPage,
-  BlueprintPanel,
-} from "@/components/marketing/Blueprint";
 import Container from "@/components/ui/Container";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
+import OperationsHeroCard from "@/components/sections/OperationsHeroCard";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { liquidActionClass } from "@/lib/buttonStyles";
+
+// Hero #2 (the iPad dashboard) is below the fold — code-split it so its client
+// JS loads after the hero is interactive. It still server-renders (no SEO/CLS
+// loss); the placeholder only shows before hydration on slow connections.
+const IpadDashboardShowcase = dynamic(
+  () => import("@/components/sections/IpadDashboardShowcase"),
+  {
+    loading: () => (
+      <section className="defer-section relative overflow-hidden border-b border-[#d9e1e6] bg-transparent py-16 md:py-24">
+        <Container>
+          <div className="mx-auto h-[28rem] max-w-5xl animate-pulse rounded-[2rem] border border-[#d9e1e6] bg-white/[0.58] shadow-[0_32px_90px_-74px_rgba(23,33,44,0.48)]" />
+        </Container>
+      </section>
+    ),
+  },
+);
 
 export const metadata: Metadata = {
   title: "Homebuilder Dashboards & ERP Reporting | AD ERP SYSTEMS",
@@ -25,160 +31,141 @@ export const metadata: Metadata = {
     "Dashboards built on your builder data, not a template. Centralize ERP data, spreadsheets, finance systems, APIs, and exports in a structured warehouse.",
 };
 
-const offerBuckets = [
-  {
-    icon: Database,
-    title: "Centralize the data",
-    body: "Bring ERP data, spreadsheets, finance exports, APIs, and operating files into one reporting warehouse.",
-  },
-  {
-    icon: BarChart3,
-    title: "Apply builder KPI logic",
-    body: "Define the date rules, statuses, calculations, and exception lists that match residential builder operations.",
-  },
-  {
-    icon: Wrench,
-    title: "Deliver usable reporting",
-    body: "Turn the warehouse into dashboards, drilldowns, alerts, and internal tools your team can use.",
-  },
-];
+const heroChips = ["4–6 week delivery", "Turnkey, client-owned system"];
 
-const useCases = [
-  "Homebuilder KPI dashboards",
-  "ERP and spreadsheet reporting",
-  "Job cost and cost-to-complete views",
-  "Land, permitting, and sales pipeline reporting",
-];
+const heroCtaClass = liquidActionClass({
+  tone: "primary",
+  size: "lg",
+  className:
+    "w-full shrink-0 sm:w-auto sm:px-6 sm:text-[0.72rem] sm:tracking-[0.12em]",
+});
 
-const fitItems = [
-  "Land acquisition and subdivision pipeline reporting",
-  "Permitting status, cycle time, and stuck-item visibility",
-  "Construction WIP, budget movement, and cost-to-complete reporting",
-  "Sales, backlog, portfolio, and per-job margin visibility",
-];
+const heroSecondaryCtaClass = liquidActionClass({
+  tone: "secondary",
+  size: "lg",
+  className:
+    "w-full shrink-0 sm:w-auto sm:px-6 sm:text-[0.72rem] sm:tracking-[0.12em]",
+});
 
 export default function BuilderDataPlatformLandingPage() {
   return (
-    <BlueprintPage>
-      <BlueprintHero
-        eyebrow="Builder Data Platform"
-        title="Dashboards built on your data, not a template."
-        description="Centralize your systems, apply builder-specific KPI logic, and give every department the operating view it needs."
-      >
-        <BlueprintPanel className="mx-auto max-w-xl p-6 text-left">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
-              Operating layer
-            </p>
-            <span className="rounded-full border border-[#d5dde2] bg-[#edf5f1] px-3 py-1.5 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-[#356b54]">
-              Client-owned
-            </span>
-          </div>
-          <div className="mt-6 grid gap-3">
-            {useCases.map((useCase) => (
-              <div
-                key={useCase}
-                className="flex items-center gap-3 rounded-[1rem] border border-[#d5dde2] bg-[#f7f9fb]/82 px-4 py-3 text-sm font-bold text-[#40515d]"
-              >
-                <CheckCircle2 size={16} className="text-[#35647f]" />
-                {useCase}
-              </div>
-            ))}
-          </div>
-        </BlueprintPanel>
-      </BlueprintHero>
+    <div className="blueprint-page min-h-screen text-[#17212c]">
+      <div aria-hidden className="blueprint-frame hidden lg:block" />
 
-      <section className="pb-16 md:pb-24">
-        <Container>
-          <div className="mb-8 rounded-[1.5rem] border border-[#d5dde2] bg-white/[0.82] p-5 shadow-[0_32px_100px_-76px_rgba(23,33,44,0.5)] md:p-7">
-            <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-              <div>
-                <h2 className="font-heading text-3xl leading-[1.05] tracking-[-0.04em] text-[#17212c] md:text-4xl">
-                  Built for ERP exports, job cost data, and disconnected spreadsheets.
-                </h2>
-                <p className="mt-4 text-base leading-7 text-[#58636b]">
-                  The platform starts with the systems already in use, then
-                  maps reporting around the decisions your team needs to make.
-                </p>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
-                <Link
-                  href="/book/?source=builder_data_platform_hero"
-                  className={liquidActionClass({ tone: "primary", size: "md" })}
+      {/* Hero #1 — value proposition first, with the operations dashboard card. */}
+      <section className="relative overflow-hidden border-b border-[#d9e1e6]/80 bg-transparent pt-32 md:pt-40">
+        <Container className="relative z-10">
+          <div className="grid gap-10 pb-14 lg:min-h-[680px] lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:pb-20">
+            <div className="max-w-3xl">
+              <AnimatedGradientText className="max-w-full tracking-[0.14em] sm:text-[0.7rem] sm:tracking-[0.22em]">
+                Builder Data Platform
+              </AnimatedGradientText>
+              <h1 className="mt-6 max-w-4xl font-heading text-[2.65rem] leading-[0.98] tracking-[-0.04em] text-[#111814] sm:text-6xl sm:tracking-[-0.045em] lg:text-[5.15rem]">
+                Dashboards built on your data, not a template.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
+                Centralize your ERP, spreadsheets, finance data, and field
+                updates, apply builder-specific KPI logic, and give every team a
+                daily operating view.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <TrackedCalendlyLink
+                  source="builder_data_platform_hero"
+                  className={heroCtaClass}
                 >
                   <span>Book a Discovery Call</span>
-                  <ArrowRight size={15} />
-                </Link>
-                <Link
-                  href="/examples/"
-                  className={liquidActionClass({ tone: "secondary", size: "md" })}
-                >
+                  <ArrowRight size={16} />
+                </TrackedCalendlyLink>
+                <Link href="/examples/" className={heroSecondaryCtaClass}>
                   <Sparkles size={15} />
                   <span>View Samples</span>
                 </Link>
               </div>
-            </div>
-          </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {offerBuckets.map(({ icon: Icon, title, body }) => (
-              <BlueprintPanel key={title} className="p-6 md:p-7">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
-                  <Icon size={22} />
-                </div>
-                <h2 className="mt-6 font-heading text-2xl leading-tight tracking-[-0.03em] text-[#17212c]">
-                  {title}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-[#58636b] md:text-base">
-                  {body}
-                </p>
-              </BlueprintPanel>
-            ))}
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                {heroChips.map((chip) => (
+                  <span
+                    key={chip}
+                    className="inline-flex items-center gap-2 rounded-full border border-[#d8e1e6] bg-white/[0.7] px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[#2f5368] shadow-[0_14px_40px_-32px_rgba(23,33,44,0.4)] backdrop-blur"
+                  >
+                    <CheckCircle2 size={14} className="text-[#4b9876]" />
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative lg:pl-4">
+              <OperationsHeroCard />
+            </div>
           </div>
         </Container>
       </section>
 
-      <section className="pb-16 md:pb-24">
+      {/* Hero #2 — the daily operating dashboard on the iPad. */}
+      <IpadDashboardShowcase />
+
+      {/* Closing CTA — uses TrackedCalendlyLink so the booking click routes to
+          Calendly with UTM + analytics (BlueprintCTA's internal Link can't). */}
+      <section className="py-16 md:py-24">
         <Container>
-          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
-            <BlueprintPanel className="p-6 md:p-8">
-              <ShieldCheck size={24} className="text-[#35647f]" />
-              <h2 className="mt-6 font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c]">
-                Best fit: builders with real reporting friction.
-              </h2>
-              <p className="mt-5 text-base leading-8 text-[#58636b]">
-                The strongest fit is a residential builder or developer with
-                enough operating complexity that manual reporting and
-                inconsistent KPI logic slow down decisions.
-              </p>
-            </BlueprintPanel>
+          <div className="relative transform-gpu overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-gradient-to-br from-[#1c2a3a] to-[#141f2b] p-7 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_42px_130px_-82px_rgba(23,33,44,0.78)] transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-white/[0.14] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_56px_150px_-76px_rgba(23,33,44,0.9)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:p-10">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.16]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, rgba(255,255,255,0.22) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
+                backgroundSize: "56px 56px",
+              }}
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-[#8bd7ff]/20 blur-3xl"
+            />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div>
+                <p className="inline-flex rounded-full border border-white/15 bg-white/8 px-4 py-2 text-[0.64rem] font-bold uppercase tracking-[0.2em] text-[#a7d7eb]">
+                  Next step
+                </p>
+                <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.04em] md:text-[3.4rem]">
+                  See whether your data can support better reporting.
+                </h2>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 md:text-lg md:leading-8">
+                  Book a short call to review your current systems, where
+                  reporting breaks down, and what a practical first release
+                  could include.
+                </p>
+              </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {fitItems.map((item) => (
-                <div key={item} className="rounded-[1rem] border border-[#d5dde2] bg-white/[0.82] p-5">
-                  <CheckCircle2 size={20} className="text-[#356b54]" />
-                  <p className="mt-4 text-sm font-semibold leading-7 text-[#40515d] md:text-base">
-                    {item}
-                  </p>
-                </div>
-              ))}
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <TrackedCalendlyLink
+                  source="builder_data_platform_cta"
+                  className={liquidActionClass({
+                    tone: "frost",
+                    size: "lg",
+                    className: "w-full sm:w-auto",
+                  })}
+                >
+                  <span>Book a Discovery Call</span>
+                  <ArrowRight size={16} />
+                </TrackedCalendlyLink>
+                <Link
+                  href="/contact/"
+                  className={liquidActionClass({
+                    tone: "secondary",
+                    size: "lg",
+                    className: "w-full sm:w-auto",
+                  })}
+                >
+                  <span>Contact Details</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
           </div>
         </Container>
       </section>
-
-      <BlueprintCTA
-        title="See whether your current data can support better reporting."
-        description="Book a 30-minute call to review your current systems, where reporting breaks down, and what a practical first release could include."
-        primary={{
-          label: "Book a Discovery Call",
-          href: "/book/?source=builder_data_platform_cta",
-        }}
-        secondary={{
-          label: "Contact Details",
-          href: "/contact/",
-        }}
-      />
-    </BlueprintPage>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, CheckCircle2, Mail, MapPin } from "lucide-react";
 import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { liquidActionClass } from "@/lib/buttonStyles";
 import { isDemoRoute, isLightMarketingRoute } from "@/lib/marketingRoutes";
 
@@ -101,13 +102,10 @@ export default function Footer() {
               {SITE_CONFIG.description}
             </p>
 
-            <Link
-              href="/book/?source=footer_cta"
-              className={footerCtaClass}
-            >
+            <TrackedCalendlyLink source="footer_cta" className={footerCtaClass}>
               <span>Book a Discovery Call</span>
               <ArrowUpRight size={13} />
-            </Link>
+            </TrackedCalendlyLink>
           </div>
 
           <div className="min-w-0">

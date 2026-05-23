@@ -25,6 +25,10 @@ export default function TrackedCalendlyLink({
   className,
   source,
 }: TrackedCalendlyLinkProps) {
+  // Carry the click source into the Calendly routing form as a UTM param so
+  // attribution survives into the Calendly webhook / CRM.
+  const href = `${SITE_CONFIG.calendlyUrl}?utm_source=website&utm_medium=referral&utm_content=${encodeURIComponent(source)}`;
+
   const handleClick = () => {
     const trackingWindow = window as TrackingWindow;
 
@@ -33,7 +37,7 @@ export default function TrackedCalendlyLink({
       event: "book_call_click",
       event_category: "lead",
       event_label: source,
-      destination: SITE_CONFIG.calendlyUrl,
+      destination: href,
     });
 
     trackingWindow.gtag?.("event", "generate_lead", {
@@ -61,7 +65,7 @@ export default function TrackedCalendlyLink({
 
   return (
     <a
-      href={SITE_CONFIG.calendlyUrl}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

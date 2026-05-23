@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Menu } from "lucide-react";
 import { NAV_LINKS, SITE_CONFIG } from "@/lib/constants";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import { liquidActionClass } from "@/lib/buttonStyles";
 import { isDemoRoute, isLightMarketingRoute, normalizePathname } from "@/lib/marketingRoutes";
 
@@ -163,13 +163,16 @@ export default function Header() {
               })}
             </nav>
             {isLightMarketing ? (
-              <Link href="/book/?source=header_cta" className={lightCtaClass}>
+              <TrackedCalendlyLink source="header_cta" className={lightCtaClass}>
                 <span>Book a Discovery Call</span>
-              </Link>
+              </TrackedCalendlyLink>
             ) : (
-              <Button href="/book/?source=header_cta" size="sm">
-                Book a Discovery Call
-              </Button>
+              <TrackedCalendlyLink
+                source="header_cta"
+                className={liquidActionClass({ tone: "primary", size: "sm" })}
+              >
+                <span>Book a Discovery Call</span>
+              </TrackedCalendlyLink>
             )}
           </div>
 
@@ -228,16 +231,19 @@ export default function Header() {
                 })}
               </nav>
               {isLightMarketing ? (
-                <Link
-                  href="/book/?source=mobile_menu_cta"
+                <TrackedCalendlyLink
+                  source="mobile_menu_cta"
                   className={`${lightCtaClass} mt-6 w-full`}
                 >
                   <span>Book a Discovery Call</span>
-                </Link>
+                </TrackedCalendlyLink>
               ) : (
-                <Button href="/book/?source=mobile_menu_cta" className="mt-6 w-full justify-center">
-                  Book a Discovery Call
-                </Button>
+                <TrackedCalendlyLink
+                  source="mobile_menu_cta"
+                  className={liquidActionClass({ tone: "primary", size: "md", className: "mt-6 w-full justify-center" })}
+                >
+                  <span>Book a Discovery Call</span>
+                </TrackedCalendlyLink>
               )}
             </div>
           </details>

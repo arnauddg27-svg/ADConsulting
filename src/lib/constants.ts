@@ -10,7 +10,7 @@ export const SITE_CONFIG = {
   location: "North America (U.S. & Canada)",
   businessAddress: "2660 Almondwood Loop, Orlando, FL 32821, United States",
   email: "adurand@aderpsystems.com",
-  calendlyUrl: "https://calendly.com/adurand-aderpsystems/30min",
+  calendlyUrl: "https://calendly.com/d/cvp6-gwc-x68",
 };
 
 export const NAV_LINKS: NavLink[] = [
