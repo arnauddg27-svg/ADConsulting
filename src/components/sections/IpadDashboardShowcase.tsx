@@ -3,11 +3,13 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   BarChart3,
+  CalendarCheck,
   CircleDollarSign,
   Clock3,
   Home,
   LayoutDashboard,
   Percent,
+  TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -33,11 +35,12 @@ type Kpi = {
   decimals?: number;
   note: string;
   icon: LucideIcon;
-  tone?: "good" | "neutral";
+  tone?: "good" | "neutral" | "warn";
 };
 
-// Six exec metrics weighted to the three pillars the dashboard tracks:
-// milestone progress, cycle time, and budget.
+// Eight exec metrics across the four pillars the dashboard tracks:
+// schedule, milestone progress, budget, and margin. The first six render on
+// mobile (2x3); the last two are desktop-only context.
 const tabletKpis: Kpi[] = [
   {
     label: "Avg cycle time",
@@ -49,19 +52,34 @@ const tabletKpis: Kpi[] = [
     tone: "good",
   },
   {
+    label: "On-time starts",
+    value: 92,
+    suffix: "%",
+    note: "starts hit schedule",
+    icon: CalendarCheck,
+    tone: "good",
+  },
+  {
     label: "Avg completion",
     value: 71,
     suffix: "%",
-    note: "across 138 active jobs",
+    note: "138 active jobs",
     icon: BarChart3,
     tone: "neutral",
+  },
+  {
+    label: "At-risk jobs",
+    value: 11,
+    note: "behind plan",
+    icon: TriangleAlert,
+    tone: "warn",
   },
   {
     label: "Budget variance",
     value: 310,
     prefix: "$",
     suffix: "K",
-    note: "under budget · to date",
+    note: "under budget",
     icon: CircleDollarSign,
     tone: "good",
   },
@@ -256,7 +274,7 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative mt-8 mx-auto h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
+      className="relative mt-8 mx-auto h-[46rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -278,7 +296,13 @@ function KpiTile({
 }) {
   const reduce = useReducedMotion();
   const Icon = kpi.icon;
-  const good = kpi.tone === "good";
+  const tone = kpi.tone ?? "neutral";
+  const toneIcon =
+    tone === "good"
+      ? "border-[#24c18d]/25 bg-[#24c18d]/10 text-[#8df2c8]"
+      : tone === "warn"
+        ? "border-[#f2c66d]/30 bg-[#f2c66d]/12 text-[#f4cf83]"
+        : "border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]";
 
   return (
     <motion.div
@@ -292,26 +316,24 @@ function KpiTile({
         ease: "easeOut",
       }}
       className={cn(
-        "flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+        "flex flex-col rounded-xl border border-white/10 bg-[#0d1620] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:p-3.5",
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.5rem] font-bold uppercase tracking-[0.16em] text-white/[0.42]">
+        <p className="text-[0.5rem] font-bold uppercase leading-tight tracking-[0.16em] text-white/[0.42]">
           {kpi.label}
         </p>
         <span
           className={cn(
-            "flex h-6 w-6 items-center justify-center rounded-lg border",
-            good
-              ? "border-[#24c18d]/25 bg-[#24c18d]/10 text-[#8df2c8]"
-              : "border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]",
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border",
+            toneIcon,
           )}
         >
           <Icon size={13} />
         </span>
       </div>
-      <div className="mt-2.5 text-2xl font-bold leading-none text-white">
+      <div className="mt-2 text-2xl font-bold leading-none text-white">
         <CountUp
           value={kpi.value}
           prefix={kpi.prefix}
@@ -320,32 +342,50 @@ function KpiTile({
           run={revealed}
         />
       </div>
-      <p className="mt-1.5 text-[0.7rem] font-semibold text-white/[0.45]">
+      <p className="mt-1 text-[0.68rem] font-semibold leading-tight text-white/[0.45]">
         {kpi.note}
       </p>
     </motion.div>
   );
 }
 
-function MilestoneBars({ revealed }: { revealed: boolean }) {
+function MilestoneBars({
+  revealed,
+  compact = false,
+}: {
+  revealed: boolean;
+  compact?: boolean;
+}) {
   const reduce = useReducedMotion();
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d1620] p-4 md:p-5">
-      <div className="flex items-center justify-between gap-4">
+    <div
+      className={cn(
+        "flex flex-col rounded-2xl border border-white/10 bg-[#0d1620]",
+        compact ? "h-full p-3.5" : "p-4 md:p-5",
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+          <p className="text-[0.5rem] font-bold uppercase tracking-[0.2em] text-white/[0.38] md:text-[0.56rem]">
             Construction milestones
           </p>
-          <h4 className="mt-1 text-base font-bold md:text-lg">
+          <h4 className="mt-1 text-sm font-bold md:text-lg">
             Active jobs by stage
           </h4>
         </div>
-        <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-white/[0.58]">
-          71% avg complete
+        <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/[0.58] md:px-3 md:text-[0.55rem] md:tracking-[0.16em]">
+          71% avg
         </span>
       </div>
 
-      <div className="mt-4 grid gap-x-5 gap-y-2.5 md:grid-cols-2">
+      <div
+        className={cn(
+          "grid",
+          compact
+            ? "mt-3 flex-1 content-between gap-y-2"
+            : "mt-4 gap-x-5 gap-y-2.5 md:grid-cols-2",
+        )}
+      >
         {milestoneStages.map((stage, i) => {
           const pct = (stage.value / stageMax) * 100;
           return (
@@ -595,16 +635,16 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 md:px-6 md:py-4">
-          <div>
-            <div className="text-[0.58rem] font-bold uppercase tracking-[0.22em] text-[#8bd7ff]/70">
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 md:px-6 md:py-4">
+          <div className="min-w-0">
+            <div className="text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#8bd7ff]/70 md:text-[0.58rem] md:tracking-[0.22em]">
               Builder operations dashboard
             </div>
-            <h3 className="mt-0.5 text-lg font-bold tracking-[-0.02em] md:text-xl">
+            <h3 className="mt-0.5 text-base font-bold tracking-[-0.02em] md:text-xl">
               Daily operating dashboard
             </h3>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[#24c18d]/35 bg-[#24c18d]/10 px-3 py-1.5 text-[0.55rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+          <div className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-[#24c18d]/35 bg-[#24c18d]/10 px-2.5 py-1 text-[0.5rem] font-bold uppercase tracking-[0.14em] text-[#8df2c8] md:px-3 md:py-1.5 md:text-[0.55rem] md:tracking-[0.16em]">
             <motion.span
               className="h-2 w-2 rounded-full bg-[#24c18d]"
               animate={reduce ? undefined : { opacity: [1, 0.35, 1] }}
@@ -615,16 +655,21 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
-          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
+          <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:auto-rows-auto md:gap-3">
             {tabletKpis.map((kpi, i) => (
               <KpiTile
                 key={kpi.label}
                 kpi={kpi}
                 index={i}
                 revealed={revealed}
-                className={i >= 4 ? "hidden md:flex" : undefined}
+                className={i >= 6 ? "hidden md:flex" : undefined}
               />
             ))}
+          </div>
+
+          {/* Mobile-only chart so the iPad reads as a real dashboard on phones */}
+          <div className="min-h-0 flex-1 md:hidden">
+            <MilestoneBars revealed={revealed} compact />
           </div>
 
           <div className="hidden flex-col gap-3 md:flex">

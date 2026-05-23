@@ -330,23 +330,38 @@ function formatParsed(parsed: ParsedValue, current: number): string {
   return `${parsed.prefix}${current.toFixed(parsed.decimals)}${parsed.suffix}`;
 }
 
-// Counts the numeric portion of a KPI value up from zero. Re-runs whenever the
-// value changes (e.g. after a scope/period filter change) so switching filters
-// re-animates the metric — a clear signal the filter took effect.
+// Animates the numeric portion of a KPI value. On first mount it counts up from
+// zero with a staggered intro. On later changes (e.g. a scope/period filter) it
+// tweens smoothly from the previous value to the new one — a live-data update,
+// not a jarring reset back to zero.
 function CountUpValue({ value, delay = 0 }: { value: string; delay?: number }) {
   const reduce = useReducedMotion();
   const parsed = useMemo(() => parseValue(value), [value]);
   const [display, setDisplay] = useState(value);
+  const fromRef = useRef(0);
+  const mountedRef = useRef(false);
 
   useIsoLayoutEffect(() => {
     if (!parsed || reduce) {
       setDisplay(value);
+      if (parsed) fromRef.current = parsed.target;
+      mountedRef.current = true;
       return;
     }
-    setDisplay(formatParsed(parsed, 0));
-    const controls = animate(0, parsed.target, {
-      duration: 0.85,
-      delay,
+    const from = fromRef.current;
+    const to = parsed.target;
+    const firstRun = !mountedRef.current;
+    mountedRef.current = true;
+    fromRef.current = to;
+
+    if (from === to) {
+      setDisplay(formatParsed(parsed, to));
+      return;
+    }
+    setDisplay(formatParsed(parsed, from));
+    const controls = animate(from, to, {
+      duration: firstRun ? 0.85 : 0.55,
+      delay: firstRun ? delay : 0,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (latest) => setDisplay(formatParsed(parsed, latest)),
     });
