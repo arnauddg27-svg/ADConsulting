@@ -119,6 +119,15 @@ const heroConstructionStats = [
   { label: "Owner actions", value: "38", unit: "due now" },
 ];
 
+// LCP hero photo. `auto=format` lets Unsplash negotiate WebP/AVIF; the srcSet
+// lets phones pull a right-sized file instead of the full 1100px desktop one.
+const HERO_IMG_BASE =
+  "https://images.unsplash.com/photo-1692229079965-d3ae0e25f3f7?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=78";
+const HERO_IMG_SRCSET = [640, 900, 1100, 1400]
+  .map((w) => `${HERO_IMG_BASE}&w=${w} ${w}w`)
+  .join(", ");
+const HERO_IMG_SIZES = "(min-width: 1024px) 736px, 100vw";
+
 const reviewSignals = [
   {
     label: "Schedule",
@@ -214,12 +223,15 @@ export default function Home() {
               >
               <div className="relative min-h-[34rem] overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#17212c] text-white shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
                 <img
-                  src="https://images.unsplash.com/photo-1692229079965-d3ae0e25f3f7?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=78&w=1100"
+                  src={`${HERO_IMG_BASE}&w=1100`}
+                  srcSet={HERO_IMG_SRCSET}
+                  sizes={HERO_IMG_SIZES}
                   alt="Residential homes under construction on a jobsite"
                   width={1100}
                   height={900}
                   className="absolute inset-0 h-full w-full object-cover"
                   loading="eager"
+                  fetchPriority="high"
                   decoding="async"
                   style={{ objectPosition: "center" }}
                 />
