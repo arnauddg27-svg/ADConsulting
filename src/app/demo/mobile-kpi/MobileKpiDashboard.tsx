@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
@@ -507,6 +508,265 @@ function MilestoneTrackerCard({ job, index }: { job: MilestoneJob; index: number
   );
 }
 
+// ── trends (charts) ──────────────────────────────────────────────────────────
+const PHASE_LABELS = ["Permit", "Found.", "Framing", "MEP", "Finishes", "Closing"];
+const WEEK_LABELS = ["8w", "", "6w", "", "4w", "", "2w", "Now"];
+
+type HealthSegment = { key: DashboardTone; label: string; value: number; color: string };
+
+// Charts react to the same scope/period filters as the KPIs so they feel live,
+// not static: cycle time shifts by the scope/period day-deltas; stock counts
+// scale by the community's share of the portfolio.
+function buildTrends(scope: Community, period: Period): {
+  cycle: number[];
+  jobsByPhase: number[];
+  health: HealthSegment[];
+} {
+  const shift = scope.deltaD + period.deltaD;
+  const cycle = [78, 75, 73, 71, 70, 68, 66, 64].map((v) => Math.max(20, v + shift));
+  const jobsByPhase = [22, 28, 31, 24, 21, 16].map((v) => Math.max(0, Math.round(v * scope.share)));
+  const health: HealthSegment[] = [
+    { key: "good", label: "On track", value: Math.max(0, Math.round(96 * scope.share)), color: "#43d19d" },
+    { key: "watch", label: "Watch", value: Math.max(0, Math.round(34 * scope.share)), color: "#77c8f2" },
+    { key: "risk", label: "At risk", value: Math.max(0, Math.round(12 * scope.share)), color: "#ffb86b" },
+  ];
+  return { cycle, jobsByPhase, health };
+}
+
+// Cycle-time area + line trend (hand-rolled SVG, matches the dashboard style).
+function TrendAreaChart({ data }: { data: number[] }) {
+  const reduce = useReducedMotion();
+  const W = 320;
+  const H = 116;
+  const pad = 8;
+  const padTop = 12;
+  const padBottom = 14;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const innerW = W - pad * 2;
+  const innerH = H - padTop - padBottom;
+  const pts = data.map((v, i) => ({
+    x: pad + (i / (data.length - 1)) * innerW,
+    y: padTop + innerH - ((v - min) / range) * innerH,
+  }));
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
+  const area = `${line} L${last.x.toFixed(1)},${padTop + innerH} L${pts[0].x.toFixed(1)},${padTop + innerH} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id="trend-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#43d19d" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#43d19d" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      {[0, 0.5, 1].map((g) => (
+        <line key={g} x1={pad} x2={W - pad} y1={padTop + innerH * g} y2={padTop + innerH * g} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+      ))}
+      <path d={area} fill="url(#trend-area)" />
+      <motion.path
+        d={line}
+        fill="none"
+        stroke="#87e7d5"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={reduce ? false : { pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      />
+      <circle cx={last.x} cy={last.y} r="3.5" fill="#87e7d5" stroke="#0e1a28" strokeWidth="2" />
+    </svg>
+  );
+}
+
+// Jobs-by-phase vertical bars (fixed px heights so % flex quirks don't bite).
+function TrendBars({ data, labels }: { data: number[]; labels: string[] }) {
+  const reduce = useReducedMotion();
+  const max = Math.max(...data, 1);
+  const CHART_H = 96;
+  return (
+    <div>
+      <div className="flex items-end justify-between gap-1.5" style={{ height: CHART_H }} aria-hidden>
+        {data.map((v, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
+            <span className="text-[0.6rem] font-bold tabular-nums text-slate-300">{v}</span>
+            <motion.div
+              className="w-full rounded-t-md bg-gradient-to-t from-[#2c6b8e] to-[#9ed7ff]"
+              initial={reduce ? false : { height: 0 }}
+              animate={{ height: Math.max(4, (v / max) * (CHART_H - 20)) }}
+              transition={{ duration: 0.7, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex justify-between gap-1.5">
+        {labels.map((l, i) => (
+          <span key={i} className="flex-1 text-center text-[0.5rem] font-semibold uppercase tracking-[0.04em] text-slate-500">
+            {l}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Portfolio-health donut (SVG arcs via stroke-dasharray) + legend.
+function TrendDonut({ segments }: { segments: HealthSegment[] }) {
+  const reduce = useReducedMotion();
+  const total = segments.reduce((s, x) => s + x.value, 0) || 1;
+  const R = 42;
+  const C = 2 * Math.PI * R;
+  const sw = 14;
+  let offset = 0;
+  return (
+    <div className="flex items-center gap-5">
+      <div className="relative h-28 w-28 shrink-0">
+        <svg viewBox="0 0 110 110" className="h-28 w-28 -rotate-90" aria-hidden>
+          <circle cx="55" cy="55" r={R} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={sw} />
+          {segments.map((s, i) => {
+            const len = (s.value / total) * C;
+            const node = (
+              <motion.circle
+                key={s.key}
+                cx="55"
+                cy="55"
+                r={R}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={sw}
+                strokeLinecap="butt"
+                strokeDasharray={`${len.toFixed(2)} ${(C - len).toFixed(2)}`}
+                strokeDashoffset={(-offset).toFixed(2)}
+                initial={reduce ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 + i * 0.12 }}
+              />
+            );
+            offset += len;
+            return node;
+          })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold leading-none tracking-[-0.03em] text-white tabular-nums">{total}</span>
+          <span className="mt-1 text-[0.46rem] font-bold uppercase tracking-[0.14em] text-slate-500">jobs</span>
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-col gap-2">
+        {segments.map((s) => (
+          <div key={s.key} className="flex items-center gap-2 text-[0.68rem]">
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: s.color }} />
+            <span className="font-semibold text-slate-200">{s.label}</span>
+            <span className="ml-auto font-bold tabular-nums text-white">{Math.round((s.value / total) * 100)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TrendCard({
+  index,
+  title,
+  subtitle,
+  value,
+  delta,
+  deltaTone,
+  ariaLabel,
+  children,
+}: {
+  index: number;
+  title: string;
+  subtitle: string;
+  value?: string;
+  delta?: string;
+  deltaTone?: DashboardTone;
+  ariaLabel: string;
+  children: ReactNode;
+}) {
+  const reduce = useReducedMotion();
+  const tone = deltaTone ? toneClasses(deltaTone) : null;
+  return (
+    <motion.article
+      role="listitem"
+      aria-label={ariaLabel}
+      initial={reduce ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: Math.min(index, 4) * 0.07, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0e1a28] p-4 shadow-[0_18px_54px_-42px_rgba(0,0,0,0.85)]"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-[0.58rem] font-bold uppercase tracking-[0.13em] text-[#94adc1]">{title}</h3>
+          <p className="mt-0.5 text-[0.62rem] font-medium text-slate-500">{subtitle}</p>
+        </div>
+        {value ? (
+          <div className="shrink-0 text-right">
+            <p className="text-xl font-bold leading-none tracking-[-0.03em] text-white tabular-nums">{value}</p>
+            {delta ? (
+              <p className={`mt-1 text-[0.58rem] font-bold ${tone ? tone.text : "text-slate-400"}`}>{delta}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      <div className="mt-3.5">{children}</div>
+    </motion.article>
+  );
+}
+
+function TrendsView({ trends }: { trends: ReturnType<typeof buildTrends> }) {
+  const { cycle, jobsByPhase, health } = trends;
+  const cycleNow = cycle[cycle.length - 1];
+  const cycleDelta = cycleNow - cycle[0];
+  const totalJobs = jobsByPhase.reduce((a, b) => a + b, 0);
+
+  return (
+    <div className="flex flex-col gap-3" role="list" aria-label="Trend charts">
+      <TrendCard
+        index={0}
+        title="Cycle time"
+        subtitle="Last 8 weeks"
+        value={`${cycleNow}d`}
+        delta={`${cycleDelta > 0 ? "+" : ""}${cycleDelta}d vs 8w`}
+        deltaTone={cycleDelta <= 0 ? "good" : "risk"}
+        ariaLabel={`Cycle time trend, now ${cycleNow} days, ${cycleDelta} days versus eight weeks ago`}
+      >
+        <TrendAreaChart data={cycle} />
+        <div className="mt-1.5 flex justify-between">
+          {WEEK_LABELS.map((l, i) => (
+            <span key={i} className="text-[0.5rem] font-semibold uppercase tracking-[0.06em] text-slate-600">
+              {l}
+            </span>
+          ))}
+        </div>
+      </TrendCard>
+
+      <TrendCard
+        index={1}
+        title="Active jobs by phase"
+        subtitle="Permit → Closing"
+        value={`${totalJobs}`}
+        delta="active"
+        ariaLabel={`Active jobs by phase, ${totalJobs} total across Permit to Closing`}
+      >
+        <TrendBars data={jobsByPhase} labels={PHASE_LABELS} />
+      </TrendCard>
+
+      <TrendCard
+        index={2}
+        title="Portfolio health"
+        subtitle="Status mix across jobs"
+        ariaLabel={`Portfolio health: ${health.map((s) => `${s.value} ${s.label}`).join(", ")}`}
+      >
+        <TrendDonut segments={health} />
+      </TrendCard>
+    </div>
+  );
+}
+
 type PickerOption = { key: string; label: string; hint?: string };
 
 function PickerSheet({
@@ -645,6 +905,8 @@ export default function MobileKpiDashboard() {
   );
 
   const isMilestones = category === "milestones";
+  const showTrends = category === "all";
+  const trends = useMemo(() => buildTrends(scope, period), [scope, period]);
 
   const footerStats = useMemo(() => {
     if (isMilestones) {
@@ -801,6 +1063,16 @@ export default function MobileKpiDashboard() {
           ref={scrollRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
+          {showTrends ? (
+            <div className="mb-6">
+              <h2 className="mb-3 flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-[#8ea7bb]">
+                <TrendingUp size={12} className="text-[#78e0c0]" />
+                Trends
+              </h2>
+              <TrendsView trends={trends} />
+            </div>
+          ) : null}
+
           <div
             className="mb-3 flex items-center justify-between"
             aria-live="polite"
