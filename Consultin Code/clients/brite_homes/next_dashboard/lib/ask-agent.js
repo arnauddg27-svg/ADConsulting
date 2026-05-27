@@ -81,3 +81,64 @@ export function buildSystemPrompt(schemaText) {
     schemaText,
   ].join("\n");
 }
+
+export async function runAskAgent({
+  messages,
+  schemaText,
+  streamModel,
+  runSql,
+  model,
+  maxQueries = 5,
+  maxTotalBytes = 6 * 1024 ** 3,
+  onEvent,
+}) {
+  const system = buildSystemPrompt(schemaText);
+  const convo = messages.map((m) => ({ role: m.role, content: m.content }));
+  let queriesRun = 0;
+  let totalBytesProcessed = 0;
+  const maxTurns = maxQueries + 3;
+
+  for (let turn = 0; turn < maxTurns; turn++) {
+    const budgetExhausted = queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes;
+    const tools = budgetExhausted ? [] : [SQL_TOOL_DEFINITION];
+    onEvent({ type: "status", text: budgetExhausted ? "writing answer" : "thinking" });
+
+    const result = await streamModel({
+      system,
+      messages: convo,
+      tools,
+      onText: (t) => onEvent({ type: "text", text: t }),
+    });
+    convo.push({ role: "assistant", content: result.content });
+
+    const toolUses = budgetExhausted ? [] : (result.content || []).filter((b) => b.type === "tool_use");
+    if (!toolUses.length) {
+      onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
+      return { queriesRun, totalBytesProcessed };
+    }
+
+    const toolResults = [];
+    for (const tu of toolUses) {
+      const sql = String(tu.input?.sql || "");
+      onEvent({ type: "tool_use", sql, purpose: String(tu.input?.purpose || "") });
+      queriesRun += 1;
+      const res = await runSql(sql);
+      if (res.ok) {
+        totalBytesProcessed += Number(res.bytesProcessed || 0);
+        onEvent({ type: "tool_result", columns: res.columns, rows: res.rows, rowCount: res.rowCount, bytesProcessed: res.bytesProcessed, truncated: res.truncated });
+        toolResults.push({
+          type: "tool_result",
+          tool_use_id: tu.id,
+          content: JSON.stringify({ columns: res.columns, rows: res.rows, rowCount: res.rowCount, truncated: res.truncated }),
+        });
+      } else {
+        onEvent({ type: "tool_result", error: res.error });
+        toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: res.error });
+      }
+    }
+    convo.push({ role: "user", content: toolResults });
+  }
+
+  onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
+  return { queriesRun, totalBytesProcessed };
+}
