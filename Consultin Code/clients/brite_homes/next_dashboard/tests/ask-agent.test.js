@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { runGuardedSql } from "@/lib/ask-agent.js";
+import { SQL_TOOL_DEFINITION, buildSystemPrompt } from "@/lib/ask-agent.js";
 
 const config = {
   projectId: "proj",
@@ -51,5 +52,21 @@ describe("runGuardedSql", () => {
     const queryFn = vi.fn(async () => [{ d: { value: "2026-01-01" } }]);
     const res = await runGuardedSql("SELECT d FROM `proj.brite_homes_marts.v`", { dryRunFn, queryFn, config });
     expect(res.rows[0].d).toBe("2026-01-01");
+  });
+});
+
+describe("SQL_TOOL_DEFINITION", () => {
+  it("declares a run_sql tool requiring sql", () => {
+    expect(SQL_TOOL_DEFINITION.name).toBe("run_sql");
+    expect(SQL_TOOL_DEFINITION.input_schema.required).toContain("sql");
+  });
+});
+
+describe("buildSystemPrompt", () => {
+  it("embeds the schema and the core rules", () => {
+    const prompt = buildSystemPrompt("SCHEMA_CATALOG_HERE");
+    expect(prompt).toContain("run_sql");
+    expect(prompt).toContain("SELECT");
+    expect(prompt).toContain("SCHEMA_CATALOG_HERE");
   });
 });
