@@ -130,4 +130,18 @@ describe("runAskAgent", () => {
     expect(out.queriesRun).toBe(2);
     expect(events.some((e) => e.type === "tool_result" && e.error === "bad column")).toBe(true);
   });
+
+  it("enforces the query budget even when one turn batches multiple tool calls", async () => {
+    const streamModel = scriptedStreamModel([
+      { content: [toolUse("t1", "SELECT 1"), toolUse("t2", "SELECT 2"), toolUse("t3", "SELECT 3")], stop_reason: "tool_use" },
+      { content: [text("Answering with what I have.")], stop_reason: "end_turn" },
+    ]);
+    const runSql = vi.fn(async () => ({ ok: true, columns: ["n"], rows: [{ n: 1 }], rowCount: 1, bytesProcessed: 10, truncated: false }));
+    const events = [];
+    const out = await runAskAgent({ messages: [{ role: "user", content: "q" }], schemaText: "S", streamModel, runSql, model: "m", maxQueries: 2, onEvent: (e) => events.push(e) });
+
+    expect(runSql).toHaveBeenCalledTimes(2);            // cap=2, so only 2 of the 3 batched calls execute
+    expect(out.queriesRun).toBe(2);
+    expect(events.filter((e) => e.type === "tool_result")).toHaveLength(3); // but every tool_use still gets a tool_result
+  });
 });

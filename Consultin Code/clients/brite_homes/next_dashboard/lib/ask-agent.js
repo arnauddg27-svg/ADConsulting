@@ -121,6 +121,12 @@ export async function runAskAgent({
     for (const tu of toolUses) {
       const sql = String(tu.input?.sql || "");
       onEvent({ type: "tool_use", sql, purpose: String(tu.input?.purpose || "") });
+      if (queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes) {
+        const message = "Query budget reached for this question; this query was not run. Answer using the data already gathered.";
+        onEvent({ type: "tool_result", error: message });
+        toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: message });
+        continue;
+      }
       queriesRun += 1;
       const res = await runSql(sql);
       if (res.ok) {
