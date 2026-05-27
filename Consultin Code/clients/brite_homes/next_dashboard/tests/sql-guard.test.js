@@ -26,3 +26,32 @@ describe("preCheckSql", () => {
     expect(preCheckSql("SELECT 1; SELECT 2").ok).toBe(false);
   });
 });
+import { evaluateDryRun } from "@/lib/sql-guard.js";
+
+const cfg = {
+  projectId: "proj",
+  allowedDatasets: ["brite_homes_raw", "brite_homes_staging", "brite_homes_marts"],
+  maxBytesScanned: 2 * 1024 ** 3,
+};
+
+describe("evaluateDryRun", () => {
+  const ref = (datasetId, projectId = "proj") => ({ projectId, datasetId, tableId: "t" });
+
+  it("accepts a SELECT on allowed datasets under the byte cap", () => {
+    const res = evaluateDryRun({ statementType: "SELECT", referencedTables: [ref("brite_homes_marts")], totalBytesProcessed: 1000 }, cfg);
+    expect(res.ok).toBe(true);
+    expect(res.bytes).toBe(1000);
+  });
+  it("rejects non-SELECT statement types", () => {
+    expect(evaluateDryRun({ statementType: "DELETE", referencedTables: [], totalBytesProcessed: 0 }, cfg).ok).toBe(false);
+  });
+  it("rejects tables outside the allowed datasets", () => {
+    expect(evaluateDryRun({ statementType: "SELECT", referencedTables: [ref("other_dataset")], totalBytesProcessed: 10 }, cfg).ok).toBe(false);
+  });
+  it("rejects tables outside the project", () => {
+    expect(evaluateDryRun({ statementType: "SELECT", referencedTables: [ref("brite_homes_marts", "evil")], totalBytesProcessed: 10 }, cfg).ok).toBe(false);
+  });
+  it("rejects scans over the byte cap", () => {
+    expect(evaluateDryRun({ statementType: "SELECT", referencedTables: [ref("brite_homes_marts")], totalBytesProcessed: 5 * 1024 ** 3 }, cfg).ok).toBe(false);
+  });
+});
