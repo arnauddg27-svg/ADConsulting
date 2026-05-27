@@ -58,6 +58,7 @@ export default function AskConsole() {
     const history = [...messages.filter((m) => m.content.trim()).map((m) => ({ role: m.role, content: m.content })), { role: "user", content: question }];
     setMessages((cur) => [...cur, { role: "user", content: question, queries: [] }, { role: "assistant", content: "", queries: [] }]);
 
+    let reader;
     try {
       const res = await fetch("/api/ask", {
         method: "POST",
@@ -68,7 +69,7 @@ export default function AskConsole() {
         const payload = await res.json().catch(() => ({}));
         throw new Error(payload.error || "The assistant could not answer.");
       }
-      const reader = res.body.getReader();
+      reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
       for (;;) {
@@ -82,6 +83,9 @@ export default function AskConsole() {
         }
       }
     } catch (e) {
+      if (reader) {
+        try { await reader.cancel(); } catch {}
+      }
       setError(e.message || "Something went wrong.");
     } finally {
       setBusy(false);
