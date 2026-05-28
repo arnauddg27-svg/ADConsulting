@@ -22,15 +22,15 @@ const SUGGESTION_CATEGORIES = [
     label: "Financials",
     icon: "chart",
     items: [
-      "Average net margin by community for closed jobs.",
-      "What's our total WIP and loan exposure right now?",
+      "Total WIP and loan exposure right now.",
+      "Which rental units are paying below market rent?",
     ],
   },
   {
     label: "Operations",
     icon: "gauge",
     items: [
-      "Top 5 jobs with the biggest variance vs. budget.",
+      "Loans expiring in the next 60 days.",
       "Show me jobs flagged with data quality issues.",
     ],
   },
