@@ -601,6 +601,17 @@ function rawCellText(v) {
 }
 
 // ── Markdown renderer ────────────────────────────────────────────────────────
+// Recursively extract plain text from a React children tree — used so that a
+// markdown <td> that ends up ellipsized still surfaces its full content via the
+// title attribute (same UX as our SQL-result tables).
+function childrenToString(node) {
+  if (node == null || node === false) return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(childrenToString).join("");
+  if (node.props && node.props.children) return childrenToString(node.props.children);
+  return "";
+}
+
 const markdownComponents = {
   table: (props) => (
     <div className="ask-result-wrap">
@@ -610,6 +621,11 @@ const markdownComponents = {
     </div>
   ),
   th: (props) => <th scope="col" {...props} />,
+  td: ({ children, ...rest }) => (
+    <td title={childrenToString(children)} {...rest}>
+      {children}
+    </td>
+  ),
 };
 
 const Markdown = ({ children }) => (

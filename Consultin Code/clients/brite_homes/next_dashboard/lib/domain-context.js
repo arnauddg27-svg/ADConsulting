@@ -73,6 +73,13 @@ Two columns answer "who owns X":
 
 3. **MLS-listed name (third-party context only):** \`brite_homes_raw.listing_agent_inventory.owner_of_record\` is the proper-case owner string from the MLS listing. Use only when explicitly asked "who's listed as owner on MLS" — otherwise prefer the canonical owner (1) or PM-owner (2).
 
+#### Entity-name normalization (heads-up)
+The same entity may appear with slightly different formatting across systems:
+- "YKOS JV, LLC" (construction-side, with comma) vs "YKOS JV LLC" (PM-side, no comma).
+- "Brite Properties of Florida" (614 jobs) vs "Brite Properties of Florida, LLC" (42 jobs) — same operator.
+- "Briten Marion, LLC" vs "Briten Marion LLC".
+For "what does X own" filtering, prefer \`area_name\` (the construction-side canonical) and use LIKE / UPPER+REPLACE patterns when matching across both tables (e.g. \`UPPER(REGEXP_REPLACE(area_name, '[,.]', '')) = UPPER(REGEXP_REPLACE(pm.owner, '[,.]', ''))\` to bridge). When DISPLAYING the owner, show whichever name appears on the source row — surface the cosmetic difference only if the user asks why.
+
 #### "Is X property listed?" — answering listing questions
 When the user asks whether a specific property is listed, listed for sale/rent, or asks about listing details:
 
