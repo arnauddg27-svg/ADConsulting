@@ -1,4 +1,5 @@
 import { preCheckSql, evaluateDryRun, normalizeSql } from "./sql-guard.js";
+import { DOMAIN_CONTEXT } from "./domain-context.js";
 
 function compactValue(v) {
   if (v === null || v === undefined) return null;
@@ -79,6 +80,9 @@ export function buildSystemPrompt(schemaText) {
     "- Lead with the direct answer and the key numbers, then briefly note which table(s) you used.",
     "- Call out data-freshness or data-quality caveats when they materially affect the answer.",
     "- Use plain language for an operations leader. Include job IDs, addresses, cities, and dollar amounts when relevant.",
+    "",
+    "Domain knowledge (definitions and synonyms for how Brite Homes models its data — rely on these so you don't have to rediscover vocabulary):",
+    DOMAIN_CONTEXT,
     "",
     "Warehouse schema catalog:",
     schemaText,

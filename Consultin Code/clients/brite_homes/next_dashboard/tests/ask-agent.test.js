@@ -77,6 +77,7 @@ describe("buildSystemPrompt", () => {
     expect(prompt).toContain("run_sql");
     expect(prompt).toContain("SELECT");
     expect(prompt).toContain("SCHEMA_CATALOG_HERE");
+    expect(prompt).toContain("Brite Homes domain knowledge"); // domain-context layer is injected
   });
 });
 

@@ -1,0 +1,48 @@
+// Curated Brite Homes domain knowledge, distilled from field_map.md and kpi_logic.md.
+// Injected into the Ask assistant's system prompt so it understands the business
+// vocabulary and metric definitions without having to discover them via queries.
+// Keep this concise and update it when the warehouse semantics change.
+
+export const DOMAIN_CONTEXT = `# Brite Homes domain knowledge
+
+Brite Homes is a residential homebuilder. A "job" is one home/lot moving through land -> construction -> CO -> sale or rental. Most analysis is at the job grain (id: job_no / job_id, formatted like 00045-000147).
+
+## Field synonyms (same concept, different column names across tables)
+- job_id = job_no
+- community = project_name = subdivision = subdivision_name
+- city = city_name = job_city = project_city
+- area_name = area = region_name  (a.k.a. "entity" / division)
+- job_type = product_type = construction_type  (lifecycle/product classification)
+- status = occupancy_status = current_status
+- the address columns are address, address_number, address_street, address_city, address_state, address_postal_code, address_county (there is NO "property_address")
+
+## Lifecycle vocabulary (job_type / current_stage values)
+- "CO" = Certificate of Occupancy (home complete enough to occupy). The matching current_stage looks like "100%. Receive CO".
+- "CO'ed not closed" / "coed" / "CO'd" = a finished home not yet closed/sold: job_type CONTAINS "SFR Completed (not closed)".
+- "Active construction" = job_type CONTAINS one of: "SFR Construction In Progress", "Awaiting CO", "On Hold", "POs Released".
+- "Spec" = builder-owned / speculative home (vs. presold).
+- "Closed" sale = sales row whose status CONTAINS "closed"; "open/other" = status does NOT contain "closed".
+- current_stage is a milestone label with a percentage prefix, e.g. "75% Electrical Trimout", "95% Final Survey", "100%. Receive CO".
+
+## Domains and where the data lives (prefer marts; use staging/raw for detail)
+- Construction / lifecycle: per-job stage, completion_pct, wip, superintendent, days_since_last_milestone. Enriched per-job rows: brite_homes_staging.stg_centralized_data_enriched and brite_homes_marts.dim_job_conformed. Portfolio totals: brite_homes_marts.mart_daily_summary.
+- Sales: buyer_name, sale_price, status, sold_date, scheduled_closing.
+- Property management (rentals): unit / tenant, status (occupied/vacant), market_rent, actual_rent, past_due, deposit, lease dates. Tables named property_management_* (e.g. property_management_unit_360 / snapshots).
+- Loans: lender, loan_amount, total_drawn, draw_pct, loan_days_until_expiration.
+- P&L / margin (Assurance / Audit): brite_homes_marts.mart_audit_pl -> net_revenue, total_cost, net_profit, net_margin, margin_status, pl_readiness, data_quality_flag.
+- Exceptions: priority (P1/P2), exception_type, days_outstanding.
+
+## KPI definitions (compute consistently with the dashboard)
+- WIP = SUM(wip). Loan exposure = SUM(loan_amount). Drawn = SUM(total_drawn). Jobs with loans = COUNT(loan_amount > 0).
+- Avg completion = AVG(completion_pct) over rows where it is populated.
+- Over budget = rows where original_budget AND job_cost_amount are populated AND job_cost_amount > original_budget.
+- Sales value = SUM(sale_price). Contracts = count of sales rows. 45-day closings = rows with a closing date in the next 45 days.
+- Occupancy = occupied units / total units. Past due = SUM(past_due).
+- Net profit = net_revenue - total_cost (only rows with both populated). Weighted margin = SUM(net_profit) / SUM(net_revenue) over rows that have BOTH revenue and cost. Rows MISSING revenue are EXCLUDED from margin/profit averages (they are cost-audit-only).
+- At-risk jobs = margin_status IN ('loss','at-risk','watch'). Negative margin = net_margin < 0.
+- Expiring loans = loan_days_until_expiration between 1 and 30.
+
+## Caveats
+- Margin / profitability lives ONLY in the P&L audit data (mart_audit_pl), NOT in the sales tables.
+- completion_pct, WIP, budget/actual, superintendent, and loan fields are partially populated. Answer from rows where the field exists and note when coverage is partial.
+- Use _mart_refreshed_at / snapshot timestamps to state data freshness when relevant.`;
