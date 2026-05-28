@@ -135,7 +135,7 @@ export default function AskConsole() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.map((m, i) => (
-          <article key={`${m.role}-${i}`} style={{ border: "1px solid #eee", borderRadius: 10, padding: 12, background: m.role === "user" ? "#f5f8ff" : "#fff" }}>
+          <article key={`${m.role}-${i}`} style={{ border: "1px solid #eee", borderRadius: 10, padding: 12, background: m.role === "user" ? "#f5f8ff" : "#fff", color: "#1f2430" }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: "#888", marginBottom: 6 }}>{m.role === "user" ? "You" : "Warehouse Analyst"}</div>
             {m.queries?.length > 0 && (
               <details style={{ marginBottom: 8 }}>
