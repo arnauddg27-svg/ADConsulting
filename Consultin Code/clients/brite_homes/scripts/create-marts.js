@@ -283,12 +283,17 @@ async function run() {
         COALESCE(_sm_total_cost, _computed_total_cost) AS total_cost,
         COALESCE(_sm_total_direct_cost, _computed_total_direct_cost) AS total_direct_cost,
         COALESCE(_sm_total_indirect_cost, _computed_total_indirect_cost) AS total_indirect_cost,
-        COALESCE(_sm_net_profit, _computed_net_profit) AS net_profit,
-        COALESCE(
-          _sm_net_margin,
-          CASE WHEN sale_price > 0 AND _computed_net_profit IS NOT NULL
-            THEN _computed_net_profit / sale_price ELSE NULL END
-        ) AS net_margin,
+        -- Recompute net_profit and net_margin from the FINAL mart values
+        -- (sale_price after override, total_cost after COALESCE) instead of
+        -- using audit_pl_summary's un-overridden values. Ensures internal
+        -- consistency: for ANY row, net_profit = sale_price - total_cost.
+        -- For non-override rows this equals what the Audits tab shows.
+        CASE WHEN sale_price > 0 AND COALESCE(_sm_total_cost, _computed_total_cost) > 0
+          THEN sale_price - COALESCE(_sm_total_cost, _computed_total_cost)
+          ELSE NULL END AS net_profit,
+        CASE WHEN sale_price > 0 AND COALESCE(_sm_total_cost, _computed_total_cost) > 0
+          THEN (sale_price - COALESCE(_sm_total_cost, _computed_total_cost)) / sale_price
+          ELSE NULL END AS net_margin,
         CASE WHEN has_summary THEN 'sheet' ELSE 'computed' END AS pl_source
       FROM audit_margins
     ),
@@ -360,6 +365,61 @@ async function run() {
       CASE WHEN sale_price > 0
         THEN (sale_price - construction_costs_summary_est - total_other_expenses_est) / sale_price
         ELSE NULL END AS net_margin_estimated_final,
+
+      -- ─── Break-even sale prices (THE sale price at which net profit = 0) ───
+      -- Audit basis: simple — break-even = total_cost (sale - cost = 0 → sale = cost).
+      total_cost AS break_even_sale_price_audit,
+
+      -- Estimated Final basis: requires solving for sale, because the 5% commissions
+      -- (cogs_commission_internal_est + cogs_commission_external_est) scale with sale.
+      --   sale_price - construction_summary - (property_tax + seller_credit + cogs_closing
+      --        + warranty + total_financing) - sale_price * 0.05 = 0
+      --   sale_price * 0.95 = fixed_costs
+      --   sale_price = fixed_costs / 0.95
+      -- The 0.95 must change if the operator changes commission rates from 2%+3%.
+      SAFE_DIVIDE(
+        construction_costs_summary_est
+        + property_taxes_on_hud_est
+        + IFNULL(seller_credit, 0)
+        + cogs_closing_costs_est
+        + warranty_coverage_est
+        + IFNULL(total_financing, 0),
+        0.95
+      ) AS break_even_sale_price_estimated_final,
+
+      -- ─── Margin buffer (cash headroom before reaching break-even) ───
+      -- How much could the sale price drop before the job hits break-even?
+      -- For Audit basis, this equals net_profit (linear math). For Estimated Final,
+      -- it differs slightly from net_profit_estimated_final because lowering sale
+      -- also lowers the commission cost proportionally.
+      CASE WHEN sale_price > 0 AND total_cost IS NOT NULL
+        THEN sale_price - total_cost
+        ELSE NULL END AS margin_buffer_audit,
+
+      CASE WHEN sale_price > 0
+        THEN sale_price - SAFE_DIVIDE(
+          construction_costs_summary_est
+          + property_taxes_on_hud_est
+          + IFNULL(seller_credit, 0)
+          + cogs_closing_costs_est
+          + warranty_coverage_est
+          + IFNULL(total_financing, 0),
+          0.95
+        )
+        ELSE NULL END AS margin_buffer_estimated_final,
+
+      CASE WHEN sale_price > 0
+        THEN (sale_price - SAFE_DIVIDE(
+          construction_costs_summary_est
+          + property_taxes_on_hud_est
+          + IFNULL(seller_credit, 0)
+          + cogs_closing_costs_est
+          + warranty_coverage_est
+          + IFNULL(total_financing, 0),
+          0.95
+        )) / sale_price
+        ELSE NULL END AS margin_buffer_pct_estimated_final,
+
       -- margin_status: traffic light based on FINAL net_profit/net_margin.
       -- Uses the Audits-tab Net Profit (contract-side). For an "operator's final" view,
       -- consumers should switch to net_margin_estimated_final and re-bucket.

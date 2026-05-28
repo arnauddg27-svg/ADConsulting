@@ -90,9 +90,51 @@ For any progress / aging / stuck question, use the **last milestone actually com
   - total_other_expenses_est = sum of ALL of the above
   - construction_costs_summary_est = lot_land + permitting_total + cost_site_work + total_vertical + cost_options + builder_fee + insurance + closing_cost
 
-  Break-even sale price interpretation:
-  - Audit basis: break-even = total_cost (simple — sale - cost = 0 → sale = cost)
-  - Estimated Final basis: break-even is NOT just construction_costs_summary_est + total_other_expenses_est at current sale, because the COGS commissions are 5% of sale_price (they scale). Exact break-even = (fixed_costs) / (1 - 0.05) = (construction_costs_summary_est + property_taxes_on_hud_est + seller_credit + cogs_closing_costs_est + warranty_coverage_est + total_financing) / 0.95. Approximate answer (total cost at current sale price) is acceptable when stated as such; do not present it as exact break-even.
+  Break-even sale price + margin buffer — PRECOMPUTED native mart columns. SELECT them; do NOT compute manually:
+  - \`break_even_sale_price_audit\` — Audit basis break-even (= total_cost).
+  - \`break_even_sale_price_estimated_final\` — Estimated Final basis break-even, computed exactly as (construction_costs_summary_est + property_taxes_on_hud_est + seller_credit + cogs_closing_costs_est + warranty_coverage_est + total_financing) / 0.95 (the 0.95 accounts for 2%+3% COGS commissions scaling with sale_price).
+  - \`margin_buffer_audit\` — sale_price - break_even_sale_price_audit (== net_profit, but reported as cash headroom).
+  - \`margin_buffer_estimated_final\` — sale_price - break_even_sale_price_estimated_final. Slightly differs from net_profit_estimated_final because lowering sale also lowers commissions proportionally; this is the TRUE headroom before reaching break-even.
+  - \`margin_buffer_pct_estimated_final\` — margin_buffer_estimated_final / sale_price. The % discount the sale could absorb before hitting break-even.
+
+  Hypothetical "what-if sale price" questions (e.g. "what's the net profit if we sold for $X?"):
+  - DO NOT use precomputed estimated_final columns directly — they assume the CURRENT sale_price. The 2%+3% commissions scale with sale, so at a different sale they'd change.
+  - Recompute on the fly: estimated_final at sale X = X - construction_costs_summary_est - (property_taxes_on_hud_est + seller_credit + cogs_closing_costs_est + warranty_coverage_est + total_financing + X*0.02 + X*0.03)
+  - Audit basis is linear: net_profit at sale X = X - total_cost.
+
+## STANDARD P&L RESPONSE TEMPLATE
+When asked about a job's P&L, break-even, or "can we sell at $X" — ALWAYS return ALL of the following structure. Do not omit sections or skip items:
+
+  ### Sale + Status
+    Address, Job_No, Sales_Status, Furthest Milestone, current sale_price (call out sale_price_override if present).
+
+  ### Net Profit (both bases)
+    Audit basis:           net_profit ($, margin %)
+    Estimated Final basis: net_profit_estimated_final ($, margin %)
+
+  ### Cost Breakdown (Construction sum — itemize)
+    Lot/Land, Permitting Total, Site Work, Total Vertical, Options, Builder Fee, Insurance, Closing Cost = Construction Costs Summary
+
+  ### Post-Close Costs (Estimated Final additions — ALWAYS itemize ALL of these)
+    Property taxes (HUD): $1,000
+    Seller credit: $X     ← from mart.seller_credit column. ALWAYS list this even if $0.
+    COGS-Closing Costs: $1,500
+    COGS-Commission Internal (2%): $X
+    COGS-Commission External (3%): $X
+    Warranty coverage: $500
+    Total Financing: $X
+    = Total Other Expenses: $X
+
+  ### Break-Even + Buffer
+    Audit basis break-even:           $break_even_sale_price_audit
+    Estimated Final basis break-even: $break_even_sale_price_estimated_final
+    Margin buffer (Audit):            $margin_buffer_audit
+    Margin buffer (Est Final):        $margin_buffer_estimated_final ($) / margin_buffer_pct_estimated_final (%)
+
+  ### Caveats (when applicable)
+    - Override applied: when mart.sale_price_override IS NOT NULL, say so + show sale_price_override_notes.
+    - Stale fallback: if pl_source = 'computed', say "this row comes from the stale 3/17 audit_* fallback".
+    - Provenance: pl_source_sheet ('investor_audits' vs 'bpof_audits').
 
   Other columns:
   - Revenue: sale_price, net_revenue, seller_credit, proceeds, cost_to_sale
