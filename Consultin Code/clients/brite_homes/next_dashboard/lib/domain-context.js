@@ -84,7 +84,7 @@ These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and 
 
 ## Caveats
 - Margin / profitability lives ONLY in the P&L audit data (mart_audit_pl), NOT in the sales tables.
-- mart_audit_pl combines two sources. Authoritative: 160 rows sourced from the Investor Audits + BPOF Audits Google Sheets (pl_source='sheet'). Fallback: 323 rows sourced from the stale audit_* upload (pl_source='computed') — these are mostly land/lot records. If a job is in neither (no SFR Completed jobs missing from both?), the answer is "no P&L data available" — do NOT fabricate.
+- mart_audit_pl combines two sources. Authoritative: 160 rows sourced from the "Construction audits" tab on Centralized Data 2.0 — which IMPORTRANGE-consolidates the per-portfolio Audits tabs from Investor Audits + BPOF Audits Google Sheets. These flow through brite_homes_raw.audit_pl_summary (refreshed nightly by refresh-raw-transforms.js, same as construction_milestones etc.). Tagged pl_source='sheet'. Fallback: 323 rows sourced from the stale audit_* manual upload (pl_source='computed') — mostly land/lot records. If a job is in neither, the answer is "no P&L data available" — do NOT fabricate.
 - When answering P&L for a specific job, surface pl_source so the user knows whether the number came from the operations team's curated sheet or from a stale 3/17 snapshot.
 - completion_pct, WIP, budget/actual, superintendent, and loan fields are partially populated. Answer from rows where the field exists and note when coverage is partial.
 - Use _mart_refreshed_at / snapshot timestamps to state data freshness when relevant.`;
