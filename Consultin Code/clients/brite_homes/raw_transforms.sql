@@ -1453,3 +1453,200 @@ SELECT
   , CURRENT_TIMESTAMP() AS _extracted_at
 FROM `atomic-venture-404412.Centralized.BrittenVariance`
 WHERE `Job_No` IS NOT NULL AND TRIM(CAST(`Job_No` AS STRING)) != '';
+
+
+-- ============================================================================
+-- STAGING + MART layer on top of the newly-wired raw tables
+-- These are VIEWs (cheap, always reflect latest raw refresh) over the raw
+-- passthrough tables, with proper types + cross-table joins for usability.
+-- ============================================================================
+
+-- ── stg_sales_master ───────────────────────────────────────────────────────
+-- Typed view of brite_homes_raw.sales_master (all-STRING raw → proper types).
+-- Surfaces the most useful ~30 columns; the raw table has 130 if needed.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_sales_master` AS
+SELECT
+  job_id,
+  Address AS address,
+  City AS city,
+  State AS state,
+  SAFE_CAST(Zip AS INT64) AS zip,
+  Area_Name AS area_name,
+  Project_Name AS community,
+  Plan_Name AS plan_name,
+  Job_Type AS job_type,
+  Sales_Status AS sales_status,
+  Job_Status AS job_status,
+  Buyer AS buyer_name,
+  Co_Buyer AS co_buyer,
+  Buyer_Address AS buyer_address,
+  Current_Stage_of_Construction AS current_stage,
+  Superintendent AS superintendent,
+  -- Dates: try direct DATE parse first, fall back to Excel serial conversion
+  COALESCE(
+    SAFE_CAST(NULLIF(Released_To_Sales_Date, '') AS DATE),
+    DATE_ADD(DATE '1899-12-30', INTERVAL SAFE_CAST(Released_To_Sales_Date AS INT64) DAY)
+  ) AS released_to_sales_date,
+  COALESCE(
+    SAFE_CAST(NULLIF(Cancel_Date, '') AS DATE),
+    DATE_ADD(DATE '1899-12-30', INTERVAL SAFE_CAST(Cancel_Date AS INT64) DAY)
+  ) AS cancel_date,
+  COALESCE(
+    SAFE_CAST(NULLIF(Released_To_Construction_Date, '') AS DATE),
+    DATE_ADD(DATE '1899-12-30', INTERVAL SAFE_CAST(Released_To_Construction_Date AS INT64) DAY)
+  ) AS released_to_construction_date,
+  COALESCE(
+    SAFE_CAST(NULLIF(Start_Date, '') AS DATE),
+    DATE_ADD(DATE '1899-12-30', INTERVAL SAFE_CAST(Start_Date AS INT64) DAY)
+  ) AS start_date,
+  Cancel_Reason AS cancel_reason,
+  -- All-STRING raw columns; strip $ + , and SAFE_CAST. NULLIF empty.
+  -- (Other monetary cols are deeper in the 130-col raw table — add here as needed.)
+  Stage_At_Sale AS stage_at_sale,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.sales_master`;
+
+
+-- ── mart_progress_issues_open ──────────────────────────────────────────────
+-- All UNRESOLVED progress issues, joined to construction_milestones for context.
+-- Use for ops/scheduling dashboards: "show me jobs blocked by open issues".
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.mart_progress_issues_open` AS
+SELECT
+  p.job_id,
+  COALESCE(p.Address, m.address) AS address,
+  m.community,
+  COALESCE(p.City__Project_, m.city) AS city,
+  COALESCE(p.Job_Type, m.job_type) AS job_type,
+  COALESCE(p.Furthest_Milestone_Completed, m.current_stage) AS current_stage,
+  p.Area_Name AS area_name,
+  p.Plan_Name AS plan_name,
+  p.Sales_Status AS sales_status,
+  p.Current_Superintendent AS superintendent,
+  p.Issue_Category AS issue_category,
+  p.Assignee AS assignee,
+  p.Vendor AS vendor,
+  p.Root_Cause AS root_cause,
+  p.Notes___Updates AS notes,
+  -- Excel serial → DATE
+  DATE_ADD(DATE '1899-12-30', INTERVAL p.Date_issue_recorded DAY) AS date_recorded,
+  DATE_ADD(DATE '1899-12-30', INTERVAL p.Date_Issue_Updated DAY) AS date_updated,
+  p.Days_Since_Last_Milestone_Completed AS days_since_last_milestone,
+  p._extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.progress_issue_notes` p
+LEFT JOIN `atomic-venture-404412.brite_homes_raw.construction_milestones` m USING (job_id)
+WHERE p.Issue_Resolved IS NOT TRUE;  -- include NULLs (unresolved) but exclude TRUE (resolved)
+
+
+-- ── mart_warranty_summary ──────────────────────────────────────────────────
+-- Warranty ticket counts by category + status. Use for "how many open warranty
+-- issues do we have" / "which suppliers have the most warranty claims".
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.mart_warranty_summary` AS
+SELECT
+  Category AS category,
+  Status AS ticket_status,
+  Item_Status AS item_status,
+  Supplier AS supplier,
+  COUNT(*) AS ticket_count,
+  COUNT(DISTINCT job_id) AS jobs_affected,
+  AVG(Ticket_Aged_Days) AS avg_aged_days,
+  MAX(Ticket_Aged_Days) AS max_aged_days
+FROM `atomic-venture-404412.brite_homes_raw.warranty_tickets`
+WHERE job_id IS NOT NULL
+GROUP BY category, ticket_status, item_status, supplier;
+
+
+-- ── mart_warranty_open ─────────────────────────────────────────────────────
+-- Detail view of open warranty tickets, joined to construction_milestones.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.mart_warranty_open` AS
+SELECT
+  w.job_id,
+  w.Ticket__ AS ticket_number,
+  w.Item__ AS item_number,
+  COALESCE(w.Job, m.address) AS job_label,
+  m.community,
+  m.city,
+  m.current_stage,
+  w.Ticket_Aged_Days AS ticket_aged_days,
+  w.Status AS ticket_status,
+  w.Description AS description,
+  w.Supplier AS supplier,
+  w.Item_Status AS item_status,
+  w.Work_Orders AS work_orders,
+  w.Location AS location,
+  w.Category AS category,
+  w.Root_Cause AS root_cause,
+  w.Work_Order_Status AS work_order_status,
+  w.Work_Order_Supplier AS work_order_supplier,
+  w._extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.warranty_tickets` w
+LEFT JOIN `atomic-venture-404412.brite_homes_raw.construction_milestones` m USING (job_id)
+WHERE w.job_id IS NOT NULL
+  AND LOWER(IFNULL(w.Item_Status, '')) != 'closed'
+  AND LOWER(IFNULL(w.Status, '')) NOT LIKE '%closed%';
+
+
+-- ── mart_loan_pipeline ─────────────────────────────────────────────────────
+-- Per-job loan status with days-until-expiration, drawn vs available WIP.
+-- Joined to construction_milestones for job context (address, stage).
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.mart_loan_pipeline` AS
+SELECT
+  l.job_id,
+  l.Lender AS lender,
+  l.Loan_Number AS loan_number,
+  l.Loan_Amount AS loan_amount,
+  l.Interest_Rate AS interest_rate,
+  l.Total_Drawn AS total_drawn,
+  l.WIP AS wip,
+  l.Drawable_WIP_ AS drawable_wip,
+  l.Equity AS equity,
+  l.Status AS loan_status,
+  l.Permitting_Status AS permitting_status,
+  l.Job_Type AS job_type,
+  l.Sales_Status AS sales_status,
+  l.Furthest_Milestone_Completed AS furthest_milestone,
+  l.Days_Until_Expiration AS days_until_expiration,
+  -- Excel serial → DATE
+  DATE_ADD(DATE '1899-12-30', INTERVAL l.Loan_Closing_Date DAY) AS loan_closing_date,
+  DATE_ADD(DATE '1899-12-30', INTERVAL l.Loan_Expiration_ DAY) AS loan_expiration_date,
+  DATE_ADD(DATE '1899-12-30', INTERVAL l.Extended_to_ DAY) AS extended_to_date,
+  l.Extension__ AS extension_count,
+  l.Status_without_land_loan AS status_without_land_loan,
+  -- Pipeline-level health flags
+  CASE
+    WHEN l.Days_Until_Expiration IS NULL THEN 'no expiration tracked'
+    WHEN l.Days_Until_Expiration < 0 THEN 'expired'
+    WHEN l.Days_Until_Expiration BETWEEN 0 AND 30 THEN 'expiring 30d'
+    WHEN l.Days_Until_Expiration BETWEEN 31 AND 60 THEN 'expiring 60d'
+    WHEN l.Days_Until_Expiration BETWEEN 61 AND 90 THEN 'expiring 90d'
+    ELSE 'healthy'
+  END AS expiration_bucket,
+  -- Join job context (community, address, current_stage)
+  m.community,
+  m.address,
+  m.city,
+  m.current_stage,
+  l._extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.loan_tracker` l
+LEFT JOIN `atomic-venture-404412.brite_homes_raw.construction_milestones` m USING (job_id);
+
+
+-- ── fact_job_metrics ───────────────────────────────────────────────────────
+-- UNIONed view of the 8 per-job 2-column lookup tables. Each row is
+-- (job_id, metric, value, _refreshed_at). Easier than 8 separate JOINs when
+-- the bot wants to compare metrics across job(s).
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.fact_job_metrics` AS
+SELECT job_id, 'bpof_wip' AS metric, SAFE_CAST(BPOF_WIP AS FLOAT64) AS value, _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_wip`
+UNION ALL
+SELECT job_id, 'bpof_drawable_wip', SAFE_CAST(BPOF_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_drawable_wip`
+UNION ALL
+SELECT job_id, 'brite_assets_wip', SAFE_CAST(Brite_Assests_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_wip`  -- sheet typo "Assests"
+UNION ALL
+SELECT job_id, 'brite_assets_drawable_wip', SAFE_CAST(Brite_Assests_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_drawable_wip`  -- sheet typo
+UNION ALL
+SELECT job_id, 'financing_cost', SAFE_CAST(Financing_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.financing_cost`
+UNION ALL
+SELECT job_id, 'job_cost_on_closed', SAFE_CAST(Job_Cost_on_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.job_cost_on_closed`
+UNION ALL
+SELECT job_id, 'lot_cost_closed', SAFE_CAST(Lot_Cost_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_closed`
+UNION ALL
+SELECT job_id, 'lot_cost_lookup', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_lookup`;

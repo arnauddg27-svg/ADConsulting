@@ -91,10 +91,25 @@ All of these are job-level (or task-level) and have a job_id column you can JOIN
 - **brite_homes_raw.takeoff_compare** (4,582 × 105, all STRING, no job_id column — plan-level not job-level) — plan/elevation takeoff comparison.
 
 ## Per-job lookup tables (2-col: job_id → value)
-Useful for joining one specific metric onto another query. Generally these values mirror columns already on construction_milestones; use the lookup tables only if you need the exact published number from the operations team's manual lookup tab.
+Useful for joining one specific metric onto another query. Generally these values mirror columns already on construction_milestones; use the lookup tables only if you need the exact published number from the operations team's manual lookup tab. Or use `brite_homes_marts.fact_job_metrics` for a UNIONed view of all eight (job_id, metric, value).
 - bpof_wip, bpof_drawable_wip, brite_assets_wip, brite_assets_drawable_wip — WIP variants
 - lot_cost_lookup, lot_cost_closed — lot cost variants (distinct from construction_milestones.lot_cost)
 - financing_cost, job_cost_on_closed — financial lookups
+
+## Staging + Mart views on top of the wired tables (USE THESE)
+Prefer these typed/joined views over the raw passthrough tables — they save the bot from doing repetitive SAFE_CAST / Excel-serial-date / JOIN work in every query.
+
+- **brite_homes_staging.stg_sales_master** — typed view of sales_master (the all-STRING raw). job_id, address, city, state, zip, area_name, community, plan_name, job_type, sales_status, job_status, buyer_name, co_buyer, sales_agent, realtor, superintendent, current_stage, plus parsed dates (released_to_sales_date, cancel_date, released_to_construction_date, start_date, stage_at_sale).
+
+- **brite_homes_marts.mart_progress_issues_open** — all UNRESOLVED progress issues joined to construction_milestones for job context (address, community, city, job_type, current_stage). Columns: job_id, issue_category, assignee, vendor, root_cause, notes, date_recorded, date_updated, days_since_last_milestone. Use for "which jobs have open issues" / "show me blocked jobs".
+
+- **brite_homes_marts.mart_warranty_summary** — warranty ticket counts grouped by (category, ticket_status, item_status, supplier). Use for "how many warranty tickets are open" / "which supplier has the most warranty claims".
+
+- **brite_homes_marts.mart_warranty_open** — detail view of open warranty tickets joined to construction_milestones. Columns: ticket_number, description, supplier, category, location, root_cause, work_order_status, ticket_aged_days, community, city, current_stage.
+
+- **brite_homes_marts.mart_loan_pipeline** — per-job loan status joined to construction_milestones, with expiration_bucket ('healthy' | 'expiring 30d' | 'expiring 60d' | 'expiring 90d' | 'expired' | 'no expiration tracked'). Columns: lender, loan_number, loan_amount, interest_rate, total_drawn, wip, drawable_wip, equity, loan_status, days_until_expiration, loan_closing_date, loan_expiration_date, extended_to_date, expiration_bucket, address, community, current_stage. Use for "loans expiring soon" / "which jobs need loan extensions".
+
+- **brite_homes_marts.fact_job_metrics** — single UNIONed view of the 8 per-job lookup tables. Each row: (job_id, metric, value, _extracted_at). Easier than 8 separate joins when comparing metrics. Metric values: 'bpof_wip', 'bpof_drawable_wip', 'brite_assets_wip', 'brite_assets_drawable_wip', 'financing_cost', 'job_cost_on_closed', 'lot_cost_closed', 'lot_cost_lookup'.
 - Exceptions: priority (P1/P2), exception_type, days_outstanding.
 
 ## KPI definitions (compute consistently with the dashboard)
