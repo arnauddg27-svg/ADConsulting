@@ -54,6 +54,14 @@ describe("runGuardedSql", () => {
     const res = await runGuardedSql("SELECT d FROM `proj.brite_homes_marts.v`", { dryRunFn, queryFn, config });
     expect(res.rows[0].d).toBe("2026-01-01");
   });
+
+  it("passes SQL with a leading comment through to the dry run", async () => {
+    const dryRunFn = vi.fn(async () => okStats);
+    const queryFn = vi.fn(async () => [{ n: 1 }]);
+    const res = await runGuardedSql("-- explain the query\nSELECT n FROM `proj.brite_homes_marts.v`", { dryRunFn, queryFn, config });
+    expect(res.ok).toBe(true);
+    expect(dryRunFn).toHaveBeenCalled();
+  });
 });
 
 describe("SQL_TOOL_DEFINITION", () => {

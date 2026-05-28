@@ -55,3 +55,29 @@ describe("evaluateDryRun", () => {
     expect(evaluateDryRun({ statementType: "SELECT", referencedTables: [ref("brite_homes_marts")], totalBytesProcessed: 5 * 1024 ** 3 }, cfg).ok).toBe(false);
   });
 });
+
+import { normalizeSql } from "@/lib/sql-guard.js";
+
+describe("preCheckSql comment/fence tolerance", () => {
+  it("accepts a query with leading line comments", () => {
+    expect(preCheckSql("-- find stalled jobs\n-- excluding closed\nSELECT 1").ok).toBe(true);
+  });
+  it("accepts a query with a leading block comment", () => {
+    expect(preCheckSql("/* note */ WITH t AS (SELECT 1 AS n) SELECT n FROM t").ok).toBe(true);
+  });
+  it("accepts a query wrapped in a markdown code fence", () => {
+    expect(preCheckSql("```sql\nSELECT 1\n```").ok).toBe(true);
+  });
+  it("still rejects DML even behind a leading comment", () => {
+    expect(preCheckSql("-- sneaky\nDELETE FROM `p.d.t`").ok).toBe(false);
+  });
+});
+
+describe("normalizeSql", () => {
+  it("strips a surrounding markdown code fence", () => {
+    expect(normalizeSql("```sql\nSELECT 1\n```")).toBe("SELECT 1");
+  });
+  it("leaves plain SQL and its comments intact", () => {
+    expect(normalizeSql("-- c\nSELECT 1")).toBe("-- c\nSELECT 1");
+  });
+});

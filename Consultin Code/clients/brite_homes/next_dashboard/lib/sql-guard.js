@@ -2,10 +2,31 @@ import { dashboardConfig } from "./bigquery.js";
 
 const FORBIDDEN = /\b(INSERT|UPDATE|DELETE|MERGE|DROP|CREATE|ALTER|TRUNCATE|GRANT|REVOKE|CALL|EXPORT|LOAD|DECLARE|BEGIN|EXECUTE)\b/i;
 
+// Strip a single surrounding markdown code fence (```sql ... ```). BigQuery can't parse
+// fences, so callers normalize before validation AND execution. SQL comments are left
+// intact — BigQuery handles them fine.
+export function normalizeSql(sql) {
+  let s = String(sql || "").trim();
+  if (s.startsWith("```")) {
+    s = s.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
+  }
+  return s;
+}
+
+// Remove SQL comments so the start/keyword heuristics see the real statement. Used only
+// for validation — the executed SQL keeps its comments.
+function stripComments(sql) {
+  return sql.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+}
+
 export function preCheckSql(sql) {
-  const trimmed = String(sql || "").trim();
-  if (!trimmed) return { ok: false, reason: "Empty SQL." };
-  const body = trimmed.replace(/;+\s*$/, "");
+  const normalized = normalizeSql(sql);
+  if (!normalized) return { ok: false, reason: "Empty SQL." };
+  // Evaluate the start/keyword/statement heuristics against the comment-free code so a
+  // leading "-- explanation" line (which Claude often adds) doesn't trip the SELECT check.
+  const code = stripComments(normalized).trim();
+  if (!code) return { ok: false, reason: "Empty SQL." };
+  const body = code.replace(/;+\s*$/, "");
   if (body.includes(";")) return { ok: false, reason: "Only a single statement is allowed." };
   if (!/^\s*(WITH|SELECT)\b/i.test(body)) return { ok: false, reason: "Query must start with SELECT or WITH." };
   if (FORBIDDEN.test(body)) return { ok: false, reason: "Query contains a forbidden keyword; only read-only SELECT queries are allowed." };

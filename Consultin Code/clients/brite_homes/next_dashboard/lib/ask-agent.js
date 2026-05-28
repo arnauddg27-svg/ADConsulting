@@ -1,4 +1,4 @@
-import { preCheckSql, evaluateDryRun } from "./sql-guard.js";
+import { preCheckSql, evaluateDryRun, normalizeSql } from "./sql-guard.js";
 
 function compactValue(v) {
   if (v === null || v === undefined) return null;
@@ -18,12 +18,13 @@ function compactRow(row) {
 }
 
 export async function runGuardedSql(sql, { dryRunFn, queryFn, config, rowCap = 50 }) {
-  const pre = preCheckSql(sql);
+  const cleaned = normalizeSql(sql); // strip markdown fences; keep comments (BigQuery handles them)
+  const pre = preCheckSql(cleaned);
   if (!pre.ok) return { ok: false, error: pre.reason };
 
   let stats;
   try {
-    stats = await dryRunFn(sql);
+    stats = await dryRunFn(cleaned);
   } catch (e) {
     return { ok: false, error: `Query failed validation: ${e.message}` };
   }
@@ -33,7 +34,7 @@ export async function runGuardedSql(sql, { dryRunFn, queryFn, config, rowCap = 5
 
   let fetched;
   try {
-    fetched = await queryFn(sql, { maxBytes: config.maxBytesScanned, maxResults: rowCap + 1 });
+    fetched = await queryFn(cleaned, { maxBytes: config.maxBytesScanned, maxResults: rowCap + 1 });
   } catch (e) {
     return { ok: false, error: `Query failed to run: ${e.message}` };
   }
