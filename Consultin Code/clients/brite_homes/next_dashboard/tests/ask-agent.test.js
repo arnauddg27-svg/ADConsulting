@@ -101,7 +101,7 @@ describe("runAskAgent", () => {
     expect(events.at(-1).type).toBe("done");
   });
 
-  it("stops querying once the query budget is hit and drops tools", async () => {
+  it("stops querying once the query budget is hit and forces a final answer", async () => {
     const streamModel = scriptedStreamModel([
       { content: [toolUse("t1", "SELECT 1")], stop_reason: "tool_use" },
       { content: [text("Final answer with what I have.")], stop_reason: "end_turn" },
@@ -111,7 +111,9 @@ describe("runAskAgent", () => {
 
     expect(runSql).toHaveBeenCalledTimes(1);
     expect(out.queriesRun).toBe(1);
-    expect(streamModel.mock.calls[1][0].tools).toEqual([]);
+    // The final turn keeps the tool defined but forces an answer (forceAnswer => tool_choice none).
+    expect(streamModel.mock.calls[1][0].forceAnswer).toBe(true);
+    expect(streamModel.mock.calls[1][0].tools.length).toBe(1);
   });
 
   it("feeds query errors back so Claude can self-correct", async () => {
@@ -143,5 +145,21 @@ describe("runAskAgent", () => {
     expect(runSql).toHaveBeenCalledTimes(2);            // cap=2, so only 2 of the 3 batched calls execute
     expect(out.queriesRun).toBe(2);
     expect(events.filter((e) => e.type === "tool_result")).toHaveLength(3); // but every tool_use still gets a tool_result
+  });
+
+  it("always emits a final answer even when every query fails and the model writes no text", async () => {
+    const streamModel = scriptedStreamModel([
+      { content: [toolUse("t1", "SELECT bad")], stop_reason: "tool_use" },
+      { content: [toolUse("t2", "SELECT alsobad")], stop_reason: "tool_use" },
+      { content: [], stop_reason: "end_turn" }, // final (forceAnswer) turn yields no text
+    ]);
+    const runSql = vi.fn(async () => ({ ok: false, error: "Unrecognized name: foo" }));
+    const events = [];
+    await runAskAgent({ messages: [{ role: "user", content: "q" }], schemaText: "S", streamModel, runSql, model: "m", maxQueries: 2, onEvent: (e) => events.push(e) });
+
+    const answer = events.filter((e) => e.type === "text").map((e) => e.text).join("");
+    expect(answer).not.toBe(""); // a fallback answer was produced
+    expect(answer).toContain("Unrecognized name: foo"); // and it surfaces the last error
+    expect(events.at(-1).type).toBe("done");
   });
 });

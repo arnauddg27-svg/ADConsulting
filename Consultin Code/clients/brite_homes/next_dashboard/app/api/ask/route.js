@@ -25,13 +25,16 @@ function validate(messages) {
 }
 
 function createStreamModel(anthropic, model) {
-  return async ({ system, messages, tools, onText }) => {
+  return async ({ system, messages, tools, forceAnswer, onText }) => {
     const stream = anthropic.messages.stream({
       model,
       max_tokens: 2048,
       system,
       messages,
       ...(tools && tools.length ? { tools } : {}),
+      // On the final turn, keep the tool defined (so the tool-use history stays valid)
+      // but forbid further tool calls so the model must write the answer.
+      ...(forceAnswer ? { tool_choice: { type: "none" } } : {}),
     });
     stream.on("text", (delta) => onText(delta));
     const final = await stream.finalMessage();

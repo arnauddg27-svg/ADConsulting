@@ -66,7 +66,9 @@ export function buildSystemPrompt(schemaText) {
     "",
     "How to work:",
     "- Use the run_sql tool to get real data. Never invent numbers, rows, table names, or columns.",
-    "- Prefer the PREFERRED marts dataset and its KPI views — they encode the business logic (margins, cycle times, exception rules) and match the dashboard exactly. Only drop to the raw dataset for row-level detail the marts don't expose.",
+    "- Use table and column names EXACTLY as they appear in the catalog below. Do not guess conventional names — e.g. this warehouse uses `address`, `address_city`, `address_state` (there is no `property_address`).",
+    "- If a query fails with \"Unrecognized name\", do NOT repeat the same guess. Re-read the catalog, or confirm the real columns cheaply (INFORMATION_SCHEMA scans are free): SELECT column_name FROM `project.dataset.INFORMATION_SCHEMA.COLUMNS` WHERE table_name = 'the_table'.",
+    "- Prefer the PREFERRED marts dataset and its KPI views — they encode the business logic (margins, cycle times, exception rules) and match the dashboard exactly. Use the staging or raw tables when they hold detail the marts don't expose (e.g. per-job stage / milestone fields).",
     "- Fully-qualify every table as `project.dataset.table` using the catalog below.",
     "- BigQuery Standard SQL only. One statement per query. Read-only (SELECT/WITH).",
     "- Start narrow: filter by date/community and select only the columns you need to keep scans small. If a query is rejected for scanning too much, add filters or aggregate.",
@@ -96,26 +98,46 @@ export async function runAskAgent({
   const convo = messages.map((m) => ({ role: m.role, content: m.content }));
   let queriesRun = 0;
   let totalBytesProcessed = 0;
+  let sawText = false;
+  let lastError = null;
   const maxTurns = maxQueries + 3;
+
+  const emitText = (t) => {
+    if (t && t.trim()) sawText = true;
+    onEvent({ type: "text", text: t });
+  };
+
+  // Always produce a user-facing answer, even if every query failed.
+  const finish = () => {
+    if (!sawText) {
+      onEvent({
+        type: "text",
+        text: lastError
+          ? `I couldn't complete a working query for that. The last issue was: ${lastError} Try rephrasing, or ask about a specific table or metric.`
+          : "I wasn't able to produce an answer for that. Try rephrasing or asking about a specific metric.",
+      });
+    }
+    onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
+    return { queriesRun, totalBytesProcessed };
+  };
 
   for (let turn = 0; turn < maxTurns; turn++) {
     const budgetExhausted = queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes;
-    const tools = budgetExhausted ? [] : [SQL_TOOL_DEFINITION];
     onEvent({ type: "status", text: budgetExhausted ? "writing answer" : "thinking" });
 
+    // Always pass the tool definition (keeps the message thread valid for the API);
+    // forceAnswer tells the model layer to disallow further tool calls on the final turn.
     const result = await streamModel({
       system,
       messages: convo,
-      tools,
-      onText: (t) => onEvent({ type: "text", text: t }),
+      tools: [SQL_TOOL_DEFINITION],
+      forceAnswer: budgetExhausted,
+      onText: emitText,
     });
     convo.push({ role: "assistant", content: result.content });
 
     const toolUses = budgetExhausted ? [] : (result.content || []).filter((b) => b.type === "tool_use");
-    if (!toolUses.length) {
-      onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
-      return { queriesRun, totalBytesProcessed };
-    }
+    if (!toolUses.length) return finish();
 
     const toolResults = [];
     for (const tu of toolUses) {
@@ -138,6 +160,7 @@ export async function runAskAgent({
           content: JSON.stringify({ columns: res.columns, rows: res.rows, rowCount: res.rowCount, truncated: res.truncated }),
         });
       } else {
+        lastError = res.error;
         onEvent({ type: "tool_result", error: res.error });
         toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: res.error });
       }
@@ -145,6 +168,5 @@ export async function runAskAgent({
     convo.push({ role: "user", content: toolResults });
   }
 
-  onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
-  return { queriesRun, totalBytesProcessed };
+  return finish();
 }

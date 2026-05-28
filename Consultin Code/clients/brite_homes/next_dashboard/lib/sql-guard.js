@@ -38,9 +38,17 @@ export function evaluateDryRun(stats, config) {
 export function guardConfig() {
   const cfg = dashboardConfig();
   const staging = cfg.rawDataset.replace(/_raw$/, "_staging");
+  // Curated views are built on upstream source datasets (e.g. the "Centralized" Google
+  // Sheet external table). BigQuery's dry run reports those upstream datasets in
+  // referencedTables, so they must be allowlisted or every view that reads the sheet is
+  // rejected. ASK_SOURCE_DATASETS is a comma-separated override; defaults to "Centralized".
+  const sourceDatasets = (process.env.ASK_SOURCE_DATASETS || "Centralized")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   return {
     projectId: cfg.projectId,
-    allowedDatasets: Array.from(new Set([cfg.rawDataset, staging, cfg.dataset])),
+    allowedDatasets: Array.from(new Set([cfg.rawDataset, staging, cfg.dataset, ...sourceDatasets])),
     maxBytesScanned: Number(process.env.ASK_MAX_BYTES_SCANNED) || 2 * 1024 ** 3,
   };
 }
