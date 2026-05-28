@@ -91,7 +91,7 @@ All of these are job-level (or task-level) and have a job_id column you can JOIN
 - **brite_homes_raw.takeoff_compare** (4,582 × 105, all STRING, no job_id column — plan-level not job-level) — plan/elevation takeoff comparison.
 
 ## Per-job lookup tables (2-col: job_id → value)
-Useful for joining one specific metric onto another query. Generally these values mirror columns already on construction_milestones; use the lookup tables only if you need the exact published number from the operations team's manual lookup tab. Or use `brite_homes_marts.fact_job_metrics` for a UNIONed view of all eight (job_id, metric, value).
+Useful for joining one specific metric onto another query. Generally these values mirror columns already on construction_milestones; use the lookup tables only if you need the exact published number from the operations team's manual lookup tab. Or use \`brite_homes_marts.fact_job_metrics\` for a UNIONed view of all eight (job_id, metric, value).
 - bpof_wip, bpof_drawable_wip, brite_assets_wip, brite_assets_drawable_wip — WIP variants
 - lot_cost_lookup, lot_cost_closed — lot cost variants (distinct from construction_milestones.lot_cost)
 - financing_cost, job_cost_on_closed — financial lookups
