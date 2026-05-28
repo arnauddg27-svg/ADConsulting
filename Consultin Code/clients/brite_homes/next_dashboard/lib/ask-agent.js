@@ -110,6 +110,7 @@ export async function runAskAgent({
   maxQueries = 5,
   maxTotalBytes = 6 * 1024 ** 3,
   onEvent,
+  signal,
 }) {
   const system = buildSystemPrompt(schemaText);
   const convo = messages.map((m) => ({ role: m.role, content: m.content }));
@@ -139,6 +140,11 @@ export async function runAskAgent({
   };
 
   for (let turn = 0; turn < maxTurns; turn++) {
+    // Stop doing paid work (Claude + BigQuery) if the client disconnected / aborted.
+    if (signal?.aborted) {
+      onEvent({ type: "done", model, queriesRun, totalBytesProcessed, aborted: true });
+      return { queriesRun, totalBytesProcessed };
+    }
     const budgetExhausted = queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes;
     onEvent({ type: "status", text: budgetExhausted ? "writing answer" : "thinking" });
 
@@ -149,6 +155,7 @@ export async function runAskAgent({
       messages: convo,
       tools: [SQL_TOOL_DEFINITION],
       forceAnswer: budgetExhausted,
+      signal,
       onText: emitText,
     });
     convo.push({ role: "assistant", content: result.content });

@@ -201,4 +201,15 @@ describe("runAskAgent", () => {
     expect(events.some((e) => e.type === "text")).toBe(true); // a clear note is shown
     expect(events.at(-1).type).toBe("done");
   });
+
+  it("does no model or SQL work when the signal is already aborted", async () => {
+    const streamModel = vi.fn();
+    const runSql = vi.fn();
+    const events = [];
+    const out = await runAskAgent({ messages: [{ role: "user", content: "q" }], schemaText: "S", streamModel, runSql, model: "m", signal: { aborted: true }, onEvent: (e) => events.push(e) });
+    expect(streamModel).not.toHaveBeenCalled();
+    expect(runSql).not.toHaveBeenCalled();
+    expect(out.queriesRun).toBe(0);
+    expect(events.at(-1)).toMatchObject({ type: "done", aborted: true });
+  });
 });
