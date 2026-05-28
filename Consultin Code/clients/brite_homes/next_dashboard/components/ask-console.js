@@ -355,7 +355,7 @@ function MetaLine({ meta }) {
 }
 
 function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
-  const showSkeleton = isActive && !msg.content && !msg.queries.length;
+  const showSkeleton = isActive && !msg.content && !(msg.queries?.length);
   return (
     <article className="ask-turn ask-turn--assistant" aria-busy={isActive ? "true" : undefined}>
       <div className="ask-turn-head">
@@ -557,7 +557,12 @@ export default function AskConsole() {
   const scrollRef = useRef(null);
   // Drive autoscroll on every message/content/query change.
   const scrollKey = useMemo(
-    () => messages.reduce((k, m) => `${k}|${m.id}:${(m.content || "").length}:${m.queries.length}:${m.queries.map((q) => (q.result ? 1 : 0)).join("")}`, ""),
+    () =>
+      messages.reduce(
+        // m.queries only exists on assistant turns — guard for user turns or the reduce throws.
+        (k, m) => `${k}|${m.id}:${(m.content || "").length}:${m.queries?.length || 0}:${(m.queries || []).map((q) => (q.result ? 1 : 0)).join("")}`,
+        "",
+      ),
     [messages],
   );
   const { pinnedUp, jumpToLatest } = useAutoscroll(scrollRef, scrollKey + status + (busy ? "1" : "0"));
