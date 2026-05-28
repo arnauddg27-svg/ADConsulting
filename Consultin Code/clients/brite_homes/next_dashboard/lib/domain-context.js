@@ -80,19 +80,77 @@ The same entity may appear with slightly different formatting across systems:
 - "Briten Marion, LLC" vs "Briten Marion LLC".
 For "what does X own" filtering, prefer \`area_name\` (the construction-side canonical) and use LIKE / UPPER+REPLACE patterns when matching across both tables (e.g. \`UPPER(REGEXP_REPLACE(area_name, '[,.]', '')) = UPPER(REGEXP_REPLACE(pm.owner, '[,.]', ''))\` to bridge). When DISPLAYING the owner, show whichever name appears on the source row — surface the cosmetic difference only if the user asks why.
 
-#### "Is X property listed?" — answering listing questions
-When the user asks whether a specific property is listed, listed for sale/rent, or asks about listing details:
+#### "Is X property listed?" — answering listing questions (CRITICAL — read carefully)
 
-1. **FIRST check the warehouse**: \`SELECT * FROM brite_homes_raw.listing_agent_inventory WHERE LOWER(site_address) LIKE LOWER(...)\` (or by job_id). If found, surface: sale_mls, lease_mls, current_price, dom (days on market), under_contract, listing_agent, signor_email, keybox_combo_code, sale_listed_date.
+The \`listing_agent_inventory\` table mixes SALE-side and LEASE-side state on one row. Several columns need careful parsing — the wrong reading will give the user a misleading answer (e.g. showing the SALE price as "current" when the sale listing was terminated and the home is already leased).
 
-2. **IF the warehouse does NOT have it** (no row in \`listing_agent_inventory\`), use the \`web_search\` tool to check public MLS aggregators. Sample query patterns that work well:
+**Column meanings (precise):**
+- \`sale_mls\` — FREE TEXT. May contain just the MLS number ("OM716771") OR the MLS number followed by a status suffix on a new line / appended ("OM716731\\nTerminated", "OM716858 LISTING FOR SALE CANCELLED ON 05/12/2025"). Parse the SUFFIX to derive sale-listing status.
+- \`lease_mls\` — FREE TEXT, same pattern. May include "Terminated" / "Cancelled" suffix or just the bare MLS number.
+- \`under_contract\` (BOOL) — sale-side: a buyer is under contract but hasn't closed yet.
+- \`sold\` (BOOL) — sale-side TERMINAL state: the home has been sold. \`sold_price\` + \`closing_sold_date\` populated.
+- \`listed_as_rental\` (BOOL) — operator marked the property as rental-track.
+- \`leased\` (BOOL) — lease-side TERMINAL state: a tenant is in the home. \`leased_date\` populated.
+- \`current_price\` (FLOAT64) — **SALE-side asking price ONLY**. Even when the sale listing is terminated, this column still holds the LAST asked sale price (now stale). **It is NOT the rent.**
+- \`starting_price\` / \`price_reduction\` / \`price_reduced_on_date\` — also sale-side only.
+- \`dom\` — days on market for the sale-side listing.
+
+**The warehouse does NOT store monthly rent.** There is no rent / lease_price / monthly_rent column anywhere in listing_agent_inventory or in any related table. If the user asks "how much for rent", say so explicitly AND offer to web_search the lease MLS (e.g. "OM718049") on Zillow/Realtor — the public listing carries the rent amount.
+
+**Derived listing status (use this CASE expression in your SQL when listing status matters):**
+\`\`\`sql
+CASE
+  WHEN sold = TRUE THEN 'sold'                                                  -- sold for cash (terminal)
+  WHEN leased = TRUE THEN 'leased'                                              -- rented out (terminal)
+  WHEN under_contract = TRUE THEN 'sale_under_contract'                         -- sale in progress
+  WHEN LOWER(sale_mls) LIKE '%terminated%' OR LOWER(sale_mls) LIKE '%cancel%' THEN
+       CASE WHEN lease_mls IS NOT NULL AND TRIM(lease_mls) != '' AND LOWER(lease_mls) NOT LIKE '%terminated%' AND LOWER(lease_mls) NOT LIKE '%cancel%' THEN 'sale_terminated_listed_for_rent'
+            ELSE 'sale_terminated' END
+  WHEN sale_mls IS NOT NULL AND TRIM(sale_mls) != '' AND lease_mls IS NOT NULL AND TRIM(lease_mls) != '' THEN 'dual_listed_sale_and_rent'
+  WHEN sale_mls IS NOT NULL AND TRIM(sale_mls) != '' THEN 'for_sale'
+  WHEN lease_mls IS NOT NULL AND TRIM(lease_mls) != '' THEN 'for_rent'
+  ELSE 'not_listed'
+END AS listing_status
+\`\`\`
+
+**Step-by-step answer procedure for "Is [address] listed?":**
+
+1. **Query the warehouse FIRST**:
+   \`\`\`sql
+   SELECT job_id, site_address, sale_mls, lease_mls, current_price, starting_price,
+          dom, under_contract, sold, sold_price, closing_sold_date,
+          listed_as_rental, leased, leased_date, listing_agent, signor, sale_listed_date,
+          /* derived listing_status as above */ ...
+   FROM brite_homes_raw.listing_agent_inventory
+   WHERE LOWER(site_address) LIKE LOWER('%<street part of address>%')
+   \`\`\`
+   Match on a substring of the address (zip codes vary across rows; street name + number is usually enough).
+
+2. **Interpret the row** by listing_status — pick the right narrative:
+   - \`sold\` → "This home was sold on \`closing_sold_date\` for \`sold_price\`. The sale closed."
+   - \`leased\` → "This home is **currently leased** (rented out) as of \`leased_date\`. Lease MLS: \`lease_mls\`. (Sale listing was terminated en route, if applicable — note it for context.)"
+   - \`sale_under_contract\` → "A buyer is under contract on the sale (MLS \`sale_mls\`). Closing date pending."
+   - \`sale_terminated_listed_for_rent\` → "The sale listing (\`sale_mls\`) was terminated. The home is now listed for rent under MLS \`lease_mls\`. Sale asking price was \`current_price\` before termination — note this is stale and does NOT represent the rent."
+   - \`sale_terminated\` (no lease) → "The sale listing (\`sale_mls\`) was terminated. Last asking price was \`current_price\` (stale). No rental listing currently."
+   - \`dual_listed_sale_and_rent\` → "Listed BOTH for sale (\`sale_mls\` at \`current_price\`) AND for rent (\`lease_mls\`)."
+   - \`for_sale\` → "Listed for sale at \`current_price\`. MLS \`sale_mls\`. \`dom\` days on market."
+   - \`for_rent\` → "Listed for rent only (MLS \`lease_mls\`). \`current_price\` is sale-side and NOT applicable here — we don't store the monthly rent."
+   - \`not_listed\` → "Not currently listed for sale or rent in our records."
+
+3. **Always include**:
+   - Listing agent (\`listing_agent\`) and signor (\`signor\`) — operator wants to know who's handling it.
+   - Owner (\`owner_of_record\` from this table — MLS-recorded name).
+   - Job number (\`job_id\`).
+
+4. **If the user asks for the RENT amount** and the status is \`leased\`, \`sale_terminated_listed_for_rent\`, \`dual_listed_sale_and_rent\`, or \`for_rent\`:
+   Say "We don't store the monthly rent in the warehouse — only the sale-side price. Let me look up MLS \`lease_mls\` publicly." THEN use \`web_search\` with a query like: \`"OM718049" rent Ocala FL\` or \`"242 Marion Oaks Golf Rd 34473" for rent zillow OR realtor\`. Report the rent if found.
+
+5. **If the warehouse does NOT have the property** (zero rows from step 1), use \`web_search\` to check public MLS aggregators:
    - "[full street address] [city] [state] for sale OR rent zillow OR realtor OR redfin"
    - "[street address] MLS listing"
-   Report: site name (Zillow/Realtor/etc.), listing status (active/pending/sold/off-market), price if visible, last-updated date. If multiple sources disagree, say so.
+   Report: site (Zillow/Realtor/etc.), listing status (active/pending/sold/off-market), price if visible, last-updated date.
 
-3. **Always surface BOTH sources** when both have info — note any disagreement (e.g. "Our listing-agent sheet shows under_contract=true, while Zillow still shows it active as of [date].").
-
-4. **Do NOT fabricate** listing data. If web_search returns nothing relevant, say "I couldn't find a public listing for this address" — don't guess.
+6. **Do NOT fabricate.** If web_search returns nothing relevant, say "I couldn't find a public listing for this address" — don't guess. If sources disagree (e.g. our warehouse says leased, Zillow still shows active), surface the disagreement.
 
 ### Milestone progress — USE \`furthest_milestone_completed\`, NOT \`current_stage\`
 For any progress / aging / stuck question, use the **last milestone actually completed**, NOT the current stage.
