@@ -79,10 +79,20 @@ For any progress / aging / stuck question, use the **last milestone actually com
     (2) \`net_profit_estimated_final\` / \`net_margin_estimated_final\` — "Estimated Final Net Profit". Formula: sale_price - construction_costs_summary_est - total_other_expenses_est. Matches the "Summary" tab's "Estimated, final accounting P&L". DEDUCTS additional post-close costs (property tax, COGS-closing, commissions, warranty).
         Operator-recorded Sales Price overrides are captured via \`sale_price_override\` (sourced from the "Sale Price Overrides" tab on Centralized Data 2.0). When the override exists, the mart's \`sale_price\` flows from the override and the estimated_final matches the operator's Summary-tab number exactly. Surface \`sale_price_override\` and \`sale_price_override_notes\` when an override applies.
 
-  Operator-final cost categories (in net_profit_estimated_final, NOT net_profit):
-  - property_taxes_on_hud_est ($1,000), cogs_closing_costs_est ($1,500), warranty_coverage_est ($500), cogs_commission_internal_est (sale × 2%), cogs_commission_external_est (sale × 3%)
-  - total_other_expenses_est = sum of above + seller_credit + total_financing
+  Operator-final cost categories (in net_profit_estimated_final, NOT net_profit). When asked about a job's "estimated final" or "post-close" costs, ALWAYS itemize ALL of these — not just construction costs:
+  - property_taxes_on_hud_est ($1,000 flat policy constant)
+  - **seller_credit** (per-job, from audit_pl_summary — typically $10,000 but varies; ALWAYS list this when itemizing post-close costs)
+  - cogs_closing_costs_est ($1,500 flat policy constant)
+  - cogs_commission_internal_est (sale_price × 2%)
+  - cogs_commission_external_est (sale_price × 3%)
+  - warranty_coverage_est ($500 flat policy constant — 2-10 home warranty)
+  - total_financing (per-job, from audit_pl_summary)
+  - total_other_expenses_est = sum of ALL of the above
   - construction_costs_summary_est = lot_land + permitting_total + cost_site_work + total_vertical + cost_options + builder_fee + insurance + closing_cost
+
+  Break-even sale price interpretation:
+  - Audit basis: break-even = total_cost (simple — sale - cost = 0 → sale = cost)
+  - Estimated Final basis: break-even is NOT just construction_costs_summary_est + total_other_expenses_est at current sale, because the COGS commissions are 5% of sale_price (they scale). Exact break-even = (fixed_costs) / (1 - 0.05) = (construction_costs_summary_est + property_taxes_on_hud_est + seller_credit + cogs_closing_costs_est + warranty_coverage_est + total_financing) / 0.95. Approximate answer (total cost at current sale price) is acceptable when stated as such; do not present it as exact break-even.
 
   Other columns:
   - Revenue: sale_price, net_revenue, seller_credit, proceeds, cost_to_sale
