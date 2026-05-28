@@ -1,6 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+const markdownComponents = {
+  table: (props) => (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ borderCollapse: "collapse", fontSize: 13, margin: "8px 0", width: "100%" }} {...props} />
+    </div>
+  ),
+  th: (props) => <th style={{ border: "1px solid #e2e2e2", padding: "6px 10px", textAlign: "left", background: "#f6f7f9", fontWeight: 600 }} {...props} />,
+  td: (props) => <td style={{ border: "1px solid #eee", padding: "6px 10px", verticalAlign: "top" }} {...props} />,
+  h1: (props) => <h1 style={{ fontSize: 20, margin: "12px 0 6px" }} {...props} />,
+  h2: (props) => <h2 style={{ fontSize: 17, margin: "12px 0 6px" }} {...props} />,
+  h3: (props) => <h3 style={{ fontSize: 15, margin: "10px 0 4px" }} {...props} />,
+  p: (props) => <p style={{ margin: "6px 0", lineHeight: 1.5 }} {...props} />,
+  ul: (props) => <ul style={{ margin: "6px 0", paddingLeft: 20 }} {...props} />,
+  ol: (props) => <ol style={{ margin: "6px 0", paddingLeft: 20 }} {...props} />,
+  li: (props) => <li style={{ margin: "2px 0", lineHeight: 1.5 }} {...props} />,
+  pre: (props) => <pre style={{ background: "#0d1117", color: "#e6edf3", padding: 12, borderRadius: 8, overflowX: "auto", fontSize: 12.5, margin: "8px 0" }} {...props} />,
+  a: (props) => <a style={{ color: "#1a56db" }} {...props} />,
+};
 
 const SUGGESTIONS = [
   "Which jobs have been in their current stage the longest?",
@@ -129,7 +150,11 @@ export default function AskConsole() {
                 ))}
               </details>
             )}
-            <div style={{ whiteSpace: "pre-wrap" }}>{m.content || (m.role === "assistant" && busy ? status || "…" : "")}</div>
+            {m.content ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{m.content}</ReactMarkdown>
+            ) : (
+              <div style={{ color: "#888", whiteSpace: "pre-wrap" }}>{m.role === "assistant" && busy ? status || "…" : ""}</div>
+            )}
           </article>
         ))}
       </div>
