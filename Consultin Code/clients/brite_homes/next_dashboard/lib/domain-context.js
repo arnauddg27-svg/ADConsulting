@@ -53,7 +53,9 @@ For any progress / aging / stuck question, use the **last milestone actually com
 ═══════════════════════════════════════════════════════════════════════════════
 
 ### Construction / lifecycle
-- **brite_homes_staging.stg_centralized_data_enriched** (158 cols) — PRIMARY per-job enriched view. Has \`furthest_milestone_completed\`, \`days_since_last_milestone\`, completion %, WIP, superintendent, loan exposure, etc.
+- **brite_homes_staging.stg_centralized_data_lifecycle_v2** — PRIMARY per-job view. Final stage of the ETL ladder (clean → current → enriched → lifecycle_v2). Has \`furthest_milestone_completed\`, \`days_since_last_milestone\`, completion %, WIP, superintendent, loan exposure, derived_lifecycle_status (incl. lot fallback). All downstream conformed/dim views build off this.
+- brite_homes_staging.stg_centralized_data_enriched — penultimate stage; same data minus the lot-lifecycle fallback.
+- brite_homes_staging.stg_centralized_data_current / _clean — intermediate ETL stages (dedup, trim). Avoid querying directly.
 - **brite_homes_marts.dim_job_conformed** (31 cols) — conformed dim version. Stable schema across queries.
 - **brite_homes_marts.mart_daily_summary** (16 cols, 1 row) — portfolio-wide KPI snapshot (total WIP, total budget/actual, total loan exposure, etc.).
 - **brite_homes_marts.mart_filter_quality** — filter options + data quality coverage stats.
@@ -137,7 +139,8 @@ For any progress / aging / stuck question, use the **last milestone actually com
 - These mirror columns already on construction_milestones; only use the lookups if you need the operator's exact published number.
 
 ### Exceptions / Data quality
-- **brite_homes_marts.unified_exception_center_v2** — PRIMARY consolidated exception view.
+- **brite_homes_marts.unified_exception_center_v2** (774 rows) — PRIMARY consolidated exception view. Sources: legacy_audit (608, via v1 → mart_exception_center), property_management (21), property_management_reconciliation (90), construction (55, via lifecycle_v2).
+- brite_homes_marts.unified_exception_center (v1, 1007 rows) — older view; v2 depends on it for the legacy_audit branch. Don't query directly — query v2.
 - brite_homes_marts.actionable_exception_queue_snapshot — actionable queue (snapshot).
 - brite_homes_marts.actionable_exception_summary_snapshot — summary.
 - brite_homes_marts.fact_exception_conformed_snapshot — fact table.
@@ -154,7 +157,7 @@ For any progress / aging / stuck question, use the **last milestone actually com
 ## Deprecated / legacy — DO NOT query for new questions
 ═══════════════════════════════════════════════════════════════════════════════
 - **brite_homes_raw.xlsx_sales_full** — 3/18 stale XLSX snapshot. Use \`sales_master\` (live, same row count) or stg_sales_full_compat.
-- **brite_homes_raw.audit_costs / audit_dirt / audit_dumpsters / audit_env / audit_utilities / audit_total_ap / audit_bbg_ap / audit_vertical_sitework_actual** — 3/17 manual snapshot. Used internally as fallback by mart_audit_pl for jobs not in audit_pl_summary; do NOT query directly. mart_audit_pl.pl_source='computed' flags those rows.
+- **brite_homes_raw.audit_costs / audit_dirt / audit_dumpsters / audit_env / audit_utilities / audit_total_ap / audit_bbg_ap / audit_vertical_sitework_actual** — 3/17 manual snapshot. Used internally as fallback by mart_audit_pl for jobs not in audit_pl_summary (323/483 rows, mostly land/lot entries). DO NOT query directly. mart_audit_pl.pl_source='computed' flags those rows. The granular cost line items in these tables (Lot/Land, Vertical, Site Work, Options, Dirt, Dumpsters, Env, Utilities, AP, Builder Fee) have NO equivalent on Centralized Data 2.0 — to refresh them, an operator would need to add a consolidated "Costs" tab to Centralized Data 2.0 similar to "Construction audits".
 - **brite_homes_raw.audits_snapshot** (206 rows) — older snapshot of an Audits view. Don't confuse with audit_pl_summary (the live source). Only useful for historical comparison.
 - **brite_homes_raw.land_acquisition_active / _cancelled / _closed**, brite_homes_raw.subdivision_pipeline — separate land-acquisition data domain (legacy 3/18).
 - **brite_homes_marts.mart_exception_center** — empty 3/17 legacy table, only referenced by unified_exception_center (v1). Use unified_exception_center_v2.
