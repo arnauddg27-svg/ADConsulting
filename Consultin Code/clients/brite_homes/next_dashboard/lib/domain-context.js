@@ -69,7 +69,7 @@ For any progress / aging / stuck question, use the **last milestone actually com
 - **brite_homes_staging.stg_sales_master** (23 cols, 1084 rows) — typed slim view of sales_master (key fields with parsed dates).
 - brite_homes_raw.sales_master (130 cols, 1084 rows, all STRING) — master sales table with EVERYTHING (sales agent, realtor, mortgage, title, contingency, etc.). Use stg_sales_master for typed access; query raw only for columns not exposed in stg.
 - brite_homes_staging.stg_sales_full_compat — drop-in compat view that mirrors xlsx_sales_full's lowercase column naming (sourced from sales_master).
-- brite_homes_raw.listing_agent_inventory — MLS listing data. See "Marketing/listing status" section above.
+- brite_homes_raw.listing_agent_inventory — MLS listing data + per-job listing operations metadata. See "Marketing/listing status" section above. Columns include: job_id, site_address, owner_of_record, sale_mls, sale_listed_date, dom (days on market), current_price, starting_price, price_reduction, price_reduced_on_date, under_contract, effective_date, sold, closing_sold_date, sold_price, listed_as_rental, lease_mls, leased, leased_date, notes, tax_id, prop_description, model_number, signor, **signor_email**, **keybox_combo_code**, **listing_agent**. Use \`listing_agent\` to answer "who's the listing agent for X" / "how many properties is agent Y listing".
 
 ### P&L / Audit
 - **brite_homes_marts.mart_audit_pl** (88 cols, 483 rows) — PRIMARY P&L. SELECT P&L columns DIRECTLY, do not reconstruct.
