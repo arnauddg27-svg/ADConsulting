@@ -1,28 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const markdownComponents = {
-  table: (props) => (
-    <div style={{ overflowX: "auto" }}>
-      <table style={{ borderCollapse: "collapse", fontSize: 13, margin: "8px 0", width: "100%" }} {...props} />
-    </div>
-  ),
-  th: (props) => <th style={{ border: "1px solid #e2e2e2", padding: "6px 10px", textAlign: "left", background: "#f6f7f9", fontWeight: 600 }} {...props} />,
-  td: (props) => <td style={{ border: "1px solid #eee", padding: "6px 10px", verticalAlign: "top" }} {...props} />,
-  h1: (props) => <h1 style={{ fontSize: 20, margin: "12px 0 6px" }} {...props} />,
-  h2: (props) => <h2 style={{ fontSize: 17, margin: "12px 0 6px" }} {...props} />,
-  h3: (props) => <h3 style={{ fontSize: 15, margin: "10px 0 4px" }} {...props} />,
-  p: (props) => <p style={{ margin: "6px 0", lineHeight: 1.5 }} {...props} />,
-  ul: (props) => <ul style={{ margin: "6px 0", paddingLeft: 20 }} {...props} />,
-  ol: (props) => <ol style={{ margin: "6px 0", paddingLeft: 20 }} {...props} />,
-  li: (props) => <li style={{ margin: "2px 0", lineHeight: 1.5 }} {...props} />,
-  pre: (props) => <pre style={{ background: "#0d1117", color: "#e6edf3", padding: 12, borderRadius: 8, overflowX: "auto", fontSize: 12.5, margin: "8px 0" }} {...props} />,
-  a: (props) => <a style={{ color: "#1a56db" }} {...props} />,
-};
-
+// ── Constants ────────────────────────────────────────────────────────────────
+const THEME_KEY = "adh-theme";
 const SUGGESTIONS = [
   "Which jobs have been in their current stage the longest?",
   "What's our total WIP and loan exposure right now?",
@@ -30,184 +13,618 @@ const SUGGESTIONS = [
   "Average net margin by community for closed jobs.",
 ];
 
-function updateLastAssistant(list, fn) {
-  const out = [...list];
-  for (let i = out.length - 1; i >= 0; i--) {
-    if (out[i].role === "assistant") {
-      out[i] = fn(out[i]);
-      break;
-    }
-  }
-  return out;
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+// ── Stream-state reducer ─────────────────────────────────────────────────────
+// Messages have stable ids; the active assistant turn is tracked by id (no
+// "find the last assistant message" scans). Query results match to their tool_use
+// by the id forwarded by the server (no positional matching).
+const initialState = { messages: [], activeId: null, busy: false, status: "", error: "" };
+
+function updateActive(state, fn) {
+  return { ...state, messages: state.messages.map((m) => (m.id === state.activeId ? fn(m) : m)) };
 }
 
-export default function AskConsole() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [status, setStatus] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+function reducer(state, action) {
+  switch (action.type) {
+    case "ASK": {
+      const user = { id: uid(), role: "user", content: action.question };
+      const assistant = { id: uid(), role: "assistant", content: "", queries: [], meta: null };
+      return {
+        ...state,
+        messages: [...state.messages, user, assistant],
+        activeId: assistant.id,
+        busy: true,
+        status: "thinking",
+        error: "",
+      };
+    }
+    case "TEXT":
+      return updateActive(state, (m) => ({ ...m, content: m.content + action.text }));
+    case "TOOL_USE":
+      return updateActive(state, (m) => ({
+        ...m,
+        queries: [...m.queries, { id: action.id, sql: action.sql, purpose: action.purpose, result: null }],
+      }));
+    case "TOOL_RESULT":
+      return updateActive(state, (m) => ({
+        ...m,
+        queries: m.queries.map((q) => (q.id === action.id ? { ...q, result: action.result } : q)),
+      }));
+    case "STATUS":
+      return { ...state, status: action.text };
+    case "DONE": {
+      const meta = action.meta;
+      return {
+        ...state,
+        busy: false,
+        status: "",
+        activeId: null,
+        messages: meta
+          ? state.messages.map((m) => (m.id === state.activeId ? { ...m, meta } : m))
+          : state.messages,
+      };
+    }
+    case "ERROR":
+      return { ...state, error: action.message, busy: false, status: "" };
+    case "ABORTED":
+      return updateActive(state, (m) => ({
+        ...m,
+        content: m.content + (m.content ? "\n\n_(Stopped.)_" : "_(Stopped.)_"),
+      }));
+    case "RESET_ERROR":
+      return { ...state, error: "" };
+    default:
+      return state;
+  }
+}
 
-  function applyEvent(ev) {
-    if (ev.type === "status") setStatus(ev.text);
-    else if (ev.type === "text") setMessages((cur) => updateLastAssistant(cur, (a) => ({ ...a, content: a.content + ev.text })));
-    else if (ev.type === "tool_use") setMessages((cur) => updateLastAssistant(cur, (a) => ({ ...a, queries: [...a.queries, { sql: ev.sql, purpose: ev.purpose, result: null }] })));
-    else if (ev.type === "tool_result")
-      setMessages((cur) =>
-        updateLastAssistant(cur, (a) => {
-          const queries = [...a.queries];
-          for (let i = queries.length - 1; i >= 0; i--) {
-            if (!queries[i].result) {
-              queries[i] = { ...queries[i], result: ev };
-              break;
+// ── Hook: useAskStream ───────────────────────────────────────────────────────
+function useAskStream() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const abortRef = useRef(null);
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const applyEvent = useCallback((ev) => {
+    switch (ev.type) {
+      case "status":
+        dispatch({ type: "STATUS", text: ev.text || "" });
+        break;
+      case "text":
+        if (ev.text) dispatch({ type: "TEXT", text: ev.text });
+        break;
+      case "tool_use":
+        dispatch({ type: "TOOL_USE", id: ev.id || `q-${Math.random().toString(36).slice(2, 7)}`, sql: ev.sql || "", purpose: ev.purpose || "" });
+        break;
+      case "tool_result": {
+        const id = ev.id;
+        const result = ev.error
+          ? { error: ev.error }
+          : { columns: ev.columns || [], rows: ev.rows || [], rowCount: ev.rowCount ?? null, bytesProcessed: ev.bytesProcessed || 0, truncated: !!ev.truncated };
+        if (id) dispatch({ type: "TOOL_RESULT", id, result });
+        break;
+      }
+      case "done":
+        dispatch({
+          type: "DONE",
+          meta: { model: ev.model, queriesRun: ev.queriesRun, totalBytesProcessed: ev.totalBytesProcessed, aborted: ev.aborted, completedAt: Date.now() },
+        });
+        break;
+      case "error":
+        dispatch({ type: "ERROR", message: ev.message || "The assistant failed." });
+        break;
+      default:
+        break;
+    }
+  }, []);
+
+  const ask = useCallback(
+    async (question) => {
+      const trimmed = String(question || "").trim();
+      if (!trimmed || stateRef.current.busy) return;
+
+      // Capture history BEFORE dispatching ASK (so the new placeholder isn't included).
+      const history = [
+        ...stateRef.current.messages
+          .filter((m) => (m.content || "").trim())
+          .map((m) => ({ role: m.role, content: m.content })),
+        { role: "user", content: trimmed },
+      ];
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+      dispatch({ type: "ASK", question: trimmed });
+
+      let reader = null;
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history }),
+          signal: controller.signal,
+        });
+        if (!res.ok || !res.body) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || `Request failed (${res.status}).`);
+        }
+        reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              applyEvent(JSON.parse(line));
+            } catch {
+              /* ignore malformed line — keep streaming */
             }
           }
-          return { ...a, queries };
-        }),
-      );
-    else if (ev.type === "error") setError(ev.message);
-    else if (ev.type === "done") setStatus("");
-  }
-
-  async function ask(q) {
-    const question = String(q ?? input).trim();
-    if (!question || busy) return;
-    setError("");
-    setInput("");
-    setBusy(true);
-    setStatus("thinking");
-    const history = [...messages.filter((m) => m.content.trim()).map((m) => ({ role: m.role, content: m.content })), { role: "user", content: question }];
-    setMessages((cur) => [...cur, { role: "user", content: question, queries: [] }, { role: "assistant", content: "", queries: [] }]);
-
-    let reader;
-    try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history }),
-      });
-      if (!res.ok || !res.body) {
-        const payload = await res.json().catch(() => ({}));
-        throw new Error(payload.error || "The assistant could not answer.");
-      }
-      reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
-        for (const line of lines) {
-          if (line.trim()) applyEvent(JSON.parse(line));
         }
+      } catch (e) {
+        if (e.name === "AbortError" || controller.signal.aborted) {
+          dispatch({ type: "ABORTED" });
+          dispatch({ type: "DONE", meta: null });
+        } else {
+          dispatch({ type: "ERROR", message: e.message || "Something went wrong." });
+        }
+      } finally {
+        if (reader) {
+          try { await reader.cancel(); } catch { /* already closed */ }
+        }
+        if (abortRef.current === controller) abortRef.current = null;
       }
-    } catch (e) {
-      if (reader) {
-        try { await reader.cancel(); } catch {}
-      }
-      setError(e.message || "Something went wrong.");
-    } finally {
-      setBusy(false);
-      setStatus("");
+    },
+    [applyEvent],
+  );
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
+
+  const retryLast = useCallback(() => {
+    const msgs = stateRef.current.messages;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === "user") return ask(msgs[i].content);
     }
-  }
+  }, [ask]);
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <header>
-        <h1 style={{ margin: 0, fontSize: 24 }}>Ask the Brite Homes Data</h1>
-        <p style={{ color: "#666", marginTop: 4 }}>
-          Natural-language answers from the live, read-only BigQuery warehouse. Claude writes and runs its own SQL (capped and validated) and shows its work.
-        </p>
-      </header>
+  const dismissError = useCallback(() => dispatch({ type: "RESET_ERROR" }), []);
 
-      {messages.length === 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {SUGGESTIONS.map((s) => (
-            <button key={s} type="button" onClick={() => ask(s)} disabled={busy} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #ddd", background: "#fafafa", cursor: "pointer" }}>
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+  return { ...state, ask, stop, retryLast, dismissError };
+}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {messages.map((m, i) => (
-          <article key={`${m.role}-${i}`} style={{ border: "1px solid #eee", borderRadius: 10, padding: 12, background: m.role === "user" ? "#f5f8ff" : "#fff", color: "#1f2430" }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#888", marginBottom: 6 }}>{m.role === "user" ? "You" : "Warehouse Analyst"}</div>
-            {m.queries?.length > 0 && (
-              <details style={{ marginBottom: 8 }}>
-                <summary style={{ cursor: "pointer", color: "#555" }}>Ran {m.queries.length} quer{m.queries.length === 1 ? "y" : "ies"}</summary>
-                {m.queries.map((query, qi) => (
-                  <div key={qi} style={{ marginTop: 8 }}>
-                    {query.purpose && <div style={{ fontSize: 12, color: "#777" }}>{query.purpose}</div>}
-                    <pre style={{ background: "#0d1117", color: "#e6edf3", padding: 10, borderRadius: 6, overflowX: "auto", fontSize: 12 }}>{query.sql}</pre>
-                    {query.result?.error && <div style={{ color: "#b00", fontSize: 13 }}>Error: {query.result.error}</div>}
-                    {query.result?.rows && <ResultTable result={query.result} />}
-                  </div>
-                ))}
-              </details>
-            )}
-            {m.content ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{m.content}</ReactMarkdown>
-            ) : (
-              <div style={{ color: "#888", whiteSpace: "pre-wrap" }}>{m.role === "assistant" && busy ? status || "…" : ""}</div>
-            )}
-          </article>
-        ))}
+// ── Theme handling ───────────────────────────────────────────────────────────
+function useTheme() {
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const stored = (typeof localStorage !== "undefined" && localStorage.getItem(THEME_KEY)) || null;
+    const initial = stored === "light" || stored === "dark" ? stored : document.documentElement.getAttribute("data-theme") || "dark";
+    document.documentElement.setAttribute("data-theme", initial);
+    setTheme(initial);
+  }, []);
+
+  const toggle = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem(THEME_KEY, next); } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
+  return [theme, toggle];
+}
+
+// ── Markdown renderer with token-aware classes ──────────────────────────────
+const markdownComponents = {
+  // Defer to the .ask-md CSS for styling; this just inserts the elements.
+  table: (props) => (
+    <div className="ask-result-wrap">
+      <div className="ask-result-scroll">
+        <table {...props} />
       </div>
+    </div>
+  ),
+  th: (props) => <th scope="col" {...props} />,
+};
 
-      {error && <div style={{ color: "#b00" }}>{error}</div>}
+const Markdown = ({ children }) => (
+  <div className="ask-md">
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+      {children}
+    </ReactMarkdown>
+  </div>
+);
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          ask(input);
-        }}
-        style={{ display: "flex", gap: 8 }}
-      >
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about jobs, delays, sales, PM, loans, margins, exceptions…"
-          rows={2}
-          style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ddd", resize: "vertical" }}
-        />
-        <button type="submit" disabled={busy || !input.trim()} style={{ padding: "0 20px", borderRadius: 8, border: "none", background: busy ? "#999" : "#1a56db", color: "#fff", cursor: busy ? "default" : "pointer" }}>
-          {busy ? "Asking…" : "Ask"}
-        </button>
-      </form>
+// ── Sub-components ───────────────────────────────────────────────────────────
+function Skeleton() {
+  return (
+    <div className="ask-skeleton" aria-hidden="true">
+      <div className="ask-skeleton-line" />
+      <div className="ask-skeleton-line" />
+      <div className="ask-skeleton-line" />
     </div>
   );
 }
 
-function ResultTable({ result }) {
-  const { columns = [], rows = [], truncated, rowCount } = result;
-  if (!rows.length) return <div style={{ fontSize: 13, color: "#777" }}>No rows.</div>;
+function StatusPill({ text }) {
+  if (!text) return null;
+  const labels = { thinking: "Thinking", "writing answer": "Writing answer" };
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table style={{ borderCollapse: "collapse", fontSize: 12, marginTop: 6 }}>
-        <thead>
-          <tr>
-            {columns.map((c) => (
-              <th key={c} style={{ border: "1px solid #eee", padding: "4px 8px", textAlign: "left", background: "#fafafa" }}>{c}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, ri) => (
-            <tr key={ri}>
+    <span className="ask-status" role="status">
+      <span className="ask-dot" />
+      {labels[text] || text}
+    </span>
+  );
+}
+
+function ResultTable({ result }) {
+  const { columns = [], rows = [], rowCount, truncated, bytesProcessed } = result || {};
+  const copyTsv = useCallback(() => {
+    const header = columns.join("\t");
+    const lines = rows.map((r) => columns.map((c) => formatCell(r[c])).join("\t"));
+    try { navigator.clipboard?.writeText([header, ...lines].join("\n")); } catch { /* ignore */ }
+  }, [columns, rows]);
+
+  if (!rows.length) {
+    return <div className="ask-result-foot">No rows returned.</div>;
+  }
+  return (
+    <div className="ask-result-wrap">
+      <div className="ask-result-scroll" role="region" aria-label="Query result rows" tabIndex={0}>
+        <table className="ask-result-table">
+          <caption className="sr-only">{`${rowCount ?? rows.length} row${rows.length === 1 ? "" : "s"}${truncated ? " (truncated)" : ""}`}</caption>
+          <thead>
+            <tr>
               {columns.map((c) => (
-                <td key={c} style={{ border: "1px solid #eee", padding: "4px 8px" }}>{String(r[c] ?? "")}</td>
+                <th key={c} scope="col">{c}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <div style={{ fontSize: 11, color: "#999", marginTop: 4 }}>
-        {rowCount} row{rowCount === 1 ? "" : "s"} shown{truncated ? " (truncated)" : ""}.
+          </thead>
+          <tbody>
+            {rows.map((row, ri) => (
+              <tr key={ri}>
+                {columns.map((c) => (
+                  <td key={c}>{formatCell(row[c])}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="ask-result-foot">
+        <span>
+          {rows.length} row{rows.length === 1 ? "" : "s"}
+          {truncated ? " (truncated)" : ""}
+          {Number(bytesProcessed) > 0 ? ` · ${formatBytes(bytesProcessed)} scanned` : ""}
+        </span>
+        <button type="button" className="ask-result-copy" onClick={copyTsv} aria-label="Copy rows as TSV">
+          Copy
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function QueryDisclosure({ queries }) {
+  if (!queries?.length) return null;
+  return (
+    <details className="ask-queries">
+      <summary>Ran {queries.length} quer{queries.length === 1 ? "y" : "ies"} — view SQL</summary>
+      {queries.map((q, i) => (
+        <div className="ask-query" key={q.id || i}>
+          {q.purpose ? <div className="ask-query-purpose">{q.purpose}</div> : null}
+          <pre className="ask-sql">{q.sql}</pre>
+          {q.result?.error ? (
+            <div className="ask-query-error">Error: {q.result.error}</div>
+          ) : q.result ? (
+            <ResultTable result={q.result} />
+          ) : null}
+        </div>
+      ))}
+    </details>
+  );
+}
+
+function MetaLine({ meta }) {
+  if (!meta) return null;
+  const time = meta.completedAt ? new Date(meta.completedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : null;
+  return (
+    <div className="ask-meta">
+      {time ? <span>Answered {time}</span> : null}
+      {time && meta.queriesRun != null ? <span className="ask-meta-dot">·</span> : null}
+      {meta.queriesRun != null ? <span>{meta.queriesRun} quer{meta.queriesRun === 1 ? "y" : "ies"}</span> : null}
+      {meta.queriesRun != null && meta.totalBytesProcessed > 0 ? <span className="ask-meta-dot">·</span> : null}
+      {meta.totalBytesProcessed > 0 ? <span>{formatBytes(meta.totalBytesProcessed)} scanned</span> : null}
+      {meta.model ? <span className="ask-meta-dot">·</span> : null}
+      {meta.model ? <span>{meta.model}</span> : null}
+      {meta.aborted ? <span className="ask-meta-dot">·</span> : null}
+      {meta.aborted ? <span>stopped</span> : null}
+    </div>
+  );
+}
+
+function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
+  const showSkeleton = isActive && !msg.content && !msg.queries.length;
+  return (
+    <article className="ask-turn ask-turn--assistant" aria-busy={isActive ? "true" : undefined}>
+      <div className="ask-turn-head">
+        <span className="ask-turn-label">Warehouse Analyst</span>
+        {isActive && status ? <StatusPill text={status} /> : null}
+      </div>
+      <div className="ask-turn-content">
+        {showSkeleton ? (
+          <Skeleton />
+        ) : msg.content ? (
+          <Markdown>{msg.content}</Markdown>
+        ) : isActive ? (
+          <Skeleton />
+        ) : (
+          <span style={{ color: "var(--text-muted)" }}>(no answer)</span>
+        )}
+        <QueryDisclosure queries={msg.queries} />
+        <MetaLine meta={msg.meta} />
+        {!isActive && msg.content ? (
+          <div className="ask-toolbar">
+            <button type="button" className="ask-tool-btn" onClick={() => onCopy(msg.content)} aria-label="Copy answer">
+              Copy answer
+            </button>
+            <button type="button" className="ask-tool-btn" onClick={onRegenerate} aria-label="Regenerate the answer">
+              Regenerate
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function UserTurn({ msg, onEdit }) {
+  return (
+    <article className="ask-turn ask-turn--user">
+      <div className="ask-turn-head">
+        <span className="ask-turn-label">You</span>
+      </div>
+      <div className="ask-turn-content">{msg.content}</div>
+      <div className="ask-toolbar">
+        <button type="button" className="ask-tool-btn" onClick={() => onEdit(msg.content)} aria-label="Edit this question">
+          Edit
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function EmptyState({ onPick, disabled }) {
+  return (
+    <div className="ask-empty">
+      <h2>Ask anything about your live warehouse</h2>
+      <p>Claude writes and runs its own read-only SQL on the BigQuery marts and shows its work. Numbers come from the same data the dashboard uses.</p>
+      <span className="ask-empty-label">Try one of these</span>
+      <div className="ask-suggestions">
+        {SUGGESTIONS.map((s) => (
+          <button key={s} type="button" className="ask-chip" onClick={() => onPick(s)} disabled={disabled}>
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ErrorPanel({ message, onRetry, onDismiss }) {
+  if (!message) return null;
+  return (
+    <div className="ask-error" role="alert">
+      <span>{message}</span>
+      <div className="ask-error-actions">
+        <button type="button" onClick={onRetry}>Retry</button>
+        <button type="button" onClick={onDismiss}>Dismiss</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Autoscroll hook ──────────────────────────────────────────────────────────
+function useAutoscroll(scrollRef, dep) {
+  const [pinnedUp, setPinnedUp] = useState(false);
+  const pinnedRef = useRef(pinnedUp);
+  pinnedRef.current = pinnedUp;
+
+  // Detect manual scroll-up to suspend autoscroll.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return undefined;
+    const onScroll = () => {
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setPinnedUp(distance > 120);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [scrollRef]);
+
+  // Scroll to bottom when content grows, unless the user pinned up.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el || pinnedRef.current) return;
+    el.scrollTop = el.scrollHeight;
+  }, [dep, scrollRef]);
+
+  const jumpToLatest = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    setPinnedUp(false);
+  }, [scrollRef]);
+
+  return { pinnedUp, jumpToLatest };
+}
+
+// ── Composer ─────────────────────────────────────────────────────────────────
+function Composer({ busy, status, onAsk, onStop, draft, setDraft }) {
+  const textRef = useRef(null);
+
+  // Auto-grow the textarea up to its max-height.
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [draft]);
+
+  const submit = useCallback(
+    (e) => {
+      e?.preventDefault();
+      if (busy || !draft.trim()) return;
+      onAsk(draft.trim());
+      setDraft("");
+    },
+    [busy, draft, onAsk, setDraft],
+  );
+
+  const onKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        submit();
+      } else if (e.key === "Escape" && busy) {
+        e.preventDefault();
+        onStop();
+      }
+    },
+    [busy, submit, onStop],
+  );
+
+  return (
+    <form className="ask-composer" onSubmit={submit}>
+      <div className="ask-textarea-wrap">
+        <label htmlFor="ask-input" className="sr-only">Ask a question about the warehouse</label>
+        <textarea
+          id="ask-input"
+          ref={textRef}
+          className="ask-textarea"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder="Ask about jobs, delays, sales, PM, loans, margins, exceptions…  (Enter to send, Shift+Enter for newline)"
+          rows={1}
+        />
+      </div>
+      {busy ? (
+        <button type="button" className="ask-btn ask-btn--stop" onClick={onStop} aria-label="Stop the answer">
+          Stop
+        </button>
+      ) : (
+        <button type="submit" className="ask-btn" disabled={!draft.trim()} aria-label="Send question">
+          Ask
+        </button>
+      )}
+    </form>
+  );
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function formatCell(v) {
+  if (v === null || v === undefined) return "—";
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+function formatBytes(n) {
+  const num = Number(n) || 0;
+  if (num >= 1e9) return `${(num / 1e9).toFixed(2)} GB`;
+  if (num >= 1e6) return `${(num / 1e6).toFixed(1)} MB`;
+  if (num >= 1e3) return `${(num / 1e3).toFixed(1)} KB`;
+  return `${num} B`;
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+export default function AskConsole() {
+  const stream = useAskStream();
+  const { messages, activeId, busy, status, error, ask, stop, retryLast, dismissError } = stream;
+  const [draft, setDraft] = useState("");
+  const [theme, toggleTheme] = useTheme();
+
+  const scrollRef = useRef(null);
+  // Drive autoscroll on every message/content/query change.
+  const scrollKey = useMemo(
+    () => messages.reduce((k, m) => `${k}|${m.id}:${(m.content || "").length}:${m.queries.length}:${m.queries.map((q) => (q.result ? 1 : 0)).join("")}`, ""),
+    [messages],
+  );
+  const { pinnedUp, jumpToLatest } = useAutoscroll(scrollRef, scrollKey + status + (busy ? "1" : "0"));
+
+  const copy = useCallback((text) => {
+    try { navigator.clipboard?.writeText(text); } catch { /* ignore */ }
+  }, []);
+
+  const editPrior = useCallback((content) => {
+    setDraft(content);
+  }, []);
+
+  return (
+    <div className="ask-shell">
+      <header className="ask-header">
+        <div>
+          <h1>Ask the Brite Homes Data</h1>
+          <div className="ask-subtitle">Natural-language answers from the live, read-only BigQuery warehouse.</div>
+        </div>
+        <div className="ask-header-spacer" />
+        <span className="ask-chip-live" aria-label="Live data">Live</span>
+        <button
+          type="button"
+          className="ask-theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          title={`Theme: ${theme}`}
+        >
+          {theme === "dark" ? "☀" : "☾"}
+        </button>
+      </header>
+
+      <div className="ask-scroll" ref={scrollRef}>
+        <div className="ask-thread" role="log" aria-live="polite" aria-relevant="additions text" aria-atomic="false">
+          {messages.length === 0 ? (
+            <EmptyState onPick={ask} disabled={busy} />
+          ) : (
+            messages.map((m) =>
+              m.role === "user" ? (
+                <UserTurn key={m.id} msg={m} onEdit={editPrior} />
+              ) : (
+                <AssistantTurn
+                  key={m.id}
+                  msg={m}
+                  isActive={m.id === activeId}
+                  status={status}
+                  onCopy={copy}
+                  onRegenerate={retryLast}
+                />
+              ),
+            )
+          )}
+
+          {error ? <ErrorPanel message={error} onRetry={retryLast} onDismiss={dismissError} /> : null}
+        </div>
+      </div>
+
+      <div className="ask-composer-wrap">
+        {pinnedUp && messages.length > 0 ? (
+          <button type="button" className="ask-jump" onClick={jumpToLatest} aria-label="Jump to latest">
+            Jump to latest ↓
+          </button>
+        ) : null}
+        <Composer busy={busy} status={status} onAsk={ask} onStop={stop} draft={draft} setDraft={setDraft} />
+        <div className="ask-hint" aria-hidden="true">
+          {busy ? "Stop with Esc · " : ""}Read-only · capped at 8 queries / 6 GB per question
+        </div>
       </div>
     </div>
   );

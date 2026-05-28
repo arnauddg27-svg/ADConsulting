@@ -2429,6 +2429,7 @@ function DashboardShell({ dashboard }) {
         <div className="config-chips">
           <span className="chip">{sourceLabel}</span>
           <span className="chip">Project {dashboard.config?.projectId || "not set"}</span>
+          <a href="/ask" className="theme-toggle" style={{ textDecoration: "none" }}>Ask the Data</a>
           <button type="button" className="theme-toggle" onClick={() => setIsFullPage((current) => !current)}>{isFullPage ? "Exit Full Page" : "Full Page"}</button>
           <button type="button" className="theme-toggle" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}>{theme === "dark" ? "Light" : "Dark"}</button>
         </div>
