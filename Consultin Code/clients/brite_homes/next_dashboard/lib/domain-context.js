@@ -77,7 +77,7 @@ For any progress / aging / stuck question, use the **last milestone actually com
   **TWO Net Profit definitions exist** — surface both when answering "what's the P&L for X":
     (1) \`net_profit\` / \`net_margin\` — "Audit Net Profit". Formula: sale_price - total_cost. Contract-side view. Matches the "Audits" tab.
     (2) \`net_profit_estimated_final\` / \`net_margin_estimated_final\` — "Estimated Final Net Profit". Formula: sale_price - construction_costs_summary_est - total_other_expenses_est. Matches the "Summary" tab's "Estimated, final accounting P&L". DEDUCTS additional post-close costs (property tax, COGS-closing, commissions, warranty).
-        Caveat: the Summary tab supports a manual sale_price override per job that the mart cannot capture. When operator's working number differs from contract, the estimate differs proportionally. State this if relevant.
+        Operator-recorded Sales Price overrides are captured via \`sale_price_override\` (sourced from the "Sale Price Overrides" tab on Centralized Data 2.0). When the override exists, the mart's \`sale_price\` flows from the override and the estimated_final matches the operator's Summary-tab number exactly. Surface \`sale_price_override\` and \`sale_price_override_notes\` when an override applies.
 
   Operator-final cost categories (in net_profit_estimated_final, NOT net_profit):
   - property_taxes_on_hud_est ($1,000), cogs_closing_costs_est ($1,500), warranty_coverage_est ($500), cogs_commission_internal_est (sale × 2%), cogs_commission_external_est (sale × 3%)

@@ -1991,3 +1991,24 @@ SELECT
   `Projected_Margin` AS projected_margin,
   `_extracted_at`
 FROM `atomic-venture-404412.brite_homes_raw.sales_master`;
+
+
+-- ============================================================================
+-- 7. sale_price_overrides — operator-curated per-job Sales Price overrides
+-- Source: Centralized.SalePriceOverrides (federated → "Sale Price Overrides" tab)
+-- The audit_pl_summary.sale_price comes from Audits!P (contract price). When
+-- the operator's final estimate differs (e.g. price reductions, concessions),
+-- they record the override here. mart_audit_pl COALESCEs override → audit price.
+-- ============================================================================
+CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.sale_price_overrides` AS
+SELECT
+  Job_No                                              AS job_id,
+  CAST(Override_Sale_Price AS FLOAT64)                AS override_sale_price,
+  Notes                                               AS notes,
+  Recorded_By                                         AS recorded_by,
+  Updated_At                                          AS updated_at,
+  CURRENT_TIMESTAMP()                                 AS _extracted_at
+FROM `atomic-venture-404412.Centralized.SalePriceOverrides`
+WHERE REGEXP_CONTAINS(Job_No, r'^\d{5}-\d{6}$')
+  AND Override_Sale_Price IS NOT NULL
+  AND Override_Sale_Price > 0;

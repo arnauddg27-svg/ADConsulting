@@ -106,8 +106,14 @@ async function run() {
         m.job_type,
         m.current_stage,
         SAFE_CAST(m.completion_pct AS FLOAT64) AS completion_pct,
-        -- Sale: prefer summary (operator-curated) over sales-contract table
-        COALESCE(sm.sale_price, SAFE_CAST(s.sale_price AS FLOAT64)) AS sale_price,
+        -- Sale: prefer Sale Price Overrides tab (operator-recorded final estimate)
+        -- → Audits-tab summary (audit_pl_summary.sale_price) → sales-contract table.
+        -- The override captures cases where the operator manually adjusts the working
+        -- Sales Price in the Summary tab (e.g. for price reductions or concessions
+        -- that haven't propagated back to the Audits tab's VLOOKUP source).
+        COALESCE(op.override_sale_price, sm.sale_price, SAFE_CAST(s.sale_price AS FLOAT64)) AS sale_price,
+        op.override_sale_price AS sale_price_override,  -- exposed for transparency
+        op.notes AS sale_price_override_notes,
         s.buyer_name,
         s.status AS sale_status,
         -- ── Summary-only fields (NULL for jobs not in summary) ──
@@ -143,10 +149,11 @@ async function run() {
         sm.notes AS sheet_notes,
         sm._source_sheet AS pl_source_sheet,
         CASE WHEN sm.job_id IS NOT NULL THEN TRUE ELSE FALSE END AS has_summary,
-        -- Cost line items: prefer the freshly-imported summary value (sm.*)
-        -- over the stale 3/17 audit_* upload. For jobs in BOTH, summary wins;
-        -- for sheet-only jobs (no audit_costs row), summary is the only source.
-        COALESCE(sm.lot_land, SAFE_CAST(c.Lot___Land AS FLOAT64)) AS lot_land,
+        -- Cost line items: prefer the freshly-imported summary value (sm.*) over
+        -- the stale 3/17 audit_* upload. For lot_land specifically, ALSO fall back
+        -- to the fresh lot_cost lookup table (2384 rows, nightly-refreshed) — this
+        -- gives lot data for jobs in neither audit_pl_summary nor audit_costs.
+        COALESCE(sm.lot_land, SAFE_CAST(c.Lot___Land AS FLOAT64), SAFE_CAST(lc.Lot_Cost AS FLOAT64)) AS lot_land,
         COALESCE(sm.permitting, SAFE_CAST(c.Permitting AS FLOAT64)) AS permitting,
         COALESCE(sm.site_work, SAFE_CAST(c.Site_Work AS FLOAT64)) AS cost_site_work,
         COALESCE(sm.vertical, SAFE_CAST(c.Vertical AS FLOAT64)) AS cost_vertical,
@@ -197,6 +204,8 @@ async function run() {
       LEFT JOIN ${raw("audit_vertical_sitework_actual")} va ON m.job_id = va.Project____Job
       LEFT JOIN latest_sale s ON m.community = s.community AND m.lot = s.lot_id AND s.rn = 1
       LEFT JOIN audit_summary_dedup sm ON m.job_id = sm.job_id
+      LEFT JOIN ${raw("sale_price_overrides")} op ON m.job_id = op.job_id
+      LEFT JOIN ${raw("lot_cost_lookup")} lc ON m.job_id = lc.job_id
       WHERE (c.Row_Labels IS NOT NULL OR sm.job_id IS NOT NULL)
         AND (m.closed_date IS NULL OR SAFE_CAST(m.closed_date AS DATE) >= '2022-01-01')
     ),
