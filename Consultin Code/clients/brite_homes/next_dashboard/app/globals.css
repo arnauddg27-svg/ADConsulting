@@ -1934,7 +1934,7 @@ body > div { height: 100%; min-height: 0; }
 
 /* ── Thread + container ──────────────────────────────────────────────────── */
 .ask-thread {
-  max-width: 920px;
+  max-width: 1180px;
   padding: 28px 24px 36px;
   gap: 14px;
 }
@@ -2220,7 +2220,12 @@ body > div { height: 100%; min-height: 0; }
   padding: 7px 11px;
   text-align: left;
   vertical-align: top;
+  white-space: nowrap;
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.ask-md td { font-feature-settings: 'tnum' 1; }
 .ask-md tr td:last-child, .ask-md tr th:last-child { border-right: 0; }
 .ask-md tr:last-child td { border-bottom: 0; }
 .ask-md th {
@@ -2393,7 +2398,7 @@ body > div { height: 100%; min-height: 0; }
   border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   vertical-align: top;
-  max-width: 280px;
+  max-width: 380px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2755,6 +2760,52 @@ body > div { height: 100%; min-height: 0; }
   background: transparent; border: 0; color: inherit; cursor: pointer;
   padding: 2px;
   border-radius: 4px;
+}
+
+/* ── Web search disclosure ───────────────────────────────────────────────── */
+.ask-searches { margin-top: 12px; }
+.ask-search { display: flex; flex-direction: column; gap: 8px; }
+.ask-query-tag--web {
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+}
+[data-theme="dark"] .ask-query-tag--web { color: var(--warning); }
+[data-theme="light"] .ask-query-tag--web { color: #b45309; }
+.ask-search-results {
+  display: flex; flex-direction: column; gap: 4px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-surface);
+  list-style: none;
+}
+.ask-search-result {
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  transition: background .14s;
+}
+.ask-search-result:hover { background: var(--bg-hover); }
+.ask-search-result-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-bottom: 0;
+}
+.ask-search-result-link:hover { text-decoration: underline; }
+.ask-search-result-title {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 720px;
+}
+.ask-search-result-icon { color: var(--text-muted); flex-shrink: 0; }
+.ask-search-result-url {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  margin-left: 0;
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────────── */

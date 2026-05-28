@@ -59,6 +59,34 @@ The \`job_type\` column on \`stg_centralized_data_*\` is the ground-truth lifecy
 
 When in doubt about which job_type values qualify, run \`SELECT DISTINCT job_type FROM brite_homes_staging.stg_centralized_data_current\` first — the 9 values above are the only ones that exist.
 
+#### Ownership — who owns a property (CRITICAL)
+Two columns answer "who owns X":
+
+1. **Default — \`area_name\`** (on \`stg_centralized_data_current\`, \`dim_job_conformed\`, etc.).
+   For ALL questions like "who owns 4820 SW 159TH LANE ROAD" or "what does YKOS own" — \`area_name\` is the owning entity.
+   The 24 owning entities in the warehouse: 'Brite Properties of Florida' (670), 'DLP/Milestone' (80), 'Florida Sun Partners II, LLC' (77), 'Milestone Management Group' (76), 'Briten Citrus, LLC' (50), 'Brite Life, LLC' (44), 'Founders Capital, LLC' (35), 'Briten Marion, LLC' (33), 'Brite Legacy LLC' (30), 'Second Avenue' (23), 'YKOS JV, LLC' (16), 'Go Life Development LLC' (15), 'JJ Long Investment Homes' (14), 'Florida BTR 2 Project, LLC' (13), 'Brite Equities LLC' (11), 'Florida BTR 1 Project, LLC' (10), 'RL Palm Bay, LLC' (10), 'AD Homes' (10), 'Florida Vertical Holdings, LLC' (8), 'Brite Life Ventures, LLC' (8), 'Segev Family Investments, LLC' (7), 'FSP Wedgefield, LLC' (5), 'Florida BTR 3 Project, LLC' (4), 'Red Mill Pointe, LLC' (1).
+
+2. **EXCEPTION — properties in the property-management pipeline:**
+   For homes that appear in \`brite_homes_marts.property_management_unit_360\` (or \`_snapshot\`), the canonical owner is the \`owner\` column on THAT table — NOT \`area_name\`. The PM-tracked owner may differ from the construction-side area entity because operators sometimes assign management to a sister LLC or external partner.
+   - To check if a property is in the PM pipeline: \`SELECT 1 FROM brite_homes_marts.property_management_unit_360 WHERE job_no = X\`. If a row exists, use that table's \`owner\` column.
+   - "All properties owned by X" / "what does X own": LEFT JOIN dim_job_conformed (or stg_centralized_data_current) to property_management_unit_360 on job_no, then COALESCE(pm.owner, area_name) as effective_owner.
+
+3. **MLS-listed name (third-party context only):** \`brite_homes_raw.listing_agent_inventory.owner_of_record\` is the proper-case owner string from the MLS listing. Use only when explicitly asked "who's listed as owner on MLS" — otherwise prefer the canonical owner (1) or PM-owner (2).
+
+#### "Is X property listed?" — answering listing questions
+When the user asks whether a specific property is listed, listed for sale/rent, or asks about listing details:
+
+1. **FIRST check the warehouse**: \`SELECT * FROM brite_homes_raw.listing_agent_inventory WHERE LOWER(site_address) LIKE LOWER(...)\` (or by job_id). If found, surface: sale_mls, lease_mls, current_price, dom (days on market), under_contract, listing_agent, signor_email, keybox_combo_code, sale_listed_date.
+
+2. **IF the warehouse does NOT have it** (no row in \`listing_agent_inventory\`), use the \`web_search\` tool to check public MLS aggregators. Sample query patterns that work well:
+   - "[full street address] [city] [state] for sale OR rent zillow OR realtor OR redfin"
+   - "[street address] MLS listing"
+   Report: site name (Zillow/Realtor/etc.), listing status (active/pending/sold/off-market), price if visible, last-updated date. If multiple sources disagree, say so.
+
+3. **Always surface BOTH sources** when both have info — note any disagreement (e.g. "Our listing-agent sheet shows under_contract=true, while Zillow still shows it active as of [date].").
+
+4. **Do NOT fabricate** listing data. If web_search returns nothing relevant, say "I couldn't find a public listing for this address" — don't guess.
+
 ### Milestone progress — USE \`furthest_milestone_completed\`, NOT \`current_stage\`
 For any progress / aging / stuck question, use the **last milestone actually completed**, NOT the current stage.
 - \`furthest_milestone_completed\` (STRING) — most recent milestone the job has finished. Truth for "how far is X".

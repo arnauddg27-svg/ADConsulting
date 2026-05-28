@@ -196,6 +196,19 @@ const Icon = ({ name, size = 16, className = "" }) => {
           <path d="M12 3l8 3v6c0 5-3.6 9-8 10-4.4-1-8-5-8-10V6z" />
         </svg>
       );
+    case "globe":
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+        </svg>
+      );
+    case "external":
+      return (
+        <svg {...props}>
+          <path d="M14 4h6v6M20 4l-9 9M5 7v12h12V12" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -260,7 +273,7 @@ function reducer(state, action) {
   switch (action.type) {
     case "ASK": {
       const user = { id: uid(), role: "user", content: action.question, attachments: action.attachments || [] };
-      const assistant = { id: uid(), role: "assistant", content: "", queries: [], meta: null };
+      const assistant = { id: uid(), role: "assistant", content: "", queries: [], searches: [], meta: null };
       return {
         ...state,
         messages: [...state.messages, user, assistant],
@@ -281,6 +294,11 @@ function reducer(state, action) {
       return updateActive(state, (m) => ({
         ...m,
         queries: m.queries.map((q) => (q.id === action.id ? { ...q, result: action.result } : q)),
+      }));
+    case "WEB_SEARCH":
+      return updateActive(state, (m) => ({
+        ...m,
+        searches: [...(m.searches || []), { id: action.id, query: action.query, results: action.results }],
       }));
     case "STATUS":
       return { ...state, status: action.text };
@@ -338,6 +356,14 @@ function useAskStream() {
         if (id) dispatch({ type: "TOOL_RESULT", id, result });
         break;
       }
+      case "web_search":
+        dispatch({
+          type: "WEB_SEARCH",
+          id: ev.id || `s-${Math.random().toString(36).slice(2, 7)}`,
+          query: ev.query || "",
+          results: Array.isArray(ev.results) ? ev.results : [],
+        });
+        break;
       case "done":
         dispatch({
           type: "DONE",
@@ -853,6 +879,60 @@ function QueryDisclosure({ queries }) {
   );
 }
 
+function WebSearchDisclosure({ searches }) {
+  if (!searches?.length) return null;
+  const totalResults = searches.reduce((s, x) => s + (x.results?.length || 0), 0);
+  return (
+    <details className="ask-queries ask-searches">
+      <summary>
+        <Icon name="chevron-right" size={12} className="ask-queries-chevron" />
+        <span className="ask-queries-summary-text">
+          <strong>{searches.length}</strong> web search{searches.length === 1 ? "" : "es"}
+        </span>
+        <span className="ask-queries-summary-meta">
+          {totalResults > 0 ? `${totalResults} result${totalResults === 1 ? "" : "s"}` : ""}
+        </span>
+      </summary>
+      <div className="ask-queries-body">
+        {searches.map((s, i) => (
+          <div className="ask-search" key={s.id || i}>
+            <div className="ask-query-head">
+              <div className="ask-query-head-left">
+                <span className="ask-query-tag ask-query-tag--web">
+                  <Icon name="globe" size={11} />
+                  Web
+                </span>
+                <span className="ask-query-index">Search {i + 1} of {searches.length}</span>
+                <span className="ask-query-purpose" title={s.query}>
+                  "{s.query}"
+                </span>
+              </div>
+            </div>
+            {s.results?.length ? (
+              <ul className="ask-search-results">
+                {s.results.map((r, ri) => (
+                  <li className="ask-search-result" key={ri}>
+                    <a href={r.url} target="_blank" rel="noopener noreferrer" className="ask-search-result-link">
+                      <span className="ask-search-result-title">{r.title}</span>
+                      <Icon name="external" size={11} className="ask-search-result-icon" />
+                    </a>
+                    <span className="ask-search-result-url">{(() => {
+                      try { return new URL(r.url).hostname.replace(/^www\./, ""); }
+                      catch { return r.url; }
+                    })()}{r.page_age ? ` · ${r.page_age}` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="ask-result-empty">No results.</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 function MetaLine({ meta }) {
   if (!meta) return null;
   const time = meta.completedAt
@@ -892,7 +972,7 @@ function Avatar({ kind }) {
 }
 
 function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
-  const showSkeleton = isActive && !msg.content && !(msg.queries?.length);
+  const showSkeleton = isActive && !msg.content && !(msg.queries?.length) && !(msg.searches?.length);
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(() => {
     onCopy(msg.content);
@@ -922,6 +1002,7 @@ function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
         ) : (
           <span style={{ color: "var(--text-muted)" }}>(no answer)</span>
         )}
+        <WebSearchDisclosure searches={msg.searches} />
         <QueryDisclosure queries={msg.queries} />
         <MetaLine meta={msg.meta} />
         {!isActive && msg.content ? (
@@ -1321,7 +1402,8 @@ export default function AskConsole() {
   const scrollKey = useMemo(
     () =>
       messages.reduce(
-        (k, m) => `${k}|${m.id}:${(m.content || "").length}:${m.queries?.length || 0}:${(m.queries || []).map((q) => (q.result ? 1 : 0)).join("")}`,
+        (k, m) =>
+          `${k}|${m.id}:${(m.content || "").length}:${m.queries?.length || 0}:${(m.queries || []).map((q) => (q.result ? 1 : 0)).join("")}:s${m.searches?.length || 0}`,
         "",
       ),
     [messages],

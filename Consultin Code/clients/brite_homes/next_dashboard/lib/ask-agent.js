@@ -74,6 +74,43 @@ export const SQL_TOOL_DEFINITION = {
   },
 };
 
+// Anthropic server-side web search. Used to look up public listings (Zillow / Realtor /
+// MLS) when the warehouse doesn't have a listing for a queried property — and any other
+// question where current public information is genuinely useful (rare). The search runs
+// on Anthropic's infrastructure; results come back in the same response as
+// `server_tool_use` + `web_search_tool_result` content blocks. We cap max_uses to keep
+// per-question cost predictable (~$10 / 1,000 searches at current pricing).
+export const WEB_SEARCH_TOOL_DEFINITION = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: 3,
+};
+
+// Extract { id, query, results: [{title, url, page_age}] } pairs from a content array.
+// Anthropic emits server_tool_use (the model's request) and web_search_tool_result
+// (the results) as separate blocks within the same assistant turn — we pair them by id.
+export function extractWebSearches(contentBlocks) {
+  const requests = new Map();
+  const results = new Map();
+  for (const block of contentBlocks || []) {
+    if (block.type === "server_tool_use" && block.name === "web_search") {
+      requests.set(block.id, String(block.input?.query || ""));
+    } else if (block.type === "web_search_tool_result") {
+      const list = Array.isArray(block.content)
+        ? block.content
+            .filter((r) => r && r.type === "web_search_result")
+            .map((r) => ({ title: r.title || r.url, url: r.url, page_age: r.page_age || null }))
+        : [];
+      results.set(block.tool_use_id || block.id, list);
+    }
+  }
+  const out = [];
+  for (const [id, query] of requests) {
+    out.push({ id, query, results: results.get(id) || [] });
+  }
+  return out;
+}
+
 export function buildSystemPrompt(schemaText) {
   return [
     "You are the Brite Homes warehouse data analyst. You answer operations questions for a homebuilder by querying their BigQuery warehouse.",
@@ -148,17 +185,27 @@ export async function runAskAgent({
     const budgetExhausted = queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes;
     onEvent({ type: "status", text: budgetExhausted ? "writing answer" : "thinking" });
 
-    // Always pass the tool definition (keeps the message thread valid for the API);
+    // Always pass tool definitions (keeps the message thread valid for the API);
     // forceAnswer tells the model layer to disallow further tool calls on the final turn.
+    // We include both run_sql (our locally-executed tool) and web_search (server-side, Anthropic
+    // executes it and returns results inline — we just display them).
     const result = await streamModel({
       system,
       messages: convo,
-      tools: [SQL_TOOL_DEFINITION],
+      tools: [SQL_TOOL_DEFINITION, WEB_SEARCH_TOOL_DEFINITION],
       forceAnswer: budgetExhausted,
       signal,
       onText: emitText,
     });
     convo.push({ role: "assistant", content: result.content });
+
+    // Emit web_search events for any server-side searches Anthropic performed this turn.
+    // These are fully self-contained — no follow-up tool_result needed from us, since
+    // Anthropic includes the web_search_tool_result block alongside the server_tool_use.
+    for (const search of extractWebSearches(result.content)) {
+      if (search.query || search.results.length) sawText = true; // count as visible output
+      onEvent({ type: "web_search", id: search.id, query: search.query, results: search.results });
+    }
 
     // A turn that hit the output-token limit may contain a partial/invalid tool_use — never
     // execute it. Finish with whatever was produced plus a clear note.
@@ -173,7 +220,12 @@ export async function runAskAgent({
       return { queriesRun, totalBytesProcessed };
     }
 
-    const toolUses = budgetExhausted ? [] : (result.content || []).filter((b) => b.type === "tool_use");
+    // Only our locally-executed run_sql tool needs follow-up tool_result blocks.
+    // server_tool_use blocks (web_search) are already paired with web_search_tool_result
+    // by Anthropic — we'd corrupt the conversation by responding to them ourselves.
+    const toolUses = budgetExhausted
+      ? []
+      : (result.content || []).filter((b) => b.type === "tool_use" && b.name === "run_sql");
     if (!toolUses.length) return finish();
 
     const toolResults = [];
