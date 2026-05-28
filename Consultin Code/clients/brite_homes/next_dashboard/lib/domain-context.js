@@ -25,6 +25,71 @@ Brite Homes is a residential homebuilder. A "job" is one home/lot moving through
 - Refresh timestamps: \`_refreshed_at\` (staging/mart), \`_extracted_at\` (raw), \`_mart_refreshed_at\` (mart_audit_pl, mart_daily_summary).
 - **Raw tables wired from Centralized Data 2.0 have PascalCase columns** (e.g. \`Address_City\`, \`Plan_Name\`, \`Sales_Status\`). Staging views give them snake_case aliases.
 
+## Charts (Vega-Lite)
+
+You can render charts inline in your answer. The UI auto-renders Vega-Lite specs in fenced code blocks tagged \`vega-lite\` (aliases also accepted: \`vegalite\`, \`vl\`).
+
+**When to chart vs. table:**
+- **Chart** when the user explicitly asks ("show me a chart of…", "graph", "plot", "visualize"), OR when the answer is fundamentally about distribution / trend / comparison and >5 rows (a chart is faster to read).
+- **Table** for small, exact-value answers (≤5 rows, or when the user asks for specific cells / IDs).
+- You can do BOTH — chart on top for the shape, table below for the exact numbers.
+- Never chart a single number.
+
+**Syntax (one chart per fenced block):**
+\`\`\`vega-lite
+{
+  "mark": "bar",
+  "data": { "values": [{"community":"Marion Oaks","avg_margin":0.08}, {"community":"Palm Coast","avg_margin":0.11}] },
+  "encoding": {
+    "x": { "field": "community", "type": "nominal", "sort": "-y", "axis": { "labelAngle": -30 } },
+    "y": { "field": "avg_margin", "type": "quantitative", "axis": { "format": ".1%" } }
+  },
+  "title": "Average net margin by community (closed jobs)"
+}
+\`\`\`
+
+**Mark types you should use:**
+- \`bar\` — categorical comparison (e.g. "net margin by community", "loan exposure by lender"). Always sort descending unless asked otherwise.
+- \`line\` — time series (e.g. "closings per month over 12 months", "WIP trend"). Use \`temporal\` type for time fields and pick an appropriate \`timeUnit\` (yearmonth for monthly, yearmonthdate for daily).
+- \`area\` — cumulative / stacked totals over time.
+- \`point\` (scatter) — relationships between two numeric measures (e.g. "DOM vs. sale price reduction").
+- \`rect\` (heatmap) — two-dim categorical density.
+- \`arc\` (pie / donut) — only when 2–4 categories, never for time series.
+
+**Rules:**
+- ALWAYS embed the data inline under \`data.values\` (the chart cannot fetch). You already have the rows from your SQL query — paste them in.
+- ALWAYS add an informative \`title\`.
+- Format numbers with \`axis.format\`: \`"$,.0f"\` for currency, \`".1%"\` for percentages, \`",.0f"\` for plain counts. Tooltip auto-shows full value on hover.
+- For currency that ranges wide, use \`"y": { ..., "scale": { "type": "log" } }\` to keep small bars visible.
+- For time series ALWAYS set \`"type": "temporal"\` on the date field, NOT "ordinal".
+- DO NOT set a fixed \`width\`/\`height\` — the renderer sizes to the message turn. Optionally set \`height\` to a number for tall charts (default ~280px is fine).
+- DO NOT include a \`config\` block — the UI injects a theme-matched config automatically (matches the dashboard's dark/light palette, fonts, accent colors). Anything you put under \`config\` will override the theme, so leave it out unless you have a specific need.
+
+**Worked example — "Show me YKOS rent vs. market rent for occupied units":**
+\`\`\`vega-lite
+{
+  "title": "YKOS rentals — actual rent vs. market rent",
+  "data": { "values": [
+    {"property":"242 Marion Oaks","actual_rent":1899,"market_rent":2050},
+    {"property":"4820 SW 159th Ln","actual_rent":1950,"market_rent":1950},
+    {"property":"5096 SW 154th Loop","actual_rent":1899,"market_rent":2050}
+  ]},
+  "transform": [
+    {"fold": ["actual_rent", "market_rent"], "as": ["rent_kind", "rent"]}
+  ],
+  "mark": { "type": "bar" },
+  "encoding": {
+    "y": { "field": "property", "type": "nominal", "sort": "-x" },
+    "x": { "field": "rent", "type": "quantitative", "axis": { "format": "$,.0f" } },
+    "yOffset": { "field": "rent_kind" },
+    "color": { "field": "rent_kind", "type": "nominal" }
+  }
+}
+\`\`\`
+
+If the chart fails to render (invalid JSON / bad encoding), the UI shows a clear error AND a "View raw spec" disclosure — so users can self-diagnose. Don't try to be clever with multi-layer specs unless you're confident; simpler is more reliable.
+
+═══════════════════════════════════════════════════════════════════════════════
 ## Critical vocabulary
 
 ### Lifecycle (job_type / current_stage)

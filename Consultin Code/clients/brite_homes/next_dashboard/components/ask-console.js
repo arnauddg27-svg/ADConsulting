@@ -612,6 +612,188 @@ function childrenToString(node) {
   return "";
 }
 
+// ── Vega-Lite chart renderer ─────────────────────────────────────────────────
+// The bot writes Vega-Lite specs inline as ```vega-lite fenced code blocks.
+// We lazy-load vega-embed on first render so the ~150 KB library only ships when
+// a chart actually appears. Theme is read directly from data-theme so the chart
+// re-renders whenever the user flips dark/light.
+const VEGA_FENCE_LANGS = ["vega-lite", "vegalite", "vl"];
+
+function readTheme() {
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.getAttribute("data-theme") || "dark";
+}
+
+// Compute a Vega-Lite config that matches our CSS tokens for the active theme.
+// Reading the values from getComputedStyle at chart-render time keeps colors in
+// sync with the theme (the static tokens flip via [data-theme] on <html>).
+function buildVegaConfig(theme) {
+  const isDark = theme === "dark";
+  if (typeof document === "undefined") return {};
+  const root = getComputedStyle(document.documentElement);
+  const read = (name, fallback) => (root.getPropertyValue(name) || "").trim() || fallback;
+  const accent = read("--accent", isDark ? "#28c084" : "#0c9f6f");
+  const textPrimary = read("--text-primary", isDark ? "#f1f3f2" : "#17201d");
+  const textSecondary = read("--text-secondary", isDark ? "#a7b0ad" : "#43544f");
+  const textMuted = read("--text-muted", isDark ? "#697572" : "#64736f");
+  const border = read("--border", isDark ? "#2a3338" : "#d7ded9");
+  const surface = read("--bg-surface", isDark ? "#101417" : "#ffffff");
+  // Categorical color ramp: accent + a few harmonizing hues per theme.
+  const categorical = isDark
+    ? [accent, "#5d9cec", "#f0b85f", "#ed6864", "#a78bfa", "#22d3ee", "#fb923c", "#facc15"]
+    : [accent, "#2563eb", "#d18d35", "#d45151", "#7c3aed", "#0891b2", "#ea580c", "#ca8a04"];
+  return {
+    background: "transparent",
+    font: "Space Grotesk, system-ui, sans-serif",
+    title: { color: textPrimary, fontSize: 14, fontWeight: 600, anchor: "start" },
+    axis: {
+      labelColor: textSecondary,
+      titleColor: textPrimary,
+      domainColor: border,
+      tickColor: border,
+      gridColor: border,
+      gridOpacity: 0.35,
+      labelFont: "Space Grotesk, system-ui, sans-serif",
+      titleFont: "Space Grotesk, system-ui, sans-serif",
+      labelFontSize: 11,
+      titleFontSize: 12,
+    },
+    legend: {
+      labelColor: textSecondary,
+      titleColor: textPrimary,
+      labelFontSize: 11,
+      titleFontSize: 12,
+      symbolStrokeWidth: 0,
+    },
+    view: { stroke: "transparent" },
+    range: {
+      category: categorical,
+      ordinal: { scheme: isDark ? "viridis" : "blues" },
+      ramp: { scheme: isDark ? "viridis" : "blues" },
+    },
+    mark: { color: accent, tooltip: true },
+    bar: { color: accent },
+    line: { color: accent, strokeWidth: 2 },
+    area: { color: accent, fillOpacity: 0.55 },
+    point: { color: accent, size: 60, filled: true },
+    rule: { color: textMuted },
+    text: { color: textPrimary },
+    style: {
+      "guide-label": { fill: textSecondary },
+      "guide-title": { fill: textPrimary },
+    },
+    padding: { top: 8, right: 12, bottom: 8, left: 12 },
+    autosize: { type: "fit", contains: "padding" },
+    _surfaceColor: surface,
+  };
+}
+
+function VegaLiteChart({ spec, fallbackText }) {
+  const containerRef = useRef(null);
+  const [theme, setTheme] = useState(readTheme);
+  const [error, setError] = useState(null);
+
+  // Re-render when the user toggles the theme (we observe the [data-theme] attr).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const obs = new MutationObserver(() => setTheme(readTheme()));
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return undefined;
+    let cancelled = false;
+    let view = null;
+
+    (async () => {
+      let parsed;
+      try {
+        parsed = typeof spec === "string" ? JSON.parse(spec) : spec;
+      } catch (e) {
+        if (!cancelled) setError(`Invalid Vega-Lite JSON: ${e.message}`);
+        return;
+      }
+      if (!parsed || typeof parsed !== "object") {
+        if (!cancelled) setError("Empty or invalid chart spec");
+        return;
+      }
+
+      // Inject Vega-Lite schema when the model forgets it (very common).
+      if (!parsed.$schema) parsed.$schema = "https://vega.github.io/schema/vega-lite/v5.json";
+
+      // Apply our theme-matched config (model-provided config wins on collisions).
+      const baseConfig = buildVegaConfig(theme);
+      parsed.config = { ...baseConfig, ...(parsed.config || {}) };
+      if (!parsed.width && !parsed.encoding?.row) parsed.width = "container";
+
+      let embed;
+      try {
+        embed = (await import("vega-embed")).default;
+      } catch (e) {
+        if (!cancelled) setError(`Chart library failed to load: ${e.message}`);
+        return;
+      }
+      if (cancelled || !containerRef.current) return;
+
+      try {
+        const result = await embed(containerRef.current, parsed, {
+          actions: false,
+          renderer: "svg",
+          mode: "vega-lite",
+        });
+        if (cancelled) {
+          result.finalize();
+          return;
+        }
+        view = result.view;
+        setError(null);
+      } catch (e) {
+        if (!cancelled) setError(`Chart render failed: ${e.message}`);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (view) {
+        try { view.finalize(); } catch { /* ignore */ }
+      }
+    };
+  }, [spec, theme]);
+
+  if (error) {
+    return (
+      <div className="ask-chart-error" role="alert">
+        <span className="ask-chart-error-icon" aria-hidden="true">
+          <Icon name="alert" size={13} />
+        </span>
+        <div className="ask-chart-error-body">
+          <div className="ask-chart-error-title">Couldn't render chart</div>
+          <div className="ask-chart-error-msg">{error}</div>
+          {fallbackText ? (
+            <details className="ask-chart-error-details">
+              <summary>View raw spec</summary>
+              <pre className="ask-chart-error-spec">{fallbackText}</pre>
+            </details>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return <div className="ask-chart" ref={containerRef} aria-label="Chart" />;
+}
+
+// Detect "language-vega-lite" (and aliases) on a markdown code child and render
+// a Vega-Lite chart in place of the <pre><code> block.
+function getVegaSpecFromCodeChild(child) {
+  const className = child?.props?.className || "";
+  for (const lang of VEGA_FENCE_LANGS) {
+    if (className.includes(`language-${lang}`)) return String(child.props.children || "").trim();
+  }
+  return null;
+}
+
 const markdownComponents = {
   table: (props) => (
     <div className="ask-result-wrap">
@@ -626,6 +808,12 @@ const markdownComponents = {
       {children}
     </td>
   ),
+  pre: ({ children, ...rest }) => {
+    const child = Array.isArray(children) ? children[0] : children;
+    const spec = getVegaSpecFromCodeChild(child);
+    if (spec) return <VegaLiteChart spec={spec} fallbackText={spec} />;
+    return <pre {...rest}>{children}</pre>;
+  },
 };
 
 const Markdown = ({ children }) => (

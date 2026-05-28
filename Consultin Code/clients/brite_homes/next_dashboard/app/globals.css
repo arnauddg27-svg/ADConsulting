@@ -2763,6 +2763,63 @@ body > div { height: 100%; min-height: 0; }
   border-radius: 4px;
 }
 
+/* ── Vega-Lite chart container ──────────────────────────────────────────── */
+.ask-chart {
+  margin: 12px 0;
+  padding: 14px 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-surface-raised) 50%, transparent);
+  width: 100%;
+  min-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+.ask-chart > svg,
+.ask-chart .vega-embed,
+.ask-chart .vega-embed > svg { max-width: 100%; height: auto; display: block; }
+.ask-chart .vega-embed { width: 100% !important; }
+.ask-chart .vega-tooltip {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  box-shadow: var(--shadow-card);
+}
+
+.ask-chart-error {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 12px 0;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: var(--danger-dim);
+  color: var(--danger);
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.ask-chart-error-icon { flex-shrink: 0; margin-top: 2px; }
+.ask-chart-error-body { flex: 1; min-width: 0; }
+.ask-chart-error-title { font-weight: 600; }
+.ask-chart-error-msg { color: color-mix(in srgb, var(--danger) 85%, var(--text-primary)); margin-top: 2px; }
+.ask-chart-error-details { margin-top: 6px; }
+.ask-chart-error-details summary { cursor: pointer; font-size: 11px; color: var(--text-secondary); }
+.ask-chart-error-spec {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-shell);
+  color: var(--text-secondary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre;
+}
+
 /* ── Web search disclosure ───────────────────────────────────────────────── */
 .ask-searches { margin-top: 12px; }
 .ask-search { display: flex; flex-direction: column; gap: 8px; }
