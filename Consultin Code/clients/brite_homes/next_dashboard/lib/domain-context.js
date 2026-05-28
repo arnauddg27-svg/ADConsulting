@@ -42,7 +42,15 @@ These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and 
 - Sales: buyer_name, sale_price, status, sold_date, scheduled_closing.
 - Property management (rentals): unit / tenant, status (occupied/vacant), market_rent, actual_rent, past_due, deposit, lease dates. Tables named property_management_* (e.g. property_management_unit_360 / snapshots).
 - Loans: lender, loan_amount, total_drawn, draw_pct, loan_days_until_expiration.
-- P&L / margin (Assurance / Audit): brite_homes_marts.mart_audit_pl -> net_revenue, total_cost, net_profit, net_margin, margin_status, pl_readiness, data_quality_flag.
+- P&L / margin (Assurance / Audit): brite_homes_marts.mart_audit_pl. SELECT P&L columns DIRECTLY — they are native, canonical SQL columns (do NOT reconstruct by summing line items):
+  - Revenue: sale_price, net_revenue, seller_credit
+  - Cost rollups: construction_costs, overhead, other_expenses, total_direct_cost, total_indirect_cost, total_cost
+  - Profitability: gross_margin, net_profit, net_margin
+  - Sheet-only (NULL for jobs not in Investor/BPOF Audits sheets): proceeds, cost_to_sale, amount_drawn, sheet_loan_amount, sheet_lender, bgh_total, bgh_margin
+  - Flags: margin_status ('good'|'watch'|'at-risk'|'loss'|'missing revenue'|'missing cost'), data_quality_flag ('ready'|'missing revenue'|'missing cost'|'missing revenue and cost'|'missing job key'), pl_readiness ('ready'|'partial'|'blocked')
+  - Provenance: pl_source ('sheet' for jobs sourced from Investor/BPOF Audits Google Sheets — authoritative; 'computed' for jobs whose P&L was derived by summing line items from the stale audit_* tables — fallback)
+  - Line items (only when user asks for the breakdown): lot_land, permitting, cost_site_work, cost_vertical, cost_options, closing_cost, financing, insurance, warranty, builder_fee, dirt_total, dumpsters, env_total, utilities_total, monthly_interest, total_ap, actual_vertical, actual_site_work.
+  - Margin thresholds: net_margin < 0 → loss; 0 ≤ x < 0.08 → at-risk; 0.08 ≤ x < 0.12 → watch; ≥ 0.12 → good.
 - Exceptions: priority (P1/P2), exception_type, days_outstanding.
 
 ## KPI definitions (compute consistently with the dashboard)
@@ -57,5 +65,7 @@ These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and 
 
 ## Caveats
 - Margin / profitability lives ONLY in the P&L audit data (mart_audit_pl), NOT in the sales tables.
+- mart_audit_pl combines two sources. Authoritative: 160 rows sourced from the Investor Audits + BPOF Audits Google Sheets (pl_source='sheet'). Fallback: 323 rows sourced from the stale audit_* upload (pl_source='computed') — these are mostly land/lot records. If a job is in neither (no SFR Completed jobs missing from both?), the answer is "no P&L data available" — do NOT fabricate.
+- When answering P&L for a specific job, surface pl_source so the user knows whether the number came from the operations team's curated sheet or from a stale 3/17 snapshot.
 - completion_pct, WIP, budget/actual, superintendent, and loan fields are partially populated. Answer from rows where the field exists and note when coverage is partial.
 - Use _mart_refreshed_at / snapshot timestamps to state data freshness when relevant.`;
