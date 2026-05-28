@@ -95,7 +95,16 @@ The \`listing_agent_inventory\` table mixes SALE-side and LEASE-side state on on
 - \`starting_price\` / \`price_reduction\` / \`price_reduced_on_date\` — also sale-side only.
 - \`dom\` — days on market for the sale-side listing.
 
-**The warehouse does NOT store monthly rent.** There is no rent / lease_price / monthly_rent column anywhere in listing_agent_inventory or in any related table. If the user asks "how much for rent", say so explicitly AND offer to web_search the lease MLS (e.g. "OM718049") on Zillow/Realtor — the public listing carries the rent amount.
+**The rent IS in the warehouse — in the property-management tables, NOT in listing_agent_inventory.**
+- \`brite_homes_marts.property_management_unit_360\` (133 rows, refreshed nightly from Property Management Pipeline 2.0):
+  - \`market_rent\` (FLOAT64) — asking rent the operator wants. Populated for all 133 PM-tracked units.
+  - \`actual_rent\` (FLOAT64) — rent currently being collected from the tenant. Populated for 87/133 (occupied units only — vacant units have no actual_rent).
+  - \`tenant\` (STRING), \`occupancy_status\` (e.g. 'Current'), \`lease_from\`, \`lease_to\`, \`move_in\`, \`move_out\`, \`deposit\`, \`past_due\`, \`amount_receivable\`.
+- The same fields are on \`stg_property_management_master\` and \`stg_property_management_rent_roll\` (staging views).
+
+**When the user asks "what's the rent for X?":** query \`property_management_unit_360 WHERE job_no = 'XXXXX-XXXXXX'\` (or LOWER(property_address) LIKE LOWER('%...%')) and surface BOTH market_rent (asking) AND actual_rent (collected). If they differ, note the gap (e.g. "Asking $2,050, but Mara Alvarez is paying $1,899 — $151 below market.").
+
+If the property is in listing_agent_inventory but NOT yet in property_management_unit_360 (it's listed-for-rent but not yet leased / not in PM rolls), THEN the warehouse doesn't have a rent — fall back to web_search on the lease MLS to find the asking rent.
 
 **Derived listing status (use this CASE expression in your SQL when listing status matters):**
 \`\`\`sql
@@ -128,7 +137,7 @@ END AS listing_status
 
 2. **Interpret the row** by listing_status — pick the right narrative:
    - \`sold\` → "This home was sold on \`closing_sold_date\` for \`sold_price\`. The sale closed."
-   - \`leased\` → "This home is **currently leased** (rented out) as of \`leased_date\`. Lease MLS: \`lease_mls\`. (Sale listing was terminated en route, if applicable — note it for context.)"
+   - \`leased\` → "This home is **currently leased** (rented out) as of \`leased_date\`. Lease MLS: \`lease_mls\`. (Sale listing was terminated en route, if applicable — note it for context.)" **Also LEFT JOIN \`property_management_unit_360\` USING (job_no) and surface: tenant, market_rent (asking), actual_rent (collected), lease_from, lease_to, deposit, past_due.** If market_rent and actual_rent differ, call out the gap.
    - \`sale_under_contract\` → "A buyer is under contract on the sale (MLS \`sale_mls\`). Closing date pending."
    - \`sale_terminated_listed_for_rent\` → "The sale listing (\`sale_mls\`) was terminated. The home is now listed for rent under MLS \`lease_mls\`. Sale asking price was \`current_price\` before termination — note this is stale and does NOT represent the rent."
    - \`sale_terminated\` (no lease) → "The sale listing (\`sale_mls\`) was terminated. Last asking price was \`current_price\` (stale). No rental listing currently."
@@ -142,8 +151,9 @@ END AS listing_status
    - Owner (\`owner_of_record\` from this table — MLS-recorded name).
    - Job number (\`job_id\`).
 
-4. **If the user asks for the RENT amount** and the status is \`leased\`, \`sale_terminated_listed_for_rent\`, \`dual_listed_sale_and_rent\`, or \`for_rent\`:
-   Say "We don't store the monthly rent in the warehouse — only the sale-side price. Let me look up MLS \`lease_mls\` publicly." THEN use \`web_search\` with a query like: \`"OM718049" rent Ocala FL\` or \`"242 Marion Oaks Golf Rd 34473" for rent zillow OR realtor\`. Report the rent if found.
+4. **If the user asks for the RENT amount**:
+   - **FIRST query \`property_management_unit_360 WHERE job_no = X\`** — if found, surface market_rent + actual_rent + tenant + lease_from/to. This covers all 133 PM-tracked units.
+   - **ONLY IF not in PM_unit_360** (listed for rent but not yet leased / not in PM rolls) — use \`web_search\` with a query like: \`"OM718049" rent Ocala FL\` or \`"242 Marion Oaks Golf Rd 34473" for rent zillow OR realtor\`. Report the rent if found.
 
 5. **If the warehouse does NOT have the property** (zero rows from step 1), use \`web_search\` to check public MLS aggregators:
    - "[full street address] [city] [state] for sale OR rent zillow OR realtor OR redfin"
