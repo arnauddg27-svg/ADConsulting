@@ -24,6 +24,12 @@ Brite Homes is a residential homebuilder. A "job" is one home/lot moving through
 - "Closed" sale = sales row whose status CONTAINS "closed"; "open/other" = status does NOT contain "closed".
 - current_stage is a milestone label with a percentage prefix, e.g. "75% Electrical Trimout", "95% Final Survey", "100%. Receive CO".
 
+## Marketing / listing status (CRITICAL real-estate vocabulary)
+- "Listed" / "on the market" = a home is in the listing agent inventory with an MLS number. The source is \`brite_homes_raw.listing_agent_inventory\`; treat a job as "listed" when \`sale_mls\` IS NOT NULL (for sale) OR \`lease_mls\` IS NOT NULL (for rent), and "listed as rental" when \`listed_as_rental\` is true / \`lease_mls\` populated.
+- "Not listed" / "unlisted" / "not yet on the market" = a job whose job_id has NO row in \`listing_agent_inventory\` with sale_mls or lease_mls populated. Use a LEFT JOIN ... WHERE listing.sale_mls IS NULL AND listing.lease_mls IS NULL, or a NOT EXISTS / anti-join against \`listing_agent_inventory\`. The join key is job_id (= job_no).
+- Disambiguation rule: when a question uses both "listed" AND a place ("listed in palm coast", "not listed in cape coral"), interpret "listed" as the MLS/inventory sense and the place as a city/community filter — NOT as "located in <place>". For example, "CO'd but not listed in Palm Coast" means: city = Palm Coast AND job_type = CO'd-not-closed AND NOT in the listing inventory.
+- "Listed for sale" = sale_mls populated. "Listed for rent" = lease_mls populated or listed_as_rental flag set. "Sale listed date" / "lease listed date" come from \`sale_listed_date\` / \`leased_date\`.
+
 ## Domains and where the data lives (prefer marts; use staging/raw for detail)
 - Construction / lifecycle: per-job stage, completion_pct, wip, superintendent, days_since_last_milestone. Enriched per-job rows: brite_homes_staging.stg_centralized_data_enriched and brite_homes_marts.dim_job_conformed. Portfolio totals: brite_homes_marts.mart_daily_summary.
 - Sales: buyer_name, sale_price, status, sold_date, scheduled_closing.
