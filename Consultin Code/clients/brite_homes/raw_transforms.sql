@@ -1650,3 +1650,344 @@ UNION ALL
 SELECT job_id, 'lot_cost_closed', SAFE_CAST(Lot_Cost_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_closed`
 UNION ALL
 SELECT job_id, 'lot_cost_lookup', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_lookup`;
+
+
+
+-- ============================================================================
+-- AUDIT-6: Reorg additions
+-- ============================================================================
+
+-- Rename lot_cost_lookup → lot_cost for naming consistency with the other
+-- 2-col lookups (bpof_wip, financing_cost, etc., none of which have a _lookup
+-- suffix). Both tables produced by this transform; lot_cost_lookup is then
+-- DROPped manually outside this file. fact_job_metrics view below uses the
+-- new name.
+CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.lot_cost` AS
+SELECT
+  `Job_No` AS job_id,
+  `Lot_Cost`,
+  CURRENT_TIMESTAMP() AS _extracted_at
+FROM `atomic-venture-404412.Centralized.LotCost`
+WHERE `Job_No` IS NOT NULL AND TRIM(CAST(`Job_No` AS STRING)) != '';
+
+-- Re-create fact_job_metrics referencing lot_cost (not lot_cost_lookup).
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.fact_job_metrics` AS
+SELECT job_id, 'bpof_wip' AS metric, SAFE_CAST(BPOF_WIP AS FLOAT64) AS value, _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_wip`
+UNION ALL
+SELECT job_id, 'bpof_drawable_wip', SAFE_CAST(BPOF_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_drawable_wip`
+UNION ALL
+SELECT job_id, 'brite_assets_wip', SAFE_CAST(Brite_Assests_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_wip`
+UNION ALL
+SELECT job_id, 'brite_assets_drawable_wip', SAFE_CAST(Brite_Assests_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_drawable_wip`
+UNION ALL
+SELECT job_id, 'financing_cost', SAFE_CAST(Financing_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.financing_cost`
+UNION ALL
+SELECT job_id, 'job_cost_on_closed', SAFE_CAST(Job_Cost_on_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.job_cost_on_closed`
+UNION ALL
+SELECT job_id, 'lot_cost_closed', SAFE_CAST(Lot_Cost_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_closed`
+UNION ALL
+SELECT job_id, 'lot_cost', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost`;
+
+
+-- ── stg_loan_tracker ───────────────────────────────────────────────────────
+-- Typed view of brite_homes_raw.loan_tracker with Excel-serial dates → DATE,
+-- snake_case column aliases, and the job context.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_loan_tracker` AS
+SELECT
+  job_id,
+  Lender AS lender,
+  Address AS address,
+  Address_City AS city,
+  Address_State AS state,
+  Address_Postal_Code AS zip,
+  Address_County AS county,
+  Area_Name AS area_name,
+  Plan AS plan,
+  Parcel_ID AS parcel_id,
+  Permitting_Status AS permitting_status,
+  Job_Type AS job_type,
+  Sales_Status AS sales_status,
+  Appraisal AS appraisal,
+  DATE_ADD(DATE '1899-12-30', INTERVAL SAFE_CAST(Projected_Start_Date AS INT64) DAY) AS projected_start_date,
+  Projected_Start_Month AS projected_start_month,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Start_Date DAY) AS start_date,
+  Furthest_Milestone_Completed AS furthest_milestone_completed,
+  Status AS loan_status,
+  Loan_Request_Date AS loan_request_date,  -- STRING in raw (mixed formats)
+  DATE_ADD(DATE '1899-12-30', INTERVAL Loan_Closing_Date DAY) AS loan_closing_date,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Loan_Expiration_ DAY) AS loan_expiration_date,
+  Days_Until_Expiration AS days_until_expiration,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Extended_to_ DAY) AS extended_to_date,
+  Extension__ AS extension_count,
+  Loan_Number AS loan_number,
+  Loan_Amount AS loan_amount,
+  Interest_Rate AS interest_rate,
+  Monthly_Interest_Payments AS monthly_interest_payments,
+  Total_Drawn AS total_drawn,
+  Last_Draw_Date AS last_draw_date,  -- STRING in raw (mixed formats)
+  WIP AS wip,
+  Equity AS equity,
+  Drawable_WIP_ AS drawable_wip,
+  Difference AS difference,
+  Status_without_land_loan AS status_without_land_loan,
+  Notes AS notes,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.loan_tracker`;
+
+
+-- ── stg_task_completion ────────────────────────────────────────────────────
+-- Typed view with Completed_Date (FLOAT64 Excel serial) → DATE.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_task_completion` AS
+SELECT
+  job_id,
+  Job AS job_label,
+  Cost_Code AS cost_code,
+  Task_Name AS task_name,
+  Supplier AS supplier,
+  P_O_ AS po_number,
+  Subtotal AS subtotal,
+  Tax AS tax,
+  Complete_Total AS complete_total,
+  Contract_Type AS contract_type,
+  DATE_ADD(DATE '1899-12-30', INTERVAL CAST(Completed_Date AS INT64) DAY) AS completed_date,
+  Completed_By AS completed_by,
+  Task_ID AS task_id,
+  Job_Task_ID AS job_task_id,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.task_completion`
+WHERE job_id IS NOT NULL;
+
+
+-- ── stg_permitting_detail ──────────────────────────────────────────────────
+-- Typed view with Excel-serial dates → DATE.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_permitting_detail` AS
+SELECT
+  job_id,
+  City AS city,
+  Owner AS owner,
+  Lot_Closing_Date AS lot_closing_date,  -- STRING in raw (mixed formats)
+  Status AS permit_status,
+  Env_Issues AS env_issues,
+  Address_ AS address,
+  Lot_Block_addition_or_section AS lot_block_addition_section,
+  Parcel_ID AS parcel_id,
+  Plan_ AS plan,
+  Garage AS garage,
+  Lot_Type AS lot_type,
+  Clerk AS clerk,
+  Permit_number AS permit_number,
+  Comments AS comments,
+  NOC_Date_Recorded AS noc_date_recorded,
+  Furthest_Milestone_Completed AS furthest_milestone_completed,
+  CM AS construction_manager,
+  Amount AS permit_fee_amount,
+  Day_Check_Requested AS day_check_requested,
+  Day_Check_Mailed AS day_check_mailed,
+  Certificte_of_occupancy__date_ AS co_date,  -- sheet typo kept verbatim
+  Survey_Ordered AS survey_ordered,
+  _1__Survey__CT AS survey_cycle_time,
+  _2__Septic_Permit_CT AS septic_permit_cycle_time,
+  _3__Plans_CT AS plans_cycle_time,
+  _4__Trusses_CT AS trusses_cycle_time,
+  _5__Energy_Calculations_CT AS energy_calcs_cycle_time,
+  _6__Permit_CT AS permit_cycle_time,
+  _7__Total_Cycle_Tme AS total_cycle_time,  -- sheet typo "Tme" kept
+  DATE_ADD(DATE '1899-12-30', INTERVAL Permit_Approved_Date DAY) AS permit_approved_date,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Permit_Issued DAY) AS permit_issued_date,
+  Expiration_for_Email AS expiration_for_email,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Permit_Submitted DAY) AS permit_submitted_date,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Expiration_Date DAY) AS expiration_date,
+  Surveyor AS surveyor,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.permitting_detail`;
+
+
+-- ── stg_progress_issue_notes ───────────────────────────────────────────────
+-- Typed view with Excel-serial dates → DATE.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_progress_issue_notes` AS
+SELECT
+  job_id,
+  Address AS address,
+  City__Project_ AS city,
+  Job_Type AS job_type,
+  Plan_Name AS plan_name,
+  Area_Name AS area_name,
+  Sales_Status AS sales_status,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Start_Date DAY) AS start_date,
+  Furthest_Milestone_Completed AS furthest_milestone_completed,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Date_Last_Milestone_Completed DAY) AS date_last_milestone_completed,
+  Days_Since_Last_Milestone_Completed AS days_since_last_milestone,
+  Current_Superintendent AS superintendent,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Date_issue_recorded DAY) AS date_issue_recorded,
+  DATE_ADD(DATE '1899-12-30', INTERVAL Date_Issue_Updated DAY) AS date_issue_updated,
+  Issue_Category AS issue_category,
+  Issue_Resolved AS issue_resolved,
+  Assignee AS assignee,
+  Vendor AS vendor,
+  Root_Cause AS root_cause,
+  Notes___Updates AS notes,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.progress_issue_notes`;
+
+
+-- ── stg_warranty_tickets ───────────────────────────────────────────────────
+-- Typed view. Most cols already typed via autodetect; just snake_case aliases.
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_warranty_tickets` AS
+SELECT
+  job_id,
+  Ticket__ AS ticket_number,
+  Item__ AS item_number,
+  Job AS job_label,
+  Community AS community,
+  Ticket_Aged_Days AS ticket_aged_days,
+  Status AS ticket_status,
+  Description AS description,
+  Supplier AS supplier,
+  Item_Status AS item_status,
+  Work_Orders AS work_orders,
+  Location AS location,
+  Category AS category,
+  Root_Cause AS root_cause,
+  Request_Valid AS request_valid,
+  Aging_Days AS aging_days,
+  Work_Order_Status AS work_order_status,
+  Work_Order_Supplier AS work_order_supplier,
+  SAFE_CAST(NULLIF(Requested_Start_Date, '') AS DATE) AS requested_start_date,
+  ID AS id,
+  _extracted_at AS _refreshed_at
+FROM `atomic-venture-404412.brite_homes_raw.warranty_tickets`
+WHERE job_id IS NOT NULL;
+-- stg_sales_full_compat: 130 renamed cols
+CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_staging.stg_sales_full_compat` AS
+SELECT
+  `job_id` AS job_no,
+  `Client` AS client,
+  `Client_Name` AS client_name,
+  `Company` AS company,
+  `Company_Name` AS company_name,
+  `Division` AS division,
+  `Division_Name` AS division_name,
+  `Region` AS region,
+  `Region_Name` AS region_name,
+  `Area` AS area,
+  `Area_Name` AS area_name,
+  `Project` AS project,
+  `Project_Name` AS project_name,
+  `Job_Type_Code` AS job_type_code,
+  `Job_Type` AS job_type,
+  `Model_Spec` AS model_spec,
+  `Job` AS job,
+  `Lot` AS lot,
+  `Block` AS block,
+  `Section` AS section,
+  `Address` AS address,
+  `City` AS city,
+  `State` AS state,
+  `Zip` AS zip,
+  `Released_To_Sales_Date` AS released_to_sales_date,
+  `Sales_Status` AS sales_status,
+  `Job_Status` AS job_status,
+  `Cancel_Date` AS cancel_date,
+  `Cancel_Week_No` AS cancel_week_no,
+  `Cancel_Month` AS cancel_month,
+  `Cancel_Year` AS cancel_year,
+  `Cancel_Code` AS cancel_code,
+  `Cancel_Reason` AS cancel_reason,
+  `Released_To_Construction_Date` AS released_to_construction_date,
+  `Start_Date` AS start_date,
+  `Superintendent` AS superintendent,
+  `Stage_Code_At_Sale` AS stage_code_at_sale,
+  `Stage_At_Sale` AS stage_at_sale,
+  `Current_Stage_Code` AS current_stage_code,
+  `Current_Stage_of_Construction` AS current_stage_of_construction,
+  `Plan` AS plan,
+  `Plan_Name` AS plan_name,
+  `Elevation` AS elevation,
+  `Elevation_Name` AS elevation_name,
+  `Swing` AS swing,
+  `Living_Area_SF` AS living_area_sf,
+  `Marketing_SF` AS marketing_sf,
+  `Buyer` AS buyer,
+  `Co_Buyer` AS co_buyer,
+  `Buyer_Address` AS buyer_address,
+  `Buyer_City` AS buyer_city,
+  `Buyer_State` AS buyer_state,
+  `Buyer_Zip` AS buyer_zip,
+  `Buyer_Cell_Phone` AS buyer_cell_phone,
+  `Buyer_Email` AS buyer_email,
+  `Co_Buyer_Email` AS co_buyer_email,
+  `Co_Buyer_Cell_Phone` AS co_buyer_cell_phone,
+  `Written_Date` AS written_date,
+  `Sold_Date` AS sold_date,
+  `Sold_Week_No` AS sold_week_no,
+  `Sold_Month` AS sold_month,
+  `Sold_Year` AS sold_year,
+  `Accepted_Date` AS accepted_date,
+  `Memo` AS memo,
+  `Sale_Source` AS sale_source,
+  `Sale_Number` AS sale_number,
+  `Base` AS base,
+  `Lot_Premium` AS lot_premium,
+  `Change_Orders` AS change_orders,
+  `Sales_Discretionary` AS sales_discretionary,
+  `Additional_Price_Fields` AS additional_price_fields,
+  `Total` AS total,
+  `Closing_Cost` AS closing_cost,
+  `Total_Deposits` AS total_deposits,
+  `MLSPrice_Job` AS mlsprice_job,
+  `Promised_Date` AS promised_date,
+  `Projected_Completion_Date` AS projected_completion_date,
+  `Projected_Profits` AS projected_profits,
+  `Completion_Date` AS completion_date,
+  `Projected_Close_Date` AS projected_close_date,
+  `Scheduled_Close_Date` AS scheduled_close_date,
+  `Close_Date` AS close_date,
+  `Close_Week_No` AS close_week_no,
+  `Close_Month` AS close_month,
+  `Close_Year` AS close_year,
+  `Net_Profit_Est` AS net_profit_est,
+  `Net_Margin_Est` AS net_margin_est,
+  `Sales_Agent` AS sales_agent,
+  `Realtor_Company` AS realtor_company,
+  `Realtor` AS realtor,
+  `Mortgage_Company` AS mortgage_company,
+  `Mortgage_Contact` AS mortgage_contact,
+  `Loan_Type` AS loan_type,
+  `Loan_Application_Date` AS loan_application_date,
+  `Loan_Approved_Date` AS loan_approved_date,
+  `Title_Company` AS title_company,
+  `Title_Contact` AS title_contact,
+  `Contingent_Sale` AS contingent_sale,
+  `Contingent_Address` AS contingent_address,
+  `Contingent_Delivery_Date` AS contingent_delivery_date,
+  `Contingency_Removed_Date` AS contingency_removed_date,
+  `Sale_Source_Code` AS sale_source_code,
+  `Realtor_Code` AS realtor_code,
+  `Mortgage_Company_Code` AS mortgage_company_code,
+  `Title_Company_Code` AS title_company_code,
+  `ClientID` AS clientid,
+  `CompanyID` AS companyid,
+  `DivisionID` AS divisionid,
+  `RegionID` AS regionid,
+  `AreaID` AS areaid,
+  `ProjectID` AS projectid,
+  `JobID` AS jobid,
+  `JobTypeID` AS jobtypeid,
+  `PlanID` AS planid,
+  `SaleID` AS saleid,
+  `CustomerID` AS customerid,
+  `CurrentStateID` AS currentstateid,
+  `RealtorID` AS realtorid,
+  `MortgageCompanyID` AS mortgagecompanyid,
+  `TitleCompanyID` AS titlecompanyid,
+  `ManagingSalesPersonID` AS managingsalespersonid,
+  `jobsaleid` AS jobsaleid,
+  `Refresh_Date` AS refresh_date,
+  `Agg_ID` AS agg_id,
+  `Lot_Premium_Additional_Price_Fields` AS lot_premium_additional_price_fields,
+  `Sales_incentive_Additional_Price_Fields` AS sales_incentive_additional_price_fields,
+  `Solar_Package_Additional_Price_Fields` AS solar_package_additional_price_fields,
+  `JobType_Job` AS jobtype_job,
+  `Projected_Margin` AS projected_margin,
+  `_extracted_at`
+FROM `atomic-venture-404412.brite_homes_raw.sales_master`;

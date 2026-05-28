@@ -507,6 +507,11 @@ export async function getDashboardData() {
     const constructionT = rawTable("construction_milestones");
     const scheduleT = rawTable("schedule");
     const salesT = rawTable("sales");
+    // xlsx_sales_full is a 3/18 manual XLSX snapshot. sales_master (refreshed
+    // nightly from Centralized Data 2.0 → "Sales" tab) is the live equivalent
+    // with the same job_no coverage but PascalCase columns. Keeping xlsx here
+    // for now because the dashboard query expects the xlsx column naming; a
+    // future migration would build stg_sales_full_compat over sales_master.
     const salesFullT = rawTable("xlsx_sales_full");
     const listingAgentT = rawTable("listing_agent_inventory");
     const pmSummaryT = fullyQualifiedTable("property_management_portfolio_summary_snapshot");
