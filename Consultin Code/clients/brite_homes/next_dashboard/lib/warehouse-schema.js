@@ -16,6 +16,11 @@ const VALUE_LIST_COLUMNS = new Set([
   "margin_status",
   "priority",
   "exception_type",
+  // Geographic filters — low cardinality for this client; the >50-distinct guard skips any
+  // that turn out high-cardinality (e.g. community/project names).
+  "city",
+  "address_city",
+  "area_name",
 ]);
 
 function cache() {
@@ -65,16 +70,24 @@ export function buildValueListText(valueRows) {
 async function fetchValueLists(client, cfg, columns) {
   // Probe only curated surfaces (marts dataset + the staging enriched table) for the
   // enum-like columns, deduped and capped. Each probe is byte/time-guarded and best-effort.
+  // Prioritize the highest-value tables so their enum columns are always covered before the cap
+  // (otherwise alphabetical exception tables can exhaust the budget before dim_job_conformed).
+  const PRIORITY_TABLES = ["dim_job_conformed", "stg_centralized_data_enriched", "mart_audit_pl", "job_cross_domain_summary"];
+  const rank = (t) => {
+    const i = PRIORITY_TABLES.indexOf(t);
+    return i === -1 ? PRIORITY_TABLES.length : i;
+  };
+  const candidates = columns
+    .filter((c) => VALUE_LIST_COLUMNS.has(c.column_name) && (c.table_schema === cfg.dataset || c.table_name === "stg_centralized_data_enriched"))
+    .sort((a, b) => rank(a.table_name) - rank(b.table_name));
   const seen = new Set();
   const targets = [];
-  for (const c of columns) {
-    if (!VALUE_LIST_COLUMNS.has(c.column_name)) continue;
-    if (c.table_schema !== cfg.dataset && c.table_name !== "stg_centralized_data_enriched") continue;
+  for (const c of candidates) {
     const key = `${c.table_schema}.${c.table_name}.${c.column_name}`;
     if (seen.has(key)) continue;
     seen.add(key);
     targets.push(c);
-    if (targets.length >= 16) break;
+    if (targets.length >= 30) break;
   }
 
   const results = await Promise.all(
