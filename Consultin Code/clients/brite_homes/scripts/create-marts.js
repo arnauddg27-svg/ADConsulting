@@ -446,7 +446,18 @@ async function run() {
         WHEN sale_price > 0 AND total_cost > 0 THEN 'ready'
         WHEN sale_price > 0 OR total_cost > 0 THEN 'partial'
         ELSE 'blocked'
-      END AS pl_readiness
+      END AS pl_readiness,
+      -- pl_data_complete: FALSE for jobs where total_cost is structurally
+      -- incomplete because construction is still in early phases (no vertical
+      -- recorded yet). These jobs will show inflated margins (sale_price -
+      -- partial_cost), and the bot should warn that future construction costs
+      -- haven't been captured. Practical rule: a SFR job without total_vertical
+      -- recorded is pre-vertical; its P&L is meaningless until vertical lands.
+      CASE
+        WHEN TRIM(IFNULL(job_type, '')) IN ('Permitting', 'On Hold', 'Development') THEN FALSE
+        WHEN total_vertical IS NULL OR total_vertical <= 0 THEN FALSE
+        ELSE TRUE
+      END AS pl_data_complete
     FROM audit_pl_estimated_totals
     ORDER BY community, lot
   `);

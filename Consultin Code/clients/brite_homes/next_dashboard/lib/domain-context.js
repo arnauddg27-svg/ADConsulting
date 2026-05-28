@@ -131,9 +131,11 @@ When asked about a job's P&L, break-even, or "can we sell at $X" — ALWAYS retu
     Margin buffer (Audit):            $margin_buffer_audit
     Margin buffer (Est Final):        $margin_buffer_estimated_final ($) / margin_buffer_pct_estimated_final (%)
 
-  ### Caveats (when applicable)
+  ### Caveats (when applicable — surface ALL that apply)
     - Override applied: when mart.sale_price_override IS NOT NULL, say so + show sale_price_override_notes.
+    - **Incomplete cost data**: when pl_data_complete = FALSE, ALWAYS warn — "this job's construction is still in an early phase (Permitting / pre-vertical), so the reported P&L only reflects costs incurred so far. Future construction costs ($150-$300K typical) are NOT in total_cost yet, so the margin shown is INFLATED. Do not use this to make pricing decisions until vertical construction is recorded." Affects ~3 jobs currently.
     - Stale fallback: if pl_source = 'computed', say "this row comes from the stale 3/17 audit_* fallback".
+    - Rental property: if job_type contains 'Leased: Property Management', note this — revenue comes from rent, not sale, so sale_price-based P&L is misleading.
     - Provenance: pl_source_sheet ('investor_audits' vs 'bpof_audits').
 
   Other columns:
