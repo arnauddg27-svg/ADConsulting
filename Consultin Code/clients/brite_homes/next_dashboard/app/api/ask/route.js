@@ -77,6 +77,10 @@ export async function POST(request) {
     return {
       statementType: q.statementType,
       referencedTables: q.referencedTables || [],
+      referencedRoutines: q.referencedRoutines || [],
+      ddlOperationPerformed: q.ddlOperationPerformed || null,
+      ddlTargetTable: q.ddlTargetTable || null,
+      ddlTargetRoutine: q.ddlTargetRoutine || null,
       totalBytesProcessed: Number(job.metadata.statistics.totalBytesProcessed || q.totalBytesProcessed || 0),
     };
   };

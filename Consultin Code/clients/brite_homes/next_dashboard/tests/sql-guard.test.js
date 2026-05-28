@@ -81,3 +81,23 @@ describe("normalizeSql", () => {
     expect(normalizeSql("-- c\nSELECT 1")).toBe("-- c\nSELECT 1");
   });
 });
+
+describe("preCheckSql string-literal safety", () => {
+  it("accepts a semicolon inside a string literal", () => {
+    expect(preCheckSql("SELECT 'a;b' AS note").ok).toBe(true);
+  });
+  it("accepts a forbidden keyword inside a string literal", () => {
+    expect(preCheckSql("SELECT 'DROP TABLE x' AS note FROM `p.d.t`").ok).toBe(true);
+  });
+});
+
+describe("evaluateDryRun defense-in-depth", () => {
+  it("rejects when a DDL operation is reported", () => {
+    expect(evaluateDryRun({ statementType: "SELECT", referencedTables: [], ddlOperationPerformed: "CREATE" }, cfg).ok).toBe(false);
+  });
+  it("rejects a routine outside the allowed project", () => {
+    expect(
+      evaluateDryRun({ statementType: "SELECT", referencedTables: [], referencedRoutines: [{ projectId: "evil", datasetId: "x", routineId: "f" }] }, cfg).ok,
+    ).toBe(false);
+  });
+});

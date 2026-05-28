@@ -19,14 +19,24 @@ function stripComments(sql) {
   return sql.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
 }
 
+// Replace string-literal contents so the keyword/`;` heuristics don't fire on data
+// (e.g. SELECT 'DROP TABLE' AS note, or a ';' inside a string literal).
+function stripStrings(sql) {
+  return sql
+    .replace(/'''[\s\S]*?'''/g, "''")
+    .replace(/"""[\s\S]*?"""/g, '""')
+    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""');
+}
+
 export function preCheckSql(sql) {
   const normalized = normalizeSql(sql);
   if (!normalized) return { ok: false, reason: "Empty SQL." };
-  // Evaluate the start/keyword/statement heuristics against the comment-free code so a
-  // leading "-- explanation" line (which Claude often adds) doesn't trip the SELECT check.
+  // Evaluate heuristics against the comment-free, string-free code so a leading
+  // "-- explanation" line or a keyword/`;` inside a string literal doesn't trip the checks.
   const code = stripComments(normalized).trim();
   if (!code) return { ok: false, reason: "Empty SQL." };
-  const body = code.replace(/;+\s*$/, "");
+  const body = stripStrings(code).replace(/;+\s*$/, "");
   if (body.includes(";")) return { ok: false, reason: "Only a single statement is allowed." };
   if (!/^\s*(WITH|SELECT)\b/i.test(body)) return { ok: false, reason: "Query must start with SELECT or WITH." };
   if (FORBIDDEN.test(body)) return { ok: false, reason: "Query contains a forbidden keyword; only read-only SELECT queries are allowed." };
@@ -34,9 +44,25 @@ export function preCheckSql(sql) {
 }
 
 export function evaluateDryRun(stats, config) {
-  const { statementType, referencedTables = [], totalBytesProcessed = 0 } = stats || {};
+  const {
+    statementType,
+    referencedTables = [],
+    referencedRoutines = [],
+    totalBytesProcessed = 0,
+    ddlOperationPerformed,
+    ddlTargetTable,
+    ddlTargetRoutine,
+  } = stats || {};
   if (statementType !== "SELECT") {
     return { ok: false, reason: `Only SELECT statements are allowed (got ${statementType || "unknown"}).` };
+  }
+  if (ddlOperationPerformed || ddlTargetTable || ddlTargetRoutine) {
+    return { ok: false, reason: "Only read-only SELECT queries are allowed (a DDL/DML operation was detected)." };
+  }
+  for (const r of referencedRoutines) {
+    if (r.projectId !== config.projectId) {
+      return { ok: false, reason: `Routine ${r.projectId}.${r.datasetId}.${r.routineId} is outside the allowed project.` };
+    }
   }
   for (const t of referencedTables) {
     if (t.projectId !== config.projectId) {
