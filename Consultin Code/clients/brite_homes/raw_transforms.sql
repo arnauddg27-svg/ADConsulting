@@ -75,22 +75,10 @@ WHERE Job_No IS NOT NULL;
 
 
 -- -----------------------------------------------------------------------------
--- 3. vendors — empty shell (no PO-level data in this source)
+-- 3. (DELETED) vendors — formerly an empty shell placeholder. Never populated;
+--     PO-level data isn't on Centralized Data 2.0. Dropped in the 2026-05-28
+--     warehouse reorg. Re-add a transform here if/when vendor data lands.
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.vendors` (
-  vendor_name     STRING,
-  vendor_id       STRING,
-  po_number       STRING,
-  job_id          STRING,
-  cost_code       STRING,
-  po_amount       FLOAT64,
-  invoiced_amount FLOAT64,
-  status          STRING,
-  issue_date      TIMESTAMP,
-  due_date        TIMESTAMP,
-  _source_erp     STRING,
-  _extracted_at   TIMESTAMP
-);
 
 
 -- -----------------------------------------------------------------------------
@@ -1296,71 +1284,7 @@ SELECT
 FROM `atomic-venture-404412.Centralized.PermittingDetail`
 WHERE `Job_Number` IS NOT NULL AND TRIM(CAST(`Job_Number` AS STRING)) != '';
 
--- Older snapshot of Audits tab (207 rows; alt view to Construction audits)
-CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.audits_snapshot` AS
-SELECT
-  `Job_No` AS job_id,
-  `Address`,
-  `Area_Name`,
-  `Job_Type`,
-  `Rental_Status`,
-  `Address_City`,
-  `Start_Date`,
-  `Completion_Date`,
-  `Cycle_time_from_start`,
-  `Sales_Status`,
-  `Plan_Name`,
-  `Current_Stage`,
-  `Individual_Well`,
-  `Septic_System`,
-  `Water_Filtration_System`,
-  `Lot_Type`,
-  `Sales_Price`,
-  `Net_Profit`,
-  `Proceeds`,
-  `Net_Margin`,
-  `BGH_Total`,
-  `BGH_Margin`,
-  `Seller_Credit`,
-  `Cost_To_Sale`,
-  `Closing_Cost`,
-  `Amount_Drawn`,
-  `Loan_Amount`,
-  `Lender`,
-  `Loan_Closing_Date`,
-  `Last_Interest_Payment`,
-  `Financing`,
-  `Financing_Left`,
-  `Total_Financing`,
-  `Insurance_Builder_s_Risk`,
-  `Correction`,
-  `Total_Cost`,
-  `Contigency`,
-  `Total_Indirect_Cost`,
-  `Total_Direct_Cost`,
-  `Total_Direct___Financing`,
-  `Current_Vertical_Budget`,
-  `Difference`,
-  `Total_Vertical`,
-  `Vertical`,
-  `Vertial_Cost_Left`,
-  `Dumpsters___Portable_Toilets`,
-  `Lot___Land`,
-  `Builder_Fee__`,
-  `Builder_Fee`,
-  `Options`,
-  `Permitting`,
-  `Gopher_Tortoise_Survey`,
-  `Budgeted_Permitting`,
-  `Permitting_Left`,
-  `Permitting_Total`,
-  `Site_Work`,
-  `Dirt_Booked`,
-  `Extra_Dirt`,
-  `Dirt_Total`
-  , CURRENT_TIMESTAMP() AS _extracted_at
-FROM `atomic-venture-404412.Centralized.AuditsSnapshot`
-WHERE `Job_No` IS NOT NULL AND TRIM(CAST(`Job_No` AS STRING)) != '';
+-- (DELETED) audits_snapshot — older Audits-tab view (207 rows). Dropped in the 2026-05-28 reorg; nothing in the codebase or BQ depends on it. Centralized.AuditsSnapshot external table still exists if a future need arises.
 
 -- Progress issue tracking per job
 CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.progress_issue_notes` AS
@@ -1649,44 +1573,7 @@ SELECT job_id, 'job_cost_on_closed', SAFE_CAST(Job_Cost_on_Closed AS FLOAT64), _
 UNION ALL
 SELECT job_id, 'lot_cost_closed', SAFE_CAST(Lot_Cost_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_closed`
 UNION ALL
-SELECT job_id, 'lot_cost_lookup', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_lookup`;
-
-
-
--- ============================================================================
--- AUDIT-6: Reorg additions
--- ============================================================================
-
--- Rename lot_cost_lookup → lot_cost for naming consistency with the other
--- 2-col lookups (bpof_wip, financing_cost, etc., none of which have a _lookup
--- suffix). Both tables produced by this transform; lot_cost_lookup is then
--- DROPped manually outside this file. fact_job_metrics view below uses the
--- new name.
-CREATE OR REPLACE TABLE `atomic-venture-404412.brite_homes_raw.lot_cost` AS
-SELECT
-  `Job_No` AS job_id,
-  `Lot_Cost`,
-  CURRENT_TIMESTAMP() AS _extracted_at
-FROM `atomic-venture-404412.Centralized.LotCost`
-WHERE `Job_No` IS NOT NULL AND TRIM(CAST(`Job_No` AS STRING)) != '';
-
--- Re-create fact_job_metrics referencing lot_cost (not lot_cost_lookup).
-CREATE OR REPLACE VIEW `atomic-venture-404412.brite_homes_marts.fact_job_metrics` AS
-SELECT job_id, 'bpof_wip' AS metric, SAFE_CAST(BPOF_WIP AS FLOAT64) AS value, _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_wip`
-UNION ALL
-SELECT job_id, 'bpof_drawable_wip', SAFE_CAST(BPOF_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.bpof_drawable_wip`
-UNION ALL
-SELECT job_id, 'brite_assets_wip', SAFE_CAST(Brite_Assests_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_wip`
-UNION ALL
-SELECT job_id, 'brite_assets_drawable_wip', SAFE_CAST(Brite_Assests_Drawable_WIP AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.brite_assets_drawable_wip`
-UNION ALL
-SELECT job_id, 'financing_cost', SAFE_CAST(Financing_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.financing_cost`
-UNION ALL
-SELECT job_id, 'job_cost_on_closed', SAFE_CAST(Job_Cost_on_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.job_cost_on_closed`
-UNION ALL
-SELECT job_id, 'lot_cost_closed', SAFE_CAST(Lot_Cost_Closed AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_closed`
-UNION ALL
-SELECT job_id, 'lot_cost', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost`;
+SELECT job_id, 'lot_cost', SAFE_CAST(Lot_Cost AS FLOAT64), _extracted_at FROM `atomic-venture-404412.brite_homes_raw.lot_cost_lookup`;
 
 
 -- ── stg_loan_tracker ───────────────────────────────────────────────────────

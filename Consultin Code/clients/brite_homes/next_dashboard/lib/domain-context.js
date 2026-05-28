@@ -156,16 +156,13 @@ For any progress / aging / stuck question, use the **last milestone actually com
 ═══════════════════════════════════════════════════════════════════════════════
 ## Deprecated / legacy — DO NOT query for new questions
 ═══════════════════════════════════════════════════════════════════════════════
-- **brite_homes_raw.xlsx_sales_full** — 3/18 stale XLSX snapshot. Use \`sales_master\` (live, same row count) or stg_sales_full_compat.
-- **brite_homes_raw.audit_costs / audit_dirt / audit_dumpsters / audit_env / audit_utilities / audit_total_ap / audit_bbg_ap / audit_vertical_sitework_actual** — 3/17 manual snapshot. Used internally as fallback by mart_audit_pl for jobs not in audit_pl_summary (323/483 rows, mostly land/lot entries). DO NOT query directly. mart_audit_pl.pl_source='computed' flags those rows. The granular cost line items in these tables (Lot/Land, Vertical, Site Work, Options, Dirt, Dumpsters, Env, Utilities, AP, Builder Fee) have NO equivalent on Centralized Data 2.0 — to refresh them, an operator would need to add a consolidated "Costs" tab to Centralized Data 2.0 similar to "Construction audits".
-- **brite_homes_raw.audits_snapshot** (206 rows) — older snapshot of an Audits view. Don't confuse with audit_pl_summary (the live source). Only useful for historical comparison.
+- **brite_homes_raw.audit_costs / audit_dirt / audit_dumpsters / audit_env / audit_utilities / audit_total_ap / audit_bbg_ap / audit_vertical_sitework_actual** — 3/17 manual snapshot. Used internally as fallback by mart_audit_pl for jobs not in audit_pl_summary (323/465 rows, mostly land/lot entries). DO NOT query directly. mart_audit_pl.pl_source='computed' flags those rows. The granular cost line items have NO equivalent on Centralized Data 2.0 — to refresh them, an operator would need to add a consolidated "Costs" tab.
 - **brite_homes_raw.land_acquisition_active / _cancelled / _closed**, brite_homes_raw.subdivision_pipeline — separate land-acquisition data domain (legacy 3/18).
-- **brite_homes_marts.mart_exception_center** — empty 3/17 legacy table, only referenced by unified_exception_center (v1). Use unified_exception_center_v2.
-- **brite_homes_marts.unified_exception_center** (v1) — superseded by v2.
-- **brite_homes_raw.vendors** — empty shell. No PO-level data available in the source.
-- **brite_homes_raw.takeoff_compare** — plan-level (no job_id). Only query when comparing plan-level pricing.
+- **brite_homes_marts.mart_exception_center** — 608-row 3/17 legacy table, only referenced by unified_exception_center (v1). Use unified_exception_center_v2 for current exceptions.
+- **brite_homes_marts.unified_exception_center** (v1) — kept because v2 depends on it for the legacy_audit branch. Query v2 instead.
+- **brite_homes_raw.takeoff_compare** — plan-level (no job_id), all-STRING (autodetect failed on duplicate headers). Only query for plan-level pricing comparisons.
 
-Dropped tables (no longer exist): pm_master, pm_delinquency, cd2_permitting, lot_cost_lookup (renamed to lot_cost), exception_summary_by_source (use _v2).
+Dropped tables (no longer exist, do NOT query): xlsx_sales_full (use sales_master or stg_sales_full_compat), pm_master, pm_delinquency, cd2_permitting, lot_cost (use lot_cost_lookup), exception_summary_by_source (use _v2), audits_snapshot (use audit_pl_summary), vendors.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## KPI definitions (consistent with the dashboard)
