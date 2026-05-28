@@ -42,15 +42,34 @@ These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and 
 - Sales: buyer_name, sale_price, status, sold_date, scheduled_closing.
 - Property management (rentals): unit / tenant, status (occupied/vacant), market_rent, actual_rent, past_due, deposit, lease dates. Tables named property_management_* (e.g. property_management_unit_360 / snapshots).
 - Loans: lender, loan_amount, total_drawn, draw_pct, loan_days_until_expiration.
-- P&L / margin (Assurance / Audit): brite_homes_marts.mart_audit_pl. SELECT P&L columns DIRECTLY — they are native, canonical SQL columns (do NOT reconstruct by summing line items):
-  - Revenue: sale_price, net_revenue, seller_credit
-  - Cost rollups: construction_costs, overhead, other_expenses, total_direct_cost, total_indirect_cost, total_cost
-  - Profitability: gross_margin, net_profit, net_margin
+- P&L / margin (Assurance / Audit): brite_homes_marts.mart_audit_pl. SELECT P&L columns DIRECTLY — they are native, canonical SQL columns (do NOT reconstruct by summing line items).
+
+  TWO Net Profit definitions exist — surface both when answering "what's the P&L for X":
+    (1) **net_profit / net_margin** — "Audit Net Profit". Formula: sale_price - total_cost.
+        Contract-side view. Matches the "Audits" tab in the Investor Audits / BPOF Audits Google Sheets.
+    (2) **net_profit_estimated_final / net_margin_estimated_final** — "Estimated Final Net Profit".
+        Formula: sale_price - construction_costs_summary_est - total_other_expenses_est.
+        Matches the "Summary" tab's "Estimated, final accounting P&L" view — what the operations team treats as the working final estimate.
+        DEDUCTS additional post-close costs (property tax, COGS-closing, commissions, warranty) that the Audit Net Profit ignores.
+        Caveat: the Summary tab supports a manual sale_price override per job (e.g., $292,900 vs the contract $299,900 for 00241-000042) that the mart cannot capture. When sale_price differs from the operator's working number, our estimated_final will differ from theirs proportionally. State this when relevant.
+
+  Operator-final cost categories (deducted in net_profit_estimated_final but NOT in net_profit):
+  - property_taxes_on_hud_est ($1,000 flat — HUD line item)
+  - cogs_closing_costs_est ($1,500 flat — distinct from closing_cost line item)
+  - cogs_commission_internal_est (sale_price × 2%)
+  - cogs_commission_external_est (sale_price × 3%)
+  - warranty_coverage_est ($500 flat — 2-10 home warranty)
+  - total_other_expenses_est (sum of above + seller_credit + total_financing)
+  - construction_costs_summary_est (sum of lot_land + permitting_total + cost_site_work + total_vertical + cost_options + builder_fee + insurance + closing_cost)
+
+  Other columns:
+  - Revenue: sale_price, net_revenue, seller_credit, proceeds
+  - Cost rollups (Audits semantics): construction_costs, overhead, other_expenses, total_direct_cost, total_indirect_cost, total_cost, gross_margin, cost_to_sale
   - Sheet-only (NULL for jobs not in Investor/BPOF Audits sheets): proceeds, cost_to_sale, amount_drawn, sheet_loan_amount, sheet_lender, bgh_total, bgh_margin
-  - Flags: margin_status ('good'|'watch'|'at-risk'|'loss'|'missing revenue'|'missing cost'), data_quality_flag ('ready'|'missing revenue'|'missing cost'|'missing revenue and cost'|'missing job key'), pl_readiness ('ready'|'partial'|'blocked')
-  - Provenance: pl_source ('sheet' for jobs sourced from Investor/BPOF Audits Google Sheets — authoritative; 'computed' for jobs whose P&L was derived by summing line items from the stale audit_* tables — fallback)
-  - Line items (only when user asks for the breakdown): lot_land, permitting, cost_site_work, cost_vertical, cost_options, closing_cost, financing, insurance, warranty, builder_fee, dirt_total, dumpsters, env_total, utilities_total, monthly_interest, total_ap, actual_vertical, actual_site_work.
-  - Margin thresholds: net_margin < 0 → loss; 0 ≤ x < 0.08 → at-risk; 0.08 ≤ x < 0.12 → watch; ≥ 0.12 → good.
+  - Flags: margin_status ('good'|'watch'|'at-risk'|'loss'|'missing revenue'|'missing cost') — based on net_margin (Audits). data_quality_flag, pl_readiness.
+  - Provenance: pl_source ('sheet' = authoritative from Investor/BPOF Audits Google Sheets; 'computed' = derived by summing line items from stale audit_* tables).
+  - Line items: lot_land, permitting (single)/permitting_total (rolled), cost_site_work, cost_vertical, total_vertical (rolled), cost_options, closing_cost, financing, insurance, warranty, builder_fee, dirt_total, dumpsters, env_total, utilities_total, monthly_interest, total_ap, actual_vertical, actual_site_work.
+  - Margin thresholds (for Audit margin_status): net_margin < 0 → loss; 0 ≤ x < 0.08 → at-risk; 0.08 ≤ x < 0.12 → watch; ≥ 0.12 → good. For Estimated Final margin, apply the same thresholds to net_margin_estimated_final.
 - Exceptions: priority (P1/P2), exception_type, days_outstanding.
 
 ## KPI definitions (compute consistently with the dashboard)

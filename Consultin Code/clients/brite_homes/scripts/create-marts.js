@@ -143,16 +143,18 @@ async function run() {
         sm.notes AS sheet_notes,
         sm._source_sheet AS pl_source_sheet,
         CASE WHEN sm.job_id IS NOT NULL THEN TRUE ELSE FALSE END AS has_summary,
-        -- Cost line items (FLOAT64; NULL kept so we can tell "missing" from 0)
-        SAFE_CAST(c.Lot___Land AS FLOAT64) AS lot_land,
-        SAFE_CAST(c.Permitting AS FLOAT64) AS permitting,
-        SAFE_CAST(c.Site_Work AS FLOAT64) AS cost_site_work,
-        SAFE_CAST(c.Vertical AS FLOAT64) AS cost_vertical,
-        SAFE_CAST(c.Options AS FLOAT64) AS cost_options,
-        SAFE_CAST(c.Closing_Cost AS FLOAT64) AS closing_cost,
-        SAFE_CAST(c.Financing AS FLOAT64) AS financing,
-        SAFE_CAST(c.Insurance_Builder_s_Risk AS FLOAT64) AS insurance,
-        SAFE_CAST(c.Warranty AS FLOAT64) AS warranty,
+        -- Cost line items: prefer the freshly-imported summary value (sm.*)
+        -- over the stale 3/17 audit_* upload. For jobs in BOTH, summary wins;
+        -- for sheet-only jobs (no audit_costs row), summary is the only source.
+        COALESCE(sm.lot_land, SAFE_CAST(c.Lot___Land AS FLOAT64)) AS lot_land,
+        COALESCE(sm.permitting, SAFE_CAST(c.Permitting AS FLOAT64)) AS permitting,
+        COALESCE(sm.site_work, SAFE_CAST(c.Site_Work AS FLOAT64)) AS cost_site_work,
+        COALESCE(sm.vertical, SAFE_CAST(c.Vertical AS FLOAT64)) AS cost_vertical,
+        COALESCE(sm.options, SAFE_CAST(c.Options AS FLOAT64)) AS cost_options,
+        COALESCE(sm.closing_cost, SAFE_CAST(c.Closing_Cost AS FLOAT64)) AS closing_cost,
+        COALESCE(sm.financing, SAFE_CAST(c.Financing AS FLOAT64)) AS financing,
+        COALESCE(sm.insurance_builder_risk, SAFE_CAST(c.Insurance_Builder_s_Risk AS FLOAT64)) AS insurance,
+        SAFE_CAST(c.Warranty AS FLOAT64) AS warranty,  -- no sheet equivalent (Audits tab has no Warranty column)
         -- Dirt (total stays FLOAT64; line items individually too)
         COALESCE(SAFE_CAST(d.Import_Fill_Dirt AS FLOAT64), 0)
           + COALESCE(SAFE_CAST(d.Pad_Build AS FLOAT64), 0) AS dirt_total,
@@ -174,9 +176,11 @@ async function run() {
         SAFE_CAST(u.Water_Filtration_System AS FLOAT64) AS water_filtration_system,
         -- Interest (placeholder until Phase B brings in monthly interest from loan tracker)
         CAST(0 AS FLOAT64) AS monthly_interest,
-        -- AP & Builder Fee
+        -- AP & Builder Fee. builder_fee prefers the sheet-imported value
+        -- (audit_pl_summary.builder_fee from the Audits tab "Builder Fee" col),
+        -- falling back to the stale audit_bbg_ap.AP_to_BBG raw table.
         SAFE_CAST(ap.Total_AP AS FLOAT64) AS total_ap,
-        SAFE_CAST(bbg.AP_to_BBG AS FLOAT64) AS builder_fee,
+        COALESCE(sm.builder_fee, SAFE_CAST(bbg.AP_to_BBG AS FLOAT64)) AS builder_fee,
         -- Actuals
         SAFE_CAST(va.Vertical AS FLOAT64) AS actual_vertical,
         SAFE_CAST(va.Site_Work AS FLOAT64) AS actual_site_work,
@@ -278,10 +282,78 @@ async function run() {
         ) AS net_margin,
         CASE WHEN has_summary THEN 'sheet' ELSE 'computed' END AS pl_source
       FROM audit_margins
+    ),
+    -- ─────────────────────────────────────────────────────────────────
+    -- audit_pl_estimated_final: replicates the "Summary" tab's
+    -- "Estimated, final accounting P&L" formula. The Audits-tab Net Profit
+    -- only deducts the contract-side Total Cost; the Summary tab deducts
+    -- an ADDITIONAL bundle of post-close costs (property taxes, commissions,
+    -- warranty, COGS-closing) that the operations team applies as policy.
+    --
+    -- For job 00241-000042: Audits net_profit=$16,002 (sale - total_cost),
+    -- but the operator's expected final is $12,852 (after post-close costs).
+    --
+    -- Policy constants are encoded HERE in SQL because they're identical
+    -- across both Investor Audits and BPOF Audits books (verified 2026-05-28).
+    -- If the operations team changes a constant, update this CTE.
+    --
+    -- The estimate uses the Audits-tab Sales Price (contract value), NOT
+    -- any manual Sales Price override in the Summary tab — capturing those
+    -- overrides would require scraping the Summary tab per job (TODO P5).
+    -- ─────────────────────────────────────────────────────────────────
+    audit_pl_estimated_final AS (
+      SELECT
+        *,
+        -- Policy constants (flat-dollar)
+        CAST(1000.0 AS FLOAT64) AS property_taxes_on_hud_est,    -- HUD line item, paid at closing
+        CAST(1500.0 AS FLOAT64) AS cogs_closing_costs_est,        -- COGS-side closing fees (distinct from Closing Cost)
+        CAST(500.0 AS FLOAT64) AS warranty_coverage_est,          -- 2-10 home warranty
+        -- Commission policy (percent-of-sale)
+        IFNULL(sale_price, 0) * 0.02 AS cogs_commission_internal_est,
+        IFNULL(sale_price, 0) * 0.03 AS cogs_commission_external_est
+      FROM audit_final
+    ),
+    audit_pl_estimated_totals AS (
+      SELECT
+        *,
+        -- Total Other Expenses (matches Summary tab row 27 formula)
+        (property_taxes_on_hud_est
+          + IFNULL(seller_credit, 0)
+          + cogs_closing_costs_est
+          + cogs_commission_internal_est
+          + cogs_commission_external_est
+          + warranty_coverage_est
+          + IFNULL(total_financing, 0)
+        ) AS total_other_expenses_est,
+        -- "Gross construction" matches Summary tab row 17 (direct construction costs)
+        -- Note: uses permitting_total (rolled) not permitting (line item); total_vertical (rolled) not cost_vertical (line item).
+        -- Line item columns (cost_site_work, cost_options) come from the line-item line via audit_base's COALESCE.
+        -- Contingency is INTENTIONALLY excluded — Summary tab hardcodes it to $0 even when Audits shows a value.
+        (IFNULL(lot_land, 0)
+          + IFNULL(permitting_total, 0)
+          + IFNULL(cost_site_work, 0)
+          + IFNULL(total_vertical, 0)
+          + IFNULL(cost_options, 0)
+          + IFNULL(builder_fee, 0)
+          + IFNULL(insurance, 0)
+          + IFNULL(closing_cost, 0)
+        ) AS construction_costs_summary_est
+      FROM audit_pl_estimated_final
     )
     SELECT
       *,
+      -- ─── Estimated-final Net Profit (matches Summary tab semantics) ───
+      -- Net Profit = Sales Price - Construction Costs (Summary def) - Total Other Expenses
+      -- For sold/contracted jobs, prefer this over net_profit for the operator's mental model.
+      CASE WHEN sale_price > 0
+        THEN sale_price - construction_costs_summary_est - total_other_expenses_est
+        ELSE NULL END AS net_profit_estimated_final,
+      CASE WHEN sale_price > 0
+        THEN (sale_price - construction_costs_summary_est - total_other_expenses_est) / sale_price
+        ELSE NULL END AS net_margin_estimated_final,
       -- margin_status: traffic light based on FINAL net_profit/net_margin.
+      -- Uses the Audits-tab Net Profit (contract-side). For an "operator's final" view,
+      -- consumers should switch to net_margin_estimated_final and re-bucket.
       CASE
         WHEN sale_price IS NULL OR sale_price <= 0 THEN 'missing revenue'
         WHEN total_cost IS NULL OR total_cost <= 0 THEN 'missing cost'
@@ -306,7 +378,7 @@ async function run() {
         WHEN sale_price > 0 OR total_cost > 0 THEN 'partial'
         ELSE 'blocked'
       END AS pl_readiness
-    FROM audit_final
+    FROM audit_pl_estimated_totals
     ORDER BY community, lot
   `);
 
