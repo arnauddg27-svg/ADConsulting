@@ -29,11 +29,35 @@ Brite Homes is a residential homebuilder. A "job" is one home/lot moving through
 
 ### Lifecycle (job_type / current_stage)
 - "CO" = Certificate of Occupancy (home complete enough to occupy). Stage label "100%. Receive CO".
-- "CO'ed not closed" / "coed" / "CO'd" = finished home not yet closed/sold: job_type CONTAINS "SFR Completed (not closed)".
-- "Active construction" = job_type CONTAINS one of: "SFR Construction In Progress", "Awaiting CO", "On Hold", "POs Released".
 - "Spec" = builder-owned / speculative home.
-- "Closed" sale = sales.status CONTAINS "closed"; "open" = does NOT contain "closed".
 - current_stage is the milestone bucket WITH a percentage prefix, e.g. "75% Electrical Trimout", "100%. Receive CO".
+
+#### job_type — the canonical lifecycle classifier (CRITICAL)
+The \`job_type\` column on \`stg_centralized_data_*\` is the ground-truth lifecycle label for each home. There are exactly **9 possible values** across the whole portfolio:
+
+| job_type                       | Meaning                                              | "Closed"? |
+|--------------------------------|------------------------------------------------------|-----------|
+| SFR Completed & Closed         | Single-family home built AND sold (cash transferred) | **YES**   |
+| SFR Completed (not closed)     | Built, has C/O, but NOT yet sold                     | **NO**    |
+| Leased: Property Management    | Operator kept the home and is renting it             | **NO** (no sale will happen) |
+| SFR Construction In Progress   | Still being built                                    | NO        |
+| Permitting                     | Pre-construction, in permit phase                    | NO        |
+| POs Released                   | POs issued, work not yet started                     | NO        |
+| On Hold                        | Paused                                               | NO        |
+| Development                    | Land development phase                               | NO        |
+| Lot                            | Just a lot, no home yet                              | NO        |
+
+#### "Closed" vs "Not closed" — canonical filters
+- **"Closed"** (sold for cash) = \`job_type = 'SFR Completed & Closed'\`. Equivalent to \`sales_status IN ('Closed', 'Sold')\`.
+- **"Not closed"** (any home that hasn't been sold yet) = \`job_type != 'SFR Completed & Closed'\` (or \`job_type NOT LIKE '%& Closed'\`). Equivalent to \`sales_status IS NULL OR sales_status NOT IN ('Closed', 'Sold')\`.
+  - Includes ALL of: Leased rentals, SFR Completed (not closed), SFR Construction In Progress, Permitting, POs Released, On Hold, Development, Lot.
+  - **WHEN A USER ASKS "show me homes not closed" for a project/area** (e.g. "YKOS homes not closed", "Brite homes not closed in Ocala") — use \`job_type != 'SFR Completed & Closed'\`. **Do NOT narrow to just "Leased: Property Management"** — that excludes the standing-inventory "SFR Completed (not closed)" homes, which are the most operationally important ones to highlight.
+- **"CO'ed not closed" / "coed" / "CO'd"** = a specific subset of "not closed": only \`job_type = 'SFR Completed (not closed)'\` (built, has C/O, awaiting sale).
+- **"Active construction"** = \`job_type IN ('SFR Construction In Progress', 'Permitting', 'POs Released', 'On Hold')\`.
+- **"Standing inventory"** = \`job_type IN ('SFR Completed (not closed)', 'Leased: Property Management')\` (homes done but not sold — either rented or sitting).
+- **Sales-table "closed"** (separate from job_type): in \`sales\` / \`sales_master\`, \`sales_status\` CONTAINS "closed"; "open" = does NOT contain "closed".
+
+When in doubt about which job_type values qualify, run \`SELECT DISTINCT job_type FROM brite_homes_staging.stg_centralized_data_current\` first — the 9 values above are the only ones that exist.
 
 ### Milestone progress — USE \`furthest_milestone_completed\`, NOT \`current_stage\`
 For any progress / aging / stuck question, use the **last milestone actually completed**, NOT the current stage.
