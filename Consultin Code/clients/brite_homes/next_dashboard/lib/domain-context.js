@@ -70,6 +70,31 @@ These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and 
   - Provenance: pl_source ('sheet' = authoritative from Investor/BPOF Audits Google Sheets; 'computed' = derived by summing line items from stale audit_* tables).
   - Line items: lot_land, permitting (single)/permitting_total (rolled), cost_site_work, cost_vertical, total_vertical (rolled), cost_options, closing_cost, financing, insurance, warranty, builder_fee, dirt_total, dumpsters, env_total, utilities_total, monthly_interest, total_ap, actual_vertical, actual_site_work.
   - Margin thresholds (for Audit margin_status): net_margin < 0 → loss; 0 ≤ x < 0.08 → at-risk; 0.08 ≤ x < 0.12 → watch; ≥ 0.12 → good. For Estimated Final margin, apply the same thresholds to net_margin_estimated_final.
+
+## Newly-wired raw tables (sourced nightly from Centralized Data 2.0)
+
+All of these are job-level (or task-level) and have a job_id column you can JOIN by. Column names retain their sheet form (PascalCase with underscores for spaces/special chars).
+
+- **brite_homes_raw.sales_master** (1,084 rows × 129 cols, all STRING) — master sales table. Distinct from the narrower brite_homes_raw.sales (contracts only). Use for portfolio-wide sales queries that need fields beyond contract_number/buyer/price.
+- **brite_homes_raw.construction_summary** (823 rows × 146 cols) — wide construction summary, Summary line type per job.
+- **brite_homes_raw.inventory_details** (1,615 × 153) — master inventory.
+- **brite_homes_raw.job_details** (1,250 × 151) — job details master.
+- **brite_homes_raw.task_completion** (11,421 × 18) — per-task completion: Cost_Code, Task_Name, Supplier, P_O_, Subtotal, Tax, Complete_Total, Contract_Type, Completed_Date, Completed_By, Task_ID. Use for "who supplied X for job Y" / "when was task Z completed".
+- **brite_homes_raw.loan_tracker** (276 × 37) — detailed loan tracking (Lender, Appraisal, Loan_Request_Date, Loan_Closing_Date, Loan_Expiration, Days_Until_Expiration, Loan_Number, Interest_Rate, Status). Richer than the loan_* columns on construction_milestones.
+- **brite_homes_raw.permitting_detail** (732 × 41) — permit detail (City, Owner, Status, NOC_Date_Recorded, Permit_number, CM, Amount, Day_Check_Requested, Certificte_of_occupancy, etc.).
+- **brite_homes_raw.audits_snapshot** (206 × 59) — older snapshot of an Audits view, NOT the same as audit_pl_summary. Use audit_pl_summary for current P&L; audits_snapshot only when comparing against an older state.
+- **brite_homes_raw.progress_issue_notes** (136 × 20) — issue tracking per job (Issue_Category, Issue_Resolved, Assignee, Vendor, Root_Cause, Notes_Updates).
+- **brite_homes_raw.warranty_tickets** (69 × 21) — warranty tickets (Ticket #, Description, Supplier, Location, Category, Root_Cause, Work_Order_Status).
+- **brite_homes_raw.jme_future_dates** (904 × 11) — forecasted milestone dates per job (5%-100% milestone target dates from the JME template).
+- **brite_homes_raw.completions** (142 × 6) and **brite_homes_raw.in_construction** (134 × 6) — completed/in-progress jobs split by category (Site Work, Vertical) with Job_Cost_Amount vs Original_Budget vs Variance.
+- **brite_homes_raw.britten_variance** (83 × 6) — Britten-specific variance analysis.
+- **brite_homes_raw.takeoff_compare** (4,582 × 105, all STRING, no job_id column — plan-level not job-level) — plan/elevation takeoff comparison.
+
+## Per-job lookup tables (2-col: job_id → value)
+Useful for joining one specific metric onto another query. Generally these values mirror columns already on construction_milestones; use the lookup tables only if you need the exact published number from the operations team's manual lookup tab.
+- bpof_wip, bpof_drawable_wip, brite_assets_wip, brite_assets_drawable_wip — WIP variants
+- lot_cost_lookup, lot_cost_closed — lot cost variants (distinct from construction_milestones.lot_cost)
+- financing_cost, job_cost_on_closed — financial lookups
 - Exceptions: priority (P1/P2), exception_type, days_outstanding.
 
 ## KPI definitions (compute consistently with the dashboard)
