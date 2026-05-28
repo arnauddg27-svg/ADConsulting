@@ -62,6 +62,23 @@ describe("runGuardedSql", () => {
     expect(res.ok).toBe(true);
     expect(dryRunFn).toHaveBeenCalled();
   });
+
+  it("renders NUMERIC/Big values as clean number strings", async () => {
+    const big = { toString: () => "1234.56", toFixed: () => "1234.56", constructor: { name: "Big" } };
+    const res = await runGuardedSql("SELECT amt FROM `proj.brite_homes_marts.v`", { dryRunFn: vi.fn(async () => okStats), queryFn: vi.fn(async () => [{ amt: big }]), config });
+    expect(res.rows[0].amt).toBe("1234.56");
+  });
+
+  it("recurses structs and arrays instead of dumping JSON internals", async () => {
+    const res = await runGuardedSql("SELECT s, arr FROM `proj.brite_homes_marts.v`", { dryRunFn: vi.fn(async () => okStats), queryFn: vi.fn(async () => [{ s: { a: 1, b: "x" }, arr: [1, 2, 3] }]), config });
+    expect(res.rows[0].s).toEqual({ a: 1, b: "x" });
+    expect(res.rows[0].arr).toEqual([1, 2, 3]);
+  });
+
+  it("stringifies integers beyond MAX_SAFE_INTEGER", async () => {
+    const res = await runGuardedSql("SELECT n FROM `proj.brite_homes_marts.v`", { dryRunFn: vi.fn(async () => okStats), queryFn: vi.fn(async () => [{ n: 9007199254740992 }]), config });
+    expect(res.rows[0].n).toBe("9007199254740992");
+  });
 });
 
 describe("SQL_TOOL_DEFINITION", () => {
@@ -138,7 +155,7 @@ describe("runAskAgent", () => {
     const out = await runAskAgent({ messages: [{ role: "user", content: "q" }], schemaText: "S", streamModel, runSql, model: "m", onEvent: (e) => events.push(e) });
 
     expect(runSql).toHaveBeenCalledTimes(2);
-    expect(out.queriesRun).toBe(2);
+    expect(out.queriesRun).toBe(1); // the failed (0-byte) query no longer consumes a budget slot
     expect(events.some((e) => e.type === "tool_result" && e.error === "bad column")).toBe(true);
   });
 
@@ -169,6 +186,19 @@ describe("runAskAgent", () => {
     const answer = events.filter((e) => e.type === "text").map((e) => e.text).join("");
     expect(answer).not.toBe(""); // a fallback answer was produced
     expect(answer).toContain("Unrecognized name: foo"); // and it surfaces the last error
+    expect(events.at(-1).type).toBe("done");
+  });
+
+  it("never executes a tool_use from a turn that hit the output-token limit", async () => {
+    const streamModel = scriptedStreamModel([
+      { content: [toolUse("t1", "SELECT 1")], stop_reason: "max_tokens" },
+    ]);
+    const runSql = vi.fn(async () => ({ ok: true, columns: [], rows: [], rowCount: 0, bytesProcessed: 10, truncated: false }));
+    const events = [];
+    await runAskAgent({ messages: [{ role: "user", content: "q" }], schemaText: "S", streamModel, runSql, model: "m", onEvent: (e) => events.push(e) });
+
+    expect(runSql).not.toHaveBeenCalled(); // a truncated (possibly partial) tool_use must not run
+    expect(events.some((e) => e.type === "text")).toBe(true); // a clear note is shown
     expect(events.at(-1).type).toBe("done");
   });
 });

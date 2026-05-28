@@ -3,11 +3,23 @@ import { DOMAIN_CONTEXT } from "./domain-context.js";
 
 function compactValue(v) {
   if (v === null || v === undefined) return null;
-  if (typeof v === "object") {
-    if ("value" in v) return compactValue(v.value);
-    const s = JSON.stringify(v);
-    return s.length > 200 ? `${s.slice(0, 200)}…` : s;
+  if (typeof v === "bigint") {
+    const n = Number(v);
+    return Number.isSafeInteger(n) ? n : v.toString();
   }
+  if (typeof v === "object") {
+    const ctor = (v.constructor && v.constructor.name) || "";
+    // BigQuery temporal wrappers (BigQueryDate/Timestamp/Datetime/Time) and simple {value} wrappers.
+    if ("value" in v && (Object.keys(v).length === 1 || /^BigQuery/.test(ctor))) return compactValue(v.value);
+    // NUMERIC / BIGNUMERIC arrive as big.js instances — render as a clean number string.
+    if (ctor === "Big" || typeof v.toFixed === "function") return v.toString();
+    if (Array.isArray(v)) return v.slice(0, 25).map(compactValue);
+    // Generic STRUCT/RECORD — recurse (bounded) instead of dumping JSON internals.
+    const out = {};
+    for (const k of Object.keys(v).slice(0, 40)) out[k] = compactValue(v[k]);
+    return out;
+  }
+  if (typeof v === "number" && Number.isInteger(v) && !Number.isSafeInteger(v)) return String(v);
   if (typeof v === "string" && v.length > 200) return `${v.slice(0, 200)}…`;
   return v;
 }
@@ -105,7 +117,7 @@ export async function runAskAgent({
   let totalBytesProcessed = 0;
   let sawText = false;
   let lastError = null;
-  const maxTurns = maxQueries + 3;
+  const maxTurns = maxQueries + 4; // extra turns so cheap exploration doesn't starve real queries
 
   const emitText = (t) => {
     if (t && t.trim()) sawText = true;
@@ -141,24 +153,39 @@ export async function runAskAgent({
     });
     convo.push({ role: "assistant", content: result.content });
 
+    // A turn that hit the output-token limit may contain a partial/invalid tool_use — never
+    // execute it. Finish with whatever was produced plus a clear note.
+    if (result.stop_reason === "max_tokens") {
+      onEvent({
+        type: "text",
+        text: sawText
+          ? "\n\n_(Response was cut off — ask a more specific question for the full result.)_"
+          : "My response was cut off before I could answer. Please ask a more specific question.",
+      });
+      onEvent({ type: "done", model, queriesRun, totalBytesProcessed });
+      return { queriesRun, totalBytesProcessed };
+    }
+
     const toolUses = budgetExhausted ? [] : (result.content || []).filter((b) => b.type === "tool_use");
     if (!toolUses.length) return finish();
 
     const toolResults = [];
     for (const tu of toolUses) {
       const sql = String(tu.input?.sql || "");
-      onEvent({ type: "tool_use", sql, purpose: String(tu.input?.purpose || "") });
+      onEvent({ type: "tool_use", id: tu.id, sql, purpose: String(tu.input?.purpose || "") });
       if (queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes) {
         const message = "Query budget reached for this question; this query was not run. Answer using the data already gathered.";
-        onEvent({ type: "tool_result", error: message });
+        onEvent({ type: "tool_result", id: tu.id, error: message });
         toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: message });
         continue;
       }
-      queriesRun += 1;
       const res = await runSql(sql);
       if (res.ok) {
         totalBytesProcessed += Number(res.bytesProcessed || 0);
-        onEvent({ type: "tool_result", columns: res.columns, rows: res.rows, rowCount: res.rowCount, bytesProcessed: res.bytesProcessed, truncated: res.truncated });
+        // Only queries that actually scanned data count against the budget, so cheap
+        // metadata/INFORMATION_SCHEMA lookups and validation rejections don't starve real analysis.
+        if (Number(res.bytesProcessed || 0) > 0) queriesRun += 1;
+        onEvent({ type: "tool_result", id: tu.id, columns: res.columns, rows: res.rows, rowCount: res.rowCount, bytesProcessed: res.bytesProcessed, truncated: res.truncated });
         toolResults.push({
           type: "tool_result",
           tool_use_id: tu.id,
@@ -166,7 +193,7 @@ export async function runAskAgent({
         });
       } else {
         lastError = res.error;
-        onEvent({ type: "tool_result", error: res.error });
+        onEvent({ type: "tool_result", id: tu.id, error: res.error });
         toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: res.error });
       }
     }

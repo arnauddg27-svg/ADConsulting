@@ -28,8 +28,10 @@ function createStreamModel(anthropic, model) {
   return async ({ system, messages, tools, forceAnswer, onText }) => {
     const stream = anthropic.messages.stream({
       model,
-      max_tokens: 2048,
-      system,
+      max_tokens: 4096,
+      // Cache the large, stable prefix (domain glossary + schema catalog) so it isn't
+      // re-billed on every turn of a multi-query question.
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       messages,
       ...(tools && tools.length ? { tools } : {}),
       // On the final turn, keep the tool defined (so the tool-use history stays valid)
@@ -103,7 +105,7 @@ export async function POST(request) {
           streamModel,
           runSql,
           model,
-          maxQueries: Number(process.env.ASK_MAX_QUERIES) || 5,
+          maxQueries: Number(process.env.ASK_MAX_QUERIES) || 8,
           maxTotalBytes: Number(process.env.ASK_MAX_TOTAL_BYTES) || 6 * 1024 ** 3,
           onEvent: send,
         });
