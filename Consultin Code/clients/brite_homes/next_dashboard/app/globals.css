@@ -2057,7 +2057,7 @@ body > div { height: 100%; min-height: 0; }
 .ask-turn--user {
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent-dim) 60%, var(--bg-surface)), var(--bg-surface));
   border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
-  align-self: flex-end;
+  align-self: center;
   max-width: min(75ch, 100%);
 }
 .ask-turn--assistant {
