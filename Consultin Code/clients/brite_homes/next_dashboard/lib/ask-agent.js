@@ -1,4 +1,4 @@
-import { preCheckSql, evaluateDryRun, normalizeSql } from "./sql-guard.js";
+import { preCheckSql, evaluateDryRun, normalizeSql, isMetadataOnlyQuery } from "./sql-guard.js";
 import { DOMAIN_CONTEXT } from "./domain-context.js";
 
 function compactValue(v) {
@@ -35,15 +35,28 @@ export async function runGuardedSql(sql, { dryRunFn, queryFn, config, rowCap = 5
   const pre = preCheckSql(cleaned);
   if (!pre.ok) return { ok: false, error: pre.reason };
 
-  let stats;
-  try {
-    stats = await dryRunFn(cleaned);
-  } catch (e) {
-    return { ok: false, error: `Query failed validation: ${e.message}` };
-  }
+  // Fast path — INFORMATION_SCHEMA-only queries skip the ~300-500ms dry-run.
+  // They never bill bytes and are validated against the allowlist by parsing
+  // the SQL itself (project + dataset extracted from the 4-part references).
+  // BigQuery's maximumBytesBilled in queryFn still hard-caps runaway scans, so
+  // even a bug here can't blow the byte budget.
+  const isMetaQuery = isMetadataOnlyQuery(cleaned, {
+    projectId: config.projectId,
+    allowedDatasets: config.allowedDatasets,
+  });
 
-  const evaluation = evaluateDryRun(stats, config);
-  if (!evaluation.ok) return { ok: false, error: evaluation.reason };
+  let bytesProcessed = 0;
+  if (!isMetaQuery) {
+    let stats;
+    try {
+      stats = await dryRunFn(cleaned);
+    } catch (e) {
+      return { ok: false, error: `Query failed validation: ${e.message}` };
+    }
+    const evaluation = evaluateDryRun(stats, config);
+    if (!evaluation.ok) return { ok: false, error: evaluation.reason };
+    bytesProcessed = evaluation.bytes;
+  }
 
   let fetched;
   try {
@@ -55,7 +68,7 @@ export async function runGuardedSql(sql, { dryRunFn, queryFn, config, rowCap = 5
   const truncated = fetched.length > rowCap;
   const rows = fetched.slice(0, rowCap).map(compactRow);
   const columns = rows.length ? Object.keys(rows[0]) : [];
-  return { ok: true, columns, rows, rowCount: rows.length, bytesProcessed: evaluation.bytes, truncated };
+  return { ok: true, columns, rows, rowCount: rows.length, bytesProcessed, truncated };
 }
 
 export const SQL_TOOL_DEFINITION = {
@@ -228,34 +241,66 @@ export async function runAskAgent({
       : (result.content || []).filter((b) => b.type === "tool_use" && b.name === "run_sql");
     if (!toolUses.length) return finish();
 
-    const toolResults = [];
-    for (const tu of toolUses) {
+    // Parallel tool execution: when Claude returns multiple tool_use blocks in a
+    // single turn (e.g. "show me YKOS rentals + their payment history" → two
+    // separate SELECTs), run them concurrently instead of serially. Cuts a
+    // 2-query turn roughly in half. Budget accounting is best-effort: we reserve
+    // slots up front, then run all reserved queries in parallel.
+    const slotsRemaining = Math.max(0, maxQueries - queriesRun);
+    const overByteCap = totalBytesProcessed >= maxTotalBytes;
+
+    // Emit tool_use events in original order BEFORE kicking off queries, so the
+    // UI shows query cards in deterministic order even though results arrive in
+    // completion order.
+    const plans = toolUses.map((tu, idx) => {
       const sql = String(tu.input?.sql || "");
-      onEvent({ type: "tool_use", id: tu.id, sql, purpose: String(tu.input?.purpose || "") });
-      if (queriesRun >= maxQueries || totalBytesProcessed >= maxTotalBytes) {
-        const message = "Query budget reached for this question; this query was not run. Answer using the data already gathered.";
-        onEvent({ type: "tool_result", id: tu.id, error: message });
-        toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: message });
-        continue;
-      }
-      const res = await runSql(sql);
-      if (res.ok) {
-        totalBytesProcessed += Number(res.bytesProcessed || 0);
-        // Only queries that actually scanned data count against the budget, so cheap
-        // metadata/INFORMATION_SCHEMA lookups and validation rejections don't starve real analysis.
-        if (Number(res.bytesProcessed || 0) > 0) queriesRun += 1;
-        onEvent({ type: "tool_result", id: tu.id, columns: res.columns, rows: res.rows, rowCount: res.rowCount, bytesProcessed: res.bytesProcessed, truncated: res.truncated });
-        toolResults.push({
-          type: "tool_result",
-          tool_use_id: tu.id,
-          content: JSON.stringify({ columns: res.columns, rows: res.rows, rowCount: res.rowCount, truncated: res.truncated }),
-        });
-      } else {
+      const purpose = String(tu.input?.purpose || "");
+      onEvent({ type: "tool_use", id: tu.id, sql, purpose });
+      // First N slots get to run; rest are over budget. INFORMATION_SCHEMA-only
+      // queries return 0 bytes and don't count against queriesRun anyway, but we
+      // still cap the parallel fan-out by slotsRemaining to limit blast radius.
+      const canRun = !overByteCap && idx < slotsRemaining;
+      return { tu, sql, canRun };
+    });
+
+    const toolResults = await Promise.all(
+      plans.map(async ({ tu, sql, canRun }) => {
+        if (!canRun) {
+          const message = "Query budget reached for this question; this query was not run. Answer using the data already gathered.";
+          onEvent({ type: "tool_result", id: tu.id, error: message });
+          return { type: "tool_result", tool_use_id: tu.id, is_error: true, content: message };
+        }
+        const res = await runSql(sql);
+        if (res.ok) {
+          // Mutations are safe — Node is single-threaded so each await resumption
+          // is serialized. The values reflect the in-turn order completed.
+          totalBytesProcessed += Number(res.bytesProcessed || 0);
+          if (Number(res.bytesProcessed || 0) > 0) queriesRun += 1;
+          onEvent({
+            type: "tool_result",
+            id: tu.id,
+            columns: res.columns,
+            rows: res.rows,
+            rowCount: res.rowCount,
+            bytesProcessed: res.bytesProcessed,
+            truncated: res.truncated,
+          });
+          return {
+            type: "tool_result",
+            tool_use_id: tu.id,
+            content: JSON.stringify({
+              columns: res.columns,
+              rows: res.rows,
+              rowCount: res.rowCount,
+              truncated: res.truncated,
+            }),
+          };
+        }
         lastError = res.error;
         onEvent({ type: "tool_result", id: tu.id, error: res.error });
-        toolResults.push({ type: "tool_result", tool_use_id: tu.id, is_error: true, content: res.error });
-      }
-    }
+        return { type: "tool_result", tool_use_id: tu.id, is_error: true, content: res.error };
+      }),
+    );
     convo.push({ role: "user", content: toolResults });
   }
 

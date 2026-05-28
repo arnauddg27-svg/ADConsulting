@@ -170,7 +170,7 @@ export async function POST(request) {
         query: sql,
         useLegacySql: false,
         maximumBytesBilled: String(maxBytes),
-        jobTimeoutMs: Number(process.env.ASK_QUERY_TIMEOUT_MS) || 30000,
+        jobTimeoutMs: Number(process.env.ASK_QUERY_TIMEOUT_MS) || 20000,
       });
       // Cancel the BigQuery job if the client disconnects so we stop paying for it.
       if (signal) {

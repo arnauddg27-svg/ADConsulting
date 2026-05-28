@@ -43,6 +43,34 @@ export function preCheckSql(sql) {
   return { ok: true };
 }
 
+// Fast path detector: returns true when the SQL is a pure INFORMATION_SCHEMA
+// lookup against the allowlisted project + datasets. INFORMATION_SCHEMA queries
+// scan 0 billed bytes and are safe; the bot uses them constantly to discover
+// columns when its first guess misses. Skipping the ~300-500ms dry-run round
+// trip is pure latency saved. Strict by design — any FROM/JOIN that is not a
+// 4-part project.dataset.INFORMATION_SCHEMA.kind reference falls through to the
+// regular dry-run path.
+export function isMetadataOnlyQuery(sql, { projectId, allowedDatasets }) {
+  const code = stripStrings(stripComments(normalizeSql(sql))).trim();
+  if (!code) return false;
+  if (!/\bINFORMATION_SCHEMA\.\w+\b/i.test(code)) return false;
+  // Strip backticks so the parser sees plain dotted identifiers.
+  const unquoted = code.replace(/`([^`]+)`/g, "$1");
+  // Walk every FROM/JOIN target. Each must be a 4-part INFO_SCHEMA reference.
+  const refRe = /\b(?:FROM|JOIN)\s+([A-Za-z][\w-]*(?:\.[A-Za-z][\w]*){2,3})\b/gi;
+  let count = 0;
+  let m;
+  while ((m = refRe.exec(unquoted)) !== null) {
+    count += 1;
+    const parts = m[1].split(".");
+    if (parts.length < 4) return false; // 3-part = regular table, not INFO_SCHEMA
+    if (parts[0] !== projectId) return false;
+    if (!allowedDatasets.includes(parts[1])) return false;
+    if (parts[2].toUpperCase() !== "INFORMATION_SCHEMA") return false;
+  }
+  return count > 0;
+}
+
 export function evaluateDryRun(stats, config) {
   const {
     statementType,
