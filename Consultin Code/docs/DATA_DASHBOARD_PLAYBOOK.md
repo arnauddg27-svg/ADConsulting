@@ -13,6 +13,8 @@
 > long-form operational framework.
 > If this playbook conflicts with the SOP or KPI reference, the SOP and KPI reference win.
 
+> **2026-05-27 update:** KPI labels must disclose their source and denominator. In particular, milestone progress should use ERP milestone fields when available, PO variance must name the sent-PO budget scope when applicable, and only one scheduled writer should refresh a given raw/mart table family.
+
 ---
 
 ## Table of Contents
@@ -50,6 +52,8 @@ The framework is designed so that a new client can be onboarded in 10 business d
 | 3 | **Modular Architecture** | Sections, tabs, KPI cards, and panels are plug-and-play modules. A dashboard can have 2 sections or 7 sections. Adding or removing a module requires no structural changes to other modules. |
 | 4 | **Standardized Visuals** | All clients share the same design system: color palette, typography, layout grid, component library. Only data and queries differ between clients. The visual layer is global. |
 | 5 | **Documented Everything** | Every decision, mapping, transformation, and assessment is documented. The documentation is the product just as much as the dashboard itself. A new developer can pick up any client engagement by reading the docs. |
+| 6 | **One Scheduled Writer Per Destination** | Each raw/mart table family has one authoritative refresh path. Legacy test jobs must be paused or migrated before production use. |
+| 7 | **Metric Labels Match Formulas** | Labels such as Actual, Variance, Progress, Completion, and Margin must name the exact denominator or proxy used. |
 
 ### 1.2 Technology Stack
 

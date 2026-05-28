@@ -10,6 +10,8 @@
 
 This document describes the step-by-step process for building `dashboard-shell.js` and its supporting data layer for each new client. The shell is not one-size-fits-all -- it is **derived from the client's KPI assessment** and only renders what the warehouse can actually support.
 
+2026-05-27 implementation note: when a client ERP exposes milestone progress, the data layer should surface that progress separately from task completion. Do not collapse milestone completion, task completion, committed PO exposure, invoice actuals, and paid cash into one generic "progress" or "actual" label. The UI label and panel note must match the formula.
+
 ---
 
 ## Prerequisites
@@ -22,8 +24,11 @@ Before building the shell, you must have completed:
 4. **BigQuery Connection** -- `.env.local` configured with service account credentials, project ID, and dataset names
 5. **Schema Type Check** -- All columns used in queries have verified types (see "Gotcha: Google Sheets Type Propagation" below)
 6. **XLSX Import** (if applicable) -- `import_xlsx_to_bq.js` configured and run for any xlsx-sourced tables
+7. **Scheduled Refresh Audit** -- only one production scheduler writes each raw/mart table family; any legacy or test ingestion jobs are paused or confirmed schema-compatible
 
 Hard rule: do not start shell/UI work until the KPI logic registry is complete for the tabs being built. If a metric does not have a confirmed date basis and drilldown row scope, the UI label must be renamed or the KPI must be blocked.
+
+Second hard rule: do not deploy a shell that depends on new warehouse columns until the scheduled refresh path has been verified after a real run. A local manual sync is not enough if a separate scheduler can overwrite the table schema later.
 
 ---
 

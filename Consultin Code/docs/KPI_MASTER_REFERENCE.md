@@ -26,11 +26,11 @@ Cross-reference this list against every new client's warehouse audit to determin
 - Recommended source: `construction_milestones` (raw) or `mart_lot_pipeline`
 - Chart type: Horizontal bar or Kanban board
 
-### CP-02: Completion Percentage Distribution
-- Description: Histogram or average completion % across active jobs
-- Required fields: `completion_pct`, `job_id`
-- Minimum threshold: `completion_pct` ≥ 50% complete
-- Recommended source: `construction_milestones` (raw)
+### CP-02: Completion Percentage / Milestone Progress Distribution
+- Description: Histogram or average completion across active jobs. Use ERP milestone progress when available; use task completion percentage only as a documented fallback.
+- Required fields: Preferred: `progress_percent`, `progress_milestone`, `job_id`. Fallback: `completion_pct`, `job_id`.
+- Minimum threshold: `progress_percent` or fallback `completion_pct` >= 50% complete
+- Recommended source: `construction_milestones` (raw), ERP schedule table, or `mart_lot_pipeline`
 - Chart type: Histogram or gauge
 
 ### CP-03: Milestone Tracker by Job
@@ -157,9 +157,9 @@ Cross-reference this list against every new client's warehouse audit to determin
 - Chart type: Bar chart or table
 
 ### FP-02: Variance by Job
-- Description: Budget minus actual cost, flagging over-budget jobs
-- Required fields: `variance_in_flight` or (`original_budget` AND `job_cost_amount`)
-- Minimum threshold: `variance_in_flight` ≥ 30% complete
+- Description: Budget minus actual cost, flagging over-budget jobs. If the metric compares committed POs only against budgeted scope with sent POs, label it `PO Variance` and document the scoped denominator.
+- Required fields: Full variance: `variance_in_flight` or (`original_budget` AND `job_cost_amount`). PO-scoped variance: `po_sent_budget_total`, `committed_po_total`, `job_id`.
+- Minimum threshold: Full variance field or PO-scoped fields >= 30% complete
 - Recommended source: `construction_milestones` (raw) or `mart_job_profitability`
 - Chart type: Bar chart with positive/negative coloring
 
@@ -401,9 +401,10 @@ Cross-reference this list against every new client's warehouse audit to determin
 - Minimum threshold: Both ≥ 80% complete
 - Recommended source: `vendors` (raw) or `mart_vendor_scorecard`
 
-### VN-02: Vendor Variance (Invoice vs PO)
-- Required fields: `vendor_name`, `po_amount`, `invoiced_amount`
-- Minimum threshold: All three ≥ 70% complete
+### VN-02: Vendor Variance
+- Required fields: Invoice variance requires `vendor_name`, `po_amount`, `invoiced_amount`. PO exposure variance may use `vendor_name`, `po_amount`, committed PO totals, and the chosen budget denominator.
+- Minimum threshold: Fields used by the selected denominator >= 70% complete
+- Label rule: use invoice wording only when invoice fields are populated. Use PO exposure or PO variance wording when invoice fields are unavailable.
 
 ### VN-03: Open PO Count by Vendor
 - Required fields: `vendor_name`, `status`, `po_number`

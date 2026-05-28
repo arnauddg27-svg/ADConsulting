@@ -14,7 +14,7 @@ Use this list when building a new client dashboard. Each KPI includes the ID, na
 | ID | KPI Name | Required Fields | Chart Type |
 |----|----------|----------------|------------|
 | CP-01 | Jobs by Stage | `current_stage`, `job_id` | Horizontal bar / Kanban |
-| CP-02 | Completion % Distribution | `completion_pct`, `job_id` | Histogram / Gauge |
+| CP-02 | Completion % / Milestone Progress Distribution | `progress_percent` + `progress_milestone` when ERP provides them; fallback `completion_pct`, `job_id` | Histogram / Gauge |
 | CP-03 | Milestone Tracker by Job | `job_start`, `clear_lot_date`, `build_pad_date`, `pour_slab_date`, `block_house_date`, `frame_house_date`, `dry_in_roof_date`, `insulate_house_date`, `drywall_house_date`, `flooring_install_date`, `cabinet_install_date`, `hot_check_date`, `ac_startup_date`, `receive_co_date`, `completion_date` | Gantt / Timeline |
 | CP-04 | Avg Cycle Time (Start→Completion) | `start_to_completion_days`, `community`, `plan_name` | Bar chart by community/plan |
 | CP-05 | Phase Cycle Times | `start_to_pad_days`, `block_to_insulation_days`, `insulation_to_flooring_days`, `flooring_to_hot_check_days`, `hot_check_to_completion_days` | Stacked bar / Waterfall |
@@ -39,7 +39,7 @@ Use this list when building a new client dashboard. Each KPI includes the ID, na
 | ID | KPI Name | Required Fields | Chart Type |
 |----|----------|----------------|------------|
 | FP-01 | Budget vs Actual by Job | `original_budget`, `job_cost_amount` | Bar chart / Table |
-| FP-02 | Variance by Job | `variance_in_flight` or (`original_budget` + `job_cost_amount`) | Bar chart (pos/neg) |
+| FP-02 | Variance by Job | Full variance: `variance_in_flight` or (`original_budget` + `job_cost_amount`). PO-scoped variance: `po_sent_budget_total` + `committed_po_total` with label `PO Variance` | Bar chart (pos/neg) |
 | FP-03 | WIP Summary | `wip`, `community` | KPI card + table |
 | FP-04 | WIP Without Lot Cost | `wip_without_lot` | KPI card |
 | FP-05 | Lot Cost Summary | `lot_cost`, `community` | KPI card + bar |
@@ -100,7 +100,7 @@ Use this list when building a new client dashboard. Each KPI includes the ID, na
 | ID | KPI Name | Required Fields | Chart Type |
 |----|----------|----------------|------------|
 | VN-01 | Total PO Value by Vendor | `vendor_name`, `po_amount` | Bar / Table |
-| VN-02 | Vendor Variance (Invoice vs PO) | `vendor_name`, `po_amount`, `invoiced_amount` | Bar / Table |
+| VN-02 | Vendor Variance | Invoice variance requires `vendor_name`, `po_amount`, `invoiced_amount`. PO exposure variance may use committed PO scope, but must not be labeled invoice variance. | Bar / Table |
 | VN-03 | Open PO Count by Vendor | `vendor_name`, `status`, `po_number` | Table |
 | VN-04 | Vendor Ranking | `vendor_name`, `avg_variance_pct`, `total_po_value` | Ranked table |
 
@@ -194,12 +194,12 @@ Use this list when building a new client dashboard. Each KPI includes the ID, na
 
 | Domain | Key Fields | Min Completeness |
 |--------|-----------|-----------------|
-| Construction Progress | current_stage, completion_pct, milestone dates | 40–60% |
+| Construction Progress | current_stage, progress_percent/progress_milestone when available, completion_pct fallback, milestone dates | 40-60% |
 | Job Profitability | original_budget, job_cost_amount, variance_in_flight | 30% |
 | Loan Tracking | lender, loan_amount, total_drawn, loan_days_until_expiration | 20% |
 | Sales | sale_price, status, contract_date, projected_close, agent_name | 40–60% |
 | Geographic | county, city, company_name | 90% |
-| Vendor Scorecard | vendor_name, po_amount, invoiced_amount | 70% |
+| Vendor Scorecard | vendor_name, po_amount; invoiced_amount only required for invoice variance | 70% |
 | Exception Center | severity, exception_type, days_outstanding | 80% |
 | Land Acquisition | deal_status, contract_price, closing_date, city | 40–90% |
 | Permitting | job_type, job_start, current_stage, city | 40–90% |

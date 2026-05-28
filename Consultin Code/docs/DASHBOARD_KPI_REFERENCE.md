@@ -1,6 +1,6 @@
 # Dashboard & KPI Reference
 
-**Canonical source of truth** - 2026-04-30
+**Canonical source of truth** - updated 2026-05-27
 
 This document consolidates the dashboard architecture, the KPI catalogue, and the data model for builder operations platforms. It reflects what is actually implemented today in:
 
@@ -12,6 +12,10 @@ This document consolidates the dashboard architecture, the KPI catalogue, and th
 Companion process standard:
 
 - **Dashboard building SOP** - [`DASHBOARD_BUILDING_SOP.md`](./DASHBOARD_BUILDING_SOP.md) defines the build sequence, KPI definition template, date-basis rules, drilldown contract, validation checklist, and definition of done.
+
+Client-specific implementation references:
+
+- **FSP Builder Ops Dashboard** - [`../clients/fsp/FSP_DASHBOARD_KPI_REFERENCE.md`](../clients/fsp/FSP_DASHBOARD_KPI_REFERENCE.md) defines the live FSP dashboard surfaces, milestone progress logic, PO variance scope, BigQuery tables, refresh jobs, and validation checks.
 
 When the older docs (`KPI_GUIDE.md`, `KPI_LIST.md`, `KPI_MASTER_REFERENCE.md`, `DASHBOARD_SHELL_BUILD_GUIDE.md`, `DASHBOARD_DESIGN_SYSTEM.md`, `DATA_DASHBOARD_PLAYBOOK.md`) conflict with this one, **this one wins**. Older docs remain for historical reference and deeper narrative.
 
@@ -234,6 +238,20 @@ Minimum required definition fields:
 | Readiness | `ready`, `partial`, `blocked`, or `renamed` |
 
 Do not ship a KPI card, chart, timeline, or crosstab if the label is broader than the logic. Rename the visual or block the KPI until the source data supports it.
+
+### Layer-A precision rules added from the FSP build
+
+These rules apply to all client dashboards, not just FSP.
+
+| Topic | Required standard | Why it matters |
+|---|---|---|
+| Milestone progress | If the ERP exposes milestone progress, use it as the primary construction progress KPI. Task completion percentage is a fallback and must not be presented as the same thing. | Task rows can be sparse, ordered early, or administratively incomplete. ERP milestone completion is usually closer to the field team's operating truth. |
+| Progress labels | Display milestone progress as both percent and current milestone, for example `25% Block House`. Store whole-number source percent separately from decimal display percent. | A bare percent hides the operational state; a milestone without a percent hides relative completion. |
+| Task status counts | Keep task counts for workload and queue management, not as the main job-progress source when milestone progress exists. | Prevents "completed tasks / total tasks" from overstating or understating construction progress. |
+| PO variance | Name the denominator. If variance is measured only against sent-PO scope, label it `PO Variance` and show `PO Budget`, not total job budget. | Prevents finance users from reading scoped PO exposure as full job budget variance. |
+| Actual spend proxies | If the dashboard uses completed-task budget as an actual/progress proxy, the panel note must say so. Do not call it invoice actuals or paid cost. | Completed scope, committed POs, invoices, and paid cash answer different questions. |
+| Refresh ownership | Exactly one scheduled ingestion path should write a given raw/mart table set unless the destinations are different. | Competing schedulers can silently replace schemas and break production dashboards. |
+| Schema guards | KPI release checks must include required-column validation for any newly introduced KPI fields. | A successful deploy can still fail if scheduled ingestion rewrites the warehouse with an older schema. |
 
 ---
 

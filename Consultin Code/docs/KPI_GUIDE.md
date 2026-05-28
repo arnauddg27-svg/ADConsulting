@@ -62,12 +62,15 @@ The loan section monitors your construction financing — how much you've borrow
 
 The core of operations — tracking every job from dirt to CO (Certificate of Occupancy).
 
+**Current standard:** when an ERP exposes milestone progress, the dashboard should use that milestone progress as the primary job-completion signal. Task completion percentage is still useful for work queues, but it should not be treated as the same KPI. A good progress display shows both the percent and the milestone name, such as `25% Block House`.
+
 ### Pipeline & Status
 
 | KPI | What It Tells You |
 |-----|-------------------|
 | **Jobs by Stage** | How many homes are at each construction stage (slab, framing, drywall, etc.). Shows your pipeline flow and bottlenecks. |
-| **Completion % Distribution** | Are most jobs clustered at the beginning, middle, or end? A healthy pipeline is evenly distributed. |
+| **Milestone Progress** | How far each job has moved through the ERP milestone sequence. Prefer this over completed-task percentage when the ERP provides it. |
+| **Completion % Distribution** | Are most jobs clustered at the beginning, middle, or end? Use milestone completion when available; use task completion only as a documented fallback. |
 | **Jobs by Type** | Breakdown of Lot, Permitting, Construction, Completed, and Closed jobs. Your full inventory picture. |
 | **Homes in Construction** | How many active builds you have trending over time. Indicates whether you're scaling up or winding down. |
 | **Completions Over Time** | Cumulative homes completed vs your goal. Are you hitting your delivery targets? |
@@ -106,10 +109,13 @@ The core of operations — tracking every job from dirt to CO (Certificate of Oc
 
 Financial performance at the job and portfolio level.
 
+**Current standard:** every budget, actual, and variance metric must name its denominator. If the dashboard compares committed POs only against the budgeted scope that has sent POs, label it `PO Variance` and show `PO Budget`. Do not present sent-PO variance as full job-budget variance.
+
 | KPI | What It Tells You |
 |-----|-------------------|
 | **Budget vs Actual by Job** | Are you building homes for what you estimated? The gap between budget and actual cost is your variance. |
-| **Variance by Job** | Dollar amount over or under budget per job. Red = over budget. Green = under. Simple and critical. |
+| **Variance by Job** | Dollar amount over or under budget per job. The dashboard must disclose whether this is full budget vs actual, budget vs committed POs, or only sent-PO scope. |
+| **PO Variance** | Budgeted task scope with sent POs minus committed POs. Positive means remaining budget on sent-PO scope; negative means committed POs exceed that scoped budget. |
 | **WIP Summary** | Total Work In Progress dollars — your capital tied up in unfinished homes. |
 | **WIP Without Lot Cost** | Same as WIP but excluding lot cost. Shows pure construction exposure. |
 | **Lot Cost Summary** | Total capital tied up in land across your portfolio. |
@@ -185,10 +191,12 @@ Cross-cutting views that span all sections.
 
 Tracks your trade partners' performance and cost.
 
+Vendor metrics are only as strong as the PO and invoice fields exposed by the source system. If invoice actuals are unavailable, the dashboard should describe the scorecard as PO exposure, not invoice performance.
+
 | KPI | What It Tells You |
 |-----|-------------------|
 | **Total PO Value by Vendor** | How much you're spending with each trade. Identifies your biggest vendor relationships. |
-| **Vendor Variance** | Difference between what vendors quoted (PO) and what they invoiced. Consistent overages = renegotiation needed. |
+| **Vendor Variance** | Difference between committed PO scope and the chosen budget or invoice denominator. Only use invoice language when invoice fields are populated. |
 | **Open PO Count** | Outstanding purchase orders per vendor. Helps track commitment exposure. |
 | **Vendor Ranking** | Ranks vendors by cost performance. Who delivers on budget and who doesn't? |
 

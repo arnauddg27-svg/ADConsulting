@@ -2,6 +2,8 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import HeroShowcase from "@/components/sections/HeroShowcase";
+import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
+import { liquidActionClass } from "@/lib/buttonStyles";
 
 export default function Hero() {
   return (
@@ -41,10 +43,13 @@ export default function Hero() {
             </p>
 
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button href="/book/?source=home_hero" size="md" className="whitespace-nowrap px-5 py-3">
-                Book a Discovery Call
+              <TrackedCalendlyLink
+                source="home_hero"
+                className={liquidActionClass({ tone: "primary", size: "md", className: "whitespace-nowrap" })}
+              >
+                <span>Book a Discovery Call</span>
                 <ArrowRight size={16} />
-              </Button>
+              </TrackedCalendlyLink>
               <Button
                 href="/examples/"
                 variant="outline"
