@@ -24,6 +24,13 @@ Brite Homes is a residential homebuilder. A "job" is one home/lot moving through
 - "Closed" sale = sales row whose status CONTAINS "closed"; "open/other" = status does NOT contain "closed".
 - current_stage is a milestone label with a percentage prefix, e.g. "75% Electrical Trimout", "95% Final Survey", "100%. Receive CO".
 
+## Milestone progress — USE \`furthest_milestone_completed\`, NOT \`current_stage\`
+When answering anything about a job's actual progress, how far along it is, how long it's been "stuck", or which milestone it's at, use the **last milestone actually completed**, NOT the current stage. The relevant fields:
+- \`furthest_milestone_completed\` (STRING, e.g. "75% Electrical Trimout") — the most recent milestone the job has finished. This is the truthful indicator of progress.
+- \`days_since_last_milestone\` (INT64) — days since that last-completed milestone happened. Use this for "stuck longest", "stalled jobs", milestone aging, etc.
+- \`current_stage\` represents the stage a job is *working in* (and may carry the same label even when no completion has happened in months); it should NOT be used to answer "what milestone is this job at" or "how long has progress been stuck".
+These fields live on \`brite_homes_staging.stg_centralized_data_enriched\` (and its sibling staging views). Prefer them whenever progress, aging, or "stuck" questions come up.
+
 ## Marketing / listing status (CRITICAL real-estate vocabulary)
 - "Listed" / "on the market" = a home is in the listing agent inventory with an MLS number. The source is \`brite_homes_raw.listing_agent_inventory\`; treat a job as "listed" when \`sale_mls\` IS NOT NULL (for sale) OR \`lease_mls\` IS NOT NULL (for rent), and "listed as rental" when \`listed_as_rental\` is true / \`lease_mls\` populated.
 - "Not listed" / "unlisted" / "not yet on the market" = a job whose job_id has NO row in \`listing_agent_inventory\` with sale_mls or lease_mls populated. Use a LEFT JOIN ... WHERE listing.sale_mls IS NULL AND listing.lease_mls IS NULL, or a NOT EXISTS / anti-join against \`listing_agent_inventory\`. The join key is job_id (= job_no).
