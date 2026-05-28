@@ -15,6 +15,56 @@ const SUGGESTIONS = [
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
+// ── Attachments ──────────────────────────────────────────────────────────────
+// Accept PDFs + common web images. Sizes match the server-side cap so the user gets a
+// friendly client-side rejection instead of a 400 after a long upload.
+const ALLOWED_FILE_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+  "image/gif",
+]);
+const MAX_PER_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_PER_MSG_BYTES = 25 * 1024 * 1024;
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const url = String(reader.result || "");
+      const comma = url.indexOf(",");
+      resolve(comma >= 0 ? url.slice(comma + 1) : url);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function validateFiles(fileList, existing) {
+  const accepted = [];
+  const errors = [];
+  let totalBytes = (existing || []).reduce((s, a) => s + (a.size || 0), 0);
+  for (const f of Array.from(fileList || [])) {
+    if (!ALLOWED_FILE_TYPES.has(f.type)) {
+      errors.push(`"${f.name}" — unsupported type (${f.type || "unknown"}). Allowed: PDF, PNG, JPG, WebP, GIF.`);
+      continue;
+    }
+    if (f.size > MAX_PER_FILE_BYTES) {
+      errors.push(`"${f.name}" — ${(f.size / 1024 / 1024).toFixed(1)} MB exceeds the 10 MB per-file cap.`);
+      continue;
+    }
+    if (totalBytes + f.size > MAX_PER_MSG_BYTES) {
+      errors.push(`"${f.name}" — would exceed the 25 MB per-message total.`);
+      continue;
+    }
+    totalBytes += f.size;
+    accepted.push(f);
+  }
+  return { accepted, errors };
+}
+
 // ── Stream-state reducer ─────────────────────────────────────────────────────
 // Messages have stable ids; the active assistant turn is tracked by id (no
 // "find the last assistant message" scans). Query results match to their tool_use
@@ -28,7 +78,7 @@ function updateActive(state, fn) {
 function reducer(state, action) {
   switch (action.type) {
     case "ASK": {
-      const user = { id: uid(), role: "user", content: action.question };
+      const user = { id: uid(), role: "user", content: action.question, attachments: action.attachments || [] };
       const assistant = { id: uid(), role: "assistant", content: "", queries: [], meta: null };
       return {
         ...state,
@@ -122,21 +172,42 @@ function useAskStream() {
   }, []);
 
   const ask = useCallback(
-    async (question) => {
+    async (question, attachments) => {
       const trimmed = String(question || "").trim();
       if (!trimmed || stateRef.current.busy) return;
+      const turnAttachments = Array.isArray(attachments) ? attachments : [];
 
-      // Capture history BEFORE dispatching ASK (so the new placeholder isn't included).
+      // Build an Anthropic-shaped message: string content when no attachments, otherwise an
+      // array of typed content blocks ({image|document|text}). Past user turns may also have
+      // attachments — we preserve them in history so the model can refer back across turns.
+      const buildApiMessage = (m) => {
+        const text = String(m.content || "");
+        if (m.attachments && m.attachments.length) {
+          return {
+            role: m.role,
+            content: [
+              ...m.attachments.map((a) =>
+                a.mediaType === "application/pdf"
+                  ? { type: "document", source: { type: "base64", media_type: a.mediaType, data: a.data } }
+                  : { type: "image", source: { type: "base64", media_type: a.mediaType, data: a.data } }
+              ),
+              { type: "text", text },
+            ],
+          };
+        }
+        return { role: m.role, content: text };
+      };
+
       const history = [
         ...stateRef.current.messages
-          .filter((m) => (m.content || "").trim())
-          .map((m) => ({ role: m.role, content: m.content })),
-        { role: "user", content: trimmed },
+          .filter((m) => (m.content || "").trim() || (m.attachments && m.attachments.length))
+          .map(buildApiMessage),
+        buildApiMessage({ role: "user", content: trimmed, attachments: turnAttachments }),
       ];
 
       const controller = new AbortController();
       abortRef.current = controller;
-      dispatch({ type: "ASK", question: trimmed });
+      dispatch({ type: "ASK", question: trimmed, attachments: turnAttachments });
 
       let reader = null;
       try {
@@ -390,12 +461,23 @@ function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
 }
 
 function UserTurn({ msg, onEdit }) {
+  const atts = msg.attachments || [];
   return (
     <article className="ask-turn ask-turn--user">
       <div className="ask-turn-head">
         <span className="ask-turn-label">You</span>
       </div>
       <div className="ask-turn-content">{msg.content}</div>
+      {atts.length > 0 ? (
+        <div className="ask-attach-row" aria-label={`${atts.length} attached file${atts.length === 1 ? "" : "s"}`}>
+          {atts.map((a) => (
+            <span key={a.id} className="ask-attach-chip ask-attach-chip--readonly" title={`${a.name} · ${formatBytes(a.size)}`}>
+              <span className="ask-attach-icon" aria-hidden="true">{a.mediaType?.startsWith("image/") ? "🖼" : "📄"}</span>
+              <span className="ask-attach-name">{a.name}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
       <div className="ask-toolbar">
         <button type="button" className="ask-tool-btn" onClick={() => onEdit(msg.content)} aria-label="Edit this question">
           Edit
@@ -471,8 +553,10 @@ function useAutoscroll(scrollRef, dep) {
 }
 
 // ── Composer ─────────────────────────────────────────────────────────────────
-function Composer({ busy, status, onAsk, onStop, draft, setDraft }) {
+function Composer({ busy, status, onAsk, onStop, draft, setDraft, attachments, onAddFiles, onRemoveAttachment, attachError, dismissAttachError }) {
   const textRef = useRef(null);
+  const fileRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
 
   // Auto-grow the textarea up to its max-height.
   useLayoutEffect(() => {
@@ -505,9 +589,84 @@ function Composer({ busy, status, onAsk, onStop, draft, setDraft }) {
     [busy, submit, onStop],
   );
 
+  // Drag-and-drop on the whole form. Use a counter to avoid flicker as the cursor enters
+  // child elements (dragleave fires when crossing into nested nodes).
+  const dragDepth = useRef(0);
+  const onDragEnter = useCallback((e) => {
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    e.preventDefault();
+    dragDepth.current += 1;
+    setDragging(true);
+  }, []);
+  const onDragOver = useCallback((e) => {
+    if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
+  }, []);
+  const onDragLeave = useCallback(() => {
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setDragging(false);
+  }, []);
+  const onDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      dragDepth.current = 0;
+      setDragging(false);
+      if (e.dataTransfer?.files?.length) onAddFiles(e.dataTransfer.files);
+    },
+    [onAddFiles],
+  );
+
+  const atts = attachments || [];
+
   return (
-    <form className="ask-composer" onSubmit={submit}>
+    <form
+      className={`ask-composer${dragging ? " ask-composer--dragging" : ""}`}
+      onSubmit={submit}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
+      <input
+        ref={fileRef}
+        type="file"
+        className="sr-only"
+        accept="application/pdf,image/png,image/jpeg,image/webp,image/gif"
+        multiple
+        onChange={(e) => {
+          if (e.target.files?.length) onAddFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        className="ask-attach-btn"
+        onClick={() => fileRef.current?.click()}
+        aria-label="Attach a PDF or image"
+        title="Attach a PDF or image · 10 MB each · 25 MB total"
+        disabled={busy}
+      >
+        <span aria-hidden="true">📎</span>
+      </button>
+
       <div className="ask-textarea-wrap">
+        {atts.length > 0 ? (
+          <div className="ask-attach-row" aria-label="Attachments to send with your question">
+            {atts.map((a) => (
+              <div key={a.id} className="ask-attach-chip" title={`${a.name} · ${formatBytes(a.size)}`}>
+                <span className="ask-attach-icon" aria-hidden="true">{a.mediaType?.startsWith("image/") ? "🖼" : "📄"}</span>
+                <span className="ask-attach-name">{a.name}</span>
+                <span className="ask-attach-size">{formatBytes(a.size)}</span>
+                <button type="button" className="ask-attach-remove" onClick={() => onRemoveAttachment(a.id)} aria-label={`Remove ${a.name}`}>×</button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {attachError ? (
+          <div className="ask-attach-error" role="alert">
+            <span style={{ whiteSpace: "pre-line" }}>{attachError}</span>
+            <button type="button" onClick={dismissAttachError} aria-label="Dismiss attachment error">×</button>
+          </div>
+        ) : null}
         <label htmlFor="ask-input" className="sr-only">Ask a question about the warehouse</label>
         <textarea
           id="ask-input"
@@ -516,9 +675,12 @@ function Composer({ busy, status, onAsk, onStop, draft, setDraft }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Ask about jobs, delays, sales, PM, loans, margins, exceptions…  (Enter to send, Shift+Enter for newline)"
+          placeholder={atts.length ? "Add a question about your attached files…" : "Ask about jobs, delays, sales, PM, loans, margins, exceptions…  (Enter to send, Shift+Enter for newline)"}
           rows={1}
         />
+        {dragging ? (
+          <div className="ask-drop-overlay" aria-hidden="true">Drop files to attach</div>
+        ) : null}
       </div>
       {busy ? (
         <button type="button" className="ask-btn ask-btn--stop" onClick={onStop} aria-label="Stop the answer">
@@ -553,6 +715,49 @@ export default function AskConsole() {
   const { messages, activeId, busy, status, error, ask, stop, retryLast, dismissError } = stream;
   const [draft, setDraft] = useState("");
   const [theme, toggleTheme] = useTheme();
+  const [attachments, setAttachments] = useState([]);
+  const [attachError, setAttachError] = useState("");
+
+  // Add files: validate (type, per-file size, total size) on the client, read accepted
+  // files to base64 in parallel, then append to the pending attachments. The server runs
+  // the same checks at /api/ask, so this is purely UX — friendlier rejection messages.
+  const addFiles = useCallback(
+    async (fileList) => {
+      const { accepted, errors } = validateFiles(fileList, attachments);
+      if (errors.length) setAttachError(errors.join("\n"));
+      if (!accepted.length) return;
+      try {
+        const newOnes = await Promise.all(
+          accepted.map(async (f) => ({
+            id: uid(),
+            name: f.name,
+            size: f.size,
+            // Some browsers report image/jpg — Anthropic wants image/jpeg.
+            mediaType: f.type === "image/jpg" ? "image/jpeg" : f.type,
+            data: await fileToBase64(f),
+          })),
+        );
+        setAttachments((cur) => [...cur, ...newOnes]);
+        if (!errors.length) setAttachError("");
+      } catch (e) {
+        setAttachError(`Could not read a file: ${e?.message || e}`);
+      }
+    },
+    [attachments],
+  );
+
+  const removeAttachment = useCallback((id) => setAttachments((cur) => cur.filter((a) => a.id !== id)), []);
+  const dismissAttachError = useCallback(() => setAttachError(""), []);
+
+  // Wrapper so the Composer can stay attachment-agnostic — it just calls onAsk(text).
+  const handleAsk = useCallback(
+    (q) => {
+      ask(q, attachments);
+      setAttachments([]);
+      setAttachError("");
+    },
+    [ask, attachments],
+  );
 
   const scrollRef = useRef(null);
   // Drive autoscroll on every message/content/query change.
@@ -626,7 +831,19 @@ export default function AskConsole() {
             Jump to latest ↓
           </button>
         ) : null}
-        <Composer busy={busy} status={status} onAsk={ask} onStop={stop} draft={draft} setDraft={setDraft} />
+        <Composer
+          busy={busy}
+          status={status}
+          onAsk={handleAsk}
+          onStop={stop}
+          draft={draft}
+          setDraft={setDraft}
+          attachments={attachments}
+          onAddFiles={addFiles}
+          onRemoveAttachment={removeAttachment}
+          attachError={attachError}
+          dismissAttachError={dismissAttachError}
+        />
         <div className="ask-hint" aria-hidden="true">
           {busy ? "Stop with Esc · " : ""}Read-only · capped at 8 queries / 6 GB per question
         </div>

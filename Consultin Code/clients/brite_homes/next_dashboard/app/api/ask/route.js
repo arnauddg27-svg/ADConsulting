@@ -13,15 +13,67 @@ export const dynamic = "force-dynamic";
 
 const MAX_MESSAGES = 40;
 const MAX_LEN = 1200;
+const MAX_ATTACH_BYTES_PER_FILE = Number(process.env.ASK_MAX_FILE_BYTES) || 10 * 1024 * 1024; // 10 MB
+const MAX_ATTACH_BYTES_PER_MESSAGE = Number(process.env.ASK_MAX_ATTACH_BYTES) || 25 * 1024 * 1024; // 25 MB
+const ALLOWED_IMAGE_MEDIA = new Set(["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"]);
+
+// base64 expands bytes by ~4/3; this is the exact decoded length given a valid base64 string
+// (we don't strictly need padding-perfect accuracy — close enough to enforce a size budget).
+function base64DecodedBytes(s) {
+  return Math.ceil((String(s || "").length * 3) / 4);
+}
+
+function validateBlock(b) {
+  if (!b || typeof b !== "object") return "Each content block must be an object.";
+  if (b.type === "text") {
+    if (typeof b.text !== "string") return "A text block must have a string 'text'.";
+    return null;
+  }
+  if (b.type === "image") {
+    if (!b.source || b.source.type !== "base64") return "An image block needs source.type='base64'.";
+    if (!ALLOWED_IMAGE_MEDIA.has(b.source.media_type)) return `Unsupported image media_type: ${b.source.media_type}.`;
+    if (base64DecodedBytes(b.source.data) > MAX_ATTACH_BYTES_PER_FILE)
+      return `An image exceeds the ${Math.round(MAX_ATTACH_BYTES_PER_FILE / (1024 * 1024))} MB per-file cap.`;
+    return null;
+  }
+  if (b.type === "document") {
+    if (!b.source || b.source.type !== "base64") return "A document block needs source.type='base64'.";
+    if (b.source.media_type !== "application/pdf") return "Only PDF documents are allowed.";
+    if (base64DecodedBytes(b.source.data) > MAX_ATTACH_BYTES_PER_FILE)
+      return `A PDF exceeds the ${Math.round(MAX_ATTACH_BYTES_PER_FILE / (1024 * 1024))} MB per-file cap.`;
+    return null;
+  }
+  return `Unsupported content block type: ${b.type}.`;
+}
 
 function validate(messages) {
   if (!Array.isArray(messages) || !messages.length) return "messages must be a non-empty array.";
   if (messages.length > MAX_MESSAGES) return `Too many messages (max ${MAX_MESSAGES}).`;
   for (const m of messages) {
     if (!m || (m.role !== "user" && m.role !== "assistant")) return "Each message needs role 'user' or 'assistant'.";
-    if (typeof m.content !== "string" || !m.content.trim()) return "Each message needs non-empty string content.";
-    // Only cap user input — assistant answers replayed as history can legitimately exceed this.
-    if (m.role === "user" && m.content.length > MAX_LEN) return `Keep each question under ${MAX_LEN} characters.`;
+    if (typeof m.content === "string") {
+      if (!m.content.trim()) return "Each message needs non-empty content.";
+      if (m.role === "user" && m.content.length > MAX_LEN) return `Keep each question under ${MAX_LEN} characters.`;
+    } else if (Array.isArray(m.content)) {
+      if (!m.content.length) return "Each message needs non-empty content.";
+      let attachBytes = 0;
+      let hasText = false;
+      for (const b of m.content) {
+        const err = validateBlock(b);
+        if (err) return err;
+        if (b.type === "text") hasText = true;
+        if (b.type === "image" || b.type === "document") attachBytes += base64DecodedBytes(b.source.data);
+      }
+      if (!hasText) return "A message with attachments must include a text question.";
+      if (attachBytes > MAX_ATTACH_BYTES_PER_MESSAGE)
+        return `Attachments exceed the ${Math.round(MAX_ATTACH_BYTES_PER_MESSAGE / (1024 * 1024))} MB per-message cap.`;
+      if (m.role === "user") {
+        const userText = m.content.filter((b) => b.type === "text").map((b) => b.text || "").join("\n");
+        if (userText.length > MAX_LEN) return `Keep each question under ${MAX_LEN} characters.`;
+      }
+    } else {
+      return "Each message's content must be a string or an array of content blocks.";
+    }
   }
   if (messages[messages.length - 1].role !== "user") return "The last message must be from the user.";
   return null;
