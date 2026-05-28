@@ -1662,13 +1662,60 @@ body > div { height: 100%; min-height: 0; }
 .ask-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 .ask-textarea::placeholder { color: var(--text-muted); }
 .ask-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: center; }
-.ask-btn { padding: 0 18px; min-height: 44px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent); color: #0a1410; font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; transition: filter .14s, background .14s, border-color .14s; white-space: nowrap; }
-[data-theme="dark"] .ask-btn { color: #061811; }
-.ask-btn:hover { filter: brightness(1.08); }
-.ask-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-dim); }
-.ask-btn:disabled { opacity: .55; cursor: not-allowed; filter: none; }
-.ask-btn--stop { background: var(--danger); border-color: var(--danger); color: #fff; }
-[data-theme="dark"] .ask-btn--stop { color: #fff; }
+/* "Cool" gradient button — port of the shadcn "cool" variant onto the token system.
+   Gradient bg + inset white top-highlight ring + thicker bottom border + soft accent glow,
+   with hover-brightness + active press. Token-aware so it works in dark and light. */
+.ask-btn {
+  padding: 0 18px; min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, #000 45%);
+  border-bottom-width: 2px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--accent) 86%, transparent), var(--accent));
+  color: #061811;
+  font: inherit; font-weight: 600; font-size: 13px;
+  cursor: pointer; white-space: nowrap;
+  transition: filter .2s ease, transform .14s, box-shadow .2s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 4px 12px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 2px 4px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+[data-theme="dark"] .ask-btn {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-left-width: 0; border-right-width: 0; border-top-width: 0;
+  color: #061811;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    0 6px 16px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 2px 4px rgba(0,0,0,0.22);
+}
+.ask-btn:hover { filter: brightness(1.10); }
+.ask-btn:active { filter: brightness(0.92); transform: translateY(1px); }
+.ask-btn:focus-visible { outline: none; box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 0 0 3px var(--accent-dim),
+    0 4px 12px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.ask-btn:disabled { opacity: .55; cursor: not-allowed; filter: none; transform: none; }
+.ask-btn--stop {
+  border-color: color-mix(in srgb, var(--danger) 55%, #000 45%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--danger) 86%, transparent), var(--danger));
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    0 4px 12px color-mix(in srgb, var(--danger) 22%, transparent),
+    0 2px 4px color-mix(in srgb, var(--danger) 14%, transparent);
+}
+[data-theme="dark"] .ask-btn--stop {
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+  border-left-width: 0; border-right-width: 0; border-top-width: 0;
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) { .ask-btn { transition: none; } .ask-btn:active { transform: none; } }
 
 /* Floating "jump to latest" */
 .ask-jump { position: absolute; right: 24px; bottom: 100%; transform: translateY(-12px); padding: 7px 13px; border-radius: 999px; background: var(--bg-surface); border: 1px solid var(--accent); color: var(--accent); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-soft); }
@@ -1691,4 +1738,37 @@ body > div { height: 100%; min-height: 0; }
   .ask-header { padding: 12px 14px; gap: 10px; }
   .ask-header h1 { font-size: 15px; }
   .ask-empty { padding: 32px 8px 24px; }
+}
+
+/* Shine border — port of the ShineBorder card aesthetic onto plain CSS + tokens.
+   A ::before pseudo carries an animated radial-gradient sized 300%×300%; mask-composite
+   "punches out" everything except the border ring, so the gradient is visible only as a
+   travelling shine around the card edge. Used to mark the live, streaming assistant turn. */
+.ask-shine-card {
+  --ask-shine-width: 1.5px;
+  --ask-shine-radius: 14px;
+  --ask-shine-duration: 14s;
+  --ask-shine-color: var(--accent);
+  position: relative;
+}
+.ask-shine-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: var(--ask-shine-radius);
+  padding: var(--ask-shine-width);
+  background: radial-gradient(circle at 50% 50%, transparent, transparent, var(--ask-shine-color), transparent, transparent);
+  background-size: 300% 300%;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: ask-shine var(--ask-shine-duration) linear infinite;
+}
+@keyframes ask-shine {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 300% -300%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ask-shine-card::before { animation: none; opacity: .35; }
 }

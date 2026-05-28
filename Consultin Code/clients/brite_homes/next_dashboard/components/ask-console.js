@@ -357,7 +357,7 @@ function MetaLine({ meta }) {
 function AssistantTurn({ msg, isActive, status, onCopy, onRegenerate }) {
   const showSkeleton = isActive && !msg.content && !(msg.queries?.length);
   return (
-    <article className="ask-turn ask-turn--assistant" aria-busy={isActive ? "true" : undefined}>
+    <article className={`ask-turn ask-turn--assistant${isActive ? " ask-shine-card" : ""}`} aria-busy={isActive ? "true" : undefined}>
       <div className="ask-turn-head">
         <span className="ask-turn-label">Warehouse Analyst</span>
         {isActive && status ? <StatusPill text={status} /> : null}
