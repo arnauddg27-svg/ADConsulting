@@ -154,9 +154,9 @@ export default function BuilderDataPlatformLandingPage() {
               </h2>
               <p className="mt-6 max-w-xl text-lg leading-8 text-[#46515a]">
                 A natural-language analyst layered on the same warehouse we
-                build for you. Operators ask in plain English. The bot writes
-                SQL against your warehouse and spreadsheets, and shows the
-                query behind every answer.
+                build for you. Operators ask in plain English. No waiting on a
+                report — it answers from your own numbers and shows how it got
+                there.
               </p>
 
               <ul className="mt-7 space-y-3.5 text-sm leading-6 text-[#40515d]">
