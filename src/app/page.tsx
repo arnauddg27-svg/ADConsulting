@@ -9,6 +9,8 @@ import {
   Database,
   DollarSign,
   LayoutDashboard,
+  Lock,
+  Sparkles,
   UserCheck,
   type LucideIcon,
 } from "lucide-react";
@@ -43,9 +45,9 @@ const ClientImprovementCards = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Builder Operations Reporting | AD ERP SYSTEMS",
+  title: "Builder Operations Reporting + AI Data Analyst | AD ERP SYSTEMS",
   description:
-    "Builder operating reviews that help residential builders spot overruns early, improve cycle times, protect margin, and keep jobs moving.",
+    "Daily operating dashboards and an AI data analyst built for residential builders — spot overruns early, ask the data in plain English, protect margin. Turnkey delivery, client-owned.",
 };
 
 const workflowSteps = [
@@ -60,6 +62,12 @@ const workflowSteps = [
     title: "Organize relevant data into KPI dashboards",
     body: "Builder-specific logic turns the source data into KPIs and pipelines for construction, finance, sales, permitting, and leadership.",
     output: "KPI dashboards",
+  },
+  {
+    icon: Sparkles,
+    title: "Ask the data anything in plain English",
+    body: "An AI analyst sits on top of the warehouse. Operators ask questions and get answers — with the SQL shown — instead of waiting for ad-hoc reports.",
+    output: "AI data analyst",
   },
   {
     icon: LayoutDashboard,
@@ -83,6 +91,11 @@ const finalFocus: Array<{
     label: "Budget movement",
     body: "Which costs changed?",
     icon: DollarSign,
+  },
+  {
+    label: "Ask anything",
+    body: "Get answers from your data in plain English.",
+    icon: Sparkles,
   },
   {
     label: "Daily dashboard",
@@ -339,6 +352,110 @@ export default function Home() {
         </Container>
       </section>
 
+      {/* === SECOND HERO: AI Data Analyst (video + pitch) ========================= */}
+      <section className="relative overflow-hidden border-b border-[#d9e1e6]/80 bg-transparent py-16 md:py-20 lg:py-24">
+        <Container className="relative z-10">
+          <div className="grid gap-12 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
+            {/* LEFT: Marketing demo video */}
+            <div className="relative order-2 lg:order-1 lg:pr-2">
+              <ShineBorder
+                borderRadius={36}
+                borderWidth={3}
+                duration={8}
+                color={["#24c18d", "#8bd7ff", "#24c18d"]}
+                className="mx-auto max-w-[46rem]"
+              >
+                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#080a0c] shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
+                  <video
+                    src="/videos/ai-data-analyst-demo.mp4"
+                    poster="/videos/ai-data-analyst-poster.jpg"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="block h-auto w-full"
+                    aria-label="AI Data Analyst demo — natural-language question answered with table, chart, and SQL exposed"
+                  />
+                </div>
+              </ShineBorder>
+            </div>
+
+            {/* RIGHT: Pitch */}
+            <div className="order-1 max-w-2xl lg:order-2">
+              <AnimatedGradientText className="max-w-full text-center tracking-[0.14em] sm:text-[0.7rem] sm:tracking-[0.22em]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Sparkles size={12} />
+                  New · AI Data Analyst
+                </span>
+              </AnimatedGradientText>
+              <h2 className="mt-6 font-heading text-[2.4rem] leading-[0.98] tracking-[-0.04em] text-[#111814] sm:text-5xl lg:text-[4rem]">
+                Ask your business data anything.
+              </h2>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-[#46515a]">
+                A natural-language analyst layered on the same warehouse we
+                build for you. Operators ask in plain English. The bot writes
+                SQL, pulls from your warehouse, your spreadsheets, and the open
+                web, and shows its work every time.
+              </p>
+
+              <ul className="mt-7 space-y-3.5 text-sm leading-6 text-[#40515d]">
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <Lock size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Client-owned end-to-end.
+                    </strong>{" "}
+                    Bot, prompts, domain context, audit log — all live in your
+                    cloud accounts and stay with you.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <CheckCircle2 size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Turnkey delivery.
+                    </strong>{" "}
+                    Configured against your warehouse, branded to your team,
+                    deployed in the same 4–6 week window as the dashboards.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <Database size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Read-only and audited.
+                    </strong>{" "}
+                    Every query capped, logged, and shown in the answer — no
+                    data leaves your warehouse.
+                  </span>
+                </li>
+              </ul>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <TrackedCalendlyLink source="home_ai_hero" className={ctaClass}>
+                  <span>See it on Your Data</span>
+                  <ArrowRight size={16} />
+                </TrackedCalendlyLink>
+                <Link
+                  href="/services/#ai-analyst"
+                  className={secondaryCtaClass}
+                >
+                  <span>How It Works</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       <IpadDashboardShowcase />
       <GlassOperationsCards />
 
@@ -350,12 +467,13 @@ export default function Home() {
                 How it works
               </p>
               <h2 className="mt-5 font-heading text-4xl leading-[1.02] tracking-[-0.04em] md:text-6xl">
-                Centralized data. Clear KPIs. Daily dashboards.
+                Centralized data. Clear KPIs. Daily dashboards. AI analyst on top.
               </h2>
               <p className="mt-5 text-lg leading-8 text-[#58636b]">
                 Centralize the source data, define builder-specific KPI logic,
-                organize detailed pipelines, and give each department a daily
-                dashboard view that helps improve cycle time and control cost.
+                organize detailed pipelines, give each department a daily
+                dashboard view, and let operators ask the same warehouse
+                questions in plain English — all in one connected system.
               </p>
             </div>
 

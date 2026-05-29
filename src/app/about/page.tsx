@@ -9,6 +9,7 @@ import {
   Landmark,
   MapPin,
   Shield,
+  Sparkles,
   TrendingUp,
   Users,
   Zap,
@@ -26,7 +27,7 @@ import { glassTileClass } from "@/lib/cardStyles";
 export const metadata: Metadata = {
   title: "About | AD ERP SYSTEMS",
   description:
-    "About AD ERP SYSTEMS, a builder reporting firm focused on residential construction data, operating dashboards, and client-owned reporting systems.",
+    "About AD ERP SYSTEMS, a builder reporting firm focused on residential construction data, operating dashboards, an AI data analyst, and turnkey client-owned reporting systems.",
 };
 
 const credentials = [
@@ -48,6 +49,11 @@ const pillars = [
     icon: BarChart3,
     title: "Dashboards on top of it",
     desc: "Daily dashboards and pipelines built on that warehouse — schedule, budget, margin, and owner follow-up your team can actually review every day.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI data analyst on top of that",
+    desc: "A natural-language analyst layered on the warehouse — operators ask questions in plain English and get answers with the SQL exposed, instead of waiting on ad-hoc reports.",
   },
 ];
 
@@ -72,9 +78,9 @@ const benefits = [
 const compared = [
   { them: "Generic BI implementation", us: "Residential builder reporting focus" },
   { them: "Template-first dashboards", us: "Logic matched to your source systems" },
-  { them: "Vendor-owned platform", us: "Client ownership of code, data, and hosting" },
-  { them: "Static reporting outputs", us: "Dashboards with alerts, monitoring, and admin controls" },
-  { them: "Large fixed scope", us: "Phased delivery around operating priorities" },
+  { them: "Vendor-owned platform", us: "Client ownership of code, data, hosting, and AI bot" },
+  { them: "Static reporting outputs", us: "Dashboards plus AI analyst your team can ask in plain English" },
+  { them: "Large fixed scope", us: "Phased turnkey delivery around operating priorities" },
 ];
 
 const process = [
@@ -91,12 +97,12 @@ const process = [
   {
     step: "03",
     title: "Build and deploy",
-    desc: "Deliver extraction pipelines, warehouse models, KPI logic, dashboards, and tools in working increments.",
+    desc: "Deliver extraction pipelines, warehouse models, KPI logic, dashboards, the AI data analyst, and tools in working increments — all into your cloud accounts.",
   },
   {
     step: "04",
     title: "Handoff and support",
-    desc: "Deploy to your accounts with documentation, training, and optional support for ongoing reporting needs.",
+    desc: "Full source code, SQL, prompts, and documentation transferred. Training, production rollout, and optional support for ongoing reporting needs.",
   },
 ];
 
@@ -106,7 +112,7 @@ export default function AboutPage() {
       <BlueprintHero
         eyebrow="About AD ERP SYSTEMS"
         title="Builder reporting built around residential operations."
-        description="We help residential builders turn scattered ERP, spreadsheet, finance, and field data into daily operating views for schedule, budget, margin, and owner follow-up."
+        description="We help residential builders turn scattered ERP, spreadsheet, finance, and field data into daily operating views — and an AI data analyst on top — for schedule, budget, margin, and owner follow-up. Delivered turnkey, fully client-owned."
       >
         <BlueprintPanel className="p-6 md:p-7">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">

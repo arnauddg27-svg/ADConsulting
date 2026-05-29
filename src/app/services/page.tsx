@@ -6,6 +6,7 @@ import {
   Check,
   DollarSign,
   Layers,
+  Sparkles,
   TrendingUp,
   Users,
   Wrench,
@@ -26,13 +27,14 @@ import { PROCESS_STEPS, SERVICES } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Services | AD ERP SYSTEMS",
   description:
-    "Builder reporting systems for residential construction teams that need clearer schedule, budget, margin, and owner follow-up visibility.",
+    "Builder reporting systems and an AI data analyst for residential construction teams that need clearer schedule, budget, margin, and owner follow-up visibility. Delivered turnkey, fully client-owned.",
 };
 
 const iconMap: Record<string, LucideIcon> = {
   AlertTriangle,
   DollarSign,
   Layers,
+  Sparkles,
   TrendingUp,
   Users,
   Wrench,
@@ -43,8 +45,8 @@ export default function ServicesPage() {
     <BlueprintPage>
       <BlueprintHero
         eyebrow="Services"
-        title="Builder reporting systems for schedule, budget, and margin."
-        description="We centralize builder data, define the exception logic, and deliver operating views your team can review every day."
+        title="Builder reporting + AI analyst for schedule, budget, and margin."
+        description="We centralize builder data, define the exception logic, deliver operating views your team can review every day, and layer on an AI data analyst that answers plain-English questions about your warehouse. Every piece is turnkey and ends up owned by you."
         align="center"
       />
 
@@ -55,7 +57,7 @@ export default function ServicesPage() {
 
             return (
               <BlueprintPanel key={service.id} className="overflow-hidden p-6 md:p-8 lg:p-10">
-                <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
+                <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-12">
                   <div>
                     <div className="flex items-center gap-4">
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">

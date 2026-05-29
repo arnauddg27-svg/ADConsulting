@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Database, Lock, Sparkles } from "lucide-react";
 
 import Container from "@/components/ui/Container";
 import TrackedCalendlyLink from "@/components/analytics/TrackedCalendlyLink";
 import OperationsHeroCard from "@/components/sections/OperationsHeroCard";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { ShineBorder } from "@/components/magicui/shine-border";
 import { liquidActionClass } from "@/lib/buttonStyles";
 
 // Hero #2 (the iPad dashboard) is below the fold — code-split it so its client
@@ -26,12 +27,16 @@ const IpadDashboardShowcase = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Homebuilder Dashboards & ERP Reporting | AD ERP SYSTEMS",
+  title: "Homebuilder Dashboards + AI Data Analyst | AD ERP SYSTEMS",
   description:
-    "Dashboards built on your builder data, not a template. Centralize ERP data, spreadsheets, finance systems, APIs, and exports in a structured warehouse.",
+    "Dashboards and an AI data analyst built on your builder data, not a template. Centralize ERP, spreadsheets, finance, and field data in a warehouse — then ask it anything in plain English. Turnkey, fully client-owned.",
 };
 
-const heroChips = ["4–6 week delivery", "Turnkey, client-owned system"];
+const heroChips = [
+  "4–6 week delivery",
+  "Turnkey, client-owned system",
+  "AI analyst included",
+];
 
 const heroCtaClass = liquidActionClass({
   tone: "primary",
@@ -61,12 +66,13 @@ export default function BuilderDataPlatformLandingPage() {
                 Builder Data Platform
               </AnimatedGradientText>
               <h1 className="mt-6 max-w-4xl font-heading text-[2.65rem] leading-[0.98] tracking-[-0.04em] text-[#111814] sm:text-6xl sm:tracking-[-0.045em] lg:text-[5.15rem]">
-                Dashboards built on your data, not a template.
+                Dashboards + AI analyst, built on your data.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
                 Centralize your ERP, spreadsheets, finance data, and field
-                updates, apply builder-specific KPI logic, and give every team a
-                daily operating view.
+                updates. Apply builder-specific KPI logic. Give every team a
+                daily operating view — and an AI analyst that answers questions
+                about it in plain English.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <TrackedCalendlyLink
@@ -105,6 +111,111 @@ export default function BuilderDataPlatformLandingPage() {
       {/* Hero #2 — the daily operating dashboard on the iPad. */}
       <IpadDashboardShowcase />
 
+      {/* Hero #3 — AI Data Analyst on top of the warehouse. */}
+      <section className="relative overflow-hidden border-b border-[#d9e1e6]/80 bg-transparent py-16 md:py-20 lg:py-24">
+        <Container className="relative z-10">
+          <div className="grid gap-12 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
+            <div className="relative order-2 lg:order-1 lg:pr-2">
+              <ShineBorder
+                borderRadius={36}
+                borderWidth={3}
+                duration={8}
+                color={["#24c18d", "#8bd7ff", "#24c18d"]}
+                className="mx-auto max-w-[46rem]"
+              >
+                <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#080a0c] shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
+                  <video
+                    src="/videos/ai-data-analyst-demo.mp4"
+                    poster="/videos/ai-data-analyst-poster.jpg"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="block h-auto w-full"
+                    aria-label="AI Data Analyst demo — natural-language question answered with table, chart, and SQL exposed"
+                  />
+                </div>
+              </ShineBorder>
+            </div>
+
+            <div className="order-1 max-w-2xl lg:order-2">
+              <AnimatedGradientText className="max-w-full tracking-[0.14em] sm:text-[0.7rem] sm:tracking-[0.22em]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Sparkles size={12} />
+                  New · AI Data Analyst
+                </span>
+              </AnimatedGradientText>
+              <h2 className="mt-6 font-heading text-[2.4rem] leading-[0.98] tracking-[-0.04em] text-[#111814] sm:text-5xl lg:text-[4rem]">
+                Ask your business data anything.
+              </h2>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-[#46515a]">
+                A natural-language analyst layered on the same warehouse we
+                build for you. Operators ask in plain English. The bot writes
+                SQL, pulls from your warehouse, your spreadsheets, and the open
+                web, and shows its work every time.
+              </p>
+
+              <ul className="mt-7 space-y-3.5 text-sm leading-6 text-[#40515d]">
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <Lock size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Client-owned end-to-end.
+                    </strong>{" "}
+                    Bot, prompts, domain context, audit log — all live in your
+                    cloud accounts and stay with you.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <CheckCircle2 size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Turnkey delivery.
+                    </strong>{" "}
+                    Configured against your warehouse, branded to your team,
+                    deployed in the same 4–6 week window as the dashboards.
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#a8c8b8] bg-[#edf5f1] text-[#356b54]">
+                    <Database size={13} strokeWidth={2.4} />
+                  </span>
+                  <span>
+                    <strong className="font-bold text-[#17212c]">
+                      Read-only and audited.
+                    </strong>{" "}
+                    Every query capped, logged, and shown in the answer — no
+                    data leaves your warehouse.
+                  </span>
+                </li>
+              </ul>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <TrackedCalendlyLink
+                  source="builder_data_platform_ai_hero"
+                  className={heroCtaClass}
+                >
+                  <span>See it on Your Data</span>
+                  <ArrowRight size={16} />
+                </TrackedCalendlyLink>
+                <Link
+                  href="/services/#ai-analyst"
+                  className={heroSecondaryCtaClass}
+                >
+                  <span>How It Works</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* Closing CTA — uses TrackedCalendlyLink so the booking click routes to
           Calendly with UTM + analytics (BlueprintCTA's internal Link can't). */}
       <section className="py-16 md:py-24">
@@ -129,12 +240,13 @@ export default function BuilderDataPlatformLandingPage() {
                   Next step
                 </p>
                 <h2 className="mt-6 max-w-3xl font-heading text-4xl leading-[0.98] tracking-[-0.04em] md:text-[3.4rem]">
-                  See whether your data can support better reporting.
+                  See whether your data can support better reporting — and an AI analyst.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 md:text-lg md:leading-8">
                   Book a short call to review your current systems, where
-                  reporting breaks down, and what a practical first release
-                  could include.
+                  reporting breaks down, what a practical first release could
+                  include, and where the AI bot pays off. Everything we ship
+                  ends up running in your cloud, owned by your team.
                 </p>
               </div>
 
