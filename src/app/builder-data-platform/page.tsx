@@ -27,16 +27,16 @@ const IpadDashboardShowcase = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Builder, Developer + Property Mgmt Dashboards + AI Data Analyst | AD ERP SYSTEMS",
+  title: "Builder, Developer + Property Management Dashboards + AI Data Analyst | AD ERP SYSTEMS",
   description:
-    "Dashboards and an AI data analyst built on your builder, developer, and property management data — not a template. Centralize ERP, spreadsheets, finance, field, and PM data in a warehouse, then ask it anything in plain English. Turnkey, fully client-owned.",
+    "Dashboards and an AI data analyst built on your builder, developer, and property management data — not a template. Centralize ERP, spreadsheets, finance, field, and property management feeds in a warehouse, then ask it anything in plain English. Turnkey, fully client-owned.",
 };
 
 const heroChips = [
   "4–6 week delivery",
   "Turnkey, client-owned system",
   "AI analyst included",
-  "Construction + PM coverage",
+  "Construction + property management coverage",
 ];
 
 const heroCtaClass = liquidActionClass({
@@ -72,7 +72,8 @@ export default function BuilderDataPlatformLandingPage() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
                 For residential builders, developers, and their property
                 management arms. Centralize your ERP, spreadsheets, finance,
-                field, and PM data. Apply builder-specific KPI logic. Give
+                field, and property management data. Apply builder-specific
+                KPI logic. Give
                 every team a daily operating view — and an AI analyst that
                 answers questions about it in plain English.
               </p>
@@ -154,8 +155,8 @@ export default function BuilderDataPlatformLandingPage() {
               <p className="mt-6 max-w-xl text-lg leading-8 text-[#46515a]">
                 A natural-language analyst layered on the same warehouse we
                 build for you. Operators ask in plain English. The bot writes
-                SQL, pulls from your warehouse, your spreadsheets, and the open
-                web, and shows its work every time.
+                SQL against your warehouse and spreadsheets, and shows the
+                query behind every answer.
               </p>
 
               <ul className="mt-7 space-y-3.5 text-sm leading-6 text-[#40515d]">

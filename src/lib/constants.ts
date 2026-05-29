@@ -71,9 +71,9 @@ export const SERVICES: Service[] = [
     deliverables: [
       "Interactive web dashboards and operating reviews",
       "Drill-downs by city, community, job, or superintendent",
-      "Land, permitting, loan, construction, and PM pipeline views",
+      "Land, permitting, loan, construction, and property management pipeline views",
       "Sales backlog, revenue, and per-job P&L views",
-      "Lease, tenant, rent, and ownership views for PM portfolios",
+      "Lease, tenant, rent, and ownership views for property management portfolios",
       "Source code + deployment under your control",
     ],
   },

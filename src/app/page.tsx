@@ -45,7 +45,7 @@ const ClientImprovementCards = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Builder, Developer + Property Mgmt Reporting + AI Data Analyst | AD ERP SYSTEMS",
+  title: "Builder, Developer + Property Management Reporting + AI Data Analyst | AD ERP SYSTEMS",
   description:
     "Daily operating dashboards and an AI data analyst built for residential builders, developers, and their property management arms — spot overruns early, ask the data in plain English, protect margin, track leases and tenants. Turnkey delivery, client-owned.",
 };
@@ -198,7 +198,8 @@ export default function Home() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
                 For residential builders, developers, and their property
                 management arms. Turn ERP exports, spreadsheets, finance, field
-                updates, and PM feeds into daily operating views that show
+                updates, and property management feeds into daily operating
+                views that show
                 which jobs are slipping, which costs moved, which leases need
                 attention, and who needs to act next.
               </p>
@@ -397,8 +398,8 @@ export default function Home() {
               <p className="mt-6 max-w-xl text-lg leading-8 text-[#46515a]">
                 A natural-language analyst layered on the same warehouse we
                 build for you. Operators ask in plain English. The bot writes
-                SQL, pulls from your warehouse, your spreadsheets, and the open
-                web, and shows its work every time.
+                SQL against your warehouse and spreadsheets, and shows the
+                query behind every answer.
               </p>
 
               <ul className="mt-7 space-y-3.5 text-sm leading-6 text-[#40515d]">
