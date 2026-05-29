@@ -76,7 +76,7 @@ const benefits = [
 ];
 
 const compared = [
-  { them: "Generic BI implementation", us: "Residential builder reporting focus" },
+  { them: "Generic BI implementation", us: "Residential builder, developer + PM focus" },
   { them: "Template-first dashboards", us: "Logic matched to your source systems" },
   { them: "Vendor-owned platform", us: "Client ownership of code, data, hosting, and AI bot" },
   { them: "Static reporting outputs", us: "Dashboards plus AI analyst your team can ask in plain English" },
@@ -111,8 +111,8 @@ export default function AboutPage() {
     <BlueprintPage>
       <BlueprintHero
         eyebrow="About AD ERP SYSTEMS"
-        title="Builder reporting built around residential operations."
-        description="We help residential builders turn scattered ERP, spreadsheet, finance, and field data into daily operating views — and an AI data analyst on top — for schedule, budget, margin, and owner follow-up. Delivered turnkey, fully client-owned."
+        title="Builder reporting built around residential operations + PM."
+        description="We help residential builders, developers, and their property management arms turn scattered ERP, spreadsheet, finance, field, and PM data into daily operating views — and an AI data analyst on top — for schedule, budget, margin, lease, and owner follow-up. Delivered turnkey, fully client-owned."
       >
         <BlueprintPanel className="p-6 md:p-7">
           <p className="text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">

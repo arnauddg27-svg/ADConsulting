@@ -45,22 +45,22 @@ const ClientImprovementCards = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Builder Operations Reporting + AI Data Analyst | AD ERP SYSTEMS",
+  title: "Builder, Developer + Property Mgmt Reporting + AI Data Analyst | AD ERP SYSTEMS",
   description:
-    "Daily operating dashboards and an AI data analyst built for residential builders — spot overruns early, ask the data in plain English, protect margin. Turnkey delivery, client-owned.",
+    "Daily operating dashboards and an AI data analyst built for residential builders, developers, and their property management arms — spot overruns early, ask the data in plain English, protect margin, track leases and tenants. Turnkey delivery, client-owned.",
 };
 
 const workflowSteps = [
   {
     icon: Database,
     title: "Centralize data from different systems",
-    body: "ERP exports, spreadsheets, finance data, and field updates land in one place so every report works off the same source.",
+    body: "ERP exports, spreadsheets, finance data, field updates, and property management feeds land in one place so every report works off the same source.",
     output: "Unified source",
   },
   {
     icon: BarChart3,
     title: "Organize relevant data into KPI dashboards",
-    body: "Builder-specific logic turns the source data into KPIs and pipelines for construction, finance, sales, permitting, and leadership.",
+    body: "Builder-specific logic turns the source data into KPIs and pipelines for construction, finance, sales, permitting, property management, and leadership.",
     output: "KPI dashboards",
   },
   {
@@ -196,9 +196,11 @@ export default function Home() {
                 Catch overruns early. Keep jobs moving.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
-                Turn ERP exports, spreadsheets, finance data, and field updates
-                into daily operating views that show which jobs are slipping,
-                which costs moved, and who needs to act next.
+                For residential builders, developers, and their property
+                management arms. Turn ERP exports, spreadsheets, finance, field
+                updates, and PM feeds into daily operating views that show
+                which jobs are slipping, which costs moved, which leases need
+                attention, and who needs to act next.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <TrackedCalendlyLink source="home_light_hero" className={ctaClass}>
@@ -470,7 +472,8 @@ export default function Home() {
                 Centralized data. Clear KPIs. Daily dashboards. AI analyst on top.
               </h2>
               <p className="mt-5 text-lg leading-8 text-[#58636b]">
-                Centralize the source data, define builder-specific KPI logic,
+                Centralize the source data — construction, finance, sales, and
+                property management — define builder-specific KPI logic,
                 organize detailed pipelines, give each department a daily
                 dashboard view, and let operators ask the same warehouse
                 questions in plain English — all in one connected system.

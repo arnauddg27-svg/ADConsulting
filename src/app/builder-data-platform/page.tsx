@@ -27,15 +27,16 @@ const IpadDashboardShowcase = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Homebuilder Dashboards + AI Data Analyst | AD ERP SYSTEMS",
+  title: "Builder, Developer + Property Mgmt Dashboards + AI Data Analyst | AD ERP SYSTEMS",
   description:
-    "Dashboards and an AI data analyst built on your builder data, not a template. Centralize ERP, spreadsheets, finance, and field data in a warehouse — then ask it anything in plain English. Turnkey, fully client-owned.",
+    "Dashboards and an AI data analyst built on your builder, developer, and property management data — not a template. Centralize ERP, spreadsheets, finance, field, and PM data in a warehouse, then ask it anything in plain English. Turnkey, fully client-owned.",
 };
 
 const heroChips = [
   "4–6 week delivery",
   "Turnkey, client-owned system",
   "AI analyst included",
+  "Construction + PM coverage",
 ];
 
 const heroCtaClass = liquidActionClass({
@@ -69,10 +70,11 @@ export default function BuilderDataPlatformLandingPage() {
                 Dashboards + AI analyst, built on your data.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
-                Centralize your ERP, spreadsheets, finance data, and field
-                updates. Apply builder-specific KPI logic. Give every team a
-                daily operating view — and an AI analyst that answers questions
-                about it in plain English.
+                For residential builders, developers, and their property
+                management arms. Centralize your ERP, spreadsheets, finance,
+                field, and PM data. Apply builder-specific KPI logic. Give
+                every team a daily operating view — and an AI analyst that
+                answers questions about it in plain English.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <TrackedCalendlyLink

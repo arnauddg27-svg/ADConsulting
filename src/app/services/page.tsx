@@ -45,8 +45,8 @@ export default function ServicesPage() {
     <BlueprintPage>
       <BlueprintHero
         eyebrow="Services"
-        title="Builder reporting + AI analyst for schedule, budget, and margin."
-        description="We centralize builder data, define the exception logic, deliver operating views your team can review every day, and layer on an AI data analyst that answers plain-English questions about your warehouse. Every piece is turnkey and ends up owned by you."
+        title="Builder, developer + PM reporting and an AI analyst on top."
+        description="We centralize your builder, developer, and property management data, define the exception logic, deliver operating views your team can review every day, and layer on an AI data analyst that answers plain-English questions about your warehouse. Every piece is turnkey and ends up owned by you."
         align="center"
       />
 

@@ -4,9 +4,9 @@ export const SITE_CONFIG = {
   name: "AD ERP SYSTEMS",
   businessName: "AD ERP SYSTEMS",
   legalName: "AD ERP SYSTEMS",
-  tagline: "Builder Reporting + AI Analyst for Schedule, Budget, and Margin",
+  tagline: "Builder, Developer + Property Management Reporting + AI Analyst",
   description:
-    "AD ERP SYSTEMS helps residential builders and developers improve schedule visibility, variance control, and margin protection with daily dashboards and an AI data analyst — all built from the systems they already use and delivered turnkey, fully client-owned.",
+    "AD ERP SYSTEMS helps residential builders, developers, and their property management arms improve schedule visibility, variance control, margin protection, and lease/tenant visibility with daily dashboards and an AI data analyst — all built from the systems they already use and delivered turnkey, fully client-owned.",
   location: "North America (U.S. & Canada)",
   businessAddress: "2660 Almondwood Loop, Orlando, FL 32821, United States",
   email: "adurand@aderpsystems.com",
@@ -64,16 +64,16 @@ export const SERVICES: Service[] = [
     id: "builder-ops",
     title: "Reporting Systems & Operational Coverage",
     shortTitle: "Reporting Systems",
-    headline: "Daily reporting systems that cover land through closeout in one connected view",
+    headline: "Daily reporting systems that cover land through closeout — and lease — in one connected view",
     description:
-      "We build reporting systems teams use daily — drill-downs and operating reviews instead of static BI tabs — organized across the full operation so teams move from acquisition through closeout without switching systems or definitions. Dashboards deploy to your domain and run on your infrastructure.",
+      "We build reporting systems teams use daily — drill-downs and operating reviews instead of static BI tabs — organized across the full operation so teams move from acquisition through closeout (and into property management) without switching systems or definitions. Dashboards deploy to your domain and run on your infrastructure.",
     icon: "TrendingUp",
     deliverables: [
       "Interactive web dashboards and operating reviews",
       "Drill-downs by city, community, job, or superintendent",
-      "Land, permitting, loan, and construction pipeline views",
+      "Land, permitting, loan, construction, and PM pipeline views",
       "Sales backlog, revenue, and per-job P&L views",
-      "Executive and department-level visibility",
+      "Lease, tenant, rent, and ownership views for PM portfolios",
       "Source code + deployment under your control",
     ],
   },
@@ -128,7 +128,7 @@ export const PROCESS_STEPS = [
     step: 2,
     title: "Systems Mapping",
     description:
-      "A technical review of source systems, data quality, KPI definitions, and the right extraction and warehouse approach.",
+      "A technical review of source systems — construction ERP, accounting, sales, and property management — data quality, KPI definitions, and the right extraction and warehouse approach.",
   },
   {
     step: 3,
