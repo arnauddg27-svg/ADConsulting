@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import { SITE_CONFIG } from "@/lib/constants";
+import { buildCalendlyUrl } from "@/lib/attribution";
 
 type TrackingWindow = Window & {
   dataLayer?: unknown[];
@@ -73,6 +74,13 @@ export default function BookingQualifier() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [systemsTouched, setSystemsTouched] = useState(false);
+  // Default to the bare Calendly URL for SSR/first paint; after mount upgrade it
+  // to carry any stored ad attribution (gclid + real UTMs) into the handoff.
+  const [calendlyHref, setCalendlyHref] = useState(SITE_CONFIG.calendlyUrl);
+
+  useEffect(() => {
+    setCalendlyHref(buildCalendlyUrl(SITE_CONFIG.calendlyUrl, getTrafficSource()));
+  }, []);
 
   const hasIdentity =
     form.companyName.trim().length > 1 &&
@@ -138,7 +146,7 @@ export default function BookingQualifier() {
       event_category: "booking",
       event_label: getTrafficSource(),
       qualified: true,
-      destination: SITE_CONFIG.calendlyUrl,
+      destination: calendlyHref,
     });
 
     trackingWindow.fbq?.("track", "Lead", {
@@ -354,7 +362,7 @@ export default function BookingQualifier() {
                     </p>
                     {isQualified ? (
                       <a
-                        href={SITE_CONFIG.calendlyUrl}
+                        href={calendlyHref}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={handleCalendarClick}

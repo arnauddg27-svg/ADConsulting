@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MarketingTracking from "@/components/analytics/MarketingTracking";
+import AttributionCapture from "@/components/analytics/AttributionCapture";
 import PageAmbient from "@/components/ui/PageAmbient";
 
 const siteUrl = "https://consulting.aderpsystems.com";
@@ -70,6 +71,7 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body className="font-sans antialiased">
         <MarketingTracking />
+        <AttributionCapture />
         <div className="relative min-h-screen overflow-x-hidden">
           <PageAmbient />
           <Header />

@@ -9,6 +9,9 @@ type CalendlyTracking = {
   utm_medium?: string | null;
   utm_content?: string | null;
   utm_term?: string | null;
+  // We forward the Google click id through Calendly's salesforce_uuid passthrough
+  // so booked calls can be imported into Google Ads as offline conversions.
+  salesforce_uuid?: string | null;
 };
 
 export type CalendlyWebhookEvent = {
@@ -63,6 +66,8 @@ export type CrmLead = {
   utmCampaign?: string;
   utmContent?: string;
   utmTerm?: string;
+  // Google click id (gclid/gbraid/wbraid) for offline conversion import.
+  gclid?: string;
 };
 
 type SyncResult = {
@@ -170,6 +175,7 @@ export function normalizeCalendlyLead(webhook: CalendlyWebhookEvent): CrmLead {
     utmCampaign: tracking.utm_campaign ?? undefined,
     utmContent: tracking.utm_content ?? undefined,
     utmTerm: tracking.utm_term ?? undefined,
+    gclid: tracking.salesforce_uuid ?? undefined,
   };
 }
 

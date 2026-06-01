@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SITE_CONFIG } from "@/lib/constants";
+import { buildCalendlyUrl } from "@/lib/attribution";
 
 type TrackingWindow = Window & {
   dataLayer?: unknown[];
@@ -25,9 +27,15 @@ export default function TrackedCalendlyLink({
   className,
   source,
 }: TrackedCalendlyLinkProps) {
-  // Carry the click source into the Calendly routing form as a UTM param so
-  // attribution survives into the Calendly webhook / CRM.
-  const href = `${SITE_CONFIG.calendlyUrl}?utm_source=website&utm_medium=referral&utm_content=${encodeURIComponent(source)}`;
+  // First render (SSR + hydration) uses the deterministic default so server and
+  // client markup match. After mount we upgrade the href to carry any stored ad
+  // attribution (gclid + real UTMs) into the Calendly handoff. See lib/attribution.
+  const defaultHref = `${SITE_CONFIG.calendlyUrl}?utm_source=website&utm_medium=referral&utm_content=${encodeURIComponent(source)}`;
+  const [href, setHref] = useState(defaultHref);
+
+  useEffect(() => {
+    setHref(buildCalendlyUrl(SITE_CONFIG.calendlyUrl, source));
+  }, [source]);
 
   const handleClick = () => {
     const trackingWindow = window as TrackingWindow;
