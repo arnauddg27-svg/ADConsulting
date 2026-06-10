@@ -151,6 +151,48 @@ function isJobComplete(row) {
   return safeNumber(row?.progress_percent) >= 100;
 }
 
+/* Narrow the whole dashboard to a single job: filters the per-job arrays and
+   recomputes the summary KPIs so every panel on the analytics tabs scopes to
+   that job. Used by the click-to-filter cross-filter. */
+function scopeDashboardToJob(dashboard, jobId) {
+  const roster = (dashboard.taskRoster || []).filter((t) => t.job_id === jobId);
+  const jobProgress = (dashboard.jobProgress || []).filter((j) => j.job_id === jobId);
+  const actualSpending = (dashboard.actualSpending || []).filter((s) => s.job_id === jobId);
+  const vendorPoDetail = (dashboard.vendorPoDetail || []).filter((po) => po.job_id === jobId);
+  const statusCount = (st) => roster.filter((t) => t.status === st).length;
+  const completed = statusCount("COMPLETED");
+  return {
+    ...dashboard,
+    jobProgress,
+    taskRoster: roster,
+    actualSpending,
+    vendorPoDetail,
+    summaries: {
+      ...dashboard.summaries,
+      portfolio: {
+        totalJobs: jobProgress.length,
+        totalTasks: roster.length,
+        completedTasks: completed,
+        totalBudget: roster.reduce((sum, t) => sum + safeNumber(t.budget_cost), 0),
+        distinctPlans: new Set(jobProgress.map((j) => j.plan_name).filter(Boolean)).size || jobProgress.length,
+      },
+      construction: {
+        completed,
+        inProgress: statusCount("IN_PROGRESS"),
+        ordered: statusCount("ORDERED"),
+        notStarted: statusCount("NOT_STARTED"),
+        jobsWithProgress: jobProgress.filter(isJobStarted).length,
+        avgCompletionPct: safeNumber(jobProgress[0]?.progress_percent),
+      },
+      vendors: {
+        totalVendors: new Set(vendorPoDetail.map((po) => po.vendor_name).filter(Boolean)).size,
+        totalPoValue: vendorPoDetail.reduce((sum, po) => sum + safeNumber(po.po_amount), 0),
+        totalPos: vendorPoDetail.length,
+      },
+    },
+  };
+}
+
 /* ── Tab config ───────────────────────────────── */
 
 const SECTIONS = [
@@ -692,7 +734,7 @@ function StackedBar({ completed, inProgress, ordered, notStarted, total }) {
 
 /* ── Overview Tab ─────────────────────────────── */
 
-function OverviewTab({ dashboard, onSelect }) {
+function OverviewTab({ dashboard, onSelect, onFilterJob }) {
   const p = dashboard.summaries.portfolio;
   const c = dashboard.summaries.construction;
   const v = dashboard.summaries.vendors;
@@ -708,7 +750,7 @@ function OverviewTab({ dashboard, onSelect }) {
   const notStartedJobs = dashboard.jobProgress.filter((r) => r.completed === 0 && r.in_progress === 0 && r.ordered === 0 && safeNumber(r.progress_percent) === 0);
   const renderOverviewJobRow = (r, i, dimmed) => (
     <div key={i} className="compact-table-row interactive-row" style={{ gridTemplateColumns: overviewJobCols, opacity: dimmed ? 0.45 : 1 }}
-      onClick={() => onSelect({ type: "job", value: r.job_id, label: r.project_address || `Lot ${r.lot_id}` })}>
+      onClick={() => onFilterJob({ id: r.job_id, label: r.project_address || `Lot ${r.lot_id}` })}>
       <span>{r.project_address || r.lot_id}</span>
       <span>{r.plan_name}</span>
       <span className="text-right">{r.total_tasks}</span>
@@ -835,7 +877,7 @@ function OverviewTab({ dashboard, onSelect }) {
               const ou = safeNumber(s.erp_over_under);
               return (
                 <div key={i} className="compact-table-row interactive-row" style={{ gridTemplateColumns: "2.5fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.7fr" }}
-                  onClick={() => onSelect({ type: "job", value: s.job_id, label: s.project_address })}>
+                  onClick={() => onFilterJob({ id: s.job_id, label: s.project_address })}>
                   <span>{s.project_address || "-"}</span>
                   <span className="text-right">{formatCompactCurrency(s.po_sent_budget_total)}</span>
                   <span className="text-right">{formatCompactCurrency(s.effective_actual_total)}</span>
@@ -874,7 +916,7 @@ function OverviewTab({ dashboard, onSelect }) {
 
 /* ── Construction Tab ─────────────────────────── */
 
-function ConstructionTab({ dashboard, onSelect }) {
+function ConstructionTab({ dashboard, onSelect, onFilterJob }) {
   // Filter to only jobs with activity
   const activeJobs = dashboard.jobProgress.filter((r) => r.completed > 0 || r.in_progress > 0 || r.ordered > 0 || safeNumber(r.progress_percent) > 0);
   const activeJobIds = new Set(activeJobs.map((r) => r.job_id));
@@ -1018,7 +1060,7 @@ function ConstructionTab({ dashboard, onSelect }) {
             </div>
             {activeJobs.map((r, i) => (
               <div key={i} className="compact-table-row interactive-row" style={{ gridTemplateColumns: detailCols }}
-                onClick={() => onSelect({ type: "job", value: r.job_id, label: r.project_address || `Lot ${r.lot_id}` })}>
+                onClick={() => onFilterJob({ id: r.job_id, label: r.project_address || `Lot ${r.lot_id}` })}>
                 <span>{r.project_address || r.lot_id}</span>
                 <span>{r.plan_name}</span>
                 <span className="text-right">{r.completed}</span>
@@ -1485,12 +1527,10 @@ function QualityChecks({ checks = [] }) {
 export default function DashboardShell({ dashboard }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [jobFilter, setJobFilter] = useState(null);
 
   const currentTab = ALL_TABS.find((t) => t.id === activeTab) || ALL_TABS[0];
   const CLIENT_NAME = dashboard.config?.clientName || "Dashboard";
-  const p = dashboard.summaries?.portfolio || {};
-  const c = dashboard.summaries?.construction || {};
-  const v = dashboard.summaries?.vendors || {};
 
   if (dashboard.errorMessage) {
     return (
@@ -1502,6 +1542,13 @@ export default function DashboardShell({ dashboard }) {
       </div>
     );
   }
+
+  // Active cross-filter scopes the analytics tabs (and rail stats) to one job.
+  const scoped = jobFilter ? scopeDashboardToJob(dashboard, jobFilter.id) : dashboard;
+  const filterActive = jobFilter && (activeTab === "overview" || activeTab === "construction");
+  const p = scoped.summaries?.portfolio || {};
+  const c = scoped.summaries?.construction || {};
+  const v = scoped.summaries?.vendors || {};
 
   return (
     <div className="shell">
@@ -1565,8 +1612,18 @@ export default function DashboardShell({ dashboard }) {
           <p className="tab-desc">{currentTab.desc}</p>
         </div>
 
-        {activeTab === "overview" && <OverviewTab dashboard={dashboard} onSelect={setSelectedDetail} />}
-        {activeTab === "construction" && <ConstructionTab dashboard={dashboard} onSelect={setSelectedDetail} />}
+        {filterActive && (
+          <div className="filter-banner">
+            <span className="filter-banner-label">Filtered to job</span>
+            <strong className="filter-banner-job">{jobFilter.label}</strong>
+            <span className="filter-banner-meta">{scoped.taskRoster?.length || 0} tasks · {formatMilestoneProgress(scoped.jobProgress?.[0] || {})}</span>
+            <button className="filter-banner-btn" onClick={() => setSelectedDetail({ type: "job", value: jobFilter.id, label: jobFilter.label })}>View task list</button>
+            <button className="filter-banner-clear" onClick={() => setJobFilter(null)}>&#x2715; Clear filter</button>
+          </div>
+        )}
+
+        {activeTab === "overview" && <OverviewTab dashboard={scoped} onSelect={setSelectedDetail} onFilterJob={setJobFilter} />}
+        {activeTab === "construction" && <ConstructionTab dashboard={scoped} onSelect={setSelectedDetail} onFilterJob={setJobFilter} />}
         {activeTab === "vendors" && <VendorsTab dashboard={dashboard} onSelect={setSelectedDetail} />}
         {activeTab === "land-runway" && <LandRunwayTab dashboard={dashboard} onSelect={setSelectedDetail} />}
         <QualityChecks checks={dashboard.qualityChecks} />
@@ -1574,7 +1631,7 @@ export default function DashboardShell({ dashboard }) {
       </main>
 
       {/* Drilldown Drawer */}
-      <DrilldownDrawer detail={selectedDetail} dashboard={dashboard} onClose={() => setSelectedDetail(null)} onDrill={setSelectedDetail} />
+      <DrilldownDrawer detail={selectedDetail} dashboard={scoped} onClose={() => setSelectedDetail(null)} onDrill={setSelectedDetail} />
 
       {/* AI Analyst chat */}
       <AiAnalyst dashboard={dashboard} />
