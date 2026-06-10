@@ -1,0 +1,8 @@
+{
+  "name": "fsp-sync",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.9.4"
+  }
+}

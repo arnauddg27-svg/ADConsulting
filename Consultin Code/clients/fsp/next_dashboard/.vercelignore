@@ -1,0 +1,7 @@
+.env
+.env.local
+.env*.local
+applied-well-*.json
+*credentials*.json
+*service-account*.json
+*sa-key*.json
