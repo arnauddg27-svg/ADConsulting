@@ -306,12 +306,20 @@ function KpiTile({
       : tone === "warn"
         ? "border-[#f2c66d]/30 bg-[#f2c66d]/12 text-[#f4cf83]"
         : "border-[#8bd7ff]/20 bg-[#8bd7ff]/10 text-[#8bd7ff]";
+  const toneNote =
+    tone === "good"
+      ? "text-[#8df2c8]/80"
+      : tone === "warn"
+        ? "text-[#f4cf83]/85"
+        : "text-white/[0.6]";
 
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, y: 12 }}
+      // Tiles stay visible (dimmed) before the scroll reveal — an opacity-0
+      // start left half the tablet looking like an empty black screen.
+      initial={reduce ? false : { opacity: 0.55, y: 10 }}
       animate={
-        revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }
+        revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0.55, y: 10 }
       }
       transition={{
         duration: 0.5,
@@ -319,12 +327,12 @@ function KpiTile({
         ease: "easeOut",
       }}
       className={cn(
-        "flex flex-col justify-between rounded-xl border border-white/10 bg-[#0d1620] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:p-3.5",
+        "flex flex-col justify-between rounded-xl border border-white/[0.12] bg-[#101b27] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:p-3.5",
         className,
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.5rem] font-bold uppercase leading-tight tracking-[0.16em] text-white/[0.42]">
+        <p className="text-[0.5rem] font-bold uppercase leading-tight tracking-[0.16em] text-white/[0.58]">
           {kpi.label}
         </p>
         <span
@@ -345,7 +353,12 @@ function KpiTile({
           run={revealed}
         />
       </div>
-      <p className="mt-1 text-[0.68rem] font-semibold leading-tight text-white/[0.45]">
+      <p
+        className={cn(
+          "mt-1 text-[0.68rem] font-semibold leading-tight",
+          toneNote,
+        )}
+      >
         {kpi.note}
       </p>
     </motion.div>
@@ -369,7 +382,7 @@ function MilestoneBars({
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[0.5rem] font-bold uppercase tracking-[0.2em] text-white/[0.38] md:text-[0.56rem]">
+          <p className="text-[0.5rem] font-bold uppercase tracking-[0.2em] text-white/[0.55] md:text-[0.56rem]">
             Construction milestones
           </p>
           <h4 className="mt-1 text-sm font-bold md:text-lg">
@@ -399,19 +412,29 @@ function MilestoneBars({
                   compact ? "text-[0.7rem]" : "text-xs md:text-sm",
                 )}
               >
-                <span className="font-bold text-white/[0.78]">
+                <span className="flex items-center gap-1.5 font-bold text-white/[0.88]">
+                  <span
+                    aria-hidden
+                    className="inline-block h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: stage.color }}
+                  />
                   {stage.label}
                 </span>
-                <span className="text-white/[0.42]">{stage.value} jobs</span>
+                <span className="text-white/[0.58]">{stage.value} jobs</span>
               </div>
-              <div className="mt-1.5 h-2 rounded-full bg-white/[0.08]">
+              <div className="mt-1.5 h-2.5 rounded-full bg-white/[0.1]">
                 <motion.div
-                  className="h-2 rounded-full"
+                  className="h-2.5 rounded-full"
                   style={{
-                    background: `linear-gradient(90deg, ${stage.color}, #8bd7ff)`,
+                    background: stage.color,
+                    boxShadow: `0 0 10px ${stage.color}55`,
                   }}
-                  initial={reduce ? false : { width: "0%" }}
-                  animate={{ width: revealed || reduce ? `${pct}%` : "0%" }}
+                  // Partially filled before the reveal so the panel never
+                  // reads as empty, then grows to the real value.
+                  initial={reduce ? false : { width: `${pct * 0.3}%` }}
+                  animate={{
+                    width: revealed || reduce ? `${pct}%` : `${pct * 0.3}%`,
+                  }}
                   transition={{
                     duration: 0.9,
                     delay: reduce ? 0 : 0.2 + i * 0.08,
@@ -470,7 +493,7 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
     <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
             Cycle time
           </p>
           <h4 className="mt-1 text-sm font-bold md:text-base">
@@ -548,7 +571,7 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
         />
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[0.6rem] font-semibold text-white/[0.42]">
+      <div className="mt-2 flex items-center justify-between text-[0.6rem] font-semibold text-white/[0.58]">
         <span>
           <span className="text-[#8df2c8]">149d now</span> · 4.9 mo
         </span>
@@ -565,7 +588,7 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
     <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.38]">
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
             Budget tracking
           </p>
           <h4 className="mt-1 text-sm font-bold md:text-base">Variance by job</h4>
@@ -612,7 +635,7 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
         ))}
       </div>
 
-      <div className="mt-2 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.4]">
+      <div className="mt-2 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.58]">
         <span>3 of 138 flagged</span>
         <span>24.6% avg margin</span>
       </div>
@@ -623,10 +646,10 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
 function DashboardOnTablet({ revealed }: { revealed: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <div className="relative h-full overflow-hidden bg-black text-white">
+    <div className="relative h-full overflow-hidden bg-[#07111b] text-white">
       <div
         aria-hidden
-        className="absolute inset-0 opacity-[0.06]"
+        className="absolute inset-0 opacity-[0.09]"
         style={{
           backgroundImage:
             "linear-gradient(90deg, rgba(139,215,255,0.32) 1px, transparent 1px), linear-gradient(rgba(139,215,255,0.24) 1px, transparent 1px)",
