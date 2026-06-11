@@ -534,8 +534,8 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
           <motion.path
             d={area}
             fill="url(#cycle-fill)"
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: revealed || reduce ? 1 : 0 }}
+            initial={reduce ? false : { opacity: 0.35 }}
+            animate={{ opacity: revealed || reduce ? 1 : 0.35 }}
             transition={{ duration: 0.7, delay: reduce ? 0 : 0.55 }}
           />
           <motion.path
@@ -546,8 +546,9 @@ function CycleTrend({ revealed }: { revealed: boolean }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             style={{ filter: "drop-shadow(0 2px 6px rgba(36,193,141,0.45))" }}
-            initial={reduce ? false : { pathLength: 0 }}
-            animate={{ pathLength: revealed || reduce ? 1 : 0 }}
+            // Partially drawn pre-reveal so the panel never reads as empty.
+            initial={reduce ? false : { pathLength: 0.45 }}
+            animate={{ pathLength: revealed || reduce ? 1 : 0.45 }}
             transition={{ duration: 1.1, ease: "easeInOut", delay: reduce ? 0 : 0.3 }}
           />
         </svg>
@@ -603,9 +604,9 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
           <motion.div
             key={row.job}
             className="flex items-center justify-between gap-3 py-1.5"
-            initial={reduce ? false : { opacity: 0, y: 6 }}
+            initial={reduce ? false : { opacity: 0.5, y: 5 }}
             animate={
-              revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }
+              revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0.5, y: 5 }
             }
             transition={{
               duration: 0.45,
