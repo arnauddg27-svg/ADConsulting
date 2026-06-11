@@ -805,7 +805,7 @@ function OverviewTab({ dashboard, onSelect, onFilterJob }) {
           />
         </Panel>
         <Panel kicker="Progress" title="Task Status Breakdown">
-          <div className="compact-table">
+          <div className="compact-table ct-fit">
             <div className="compact-table-head" style={{ gridTemplateColumns: "1.5fr 0.7fr 0.7fr" }}>
               <span>Status</span><span className="text-right">Count</span><span className="text-right"><Term tip={TIPS.share} align="right">Share</Term></span>
             </div>
@@ -1163,7 +1163,7 @@ function VendorsTab({ dashboard, onSelect }) {
           />
         </Panel>
         <Panel kicker="Detail" title="Vendor Scorecard">
-          <div className="compact-table">
+          <div className="compact-table ct-fit">
             <div className="compact-table-head" style={{ gridTemplateColumns: "2fr 0.8fr 0.5fr 0.5fr" }}>
               <span>Vendor</span><span className="text-right">PO Value</span><span className="text-right">POs</span><span className="text-right">Rank</span>
             </div>
@@ -1252,7 +1252,7 @@ function ExceptionsFooter({ dashboard }) {
 
       {expanded && (
         <div style={{ marginTop: 8 }}>
-          <div className="compact-table">
+          <div className="compact-table ct-fit">
             <div className="compact-table-head" style={{ gridTemplateColumns: "2fr 1.5fr 0.8fr 0.6fr" }}>
               <span>Entity</span><span>Type</span><span>Severity</span><span className="text-right">Days</span>
             </div>

@@ -524,15 +524,29 @@ body { min-height: 100vh; }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+  /* Wide data tables scroll horizontally on mobile instead of crushing every
+     column to fit (which mangled headers into unreadable fragments). Fixed
+     min-width keeps columns aligned row-to-row; cells stay single-line. */
   .compact-table-head,
   .compact-table-row {
-    min-width: 0;
-    padding-left: 8px;
-    padding-right: 8px;
-    column-gap: 6px;
-    overflow-wrap: anywhere;
+    min-width: 720px;
+    padding-left: 10px;
+    padding-right: 10px;
+    column-gap: 12px;
+    align-items: center;
   }
-  .compact-table-row.interactive-row { min-height: 44px; align-items: center; }
+  .compact-table-head > span,
+  .compact-table-row > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .compact-table-row.interactive-row { min-height: 44px; }
+  /* Narrow tables (≤4 cols) fill the width instead of forcing a 720px scroll. */
+  .compact-table.ct-fit .compact-table-head,
+  .compact-table.ct-fit .compact-table-row {
+    min-width: 100%;
+  }
   .drawer-overlay {
     width: 100vw;
     padding: 18px 14px 24px;
@@ -547,7 +561,7 @@ body { min-height: 100vh; }
   }
   .drawer-overlay .compact-table-head,
   .drawer-overlay .compact-table-row {
-    min-width: 520px;
+    min-width: 680px;
   }
   .pipeline-board { grid-template-columns: repeat(2, 1fr); }
   .planning-status { align-items: flex-start; }
