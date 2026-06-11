@@ -208,6 +208,10 @@ export default function Home() {
                   <span>Book a Discovery Call</span>
                   <ArrowRight size={16} />
                 </TrackedCalendlyLink>
+                <a href="#ai-analyst-demo" className={secondaryCtaClass}>
+                  <span>Watch the 75-sec Demo</span>
+                  <ArrowRight size={16} />
+                </a>
                 <Link href="/examples/" className={secondaryCtaClass}>
                   <span>View Example Dashboards</span>
                   <ArrowRight size={16} />
@@ -370,6 +374,7 @@ export default function Home() {
               >
                 <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#080a0c] shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
                   <video
+                    id="ai-analyst-demo"
                     src="/videos/ai-data-analyst-demo.mp4"
                     poster="/videos/ai-data-analyst-poster.jpg"
                     autoPlay
@@ -377,7 +382,7 @@ export default function Home() {
                     loop
                     playsInline
                     preload="metadata"
-                    className="block h-auto w-full"
+                    className="block h-auto w-full scroll-mt-28"
                     aria-label="AI Data Analyst demo — natural-language question answered with table, chart, and SQL exposed"
                   />
                 </div>

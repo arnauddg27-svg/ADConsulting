@@ -81,7 +81,7 @@ export default function OperationsHeroCard({
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#66d9b2]/[0.36] bg-[#07111b]/[0.68] px-3 py-2 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#b8f5df] backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-[#66d9b2]" />
-              Data sync healthy
+              Data up to date
             </div>
           </div>
 

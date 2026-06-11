@@ -146,7 +146,10 @@ function CountUp({
   run: boolean;
 }) {
   const reduce = useReducedMotion();
-  const [display, setDisplay] = useState(0);
+  // Initialize at the real value so server-rendered HTML (crawlers, no-JS,
+  // pre-hydration paints) shows real numbers instead of zeros; the count-up
+  // still plays from 0 once the card scrolls into view.
+  const [display, setDisplay] = useState(value);
 
   useEffect(() => {
     if (!run) return;

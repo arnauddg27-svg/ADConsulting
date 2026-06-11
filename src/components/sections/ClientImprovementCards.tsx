@@ -416,8 +416,8 @@ export default function ClientImprovementCards() {
         </div>
 
         <p className="mx-auto mt-6 max-w-3xl text-center text-xs leading-5 text-[#6b747b]">
-          * Past client performance on some jobs may not reflect future
-          performance.
+          * Results from prior builder engagements. Every operation is
+          different — outcomes vary.
         </p>
       </Container>
     </section>

@@ -50,6 +50,8 @@ const systemOptions = [
 
 const linkedInBookCallConversionId =
   process.env.NEXT_PUBLIC_LINKEDIN_BOOK_CALL_CONVERSION_ID;
+const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
+const googleAdsBookCallLabel = process.env.NEXT_PUBLIC_GOOGLE_ADS_BOOK_CALL_LABEL;
 
 function getTrafficSource() {
   if (typeof window === "undefined") {
@@ -148,6 +150,12 @@ export default function BookingQualifier() {
       qualified: true,
       destination: calendlyHref,
     });
+
+    if (googleAdsId && googleAdsBookCallLabel) {
+      trackingWindow.gtag?.("event", "conversion", {
+        send_to: `${googleAdsId}/${googleAdsBookCallLabel}`,
+      });
+    }
 
     trackingWindow.fbq?.("track", "Lead", {
       content_name: "Qualified discovery call",

@@ -67,14 +67,14 @@ export default function BuilderDataPlatformLandingPage() {
                 Builder Data Platform
               </AnimatedGradientText>
               <h1 className="mt-6 max-w-4xl font-heading text-[2.65rem] leading-[0.98] tracking-[-0.04em] text-[#111814] sm:text-6xl sm:tracking-[-0.045em] lg:text-[5.15rem]">
-                Dashboards + AI analyst, built on your data.
+                Know which jobs are slipping — before they cost you.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#46515a] md:text-xl">
-                For residential builders, developers, and their property
-                management arms. Centralize your ERP, spreadsheets, finance,
-                field, and property management data. Apply builder-specific
-                KPI logic. Give
-                every team a daily operating view — and an AI analyst that
+                Dashboards + an AI analyst, built on your data — for
+                residential builders, developers, and their property
+                management arms. We pull your ERP, spreadsheets, finance,
+                field, and property management data into one place and give
+                every team a daily operating view, plus an AI analyst that
                 answers questions about it in plain English.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -85,9 +85,13 @@ export default function BuilderDataPlatformLandingPage() {
                   <span>Book a Discovery Call</span>
                   <ArrowRight size={16} />
                 </TrackedCalendlyLink>
-                <Link href="/examples/" className={heroSecondaryCtaClass}>
+                <a href="#ai-analyst-demo" className={heroSecondaryCtaClass}>
                   <Sparkles size={15} />
+                  <span>Watch the 75-sec Demo</span>
+                </a>
+                <Link href="/examples/" className={heroSecondaryCtaClass}>
                   <span>View Samples</span>
+                  <ArrowRight size={16} />
                 </Link>
               </div>
 
@@ -114,6 +118,68 @@ export default function BuilderDataPlatformLandingPage() {
       {/* Hero #2 — the daily operating dashboard on the iPad. */}
       <IpadDashboardShowcase />
 
+      {/* Proof — recent engagement with concrete outcomes. */}
+      <section className="relative overflow-hidden border-b border-[#d9e1e6]/80 bg-transparent py-16 md:py-20">
+        <Container className="relative z-10">
+          <div className="overflow-hidden rounded-[1.5rem] border border-[#d4dee4] bg-white/[0.82] p-7 shadow-[0_36px_110px_-78px_rgba(23,33,44,0.55)] backdrop-blur md:p-10">
+            <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div>
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em] text-[#2f5368]">
+                  Recent engagement
+                </p>
+                <h2 className="mt-4 font-heading text-3xl leading-[1.02] tracking-[-0.03em] text-[#17212c] md:text-[2.6rem]">
+                  Built inside a top-200 builder environment.
+                </h2>
+                <p className="mt-5 max-w-xl text-base leading-7 text-[#46515a] md:text-lg">
+                  ERP exports, estimating spreadsheets, and finance feeds
+                  pulled into one central system, with daily operating views
+                  for construction, finance, and leadership on top — the same
+                  platform this page describes, run on real builder data.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    "ERP + spreadsheet workflows",
+                    "Daily operating views",
+                    "AI analyst included",
+                  ].map((chip) => (
+                    <span
+                      key={chip}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#dce4e8] bg-[#f7f9fb] px-3 py-1.5 text-xs font-semibold text-[#40515d]"
+                    >
+                      <CheckCircle2 size={13} className="text-[#4b9876]" />
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3 lg:gap-4">
+                {[
+                  { value: "15%", label: "Cycle-time reduction" },
+                  { value: "$0", label: "Over budget on tracked jobs" },
+                  { value: "20", label: "Fewer days on market" },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-[1.25rem] border border-[#d8e1e6] bg-white px-5 py-6 text-center shadow-[0_18px_44px_-36px_rgba(23,33,44,0.45)]"
+                  >
+                    <div className="font-heading text-4xl tracking-[-0.04em] text-[#17212c]">
+                      {stat.value}
+                    </div>
+                    <div className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#2f5368]">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="mt-8 text-xs leading-5 text-[#6b747b]">
+              Results from a prior builder engagement; every operation is
+              different and scope is shaped to yours.
+            </p>
+          </div>
+        </Container>
+      </section>
+
       {/* Hero #3 — AI Data Analyst on top of the warehouse. */}
       <section className="relative overflow-hidden border-b border-[#d9e1e6]/80 bg-transparent py-16 md:py-20 lg:py-24">
         <Container className="relative z-10">
@@ -128,6 +194,7 @@ export default function BuilderDataPlatformLandingPage() {
               >
                 <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[#080a0c] shadow-[0_18px_48px_-36px_rgba(23,33,44,0.42)]">
                   <video
+                    id="ai-analyst-demo"
                     src="/videos/ai-data-analyst-demo.mp4"
                     poster="/videos/ai-data-analyst-poster.jpg"
                     autoPlay
@@ -135,7 +202,7 @@ export default function BuilderDataPlatformLandingPage() {
                     loop
                     playsInline
                     preload="metadata"
-                    className="block h-auto w-full"
+                    className="block h-auto w-full scroll-mt-28"
                     aria-label="AI Data Analyst demo — natural-language question answered with table, chart, and SQL exposed"
                   />
                 </div>
