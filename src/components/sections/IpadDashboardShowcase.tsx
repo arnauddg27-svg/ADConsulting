@@ -943,7 +943,7 @@ function ScheduleTab({ revealed }: { revealed: boolean }) {
 function BudgetTab({ revealed }: { revealed: boolean }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
-      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:gap-3">
+      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:h-full md:auto-rows-fr md:gap-3">
         {budgetKpis.map((kpi, i) => (
           <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
         ))}
@@ -961,7 +961,7 @@ function BudgetTab({ revealed }: { revealed: boolean }) {
 function SalesTab({ revealed }: { revealed: boolean }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
-      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:gap-3">
+      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:h-full md:auto-rows-fr md:gap-3">
         {salesKpis.map((kpi, i) => (
           <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
         ))}
