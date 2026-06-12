@@ -54,11 +54,20 @@ export default function ServicesPage() {
         <Container className="space-y-5">
           {SERVICES.map((service, index) => {
             const Icon = iconMap[service.icon] ?? Wrench;
+            // Alternate the layout direction so the page reads as a zig-zag
+            // instead of six identical stacked blocks.
+            const reversed = index % 2 === 1;
 
             return (
               <BlueprintPanel key={service.id} className="overflow-hidden p-6 md:p-8 lg:p-10">
-                <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-12">
-                  <div>
+                <div
+                  className={`grid gap-8 lg:items-center lg:gap-12 ${
+                    reversed
+                      ? "lg:grid-cols-[1.18fr_0.82fr]"
+                      : "lg:grid-cols-[0.82fr_1.18fr]"
+                  }`}
+                >
+                  <div className={reversed ? "lg:order-2" : undefined}>
                     <div className="flex items-center gap-4">
                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d5dde2] bg-[#f7f9fb] text-[#35647f]">
                         <Icon size={26} />
@@ -91,7 +100,7 @@ export default function ServicesPage() {
                     </Link>
                   </div>
 
-                  <div>
+                  <div className={reversed ? "lg:order-1" : undefined}>
                     <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
                       What you get
                     </p>

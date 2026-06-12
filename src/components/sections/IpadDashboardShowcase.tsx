@@ -840,7 +840,7 @@ function CostCategoryPanel({ revealed }: { revealed: boolean }) {
           ▼ net under
         </span>
       </div>
-      <div className="mt-3 space-y-2.5">
+      <div className="mt-3 flex flex-1 flex-col justify-center gap-2.5">
         {costByCategory.map((row, i) => (
           <div key={row.label}>
             <div className="flex items-center justify-between text-xs md:text-sm">
@@ -886,7 +886,7 @@ function CostCategoryPanel({ revealed }: { revealed: boolean }) {
 function InventoryAgingPanel({ revealed }: { revealed: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
@@ -900,7 +900,7 @@ function InventoryAgingPanel({ revealed }: { revealed: boolean }) {
           3 over 90d
         </span>
       </div>
-      <div className="mt-3 space-y-2.5">
+      <div className="mt-3 flex flex-1 flex-col justify-center gap-2.5">
         {inventoryAging.map((row, i) => {
           const pct = (row.value / inventoryMax) * 100;
           return (
@@ -961,16 +961,17 @@ function ScheduleTab({ revealed }: { revealed: boolean }) {
 }
 
 function BudgetTab({ revealed }: { revealed: boolean }) {
+  // Compact KPI strip on top, two panels share the space below.
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
-      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:h-full md:auto-rows-fr md:gap-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:gap-4 md:p-4">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
         {budgetKpis.map((kpi, i) => (
           <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
         ))}
       </div>
-      <div className="flex min-h-0 flex-col gap-3 md:gap-4">
+      <div className="grid min-h-0 flex-1 gap-3 md:grid-cols-2 md:gap-4">
         <CostCategoryPanel revealed={revealed} />
-        <div className="hidden min-h-0 flex-1 flex-col md:flex">
+        <div className="hidden md:flex md:min-h-0 md:flex-col">
           <BudgetPanel revealed={revealed} />
         </div>
       </div>
@@ -979,9 +980,10 @@ function BudgetTab({ revealed }: { revealed: boolean }) {
 }
 
 function SalesTab({ revealed }: { revealed: boolean }) {
+  // Compact KPI strip on top (single-stat tiles stay small), panel fills below.
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
-      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:h-full md:auto-rows-fr md:gap-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:gap-4 md:p-4">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
         {salesKpis.map((kpi, i) => (
           <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
         ))}
