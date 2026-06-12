@@ -395,7 +395,9 @@ function TabletCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="relative mt-8 mx-auto h-[34rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
+      // Auto height on small screens so tab content never needs an inner
+      // scroller (which traps touch scrolling); fixed tablet height on md+.
+      className="relative mt-8 mx-auto h-auto min-h-[30rem] md:h-[40rem] w-full max-w-5xl rounded-[30px] border-4 border-[#6C6C6C] bg-[#222222] p-2 shadow-2xl md:p-5"
     >
       <div className="h-full w-full overflow-hidden rounded-2xl bg-[#07111b]">
         {children}
@@ -1081,7 +1083,7 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? undefined : { opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-visible"
+            className="flex min-h-0 flex-1 flex-col"
           >
             {tab === "schedule" && <ScheduleTab revealed={revealed} />}
             {tab === "budget" && <BudgetTab revealed={revealed} />}
