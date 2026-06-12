@@ -344,7 +344,7 @@ function KpiTile({
           <Icon size={13} />
         </span>
       </div>
-      <div className="mt-2 text-2xl font-bold leading-none text-white">
+      <div className="mt-2 text-2xl font-bold leading-none text-white tabular-nums">
         <CountUp
           value={kpi.value}
           prefix={kpi.prefix}

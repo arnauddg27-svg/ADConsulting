@@ -162,7 +162,7 @@ export default function BuilderDataPlatformLandingPage() {
                     key={stat.label}
                     className="rounded-[1.25rem] border border-[#d8e1e6] bg-white px-5 py-6 text-center shadow-[0_18px_44px_-36px_rgba(23,33,44,0.45)]"
                   >
-                    <div className="font-heading text-4xl tracking-[-0.04em] text-[#17212c]">
+                    <div className="font-heading text-4xl tracking-[-0.04em] text-[#17212c] tabular-nums">
                       {stat.value}
                     </div>
                     <div className="mt-2 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-[#2f5368]">
