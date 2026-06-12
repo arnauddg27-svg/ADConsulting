@@ -111,7 +111,7 @@ export default function OperationsHeroCard({
                     <p className="text-[0.5rem] font-bold uppercase tracking-[0.18em] text-white/[0.6]">
                       {stat.label}
                     </p>
-                    <p className="mt-2 text-xl font-bold leading-none tracking-[-0.02em] text-white sm:text-2xl">
+                    <p className="mt-2 text-xl font-bold leading-none tracking-[-0.02em] text-white tabular-nums sm:text-2xl">
                       {stat.value}
                     </p>
                     <p className="mt-1 text-[0.56rem] font-semibold uppercase tracking-[0.12em] text-[#8bd7ff]/75">
@@ -122,7 +122,7 @@ export default function OperationsHeroCard({
               </div>
             </div>
 
-            <div className="rounded-[1.35rem] border border-white/[0.16] bg-[#07111b]/[0.72] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_-42px_rgba(0,0,0,0.78)] backdrop-blur-md">
+            <div className="rounded-[1.5rem] border border-white/[0.16] bg-[#07111b]/[0.72] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_-42px_rgba(0,0,0,0.78)] backdrop-blur-md">
               <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-[#8bd8f7]">
                 Today&apos;s flags
               </p>

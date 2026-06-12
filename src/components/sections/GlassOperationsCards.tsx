@@ -73,7 +73,7 @@ function GlassOperationsCard({
 }: GlassOperationsCardProps) {
   return (
     <article className={cn("group h-full", className)}>
-      <div className="relative h-full overflow-hidden rounded-[1.35rem] border border-[#d4dee4] bg-gradient-to-br from-white/92 to-[#eef4f7]/78 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_30px_88px_-68px_rgba(23,33,44,0.5)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-1 hover:border-[#9eb6c8] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_40px_110px_-72px_rgba(23,33,44,0.6)]">
+      <div className="relative h-full overflow-hidden rounded-[1.5rem] border border-[#d4dee4] bg-gradient-to-br from-white/92 to-[#eef4f7]/78 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_30px_88px_-68px_rgba(23,33,44,0.5)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-1 hover:border-[#9eb6c8] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_40px_110px_-72px_rgba(23,33,44,0.6)]">
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={image}

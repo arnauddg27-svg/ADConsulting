@@ -307,7 +307,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="rounded-[1.35rem] border border-white/[0.16] bg-[#07111b]/[0.72] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_-42px_rgba(0,0,0,0.78)] backdrop-blur-md">
+                    <div className="rounded-[1.5rem] border border-white/[0.16] bg-[#07111b]/[0.72] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_-42px_rgba(0,0,0,0.78)] backdrop-blur-md">
                       <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-[#8bd8f7]">
                         Today&apos;s flags
                       </p>
@@ -608,7 +608,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-[1.45rem] border border-white/[0.12] bg-white/[0.07] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_70px_-54px_rgba(0,0,0,0.8)] backdrop-blur-md">
+              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/[0.12] bg-white/[0.07] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_70px_-54px_rgba(0,0,0,0.8)] backdrop-blur-md">
                 <div
                   aria-hidden
                   className="absolute inset-0 bg-gradient-to-br from-white/[0.09] via-transparent to-[#6ee7b7]/10"
