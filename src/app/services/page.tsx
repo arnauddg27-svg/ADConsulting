@@ -40,6 +40,166 @@ const iconMap: Record<string, LucideIcon> = {
   Wrench,
 };
 
+/* Compact dark-panel illustration per service — same visual language as the
+   live dashboard demo. Static markup only (server-rendered). */
+function ServiceVisual({ id }: { id: string }) {
+  const frame =
+    "relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1622] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_60px_-48px_rgba(23,33,44,0.8)]";
+  const grid = {
+    backgroundImage:
+      "linear-gradient(90deg, rgba(139,215,255,0.18) 1px, transparent 1px), linear-gradient(rgba(139,215,255,0.14) 1px, transparent 1px)",
+    backgroundSize: "28px 28px",
+  } as const;
+
+  if (id === "ingestion") {
+    return (
+      <div className={frame}>
+        <div aria-hidden className="absolute inset-0 opacity-[0.08]" style={grid} />
+        <div className="relative flex items-center gap-3">
+          <div className="flex flex-1 flex-col gap-1.5">
+            {["ERP exports", "Spreadsheets", "Finance", "Field + PM"].map((s) => (
+              <span
+                key={s}
+                className="inline-flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[0.56rem] font-bold uppercase tracking-[0.12em] text-white/[0.72]"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-[#8bd7ff]" />
+                {s}
+              </span>
+            ))}
+          </div>
+          <div aria-hidden className="h-px w-8 shrink-0 border-t-2 border-dashed border-[#24c18d]/60" />
+          <div className="shrink-0 rounded-xl border border-[#24c18d]/40 bg-[#24c18d]/10 px-4 py-5 text-center">
+            <div className="text-[0.56rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+              One central
+            </div>
+            <div className="text-sm font-bold text-white">warehouse</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (id === "warehouse") {
+    return (
+      <div className={frame}>
+        <div aria-hidden className="absolute inset-0 opacity-[0.08]" style={grid} />
+        <div className="relative space-y-1.5">
+          <div className="flex gap-1.5">
+            {["jobs", "costs", "sales", "leases"].map((t) => (
+              <span
+                key={t}
+                className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[0.54rem] font-bold uppercase tracking-[0.12em] text-[#8bd7ff]"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+          {[88, 72, 94, 63].map((w, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#24c18d]/70" />
+              <div
+                className="h-2 rounded-full bg-gradient-to-r from-[#1d3a52] to-[#2a5878]"
+                style={{ width: `${w}%` }}
+              />
+            </div>
+          ))}
+          <p className="pt-1 text-[0.54rem] font-semibold uppercase tracking-[0.14em] text-white/[0.45]">
+            Clean, joined, client-owned tables
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (id === "builder-ops") {
+    return (
+      <div className={frame}>
+        <div aria-hidden className="absolute inset-0 opacity-[0.08]" style={grid} />
+        <div className="relative grid grid-cols-3 gap-2">
+          {[
+            { v: "4.9 mo", l: "cycle" },
+            { v: "$310K", l: "variance" },
+            { v: "24.6%", l: "margin" },
+          ].map((k) => (
+            <div key={k.l} className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-center">
+              <div className="text-sm font-bold text-white tabular-nums">{k.v}</div>
+              <div className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/[0.5]">{k.l}</div>
+            </div>
+          ))}
+        </div>
+        <div className="relative mt-2.5 space-y-1.5">
+          {[
+            { w: 78, c: "#14b8a6" },
+            { w: 52, c: "#22d3ee" },
+            { w: 34, c: "#3b82f6" },
+          ].map((b, i) => (
+            <div key={i} className="h-2 rounded-full bg-white/[0.08]">
+              <div className="h-2 rounded-full" style={{ width: `${b.w}%`, background: b.c }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (id === "ai-analyst") {
+    return (
+      <div className={frame}>
+        <div aria-hidden className="absolute inset-0 opacity-[0.08]" style={grid} />
+        <div className="relative space-y-2">
+          <div className="w-fit rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 text-[0.66rem] font-semibold text-white/[0.85]">
+            &ldquo;Which jobs are over budget?&rdquo;
+          </div>
+          <div className="rounded-xl border border-[#24c18d]/30 bg-[#24c18d]/[0.07] p-2.5">
+            {[
+              { job: "Lot 231 · Emerald Bay", v: "+$14K", over: true },
+              { job: "Lot 118 · Sunshine Ridge", v: "+$9K", over: true },
+              { job: "136 others", v: "on budget", over: false },
+            ].map((r) => (
+              <div key={r.job} className="flex items-center justify-between py-0.5 text-[0.62rem] font-semibold">
+                <span className="text-white/[0.75]">{r.job}</span>
+                <span className={r.over ? "text-[#f2c66d]" : "text-[#8df2c8]"}>{r.v}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[0.54rem] font-semibold uppercase tracking-[0.14em] text-white/[0.45]">
+            Answered from your warehouse · SQL shown
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // data-quality (default)
+  return (
+    <div className={frame}>
+      <div aria-hidden className="absolute inset-0 opacity-[0.08]" style={grid} />
+      <div className="relative space-y-1.5">
+        {[
+          { l: "ERP sync", ok: true, t: "today 6:02 AM" },
+          { l: "Sheets import", ok: true, t: "today 6:04 AM" },
+          { l: "Field updates", ok: false, t: "2 stale records" },
+          { l: "Access controls", ok: true, t: "12 users · roles set" },
+        ].map((r) => (
+          <div
+            key={r.l}
+            className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5"
+          >
+            <span className="flex items-center gap-2 text-[0.62rem] font-bold text-white/[0.82]">
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: r.ok ? "#24c18d" : "#f2c66d" }}
+              />
+              {r.l}
+            </span>
+            <span className="text-[0.56rem] font-semibold text-white/[0.5]">{r.t}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ServicesPage() {
   return (
     <BlueprintPage>
@@ -52,6 +212,8 @@ export default function ServicesPage() {
 
       <section className="pb-14 md:pb-20">
         <Container className="space-y-5">
+          {/* Mini dashboard-style visual per service, in the same dark panel
+              language as the live demo — so each block shows, not just tells. */}
           {SERVICES.map((service, index) => {
             const Icon = iconMap[service.icon] ?? Wrench;
             // Alternate the layout direction so the page reads as a zig-zag
@@ -101,7 +263,8 @@ export default function ServicesPage() {
                   </div>
 
                   <div className={reversed ? "lg:order-1" : undefined}>
-                    <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
+                    <ServiceVisual id={service.id} />
+                    <p className="mt-5 text-[0.66rem] font-bold uppercase tracking-[0.22em] text-[#35647f]">
                       What you get
                     </p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">

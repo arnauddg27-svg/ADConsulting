@@ -334,59 +334,58 @@ function ClientImprovementCard({
   const rawId = useId();
   const chartId = `ci-${rawId.replace(/:/g, "")}`;
 
+  // Editorial row on desktop (metric | story | chart) instead of three
+  // identical template cards; stacks naturally on mobile.
   return (
-    <article ref={ref} className={cn("h-full", className)}>
-      <div className="group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-[#d4dee4] bg-gradient-to-br from-white/96 via-white/90 to-[#eef4f7]/82 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.92),0_2px_4px_-2px_rgba(23,33,44,0.06),0_28px_64px_-46px_rgba(23,33,44,0.42)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-0.5 hover:border-[#c6d3da] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.96),0_30px_72px_-44px_rgba(23,33,44,0.5)]">
+    <article ref={ref} className={cn(className)}>
+      <div className="group relative flex flex-col gap-6 overflow-hidden rounded-[1.5rem] border border-[#d4dee4] bg-gradient-to-br from-white/96 via-white/90 to-[#eef4f7]/82 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.92),0_2px_4px_-2px_rgba(23,33,44,0.06),0_28px_64px_-46px_rgba(23,33,44,0.42)] backdrop-blur-xl backdrop-saturate-[140%] transition duration-300 hover:-translate-y-0.5 hover:border-[#c6d3da] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.96),0_30px_72px_-44px_rgba(23,33,44,0.5)] md:p-7 lg:grid lg:grid-cols-[13rem_1fr_19rem] lg:items-center lg:gap-10">
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#7fb8d3] via-[#5bbf98] to-[#17212c] opacity-75"
+          className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#7fb8d3] via-[#5bbf98] to-[#17212c] opacity-75"
         />
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#d6e0e5] bg-[#f8fafc]">
-              <Icon animate={inView && !reduceMotion} />
-            </span>
-            <span className="max-w-[8.5rem] text-[0.58rem] font-bold uppercase leading-tight tracking-[0.16em] text-[#66727a]">
-              {proof}
-            </span>
-          </div>
-          <span className="rounded-full border border-[#d7e0e5] bg-[#edf5f1] px-3 py-1 text-[0.56rem] font-bold uppercase tracking-[0.14em] text-[#285d47]">
-            Outcome
+        <div className="flex items-center gap-4 lg:flex-col lg:items-start lg:gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#d6e0e5] bg-[#f8fafc]">
+            <Icon animate={inView && !reduceMotion} />
           </span>
+          <div>
+            <div className="font-heading text-[2.8rem] font-semibold leading-none tracking-[-0.06em] text-[#17212c] tabular-nums lg:text-[3.4rem]">
+              {metric}
+              <sup className="ml-1 align-super text-xl leading-none text-[#2f5368]">
+                *
+              </sup>
+            </div>
+            <div className="mt-1.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#2f5368]">
+              {metricLabel}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 flex items-baseline gap-3">
-          <div className="font-heading text-[3.2rem] font-semibold leading-none tracking-[-0.06em] text-[#17212c] tabular-nums">
-            {metric}
-            <sup className="ml-1 align-super text-xl leading-none text-[#2f5368]">
-              *
-            </sup>
-          </div>
-          <div className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#2f5368]">
-            {metricLabel}
+        <div>
+          <p className="text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#66727a]">
+            {proof}
+          </p>
+          <h3 className="mt-2 text-[1.35rem] font-bold leading-snug tracking-[-0.02em] text-[#17212c]">
+            {title}
+          </h3>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#58636b]">
+            {description}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {focus.map((item) => (
+              <span
+                key={item}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#dce4e8] bg-[#f7f9fb] px-3 py-1.5 text-xs font-semibold text-[#40515d]"
+              >
+                <CheckCircle2 size={13} className="text-[#4b9876]" />
+                {item}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="lg:justify-self-end lg:w-full">
           <Chart play={inView} reduce={!!reduceMotion} id={chartId} />
-        </div>
-
-        <h3 className="mt-6 text-[1.25rem] font-bold leading-snug tracking-[-0.02em] text-[#17212c]">
-          {title}
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-[#58636b]">{description}</p>
-
-        <div className="mt-auto flex flex-wrap gap-2 pt-6">
-          {focus.map((item) => (
-            <span
-              key={item}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#dce4e8] bg-[#f7f9fb] px-3 py-1.5 text-xs font-semibold text-[#40515d]"
-            >
-              <CheckCircle2 size={13} className="text-[#4b9876]" />
-              {item}
-            </span>
-          ))}
         </div>
       </div>
     </article>
@@ -409,7 +408,7 @@ export default function ClientImprovementCards() {
           </p>
         </div>
 
-        <div className="grid auto-rows-fr items-stretch gap-5 lg:grid-cols-3">
+        <div className="space-y-4 md:space-y-5">
           {clientImprovementCards.map((card) => (
             <ClientImprovementCard key={card.title} {...card} />
           ))}
