@@ -117,7 +117,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`group inline-flex items-center gap-1.5 py-2 text-sm font-bold transition-colors ${linkText}`}
+                    className={`group inline-flex min-h-11 items-center gap-1.5 py-2 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f] ${linkText}`}
                   >
                     {link.label}
                     <ArrowUpRight
@@ -149,7 +149,7 @@ export default function Footer() {
                 <Mail size={16} className="mt-0.5 text-[#35647f]" />
                 <a
                   href={`mailto:${SITE_CONFIG.email}`}
-                  className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}
+                  className={`inline-flex min-h-11 items-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f] ${hoverMetaText}`}
                 >
                   {SITE_CONFIG.email}
                 </a>
@@ -168,13 +168,13 @@ export default function Footer() {
         >
           <div>© {new Date().getFullYear()} {SITE_CONFIG.businessName}.</div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <Link href="/about/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
+            <Link href="/about/" className={`inline-flex min-h-11 items-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f] ${hoverMetaText}`}>
               About Us
             </Link>
-            <Link href="/founder/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
+            <Link href="/founder/" className={`inline-flex min-h-11 items-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f] ${hoverMetaText}`}>
               Founder
             </Link>
-            <Link href="/privacy/" className={`inline-block py-1.5 transition-colors ${hoverMetaText}`}>
+            <Link href="/privacy/" className={`inline-flex min-h-11 items-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f] ${hoverMetaText}`}>
               Privacy Policy
             </Link>
             <span className="inline-flex items-center gap-2">

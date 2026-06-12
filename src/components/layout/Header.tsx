@@ -147,7 +147,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     className={[
-                      "relative rounded-full px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] transition-all",
+                      "relative rounded-full px-4 py-2.5 text-[0.72rem] font-semibold uppercase tracking-[0.18em] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f]",
                       active
                         ? isLightMarketing
                           ? "bg-[#e8eef2] text-[#243f52] shadow-[inset_0_0_0_1px_rgba(53,95,122,0.13)]"
