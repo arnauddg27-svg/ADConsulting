@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  AnimatePresence,
   animate,
   motion,
   type MotionValue,
@@ -131,6 +132,105 @@ const budgetByJob = [
   { job: "Lot 231", community: "Emerald Bay", variance: "$14K", over: true },
   { job: "Lot 097", community: "Palm Coast", variance: "$2K", over: false },
 ];
+
+// — Interactive demo tabs: each tab is a different operating view, all sample data. —
+const DEMO_TABS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "schedule", label: "Schedule", icon: CalendarCheck },
+  { id: "budget", label: "Budget", icon: CircleDollarSign },
+  { id: "sales", label: "Sales", icon: Home },
+] as const;
+type DemoTabId = (typeof DEMO_TABS)[number]["id"];
+
+const atRiskJobs = [
+  { job: "Lot 118", community: "Sunshine Ridge", behind: "9d behind", stage: "Framing" },
+  { job: "Lot 052", community: "Emerald Bay", behind: "6d behind", stage: "MEP / Drywall" },
+  { job: "Lot 203", community: "Palm Coast", behind: "5d behind", stage: "Finishes" },
+  { job: "Lot 091", community: "Cypress Creek", behind: "3d behind", stage: "Closing" },
+];
+
+const costByCategory = [
+  { label: "Sitework", delta: "+$38K", over: true, pct: 62 },
+  { label: "Framing", delta: "+$21K", over: true, pct: 41 },
+  { label: "MEP", delta: "−$12K", over: false, pct: 24 },
+  { label: "Finishes", delta: "−$54K", over: false, pct: 78 },
+];
+
+const budgetKpis: Kpi[] = [
+  {
+    label: "Budget variance",
+    value: 310,
+    prefix: "$",
+    suffix: "K",
+    note: "under budget",
+    icon: CircleDollarSign,
+    tone: "good",
+  },
+  {
+    label: "Avg margin",
+    value: 24.6,
+    decimals: 1,
+    suffix: "%",
+    note: "gross at closeout",
+    icon: Percent,
+    tone: "good",
+  },
+  {
+    label: "Jobs flagged",
+    value: 3,
+    note: "of 138 tracked",
+    icon: TriangleAlert,
+    tone: "warn",
+  },
+  {
+    label: "Change orders",
+    value: 12,
+    note: "open this month",
+    icon: BarChart3,
+    tone: "neutral",
+  },
+];
+
+const salesKpis: Kpi[] = [
+  {
+    label: "Closings QTD",
+    value: 27,
+    note: "vs 24 plan",
+    icon: Home,
+    tone: "good",
+  },
+  {
+    label: "Avg days on market",
+    value: 34,
+    note: "down 20 days",
+    icon: Clock3,
+    tone: "good",
+  },
+  {
+    label: "Backlog",
+    value: 61,
+    note: "homes under contract",
+    icon: BarChart3,
+    tone: "neutral",
+  },
+  {
+    label: "Absorption",
+    value: 2.4,
+    decimals: 1,
+    suffix: "/mo",
+    note: "per community",
+    icon: Percent,
+    tone: "neutral",
+  },
+];
+
+const inventoryAging = [
+  { label: "0–30 days", value: 14, color: "#14b8a6" },
+  { label: "31–60 days", value: 9, color: "#22d3ee" },
+  { label: "61–90 days", value: 5, color: "#3b82f6" },
+  { label: "90+ days", value: 3, color: "#f2c66d" },
+];
+const inventoryMax = Math.max(...inventoryAging.map((r) => r.value));
 
 function CountUp({
   value,
@@ -644,8 +744,237 @@ function BudgetPanel({ revealed }: { revealed: boolean }) {
   );
 }
 
+function AtRiskPanel({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
+            Schedule risk
+          </p>
+          <h4 className="mt-1 text-sm font-bold md:text-base">
+            Jobs behind plan
+          </h4>
+        </div>
+        <span className="rounded-full border border-[#f2c66d]/35 bg-[#f2c66d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#f4cf83]">
+          11 at risk
+        </span>
+      </div>
+      <div className="mt-3 flex flex-1 flex-col divide-y divide-white/[0.07]">
+        {atRiskJobs.map((row, i) => (
+          <motion.div
+            key={row.job}
+            className="flex items-center justify-between gap-3 py-2"
+            initial={reduce ? false : { opacity: 0.5, y: 5 }}
+            animate={
+              revealed || reduce ? { opacity: 1, y: 0 } : { opacity: 0.5, y: 5 }
+            }
+            transition={{
+              duration: 0.4,
+              delay: reduce ? 0 : 0.12 + i * 0.08,
+              ease: "easeOut",
+            }}
+          >
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white/[0.84] md:text-sm">
+                {row.job}
+              </div>
+              <div className="mt-0.5 text-[0.5rem] font-bold uppercase tracking-[0.16em] text-[#8df2c8]">
+                {row.community}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="hidden rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[0.54rem] font-semibold text-white/[0.6] md:inline">
+                {row.stage}
+              </span>
+              <span className="rounded-full border border-[#f2c66d]/35 bg-[#f2c66d]/10 px-2 py-0.5 text-[0.56rem] font-bold text-[#f2c66d]">
+                ▲ {row.behind}
+              </span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-2 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.58]">
+        <span>Owner + next action on each job</span>
+        <span>4 of 11 shown</span>
+      </div>
+    </div>
+  );
+}
+
+function CostCategoryPanel({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
+            Cost movement
+          </p>
+          <h4 className="mt-1 text-sm font-bold md:text-base">
+            Variance by category
+          </h4>
+        </div>
+        <span className="rounded-full border border-[#24c18d]/30 bg-[#24c18d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#8df2c8]">
+          ▼ net under
+        </span>
+      </div>
+      <div className="mt-3 space-y-2.5">
+        {costByCategory.map((row, i) => (
+          <div key={row.label}>
+            <div className="flex items-center justify-between text-xs md:text-sm">
+              <span className="font-bold text-white/[0.88]">{row.label}</span>
+              <span
+                className={cn(
+                  "font-bold",
+                  row.over ? "text-[#f2c66d]" : "text-[#8df2c8]",
+                )}
+              >
+                {row.delta}
+              </span>
+            </div>
+            <div className="mt-1.5 h-2.5 rounded-full bg-white/[0.1]">
+              <motion.div
+                className="h-2.5 rounded-full"
+                style={{
+                  background: row.over ? "#f2c66d" : "#24c18d",
+                  boxShadow: `0 0 10px ${row.over ? "#f2c66d" : "#24c18d"}55`,
+                }}
+                initial={reduce ? false : { width: `${row.pct * 0.3}%` }}
+                animate={{
+                  width: revealed || reduce ? `${row.pct}%` : `${row.pct * 0.3}%`,
+                }}
+                transition={{
+                  duration: 0.8,
+                  delay: reduce ? 0 : 0.15 + i * 0.08,
+                  ease: "easeOut",
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.58]">
+        <span>vs current budget, this month</span>
+        <span>$310K net under</span>
+      </div>
+    </div>
+  );
+}
+
+function InventoryAgingPanel({ revealed }: { revealed: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="flex flex-col rounded-2xl border border-white/10 bg-[#0d1620] p-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-white/[0.55]">
+            Inventory aging
+          </p>
+          <h4 className="mt-1 text-sm font-bold md:text-base">
+            Unsold homes by age
+          </h4>
+        </div>
+        <span className="rounded-full border border-[#f2c66d]/35 bg-[#f2c66d]/10 px-2 py-0.5 text-[0.5rem] font-bold uppercase tracking-[0.12em] text-[#f4cf83]">
+          3 over 90d
+        </span>
+      </div>
+      <div className="mt-3 space-y-2.5">
+        {inventoryAging.map((row, i) => {
+          const pct = (row.value / inventoryMax) * 100;
+          return (
+            <div key={row.label}>
+              <div className="flex items-center justify-between text-xs md:text-sm">
+                <span className="flex items-center gap-1.5 font-bold text-white/[0.88]">
+                  <span
+                    aria-hidden
+                    className="inline-block h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: row.color }}
+                  />
+                  {row.label}
+                </span>
+                <span className="text-white/[0.58]">{row.value} homes</span>
+              </div>
+              <div className="mt-1.5 h-2.5 rounded-full bg-white/[0.1]">
+                <motion.div
+                  className="h-2.5 rounded-full"
+                  style={{
+                    background: row.color,
+                    boxShadow: `0 0 10px ${row.color}55`,
+                  }}
+                  initial={reduce ? false : { width: `${pct * 0.3}%` }}
+                  animate={{
+                    width: revealed || reduce ? `${pct}%` : `${pct * 0.3}%`,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: reduce ? 0 : 0.15 + i * 0.08,
+                    ease: "easeOut",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between border-t border-white/[0.07] pt-2 text-[0.58rem] font-semibold text-white/[0.58]">
+        <span>31 unsold homes</span>
+        <span>aging flags on 90d+</span>
+      </div>
+    </div>
+  );
+}
+
+function ScheduleTab({ revealed }: { revealed: boolean }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[1.12fr_0.88fr] md:gap-4 md:p-4">
+      <div className="flex min-h-0 flex-col gap-3 md:gap-4">
+        <MilestoneBars revealed={revealed} />
+        <div className="hidden min-h-0 flex-1 flex-col md:flex">
+          <CycleTrend revealed={revealed} />
+        </div>
+      </div>
+      <AtRiskPanel revealed={revealed} />
+    </div>
+  );
+}
+
+function BudgetTab({ revealed }: { revealed: boolean }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
+      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:gap-3">
+        {budgetKpis.map((kpi, i) => (
+          <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
+        ))}
+      </div>
+      <div className="flex min-h-0 flex-col gap-3 md:gap-4">
+        <CostCategoryPanel revealed={revealed} />
+        <div className="hidden min-h-0 flex-1 flex-col md:flex">
+          <BudgetPanel revealed={revealed} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SalesTab({ revealed }: { revealed: boolean }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.92fr_1.08fr] md:gap-4 md:p-4">
+      <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:gap-3">
+        {salesKpis.map((kpi, i) => (
+          <KpiTile key={kpi.label} kpi={kpi} index={i} revealed={revealed} />
+        ))}
+      </div>
+      <InventoryAgingPanel revealed={revealed} />
+    </div>
+  );
+}
+
 function DashboardOnTablet({ revealed }: { revealed: boolean }) {
   const reduce = useReducedMotion();
+  const [tab, setTab] = useState<DemoTabId>("overview");
+  const [touched, setTouched] = useState(false);
   return (
     <div className="relative h-full overflow-hidden bg-[#07111b] text-white">
       <div
@@ -686,6 +1015,59 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
           </div>
         </div>
 
+        <div
+          role="tablist"
+          aria-label="Demo dashboard views"
+          className="flex items-center gap-1.5 overflow-x-auto border-b border-white/10 px-3 py-2 md:px-4"
+        >
+          {DEMO_TABS.map((t) => {
+            const TabIcon = t.icon;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => {
+                  setTab(t.id);
+                  setTouched(true);
+                }}
+                className={cn(
+                  "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f]",
+                  tab === t.id
+                    ? "border-[#24c18d]/40 bg-[#24c18d]/15 text-[#8df2c8]"
+                    : "border-white/10 bg-white/[0.04] text-white/[0.6] hover:bg-white/[0.07] hover:text-white/[0.85]",
+                )}
+              >
+                <TabIcon size={12} />
+                {t.label}
+              </button>
+            );
+          })}
+          {!touched && (
+            <motion.span
+              className="ml-auto hidden shrink-0 items-center gap-1.5 text-[0.55rem] font-bold uppercase tracking-[0.14em] text-[#8bd7ff]/80 md:inline-flex"
+              animate={reduce ? undefined : { opacity: [0.45, 1, 0.45] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              ← Click the tabs — it&apos;s interactive
+            </motion.span>
+          )}
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={tab}
+            initial={reduce ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduce ? undefined : { opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto md:overflow-visible"
+          >
+            {tab === "schedule" && <ScheduleTab revealed={revealed} />}
+            {tab === "budget" && <BudgetTab revealed={revealed} />}
+            {tab === "sales" && <SalesTab revealed={revealed} />}
+            {tab === "overview" && (
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 md:grid md:grid-cols-[0.82fr_1.18fr] md:gap-4 md:p-4">
           <div className="grid auto-rows-min grid-cols-2 gap-2.5 md:flex-none md:auto-rows-auto md:gap-3">
             {tabletKpis.map((kpi, i) => (
@@ -712,6 +1094,9 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
             </div>
           </div>
         </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -728,7 +1113,7 @@ export default function IpadDashboardShowcase() {
           titleComponent={
             <div>
               <AnimatedGradientText className="mx-auto text-[0.68rem] tracking-[0.22em]">
-                Daily dashboard preview
+                Interactive dashboard demo
               </AnimatedGradientText>
               <h2 className="mx-auto mt-5 max-w-4xl font-heading text-4xl leading-[1.02] tracking-[-0.04em] text-[#17212c] md:text-6xl">
                 Milestone progress, cycle time, and budget in one view.
@@ -736,7 +1121,8 @@ export default function IpadDashboardShowcase() {
               <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#58636b]">
                 A daily operating dashboard that tracks construction milestones,
                 cycle-time trends, and budget variance — the signals that decide
-                whether jobs close on time and on margin.
+                whether jobs close on time and on margin. Click through the
+                tabs: this is a working sample, not a screenshot.
               </p>
             </div>
           }
