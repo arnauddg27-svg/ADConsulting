@@ -232,6 +232,24 @@ const inventoryAging = [
 ];
 const inventoryMax = Math.max(...inventoryAging.map((r) => r.value));
 
+// Same dataLayer + gtag pattern as BookingQualifier's trackEvent — tells us
+// which demo view (schedule / budget / sales) prospects actually explore.
+function trackDemoTab(tab: DemoTabId) {
+  if (typeof window === "undefined") return;
+  const w = window as Window & {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+  };
+  const payload = {
+    event_category: "engagement",
+    event_label: tab,
+    page: window.location.pathname,
+  };
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ event: "demo_tab_click", ...payload });
+  w.gtag?.("event", "demo_tab_click", payload);
+}
+
 function CountUp({
   value,
   prefix = "",
@@ -1031,6 +1049,7 @@ function DashboardOnTablet({ revealed }: { revealed: boolean }) {
                 onClick={() => {
                   setTab(t.id);
                   setTouched(true);
+                  trackDemoTab(t.id);
                 }}
                 className={cn(
                   "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f9e6f]",
